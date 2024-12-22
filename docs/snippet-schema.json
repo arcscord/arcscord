@@ -1,33 +1,5 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema",
-  "$id": "https://raw.githubusercontent.com/arcscord/arcscord/refs/heads/main/packages/cli/src/arcscord_snippet/snippet.json",
-  "title": "Snippet",
-  "description": "A snippet for arcscord",
   "type": "object",
-  "required": ["name"],
-  "additionalProperties": false,
-  "definitions": {
-    "user": {
-      "type": "object",
-      "required": ["name"],
-      "properties": {
-        "name": {
-          "type": "string",
-          "description": "The name of the user"
-        },
-        "email": {
-          "type": "string",
-          "format": "email",
-          "description": "The email of the user"
-        },
-        "url": {
-          "type": "string",
-          "format": "uri",
-          "description": "The url of profile of the user"
-        }
-      }
-    }
-  },
   "properties": {
     "name": {
       "type": "string",
@@ -43,33 +15,28 @@
       "description": "The version of the snippet (semver)"
     },
     "author": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "string",
           "description": "The author of the snippet"
         },
         {
-          "$ref": "#/definitions/user",
           "description": "The author of the snippet"
         }
       ]
     },
     "contributors": {
       "type": "array",
-      "items": {
-        "$ref": "#/definitions/user"
-      },
       "description": "The contributors to the snippet"
     },
     "license": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "string",
           "description": "The license name of the snippet"
         },
         {
           "type": "object",
-          "required": ["type"],
           "properties": {
             "type": {
               "type": "string",
@@ -85,10 +52,10 @@
               "description": "The full license text"
             }
           },
-          "oneOf": [
-            { "required": ["url"] },
-            { "required": ["text"] }
+          "required": [
+            "type"
           ],
+          "additionalProperties": false,
           "description": "The full license information"
         }
       ],
@@ -100,7 +67,7 @@
       "description": "The homepage URL of the snippet"
     },
     "repository": {
-      "oneOf": [
+      "anyOf": [
         {
           "type": "string",
           "format": "uri",
@@ -108,7 +75,6 @@
         },
         {
           "type": "object",
-          "required": ["type", "url"],
           "properties": {
             "type": {
               "type": "string"
@@ -117,7 +83,12 @@
               "type": "string",
               "format": "uri"
             }
-          }
+          },
+          "required": [
+            "type",
+            "url"
+          ],
+          "additionalProperties": false
         }
       ],
       "description": "The repository information"
@@ -135,7 +106,8 @@
           "format": "email",
           "description": "The email address for bug reports"
         }
-      }
+      },
+      "additionalProperties": false
     },
     "extends": {
       "type": "string",
@@ -159,15 +131,10 @@
       "description": "The direct content of the snippet"
     }
   },
-  "oneOf": [
-    {
-      "required": ["file"]
-    },
-    {
-      "required": ["fileContent"]
-    },
-    {
-      "required": ["template"]
-    }
-  ]
+  "required": [
+    "name"
+  ],
+  "additionalProperties": false,
+  "description": "A snippet for arcscord",
+  "$schema": "http://json-schema.org/draft-07/schema#"
 }

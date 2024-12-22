@@ -1,3 +1,14 @@
 {
-  "name": "example-snippet"
+  "$schema": "../../../../docs/snippet-schema.json",
+  "name": "example-snippet",
+  "description": "a example snippet",
+  "bugs": {
+    "url": "https://github.com/arcscord/arcscord/issues"
+  },
+  "version": "0.0.1",
+  "author": {
+    "name": "Arcoz0308",
+    "url": "https://github.com/Arcoz0308"
+  },
+  "file": "src/index.ts"
 }
