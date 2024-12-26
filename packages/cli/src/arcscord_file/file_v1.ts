@@ -15,6 +15,7 @@ const fileDataSchema = z.object({
   packageManager: z.object({
     type: z.enum(["npm", "pnpm", "yarn"]),
   }),
+  options: z.array(z.enum(["i18n", "eslint", "prettier"])),
 });
 
 export const fileV1: ArcscordFileParser = {

@@ -11,6 +11,7 @@ export type ArcscordFileData = {
   components: ArcscordFileElement[];
   tasks: ArcscordFileElement[];
   packageManager: PackageManagerOptions;
+  options: Options[];
 };
 
 export type ArcscordFileElement = {
@@ -23,3 +24,5 @@ export type PackageManagerOptions = {
 };
 
 export type PackageManagerType = "npm" | "yarn" | "pnpm";
+
+export type Options = "i18n" | "eslint" | "prettier";
