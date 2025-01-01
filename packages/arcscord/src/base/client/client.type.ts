@@ -4,6 +4,10 @@ import type { ComponentManagerOptions } from "#/manager/component/component_mana
 import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type";
 import type { LoggerConstructor } from "#/utils/logger/logger.type";
 import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
+import type { Command } from "../command";
+import type { ComponentHandler } from "../components";
+import type { EventHandler } from "../event";
+import type { TaskHandler } from "../task";
 
 /**
  * Represents the options for configuring the ArcClient Logger.
@@ -115,4 +119,26 @@ export type MessageOptions = {
   missingPermissions?: (
     permissionsMissing: PermissionsString[],
   ) => BaseMessageOptions;
+};
+
+/**
+ * List of handlers
+ */
+export type HandlersList = {
+  /**
+   * List of commands
+   */
+  commands?: Command[];
+  /**
+   * List of components
+   */
+  components?: ComponentHandler[];
+  /**
+   * List of tasks
+   */
+  tasks?: TaskHandler[];
+  /**
+   * List of events
+   */
+  events?: EventHandler[];
 };

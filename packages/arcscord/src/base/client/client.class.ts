@@ -1,5 +1,5 @@
 import type { TaskHandler } from "#/base";
-import type { ArcClientOptions, MessageOptions } from "#/base/client/client.type";
+import type { ArcClientOptions, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/component_handlers.type";
 import type { EventHandler } from "#/base/event/event.type";
@@ -287,5 +287,35 @@ export class ArcClient extends DJSClient {
     if (this.arcOptions.enableInternalTrace) {
       this.logger.trace(message);
     }
+  }
+
+  /**
+   * Loads and registers handlers
+   *
+   * @param handlers - The handlers to load
+   * @returns the number of tasks loaded
+   */
+  async loadHandlers(handlers: HandlersList): Promise<Result<true, InternalError>> {
+    if (handlers.events) {
+      await this.eventManager.loadEvents(handlers.events);
+    }
+    if (handlers.tasks) {
+      const [err] = await this.taskManager.loadTasks(handlers.tasks);
+      if (err) {
+        return error(err);
+      }
+    }
+    if (handlers.components) {
+      await this.componentManager.loadComponents(handlers.components);
+    }
+    if (handlers.commands) {
+      await this.waitReady();
+      const [err] = await this.commandManager.loadCommands(handlers.commands);
+      if (err) {
+        return error(err);
+      }
+    }
+
+    return ok(true);
   }
 }
