@@ -28,7 +28,7 @@ const dependenciesVersions = {
   "i18next": "^23.16.4",
 };
 
-export function packageJson(options: PackageJSONOptions): string {
+export function generatePackageJson(options: PackageJSONOptions): string {
   const jsonObj: Record<string, unknown> = {
     name: options.name,
     version: "1.0.0",
