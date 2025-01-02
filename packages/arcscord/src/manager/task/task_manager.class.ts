@@ -116,11 +116,11 @@ export class TaskManager extends BaseManager {
 
       const next = Array.isArray(cron)
         ? cron
-          .sort(
-            (a, b) => a.nextDate().toMillis() - b.nextDate().toMillis(),
-          )[0]
-          .nextDate()
-          .toJSDate()
+            .sort(
+              (a, b) => a.nextDate().toMillis() - b.nextDate().toMillis(),
+            )[0]
+            .nextDate()
+            .toJSDate()
         : cron instanceof CronJob
           ? cron.nextDate().toJSDate()
           : typeof task.interval === "number"
