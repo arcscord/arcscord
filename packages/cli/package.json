@@ -24,7 +24,8 @@
   },
   "scripts": {
     "build": "tsc -p src/tsconfig.json",
-    "typecheck": "tsc -p tsconfig.eslint.json"
+    "typecheck": "tsc -p tsconfig.eslint.json",
+    "test": "vitest run"
   },
   "devDependencies": {
     "i18next": "^23.16.4",
@@ -34,6 +35,8 @@
   },
   "dependencies": {
     "@arcscord/error": "^1.0.1",
+    "@commander-js/extra-typings": "^12.1.0",
+    "@inquirer/prompts": "^7.2.1",
     "arcscord": "workspace:^",
     "commander": "^12.1.0",
     "typescript": "^5.7.2",

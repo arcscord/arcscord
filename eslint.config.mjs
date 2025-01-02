@@ -12,6 +12,7 @@ export default antfu(
       "docs/*",
       "json_docs/*",
       ".vscode/settings.json",
+      "*templates/**/package.json",
     ],
   },
   {
