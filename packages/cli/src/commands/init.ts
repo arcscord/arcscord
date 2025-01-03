@@ -2,6 +2,7 @@ import { execSync } from "node:child_process";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { Command, Option } from "@commander-js/extra-typings";
+import { generateEnvFile } from "../generators/env.js";
 import { generatePackageJson } from "../generators/package.js";
 import { additionalPrompt } from "../prompts/additional.js";
 import { eslintPrompt } from "../prompts/eslint.js";
@@ -64,6 +65,7 @@ export const InitCommand = new Command("init")
       prettier,
       i18n: additional.i18n,
     }), "utf8");
+    await writeFile(`${root}/.env`, generateEnvFile(), "utf8");
 
     console.log(`Project initialized in "${dirName}"`);
 
