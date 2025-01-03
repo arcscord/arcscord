@@ -1,5 +1,5 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 export function eslintFix(root: string): void {
-  execSync(`npx eslint --fix ${root}`);
+  execFileSync("npx", ["eslint", "--fix", root], { stdio: "inherit" });
 }
