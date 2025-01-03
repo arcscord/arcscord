@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
 import * as console from "node:console";
+import { createRequire } from "node:module";
 import * as process from "node:process";
 import { Command } from "@commander-js/extra-typings";
-import packageJson from "../package.json" with { type: "json" };
 import { InitCommand } from "./commands/init.js";
 
 const cli = new Command();
@@ -11,7 +11,7 @@ const cli = new Command();
 cli
   .name("Arcscord")
   .description("Cli for arcscord framework")
-  .version(packageJson.version);
+  .version((createRequire(import.meta.url)("../package.json") as { version: string }).version);
 
 cli.command("ping")
   .action(async () => {
