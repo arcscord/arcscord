@@ -1,4 +1,4 @@
-import type { ArcscordFileParser } from "./type";
+import type { ArcscordFileParser } from "./type.js";
 import { error, ok } from "@arcscord/error";
 import { z } from "zod";
 

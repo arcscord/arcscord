@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { generatePackageJson } from "./package";
+import { generatePackageJson } from "./package.js";
 
 describe("packageJson function", () => {
   it("should generate a package.json with basic fields", () => {

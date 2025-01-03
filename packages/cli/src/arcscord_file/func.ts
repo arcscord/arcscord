@@ -1,9 +1,9 @@
 import type { Result } from "@arcscord/error";
-import type { ArcscordFileData } from "./type";
+import type { ArcscordFileData } from "./type.js";
 import * as fs from "node:fs";
 import { anyToError, error, ok } from "@arcscord/error";
 import { z } from "zod";
-import { parsers } from "./versions";
+import { parsers } from "./versions.js";
 
 const baseSchema = z.object({
   version: z.number().int().positive().min(0),

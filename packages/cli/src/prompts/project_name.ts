@@ -1,6 +1,6 @@
 import { exit } from "node:process";
 import { input } from "@inquirer/prompts";
-import { PACKAGE_NAME_REGEX } from "../utils/const";
+import { PACKAGE_NAME_REGEX } from "../utils/const.js";
 
 export async function projectNamePrompt(name?: string): Promise<string> {
   if (name) {

@@ -23,7 +23,7 @@
     "arcscord": "dist/index.js"
   },
   "scripts": {
-    "build": "tsc -p src/tsconfig.json",
+    "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.eslint.json",
     "test": "vitest run"
   },
