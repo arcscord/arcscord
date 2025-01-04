@@ -28,4 +28,10 @@ export default antfu(
       "prefer-promise-reject-errors": "off",
     },
   },
+  {
+    files: ["packages/cli/**/*.ts"],
+    rules: {
+      "import/extensions": ["error", "ignorePackages"],
+    },
+  },
 );

@@ -91,6 +91,14 @@ export const InitCommand = new Command("init")
         type: packageManager,
       },
       options: arcscordFileOptions,
+      basePaths: {
+        root: "./src",
+        commands: "./src/commands",
+        events: "./src/event",
+        components: "./src/components",
+        tasks: "./src/task",
+        handlerList: "./src/_handlers.ts",
+      },
     }), "utf8");
 
     if (eslint) {

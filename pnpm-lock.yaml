@@ -134,8 +134,8 @@ importers:
   packages/cli:
     dependencies:
       '@arcscord/error':
-        specifier: ^1.0.1
-        version: 1.1.0
+        specifier: ^2.0.1
+        version: 2.0.1
       '@babel/generator':
         specifier: ^7.26.3
         version: 7.26.3
@@ -348,10 +348,6 @@ packages:
 
   /@arcscord/better-error@1.0.4:
     resolution: {integrity: sha512-GCa8pBQrIA7RyecyTiWUybAbP/pcM5F8RtPRW5q3lSWrU8c4u8uJJ9Ic2V0Z2RavulmtaXNHWIPjOkZ1s8qE4g==}
-    dev: false
-
-  /@arcscord/error@1.1.0:
-    resolution: {integrity: sha512-pE48ufPe5hVEg9M0mJUTQHzHDWGhOZDS8aHJ13XqN0B0z4r+mtYs7h9oOAfLoQM1D27EQenDwWMFHqAYR2GxVg==}
     dev: false
 
   /@arcscord/error@2.0.1:

@@ -5,6 +5,7 @@ import { createRequire } from "node:module";
 import * as process from "node:process";
 import { Command } from "@commander-js/extra-typings";
 import { InitCommand } from "./commands/init.js";
+import { NewCommand } from "./commands/new.js";
 
 const cli = new Command();
 
@@ -18,4 +19,5 @@ cli.command("ping")
     console.log("Pong !");
   });
 cli.addCommand(InitCommand);
+cli.addCommand(NewCommand);
 cli.parse(process.argv);

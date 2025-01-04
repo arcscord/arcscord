@@ -1,4 +1,4 @@
-import type { PackageManagerType } from "../arcscord_file/type";
+import type { PackageManagerType } from "../arcscord_file/type.js";
 import { select } from "@inquirer/prompts";
 
 export async function packageManagerPrompt(packageManager?: PackageManagerType): Promise<PackageManagerType> {

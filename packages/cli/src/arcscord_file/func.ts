@@ -9,7 +9,7 @@ export const baseArcscordFileSchema = z.object({
   version: z.number().int().positive().min(0),
 });
 
-export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<ArcscordFileData, Error>> {
+export async function parseArcscordFile(file = "./arcscord.json"): Promise<Result<ArcscordFileData, Error>> {
   const fileContent = fs.readFileSync(file).toString();
 
   let data;
@@ -31,7 +31,7 @@ export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<
 
   const parser = parsers[result.data.version].parse;
 
-  const [result2, err] = await parser(result.data);
+  const [err, result2] = await parser(data);
   if (err) {
     return error(err);
   }
