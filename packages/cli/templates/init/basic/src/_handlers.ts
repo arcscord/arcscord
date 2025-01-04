@@ -2,16 +2,8 @@
 import type { HandlersList } from "arcscord";
 
 export default {
-  commands: [
-
-  ],
-  components: [
-
-  ],
-  events: [
-
-  ],
-  tasks: [
-
-  ],
+  commands: [],
+  components: [],
+  events: [],
+  tasks: [],
 } satisfies HandlersList;
