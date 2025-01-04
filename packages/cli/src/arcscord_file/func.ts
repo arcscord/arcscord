@@ -5,11 +5,11 @@ import { anyToError, error, ok } from "@arcscord/error";
 import { z } from "zod";
 import { parsers } from "./versions.js";
 
-const baseSchema = z.object({
+export const baseArcscordFileSchema = z.object({
   version: z.number().int().positive().min(0),
 });
 
-export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<ArcscordFileData & z.infer<typeof baseSchema>, Error>> {
+export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<ArcscordFileData, Error>> {
   const fileContent = fs.readFileSync(file).toString();
 
   let data;
@@ -20,7 +20,7 @@ export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<
     return error(anyToError(err));
   }
 
-  const result = baseSchema.safeParse(data);
+  const result = baseArcscordFileSchema.safeParse(data);
   if (!result.success) {
     return error(new Error("Invalid version number in arcscord.json file !"));
   }
@@ -36,5 +36,5 @@ export async function parseArcscordFile(file = "arcscord.json"): Promise<Result<
     return error(err);
   }
   // already check before, no need to more checks
-  return ok(result2 as ArcscordFileData & z.infer<typeof baseSchema>);
+  return ok(result2 as ArcscordFileData);
 }

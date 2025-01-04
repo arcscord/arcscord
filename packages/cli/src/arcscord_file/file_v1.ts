@@ -1,22 +1,14 @@
 import type { ArcscordFileParser } from "./type.js";
 import { error, ok } from "@arcscord/error";
 import { z } from "zod";
-
-const elementSchema = z.object({
-  name: z.string(),
-  path: z.string(),
-});
+import { baseArcscordFileSchema } from "./func.js";
 
 const fileDataSchema = z.object({
-  commands: elementSchema.array(),
-  events: elementSchema.array(),
-  components: elementSchema.array(),
-  tasks: elementSchema.array(),
   packageManager: z.object({
     type: z.enum(["npm", "pnpm", "yarn"]),
   }),
   options: z.array(z.enum(["i18n", "eslint", "prettier"])),
-});
+}).merge(baseArcscordFileSchema);
 
 export const fileV1: ArcscordFileParser = {
   version: 1,

@@ -1,8 +1,10 @@
+import type { Options as ArcscordFileOptions } from "../arcscord_file/type.js";
 import { execSync } from "node:child_process";
 import { mkdir, readdir, stat, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process, { exit } from "node:process";
 import { Command, Option } from "@commander-js/extra-typings";
+import { generateArcscordFile } from "../arcscord_file/generator.js";
 import { generateEnvFile } from "../generators/env.js";
 import { generatePackageJson } from "../generators/package.js";
 import { additionalPrompt } from "../prompts/additional.js";
@@ -33,6 +35,14 @@ export const InitCommand = new Command("init")
     const prettier = options.prettier ?? (eslint === "eslint" ? await prettierPrompt() : false);
     const additional = await additionalPrompt({ i18n: options.i18n });
 
+    const arcscordFileOptions: ArcscordFileOptions[] = [];
+    if (eslint) {
+      arcscordFileOptions.push("eslint");
+    }
+    if (prettier) {
+      arcscordFileOptions.push("prettier");
+    }
+
     if (eslint !== "eslint" && prettier) {
       console.error("prettier is only compatible with eslint recommended config, not with arcscord or antfu config");
       exit(1);
@@ -61,6 +71,7 @@ export const InitCommand = new Command("init")
 
     await copy("init/global", root);
     if (additional.i18n) {
+      arcscordFileOptions.push("i18n");
       await copy("init/i18n", root);
     }
     else {
@@ -74,6 +85,13 @@ export const InitCommand = new Command("init")
       i18n: additional.i18n,
     }), "utf8");
     await writeFile(`${root}/.env`, generateEnvFile(), "utf8");
+    await writeFile(`${root}/arcscord.json`, generateArcscordFile({
+      version: 1,
+      packageManager: {
+        type: packageManager,
+      },
+      options: arcscordFileOptions,
+    }), "utf8");
 
     if (eslint) {
       if (prettier) {

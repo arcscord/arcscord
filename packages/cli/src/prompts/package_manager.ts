@@ -1,6 +1,7 @@
+import type { PackageManagerType } from "../arcscord_file/type";
 import { select } from "@inquirer/prompts";
 
-export async function packageManagerPrompt(packageManager?: "npm" | "pnpm" | "yarn"): Promise<"npm" | "pnpm" | "yarn"> {
+export async function packageManagerPrompt(packageManager?: PackageManagerType): Promise<PackageManagerType> {
   if (packageManager) {
     return packageManager;
   }

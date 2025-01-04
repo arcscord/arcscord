@@ -6,17 +6,9 @@ export type ArcscordFileParser = {
 };
 
 export type ArcscordFileData = {
-  commands: ArcscordFileElement[];
-  events: ArcscordFileElement[];
-  components: ArcscordFileElement[];
-  tasks: ArcscordFileElement[];
   packageManager: PackageManagerOptions;
   options: Options[];
-};
-
-export type ArcscordFileElement = {
-  name: string;
-  path: string;
+  version: number;
 };
 
 export type PackageManagerOptions = {
