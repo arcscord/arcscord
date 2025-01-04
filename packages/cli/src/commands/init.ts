@@ -93,10 +93,10 @@ export const InitCommand = new Command("init")
       options: arcscordFileOptions,
       basePaths: {
         root: "./src",
-        commands: "./src/commands",
-        events: "./src/event",
-        components: "./src/components",
-        tasks: "./src/task",
+        commands: "./commands",
+        events: "./events",
+        components: "./components",
+        tasks: "./tasks",
         handlerList: "./src/_handlers.ts",
       },
     }), "utf8");

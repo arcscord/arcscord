@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import process from "node:process";
 import * as commander from "@commander-js/extra-typings";
 import { Command, Option } from "@commander-js/extra-typings";
@@ -80,7 +81,7 @@ export const NewCommand = new Command("new")
 
     fileContent = fileContent.replaceAll("{{name}}", names[names.length - 1]);
 
-    let root = projectOptions.basePaths[type];
+    let root = path.resolve(projectOptions.basePaths.root, projectOptions.basePaths[type]);
 
     if (names.length > 1) {
       root = `${root}/${names.slice(0, -1).join("/")}`;
@@ -91,8 +92,8 @@ export const NewCommand = new Command("new")
 
     const handlersListFile = await readFile(projectOptions.basePaths.handlerList, "utf8");
     const newContent = addHandlerToList({
-      name: names[names.length - 1],
-      path: `./${names[names.length - 1]}_${type.slice(0, -1)}`,
+      name: names[names.length - 1] + type[0].toUpperCase() + type.slice(1, -1),
+      path: `${projectOptions.basePaths[type]}/${names[names.length - 1]}_${type.slice(0, -1)}`,
       type,
       fileContent: handlersListFile,
       importExtension: "",
