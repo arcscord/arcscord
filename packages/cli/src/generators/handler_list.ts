@@ -18,8 +18,7 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     plugins: ["typescript"],
   });
 
-  // @ts-expect-error fix error with default import
-  traverse(ast, {
+  traverse.default(ast, {
     Program(path: NodePath<types.Program>) {
       const existingImport = path.node.body.some(node =>
         types.isImportDeclaration(node)
@@ -64,7 +63,6 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     },
   });
 
-  // @ts-expect-error fix error with default import
-  return generate(ast, {
+  return generate.default(ast, {
   }).code;
 }
