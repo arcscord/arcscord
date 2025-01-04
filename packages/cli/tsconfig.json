@@ -5,9 +5,7 @@
     "outDir": "./dist",
     "incremental": false,
     "declarationMap": false,
-    "declaration": false,
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext"
+    "declaration": false
   },
   "include": [
     "src/**/*" // Only include files in the src directory
