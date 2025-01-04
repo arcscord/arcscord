@@ -8,7 +8,7 @@ export default defineConfig({
   minify: true,
   skipNodeModulesBundle: true,
   target: "es2022",
-  tsconfig: relative(__dirname, resolveDir(process.cwd(), "src", "tsconfig.json")),
+  tsconfig: relative(__dirname, resolveDir(process.cwd(), "", "tsconfig.json")),
   keepNames: true,
   treeshake: true,
   format: "esm",

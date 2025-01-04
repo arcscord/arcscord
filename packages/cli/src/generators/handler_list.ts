@@ -18,7 +18,7 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     plugins: ["typescript"],
   });
 
-  traverse.default(ast, {
+  traverse(ast, {
     Program(path: NodePath<types.Program>) {
       const existingImport = path.node.body.some(node =>
         types.isImportDeclaration(node)
@@ -63,6 +63,6 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     },
   });
 
-  return generate.default(ast, {
+  return generate(ast, {
   }).code;
 }
