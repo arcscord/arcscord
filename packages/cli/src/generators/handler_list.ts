@@ -1,8 +1,7 @@
 import type { NodePath } from "@babel/traverse";
-import generate from "@babel/generator";
 import { parse } from "@babel/parser";
-import traverse from "@babel/traverse";
 import * as types from "@babel/types";
+import { esmGenerate, esmTraverse } from "../utils/esm.js";
 
 export type AddHandlerToListOptions = {
   name: string;
@@ -18,7 +17,7 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     plugins: ["typescript"],
   });
 
-  traverse(ast, {
+  esmTraverse(ast, {
     Program(path: NodePath<types.Program>) {
       const existingImport = path.node.body.some(node =>
         types.isImportDeclaration(node)
@@ -63,6 +62,6 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
     },
   });
 
-  return generate(ast, {
+  return esmGenerate(ast, {
   }).code;
 }

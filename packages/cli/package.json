@@ -26,7 +26,7 @@
     "build": "tsc -p tsconfig.json && pnpm run fix:babel",
     "typecheck": "tsc -p tsconfig.eslint.json",
     "test": "vitest run",
-    "fix:babel": "npx node -e \"const fs = require('fs'); const path = './dist/generators/handler_list.js'; let data = fs.readFileSync(path, 'utf8'); let updatedContent = data.replace('traverse(', 'traverse.default(').replace('generate(', 'generate.default('); fs.writeFileSync(path, updatedContent, 'utf8'); console.log('File updated successfully.');\""
+    "fix:babel": "npx node -e \"const fs = require('fs'); const path = './dist/utils/esm.js'; let data = fs.readFileSync(path, 'utf8'); let updatedContent = data.replace('traverse;', 'traverse.default;').replace('generate;', 'generate.default;'); fs.writeFileSync(path, updatedContent, 'utf8'); console.log('File updated successfully.');\""
   },
   "devDependencies": {
     "@types/babel__generator": "^7.6.8",
