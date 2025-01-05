@@ -8,6 +8,8 @@ import { addHandlerToList } from "../generators/handler_list.js";
 import { commandTypePrompt } from "../prompts/command_type.js";
 import { handlerNamePrompt } from "../prompts/handler_name.js";
 import { noIncompatibleOptions } from "../utils/cli_options.js";
+import { eslintFix } from "../utils/eslint.js";
+import { prettierFix } from "../utils/prettier.js";
 import { camelOrPascalToSnakeCase } from "../utils/string.js";
 
 export const NewCommand = new Command("new")
@@ -67,7 +69,7 @@ export const NewCommand = new Command("new")
         );
 
         const templatePath = new URL(`../../templates/commands/${
-          projectOptions.options.includes("i18n") ? "i18n/" : "basic/"
+          projectOptions.options.includes("i18n") && options.i18n ? "i18n/" : "basic/"
         }${camelOrPascalToSnakeCase(commandType)}_command.ts`, import.meta.url).pathname;
 
         fileContent = await readFile(templatePath, "utf8");
@@ -88,7 +90,8 @@ export const NewCommand = new Command("new")
     }
     await mkdir(root, { recursive: true });
 
-    await writeFile(`${root}/${camelOrPascalToSnakeCase(names[names.length - 1])}_${type.slice(0, -1)}.ts`, fileContent, "utf8");
+    const fileRoot = path.resolve(root, `${camelOrPascalToSnakeCase(names[names.length - 1])}_${type.slice(0, -1)}.ts`);
+    await writeFile(fileRoot, fileContent, "utf8");
 
     const handlersListFile = await readFile(projectOptions.basePaths.handlerList, "utf8");
     const newContent = addHandlerToList({
@@ -99,5 +102,18 @@ export const NewCommand = new Command("new")
       importExtension: "",
     });
     await writeFile(projectOptions.basePaths.handlerList, newContent, "utf8");
+
+    if (options.eslint && projectOptions.options.includes("eslint")) {
+      if (options.prettier && projectOptions.options.includes("prettier")) {
+        prettierFix(fileRoot);
+        prettierFix(projectOptions.basePaths.handlerList);
+        eslintFix(fileRoot);
+        eslintFix(projectOptions.basePaths.handlerList);
+      }
+      else {
+        eslintFix(fileRoot);
+        eslintFix(projectOptions.basePaths.handlerList);
+      }
+    }
     console.log(`${type.slice(0, -1)} created in ${root}/${camelOrPascalToSnakeCase(names[names.length - 1])}_${type.slice(0, -1)}.ts`);
   });
