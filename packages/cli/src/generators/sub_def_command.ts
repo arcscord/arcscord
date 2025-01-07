@@ -66,12 +66,100 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
         && satisfiesExpression.typeName !== null
         && "name" in satisfiesExpression.typeName
         && satisfiesExpression.typeName.name === "SlashWithSubsCommandDefinition"
+        && types.isObjectExpression(variableDeclaration.init?.expression)
       ) {
-        console.log("found");
-        console.log(JSON.stringify(path.node, null, 2));
-      }
+        if (options.impGroupName) {
+          const groupsProperty = objectGetProperty(variableDeclaration.init.expression, "subCommandGroup")
+            || types.objectProperty(types.identifier("subCommandGroup"), types.objectExpression([]));
+          if (!types.isObjectExpression(groupsProperty.value)) {
+            groupsProperty.value = types.objectExpression([]);
+          }
 
-      edited = true;
+          const groupProperty = objectGetProperty(groupsProperty.value, options.impGroupName)
+            || types.objectProperty(types.identifier(options.impGroupName), types.objectExpression([
+              types.objectProperty(types.identifier("description"), types.stringLiteral("Group description")),
+              types.objectProperty(types.identifier("subCommands"), types.arrayExpression([])),
+            ]));
+
+          if (!types.isObjectExpression(groupProperty.value)) {
+            groupProperty.value = types.objectExpression([
+              types.objectProperty(types.identifier("description"), types.stringLiteral("Group description")),
+              types.objectProperty(types.identifier("subCommands"), types.arrayExpression([])),
+            ]);
+          }
+
+          const subCommandsArrayExpression = groupProperty.value.properties.filter(p => types.isObjectProperty(p)).find(
+            p => p.key.type === "Identifier" && p.key.name === "subCommands",
+          ) || types.objectProperty(types.identifier("subCommands"), types.arrayExpression([]));
+
+          if (!types.isArrayExpression(subCommandsArrayExpression.value)) {
+            subCommandsArrayExpression.value = types.arrayExpression([]);
+          }
+
+          const elementExists = subCommandsArrayExpression.value.elements.find(
+            element => element && element.type === "Identifier" && element.name === options.name,
+          );
+          if (elementExists) {
+            return;
+          }
+          subCommandsArrayExpression.value.elements.push(types.identifier(options.name));
+
+          const index = groupProperty.value.properties.findIndex(
+            p => types.isObjectProperty(p) && p.key.type === "Identifier" && p.key.name === "subCommands",
+          );
+          if (index === -1) {
+            groupProperty.value.properties.push(subCommandsArrayExpression);
+          }
+          else {
+            groupProperty.value.properties[index] = subCommandsArrayExpression;
+          }
+
+          const index2 = groupsProperty.value.properties.findIndex(
+            p => types.isObjectProperty(p) && p.key.type === "Identifier" && p.key.name === options.impGroupName,
+          );
+          if (index2 === -1) {
+            groupsProperty.value.properties.push(groupProperty);
+          }
+
+          const index3 = variableDeclaration.init.expression.properties.findIndex(
+            p => types.isObjectProperty(p) && p.key.type === "Identifier" && p.key.name === "subCommandGroup",
+          );
+          if (index3 === -1) {
+            variableDeclaration.init.expression.properties.push(groupsProperty);
+          }
+          else {
+            variableDeclaration.init.expression.properties[index3] = groupsProperty;
+          }
+          edited = true;
+          return;
+        }
+        const subCommandsArray = variableDeclaration.init.expression.properties.filter(p => types.isObjectProperty(p)).find(
+          p => types.isObjectProperty(p) && p.key.type === "Identifier" && p.key.name === "subCommands",
+        ) || types.objectProperty(types.identifier("subCommands"), types.arrayExpression([]));
+
+        if (!types.isArrayExpression(subCommandsArray.value)) {
+          subCommandsArray.value = types.arrayExpression([]);
+        }
+
+        const elementExists = subCommandsArray.value.elements.find(
+          element => element && element.type === "Identifier" && element.name === options.name,
+        );
+        if (elementExists) {
+          return;
+        }
+        subCommandsArray.value.elements.push(types.identifier(options.name));
+
+        const index = variableDeclaration.init.expression.properties.findIndex(
+          p => types.isObjectProperty(p) && p.key.type === "Identifier" && p.key.name === "subCommandsGroups",
+        );
+        if (index === -1) {
+          variableDeclaration.init.expression.properties.push(subCommandsArray);
+        }
+        else {
+          variableDeclaration.init.expression.properties[index] = subCommandsArray;
+        }
+        edited = true;
+      }
     },
   });
 
@@ -99,4 +187,26 @@ export function getObjectStringPropertyValue(property: types.ObjectProperty): st
     return null;
   }
   return property.value.value;
+}
+
+export function addElementToArray(array: types.ArrayExpression, name: string): [array: types.ArrayExpression, edited: boolean] {
+  const elementExist = array.elements.find(element => element && element.type === "Identifier" && element.name === name);
+
+  if (!elementExist) {
+    array.elements.push(types.identifier(name));
+    return [array, true];
+  }
+
+  return [array, false];
+}
+
+export function addElementToObject(object: types.ObjectExpression, name: string, value: types.Expression): [object: types.ObjectExpression, edited: boolean] {
+  const elementExist = object.properties.find(element => element && element.type === "ObjectProperty" && element.key.type === "Identifier" && element.key.name === name);
+
+  if (!elementExist) {
+    object.properties.push(types.objectProperty(types.identifier(name), value));
+    return [object, true];
+  }
+
+  return [object, false];
 }
