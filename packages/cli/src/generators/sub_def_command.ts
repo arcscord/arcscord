@@ -181,32 +181,3 @@ export function objectGetProperty(obj: types.ObjectExpression, property: string)
     return false;
   });
 }
-
-export function getObjectStringPropertyValue(property: types.ObjectProperty): string | null {
-  if (property.value.type !== "StringLiteral") {
-    return null;
-  }
-  return property.value.value;
-}
-
-export function addElementToArray(array: types.ArrayExpression, name: string): [array: types.ArrayExpression, edited: boolean] {
-  const elementExist = array.elements.find(element => element && element.type === "Identifier" && element.name === name);
-
-  if (!elementExist) {
-    array.elements.push(types.identifier(name));
-    return [array, true];
-  }
-
-  return [array, false];
-}
-
-export function addElementToObject(object: types.ObjectExpression, name: string, value: types.Expression): [object: types.ObjectExpression, edited: boolean] {
-  const elementExist = object.properties.find(element => element && element.type === "ObjectProperty" && element.key.type === "Identifier" && element.key.name === name);
-
-  if (!elementExist) {
-    object.properties.push(types.objectProperty(types.identifier(name), value));
-    return [object, true];
-  }
-
-  return [object, false];
-}
