@@ -2,6 +2,7 @@ import type { NodePath } from "@babel/traverse";
 import { parse } from "@babel/parser";
 import * as types from "@babel/types";
 import { esmGenerate, esmTraverse } from "../utils/esm.js";
+import { addImport } from "./utils.js";
 
 export type AddHandlerToListOptions = {
   name: string;
@@ -18,33 +19,7 @@ export function addHandlerToList(options: AddHandlerToListOptions): string {
   });
 
   esmTraverse(ast, {
-    Program(path: NodePath<types.Program>) {
-      const existingImport = path.node.body.some(node =>
-        types.isImportDeclaration(node)
-        && node.source.value === (options.path + options.importExtension)
-        && node.specifiers.some(
-          specifier =>
-            types.isImportSpecifier(specifier) && specifier.local.name === options.name,
-        ),
-      );
-      if (!existingImport) {
-        const newImport = types.importDeclaration(
-          [types.importSpecifier(types.identifier(options.name), types.identifier(options.name))],
-          types.stringLiteral(options.path + options.importExtension),
-        );
-
-        // Find the last import declaration
-        let lastImportIndex = -1;
-        path.node.body.forEach((node, index) => {
-          if (types.isImportDeclaration(node)) {
-            lastImportIndex = index;
-          }
-        });
-
-        // Insert the new import after the last import declaration
-        path.node.body.splice(lastImportIndex + 1, 0, newImport);
-      }
-    },
+    Program: addImport(options.path + options.importExtension, options.name),
     ObjectProperty(path: NodePath<types.ObjectProperty>) {
       if (types.isIdentifier(path.node.key, { name: options.type })) {
         const arrayList = path.node.value;
