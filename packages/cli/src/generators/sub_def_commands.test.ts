@@ -120,4 +120,22 @@ describe("sub_def_commands", () => {
 
     expect(() => addToSubDefinition(options)).toThrow("Found subCommands property in object but it was not a ArrayExpression");
   });
+  it("should add a sub command with i18n support", () => {
+    const options = {
+      name: "i18nSubCommand",
+      path: "./i18nSubCommand",
+      type: "sub" as const,
+      fileContent: baseContentWithoutSubsCommands,
+      importExtension: ".js",
+      i18n: true,
+      nameLocalizationName: "test:i18n.subcommand.name",
+      descriptionLocalizationName: "test:i18n.subcommand.description",
+      impGroupName: "newGroup",
+    };
+
+    const result = addToSubDefinition(options);
+    expect(result).toContain("subCommands: [i18nSubCommand]");
+    expect(result).toContain("nameLocalizations: t => t(\"test:i18n.subcommand.name\")");
+    expect(result).toContain("descriptionLocalizations: t => t(\"test:i18n.subcommand.description\")");
+  });
 });

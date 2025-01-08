@@ -10,6 +10,9 @@ export type AddToSubDefinitionOptions = {
   fileContent: string;
   impGroupName?: string;
   importExtension: string;
+  i18n?: boolean;
+  nameLocalizationName?: string;
+  descriptionLocalizationName?: string;
 };
 
 export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
@@ -45,10 +48,7 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
         const groupObject = getObjectPropertyOrCreate(
           groupsObject.value,
           options.impGroupName,
-          types.objectExpression([
-            types.objectProperty(types.identifier("description"), types.stringLiteral("Group description")),
-            types.objectProperty(types.identifier("subCommands"), types.arrayExpression([])),
-          ]),
+          generateDefaultGroupObject(options),
         );
 
         subCommandsArray = getObjectPropertyOrCreate(
@@ -81,6 +81,30 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
   }
   return esmGenerate(ast, {
   }).code;
+}
+function generateDefaultGroupObject(options: AddToSubDefinitionOptions): types.ObjectExpression {
+  if (options.i18n) {
+    return types.objectExpression([
+      types.objectProperty(types.identifier("nameLocalizations"), i18nCallback(options.nameLocalizationName ?? "default.name")),
+      types.objectProperty(types.identifier("description"), types.stringLiteral("Group description")),
+      types.objectProperty(types.identifier("descriptionLocalizations"), i18nCallback(options.descriptionLocalizationName ?? "default.description")),
+      types.objectProperty(types.identifier("subCommands"), types.arrayExpression([])),
+    ]);
+  }
+  return types.objectExpression([
+    types.objectProperty(types.identifier("description"), types.stringLiteral("Group description")),
+    types.objectProperty(types.identifier("subCommands"), types.arrayExpression([])),
+  ]);
+}
+
+function i18nCallback(value: string): types.ArrowFunctionExpression {
+  return types.arrowFunctionExpression(
+    [types.identifier("t")],
+    types.callExpression(
+      types.identifier("t"),
+      [types.stringLiteral(value)],
+    ),
+  );
 }
 
 function getObjectPropertyOrCreate<T extends types.Expression>(
