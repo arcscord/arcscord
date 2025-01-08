@@ -36,13 +36,13 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
 
       let subCommandsArray;
       if (options.impGroupName) {
-        const groupsObject = getObjectObjectPropertyOrCreate(
+        const groupsObject = getObjectPropertyOrCreate(
           variableDeclaration.init.expression,
           "subCommandGroup",
           types.objectExpression([]),
         );
 
-        const groupObject = getObjectObjectPropertyOrCreate(
+        const groupObject = getObjectPropertyOrCreate(
           groupsObject.value,
           options.impGroupName,
           types.objectExpression([
@@ -51,14 +51,14 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
           ]),
         );
 
-        subCommandsArray = getObjectArrayPropertyOrCreate(
+        subCommandsArray = getObjectPropertyOrCreate(
           groupObject.value,
           "subCommands",
           types.arrayExpression([]),
         );
       }
       else {
-        subCommandsArray = getObjectArrayPropertyOrCreate(
+        subCommandsArray = getObjectPropertyOrCreate(
           variableDeclaration.init.expression,
           "subCommands",
           types.arrayExpression([]),
@@ -83,8 +83,11 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
   }).code;
 }
 
-function getObjectObjectPropertyOrCreate(obj: types.ObjectExpression, propertyName: string, create: types.ObjectExpression):
-types.ObjectProperty & { value: types.ObjectExpression } {
+function getObjectPropertyOrCreate<T extends types.Expression>(
+  obj: types.ObjectExpression,
+  propertyName: string,
+  create: T,
+): types.ObjectProperty & { value: T } {
   const index = obj.properties.findIndex((p) => {
     if (!types.isObjectProperty(p)) {
       return false;
@@ -97,54 +100,22 @@ types.ObjectProperty & { value: types.ObjectExpression } {
     return p.key.name === propertyName;
   });
 
-  let objectProperty;
+  let property;
   if (index === -1) {
     const length = obj.properties.push(types.objectProperty(
       types.identifier(propertyName),
       create,
     ));
-    objectProperty = obj.properties[length - 1];
+    property = obj.properties[length - 1];
   }
   else {
-    objectProperty = obj.properties[index] as types.ObjectProperty;
-    if (objectProperty.value.type !== "ObjectExpression") {
-      throw new Error(`Found ${propertyName} property in object but it was not an object`);
+    property = obj.properties[index] as types.ObjectProperty;
+    if (property.value.type !== create.type) {
+      throw new Error(`Found ${propertyName} property in object but it was not a ${create.type}`);
     }
   }
 
-  return objectProperty as types.ObjectProperty & { value: types.ObjectExpression };
-}
-
-function getObjectArrayPropertyOrCreate(obj: types.ObjectExpression, propertyName: string, create: types.ArrayExpression):
- types.ObjectProperty & { value: types.ArrayExpression } {
-  const index = obj.properties.findIndex((p) => {
-    if (!types.isObjectProperty(p)) {
-      return false;
-    }
-
-    if (p.key.type !== "Identifier") {
-      return false;
-    }
-
-    return p.key.name === propertyName;
-  });
-
-  let arrayProperty;
-  if (index === -1) {
-    const length = obj.properties.push(types.objectProperty(
-      types.identifier(propertyName),
-      create,
-    ));
-    arrayProperty = obj.properties[length - 1];
-  }
-  else {
-    arrayProperty = obj.properties[index] as types.ObjectProperty;
-    if (arrayProperty.value.type !== "ArrayExpression") {
-      throw new Error(`Found ${propertyName} property in object but it was not an array`);
-    }
-  }
-
-  return arrayProperty as types.ObjectProperty & { value: types.ArrayExpression };
+  return property as types.ObjectProperty & { value: T };
 }
 
 function isValidDeclaration(declaration: types.VariableDeclarator, name: string):
