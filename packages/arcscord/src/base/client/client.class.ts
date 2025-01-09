@@ -86,6 +86,12 @@ export class ArcClient extends DJSClient {
 
     this.loggerConstructor = options.logger?.customLogger ?? ArcLogger;
 
+    this.logger = createLogger(
+      this.loggerConstructor,
+      "main",
+      options.logger?.loggerFunc,
+    );
+
     this.defaultMessages = Object.assign<
       Required<MessageOptions>,
       MessageOptions | undefined
@@ -139,12 +145,6 @@ export class ArcClient extends DJSClient {
     this.componentManager = new ComponentManager(this, options.managers?.component);
     this.localeManager = new LocaleManager(this, options.managers?.locale);
     this.trace("created managers");
-
-    this.logger = createLogger(
-      this.loggerConstructor,
-      "main",
-      options.logger?.loggerFunc,
-    );
 
     this.token = token;
 
