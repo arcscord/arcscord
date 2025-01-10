@@ -23,6 +23,8 @@ const fileDataSchema = z.object({
     defaultSubCommandDescriptionPattern: z.string().optional(),
     defaultSubCommandGroupNamePattern: z.string().optional(),
     defaultSubCommandGroupDescriptionPattern: z.string().optional(),
+    defaultSubCommandWithGroupNamePattern: z.string().optional(),
+    defaultSubCommandWithGroupDescriptionPattern: z.string().optional(),
   }).optional(),
 });
 

@@ -33,6 +33,8 @@ export type I18nOptions = {
   defaultSubCommandDescriptionPattern?: string;
   defaultSubCommandGroupNamePattern?: string;
   defaultSubCommandGroupDescriptionPattern?: string;
+  defaultSubCommandWithGroupNamePattern?: string;
+  defaultSubCommandWithGroupDescriptionPattern?: string;
 };
 
 export type PackageManagerType = "npm" | "yarn" | "pnpm";
