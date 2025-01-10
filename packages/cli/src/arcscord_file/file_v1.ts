@@ -16,6 +16,14 @@ const fileDataSchema = z.object({
   }),
   options: z.array(z.enum(["i18n", "eslint", "prettier"])),
   version: z.literal(1),
+  i18n: z.object({
+    defaultCommandNamePattern: z.string().optional(),
+    defaultCommandDescriptionPattern: z.string().optional(),
+    defaultSubCommandNamePattern: z.string().optional(),
+    defaultSubCommandDescriptionPattern: z.string().optional(),
+    defaultSubCommandGroupNamePattern: z.string().optional(),
+    defaultSubCommandGroupDescriptionPattern: z.string().optional(),
+  }).optional(),
 });
 
 export const fileV1: ArcscordFileParser = {

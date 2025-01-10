@@ -10,6 +10,7 @@ export type ArcscordFileData = {
   options: Options[];
   version: number;
   basePaths: BasePaths;
+  i18n?: I18nOptions;
 };
 
 export type PackageManagerOptions = {
@@ -23,6 +24,15 @@ export type BasePaths = {
   components: string;
   tasks: string;
   handlerList: string;
+};
+
+export type I18nOptions = {
+  defaultCommandNamePattern?: string;
+  defaultCommandDescriptionPattern?: string;
+  defaultSubCommandNamePattern?: string;
+  defaultSubCommandDescriptionPattern?: string;
+  defaultSubCommandGroupNamePattern?: string;
+  defaultSubCommandGroupDescriptionPattern?: string;
 };
 
 export type PackageManagerType = "npm" | "yarn" | "pnpm";
