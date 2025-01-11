@@ -1,3 +1,6 @@
 {
-  "test": "test"
+  "test": "test",
+  "default": {
+    "run": "pong"
+  }
 }

@@ -21,11 +21,10 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
   },
 });
 
-client.loadEvents(handlers.events);
-client.loadTasks(handlers.tasks);
-client.loadComponents(handlers.components);
-client.on("ready", async () => {
-  void client.loadCommands(handlers.commands);
+client.loadHandlers(handlers);
+
+client.on("ready", () => {
+  client.logger.info("Ready !");
 });
 
 void client.login();

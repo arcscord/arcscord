@@ -4,10 +4,10 @@ export const {{name}}Command = createCommand({
   build: {
     user: {
       name: "{{name}}",
-      nameLocalizations: t => t("commands.{{name}}.name"),
+      nameLocalizations: t => t("{{i18nName}}"),
     },
   },
   run: (ctx) => {
-    return ctx.reply(ctx.t("commands.{{name}}.run"));
+    return ctx.reply(ctx.t("default.run"));
   },
 });
