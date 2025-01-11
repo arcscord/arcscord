@@ -12,8 +12,8 @@ import { eslintPrompt } from "../prompts/eslint.js";
 import { packageManagerPrompt } from "../prompts/package_manager.js";
 import { prettierPrompt } from "../prompts/prettier.js";
 import { projectNamePrompt } from "../prompts/project_name.js";
-import { copy } from "../utils/copy.js";
 import { eslintFix } from "../utils/eslint.js";
+import { copy } from "../utils/file.js";
 import { prettierFix } from "../utils/prettier.js";
 
 export const InitCommand = new Command("init")

@@ -6,7 +6,6 @@ import { addImport } from "./utils.js";
 export type AddToSubDefinitionOptions = {
   name: string;
   path: string;
-  type: "sub" | "subGroup";
   fileContent: string;
   impGroupName?: string;
   importExtension: string;
@@ -41,7 +40,7 @@ export function addToSubDefinition(options: AddToSubDefinitionOptions): string {
       if (options.impGroupName) {
         const groupsObject = getObjectPropertyOrCreate(
           variableDeclaration.init.expression,
-          "subCommandGroup",
+          "subCommandsGroups",
           types.objectExpression([]),
         );
 
