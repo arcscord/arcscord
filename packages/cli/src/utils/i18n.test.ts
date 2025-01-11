@@ -10,31 +10,31 @@ describe("replaceI18nVariables", () => {
   });
 
   it("should replace path variable with only one folder", () => {
-    const baseString = "commands.{{path.}}.name";
+    const baseString = "commands.{{path.}}name";
     const patterns = { path: "folder" };
     const result = replaceI18nVariables(baseString, patterns);
     expect(result).toBe("commands.folder.name");
   });
 
   it("should replace path variables with custom separator", () => {
-    const baseString = "commands.{{path/}}.name";
+    const baseString = "commands.{{path/}}name";
     const patterns = { path: "folder/subfolder" };
     const result = replaceI18nVariables(baseString, patterns);
-    expect(result).toBe("commands.folder/subfolder.name");
+    expect(result).toBe("commands.folder/subfolder/name");
   });
 
   it("should replace path variables with different separator", () => {
-    const baseString = "commands.{{path-}}.name";
+    const baseString = "commands.{{path-}}name";
     const patterns = { path: "folder/subfolder" };
     const result = replaceI18nVariables(baseString, patterns);
-    expect(result).toBe("commands.folder-subfolder.name");
+    expect(result).toBe("commands.folder-subfolder-name");
   });
 
   it("should handle multiple replacements", () => {
-    const baseString = "commands.{{name}}.{{path/}}.description";
+    const baseString = "commands.{{name}}.{{path/}}description";
     const patterns = { name: "greet", path: "folder/subfolder" };
     const result = replaceI18nVariables(baseString, patterns);
-    expect(result).toBe("commands.greet.folder/subfolder.description");
+    expect(result).toBe("commands.greet.folder/subfolder/description");
   });
 
   it("should return the original string if no patterns match", () => {

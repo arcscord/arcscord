@@ -6,7 +6,7 @@ export function replaceI18nVariables(baseString: string, patterns: Record<string
       const pathPatternMatch = baseString.match(/\{\{path(.)\}\}/);
       if (pathPatternMatch) {
         const separator = pathPatternMatch[1];
-        const pathAlias = value.replace(/\//g, separator);
+        const pathAlias = value ? value.replace(/\//g, separator) + separator : "";
         baseString = baseString.replace(new RegExp(`\\{\\{path${separator}\\}\\}`, "g"), pathAlias);
       }
       continue;
@@ -21,7 +21,7 @@ export function getCommandNameI18nPath(options: ArcscordFileData, variables: {
   path: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultCommandNamePattern ?? "commands.{{path.}}.{{name}}.name",
+    options.i18n?.defaultCommandNamePattern ?? "commands.{{path.}}{{name}}.name",
     variables,
   );
 };
@@ -31,7 +31,7 @@ export function getCommandDescriptionI18nPath(options: ArcscordFileData, variabl
   path: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultCommandDescriptionPattern ?? "commands.{{path.}}.{{name}}.description",
+    options.i18n?.defaultCommandDescriptionPattern ?? "commands.{{path.}}{{name}}.description",
     variables,
   );
 };
@@ -42,7 +42,7 @@ export function getSubCommandNameI18nPath(options: ArcscordFileData, variables: 
   subName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandNamePattern ?? "commands.{{path.}}.{{name}}.{{subName}}.name",
+    options.i18n?.defaultSubCommandNamePattern ?? "commands.{{path.}}{{name}}.{{subName}}.name",
     variables,
   );
 }
@@ -53,7 +53,7 @@ export function getSubCommandDescriptionI18nPath(options: ArcscordFileData, vari
   subName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandDescriptionPattern ?? "commands.{{path.}}.{{name}}.{{subName}}.description",
+    options.i18n?.defaultSubCommandDescriptionPattern ?? "commands.{{path.}}{{name}}.{{subName}}.description",
     variables,
   );
 }
@@ -65,7 +65,7 @@ export function getSubCommandWithGroupNameI18nPath(options: ArcscordFileData, va
   groupName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandWithGroupNamePattern ?? "commands.{{path.}}.{{name}}.{{groupName}}.{{subName}}.name",
+    options.i18n?.defaultSubCommandWithGroupNamePattern ?? "commands.{{path.}}{{name}}.{{groupName}}.{{subName}}.name",
     variables,
   );
 }
@@ -77,7 +77,7 @@ export function getSubCommandWithGroupDescriptionI18nPath(options: ArcscordFileD
   groupName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandWithGroupDescriptionPattern ?? "commands.{{path.}}.{{name}}.{{groupName}}.{{subName}}.description",
+    options.i18n?.defaultSubCommandWithGroupDescriptionPattern ?? "commands.{{path.}}{{name}}.{{groupName}}.{{subName}}.description",
     variables,
   );
 }
@@ -88,7 +88,7 @@ export function getSubCommandGroupNameI18nPath(options: ArcscordFileData, variab
   groupName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandGroupNamePattern ?? "commands.{{path.}}.{{name}}.{{groupName}}.name",
+    options.i18n?.defaultSubCommandGroupNamePattern ?? "commands.{{path.}}{{name}}.{{groupName}}.name",
     variables,
   );
 }
@@ -99,7 +99,7 @@ export function getSubCommandGroupDescriptionI18nPath(options: ArcscordFileData,
   groupName: string;
 }): string {
   return replaceI18nVariables(
-    options.i18n?.defaultSubCommandGroupDescriptionPattern ?? "commands.{{path.}}.{{name}}.{{groupName}}.description",
+    options.i18n?.defaultSubCommandGroupDescriptionPattern ?? "commands.{{path.}}{{name}}.{{groupName}}.description",
     variables,
   );
 }
