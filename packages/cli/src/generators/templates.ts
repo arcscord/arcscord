@@ -52,3 +52,16 @@ export function initializeSubCommandFile(content: string, variables: {
   }));
   return content;
 }
+
+export function initializeCommandFile(content: string, name: string, path: string, options: ArcscordFileData): string {
+  content = content.replaceAll("{{name}}", name);
+  content = content.replaceAll("{{i18nName}}", getCommandNameI18nPath(options, {
+    name,
+    path,
+  }));
+  content = content.replaceAll("{{i18nDescription}}", getCommandDescriptionI18nPath(options, {
+    name,
+    path,
+  }));
+  return content;
+}
