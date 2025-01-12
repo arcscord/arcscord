@@ -11,6 +11,10 @@ on:
           - arcscord
           - middleware
           - cli
+      tag:
+        description: the version tag to publish
+        required: false
+        type: string
 
 jobs:
   Publish:
@@ -35,7 +39,12 @@ jobs:
       - name: Build code
         run: pnpm build
       - name: Publish
-        run: npm publish --provenance --access public
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            npm publish --provenance --access public --tag ${{ inputs.tag }}
+          else
+            npm publish --provenance --access public
+          fi
         working-directory: "packages/${{inputs.package}}"
         env:
           NODE_AUTH_TOKEN: ${{secrets.NPM_SECRET}}
