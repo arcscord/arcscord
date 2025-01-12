@@ -1,3 +1,4 @@
+import { existsSync } from "node:fs";
 import { cp, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -34,4 +35,11 @@ export function cleanPath(root: string): string {
   }
 
   return root;
+}
+
+export function checkIfFileExist(filePath: string): void {
+  if (existsSync(filePath)) {
+    console.error(`file ${filePath} already exists`);
+    process.exit(1);
+  }
 }

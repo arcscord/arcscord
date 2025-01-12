@@ -1,5 +1,4 @@
 import type { ArcscordFileData } from "../arcscord_file/type.js";
-import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
@@ -13,7 +12,7 @@ import { commandTypePrompt } from "../prompts/command_type.js";
 import { handlerNamePrompt } from "../prompts/handler_name.js";
 import { noIncompatibleOptions } from "../utils/cli_options.js";
 import { eslintFixMultiples } from "../utils/eslint.js";
-import { cleanPath, readOrCreate } from "../utils/file.js";
+import { checkIfFileExist, cleanPath, readOrCreate } from "../utils/file.js";
 import { getSubCommandGroupDescriptionI18nPath, getSubCommandGroupNameI18nPath } from "../utils/i18n.js";
 import { prettierFixMultiples } from "../utils/prettier.js";
 import { camelOrPascalToSnakeCase } from "../utils/string.js";
@@ -141,13 +140,6 @@ async function handleNewCommand(projectOptions: ArcscordFileData, commandsOption
   return [[subCommandPath, true], definitionResult];
 
   return [];
-}
-
-function checkIfFileExist(filePath: string): void {
-  if (existsSync(filePath)) {
-    console.error(`file ${filePath} already exists`);
-    process.exit(1);
-  }
 }
 
 type SubNames = [baseName: string, subGroupName: undefined | string, subName: string];
