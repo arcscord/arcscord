@@ -1,4 +1,4 @@
-import type resources from "./recources";
+import type resources from "./resources";
 
 declare module "i18next" {
   interface CustomTypeOptions { // eslint-disable-line
