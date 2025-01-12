@@ -6,7 +6,7 @@ export type PackageJSONOptions = {
 };
 
 const dependenciesVersions = {
-  "arcscord": "0.3.0-beta-6",
+  "arcscord": "0.3.0-beta-7",
   "discord.js": "^14.16.3",
   "@swc-node/core": "^1.13.3",
   "@swc-node/register": "^1.10.9",
