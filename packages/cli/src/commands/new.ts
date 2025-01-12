@@ -115,7 +115,7 @@ async function handleNewCommand(projectOptions: ArcscordFileData, commandsOption
       + (commandsOptions.subFolders
         ? `/${commandsOptions.subFolders}`
         : "")
-    }/${camelOrPascalToSnakeCase(commandsOptions.name)}_command.ts`;
+    }/${camelOrPascalToSnakeCase(commandsOptions.name)}_command`;
 
     await updateHandlersList(projectOptions, `${commandsOptions.name}Command`, importPath, "commands");
     return [[fileRoot, true], [projectOptions.basePaths.handlerList, false]];
@@ -246,7 +246,7 @@ async function handleNewEvent(projectOptions: ArcscordFileData, eventsOptions: N
     + (eventsOptions.subFolders
       ? `/${eventsOptions.subFolders}`
       : "")
-  }/${camelOrPascalToSnakeCase(eventsOptions.name)}.ts`;
+  }/${camelOrPascalToSnakeCase(eventsOptions.name)}`;
 
   await updateHandlersList(projectOptions, `${eventsOptions.name}Event`, importPath, "events");
   return [[fileRoot, true], [projectOptions.basePaths.handlerList, false]];
