@@ -9,7 +9,7 @@ export const baseArcscordFileSchema = z.object({
   version: z.number().int().positive().min(0),
 });
 
-export async function parseArcscordFile(file = "./arcscord.json"): Promise<Result<ArcscordFileData, Error>> {
+export async function parseArcscordFile(file = "./arcscord-config.json"): Promise<Result<ArcscordFileData, Error>> {
   const fileContent = fs.readFileSync(file).toString();
 
   let data;
@@ -22,7 +22,7 @@ export async function parseArcscordFile(file = "./arcscord.json"): Promise<Resul
 
   const result = baseArcscordFileSchema.safeParse(data);
   if (!result.success) {
-    return error(new Error("Invalid version number in arcscord.json file !"));
+    return error(new Error("Invalid version number in arcscord-config.json file !"));
   }
 
   if (!Object.hasOwn(parsers, result.data.version)) {

@@ -85,7 +85,7 @@ export const InitCommand = new Command("init")
       i18n: additional.i18n,
     }), "utf8");
     await writeFile(`${root}/.env`, generateEnvFile(), "utf8");
-    await writeFile(`${root}/arcscord.json`, generateArcscordFile({
+    await writeFile(`${root}/arcscord-config.json`, generateArcscordFile({
       version: 1,
       packageManager: {
         type: packageManager,
