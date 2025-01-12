@@ -66,7 +66,7 @@ export const NewCommand = new Command("new")
 
     switch (type) {
       case "commands": {
-        fileToCheck.push(...(await handleNewCommand(projectOptions, { ...options, name: handlerName, subFolders, i18n })));
+        fileToCheck.push(...(await handleNewCommand(projectOptions, { ...options, name: handlerName.toLowerCase(), subFolders, i18n })));
         break;
       }
 
