@@ -139,8 +139,6 @@ async function handleNewCommand(projectOptions: ArcscordFileData, commandsOption
     return [[subCommandPath, true], definitionResult, [projectOptions.basePaths.handlerList, false]];
   }
   return [[subCommandPath, true], definitionResult];
-
-  return [];
 }
 
 type SubNames = [baseName: string, subGroupName: undefined | string, subName: string];
