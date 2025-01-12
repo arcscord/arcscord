@@ -1,6 +1,6 @@
 {
   "name": "arcscord",
-  "version": "0.3.0-beta-7",
+  "version": "0.3.0-beta-8",
   "description": "A discord.js framework, slash command first and full typescript !",
   "author": "Arcoz0308",
   "license": "MIT",
