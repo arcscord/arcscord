@@ -310,7 +310,7 @@ export class ArcClient extends DJSClient {
     }
     if (handlers.commands) {
       await this.waitReady();
-      const [err] = await this.commandManager.loadCommands(handlers.commands);
+      const [err] = await this.loadCommands(handlers.commands);
       if (err) {
         return error(err);
       }
