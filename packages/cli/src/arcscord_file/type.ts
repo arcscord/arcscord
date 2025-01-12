@@ -11,6 +11,7 @@ export type ArcscordFileData = {
   version: number;
   basePaths: BasePaths;
   i18n?: I18nOptions;
+  customExtension?: string;
 };
 
 export type PackageManagerOptions = {

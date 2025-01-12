@@ -216,7 +216,7 @@ async function updateSubCommandDef(projectOptions: ArcscordFileData, commandsOpt
     path: name[1] ? `./${name[1]}/${name[2]}` : `./${name[2]}`,
     fileContent: definitionFileContent,
     impGroupName: name[1],
-    importExtension: "",
+    importExtension: projectOptions.customExtension ?? "",
     i18n: commandsOptions.i18n,
     nameLocalizationName: getSubCommandGroupNameI18nPath(projectOptions, {
       name: name[0],
@@ -241,7 +241,7 @@ async function updateHandlersList(projectOptions: ArcscordFileData, handlerName:
     path: handlerPath,
     type: handlerType,
     fileContent: handlersListFile,
-    importExtension: "",
+    importExtension: projectOptions.customExtension ?? "",
   });
   await writeFile(projectOptions.basePaths.handlerList, newContent, "utf8");
 }

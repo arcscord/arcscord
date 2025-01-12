@@ -26,6 +26,7 @@ const fileDataSchema = z.object({
     defaultSubCommandWithGroupNamePattern: z.string().optional(),
     defaultSubCommandWithGroupDescriptionPattern: z.string().optional(),
   }).optional(),
+  customExtension: z.string().optional(),
 });
 
 export const fileV1: ArcscordFileParser = {
