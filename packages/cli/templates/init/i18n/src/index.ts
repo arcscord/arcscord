@@ -15,8 +15,13 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
           },
         },
         defaultNS: "translations",
+        fallbackLng: "en",
       },
       enabled: true,
+      languageMap: {
+        en: ["en-US", "en-GB"],
+      },
+      availableLanguages: ["en-US", "en-GB"],
     },
   },
 });

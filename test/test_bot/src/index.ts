@@ -1,12 +1,9 @@
 import process from "node:process";
 import { ArcClient } from "arcscord";
 import { Partials } from "discord.js";
-import { commands } from "./commands";
-import { components } from "./components";
-import { messageEvent } from "./event/message";
+import handlers from "./_handlers";
 import en from "./locale/en.json";
 import fr from "./locale/fr.json";
-import { tasks } from "./task";
 import "dotenv/config";
 
 const client = new ArcClient(process.env.TOKEN as string, {
@@ -34,12 +31,14 @@ const client = new ArcClient(process.env.TOKEN as string, {
   },
 });
 
-client.loadEvents([messageEvent]);
+client.loadHandlers(handlers);
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
 
 client.on("ready", async () => {
-  await client.loadCommands(commands);
-  client.loadComponents(components);
-  client.loadTasks(tasks);
+  await sleep(1000);
   const [err, count] = await client.commandManager.deleteUnloadedCommands();
   if (err) {
     return client.logger.fatalError(err);
