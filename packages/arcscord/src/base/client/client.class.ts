@@ -166,18 +166,13 @@ export class ArcClient extends DJSClient {
    */
   waitReady(delay = 50): Promise<void> {
     return new Promise((resolve) => {
-      if (this.ready) {
-        return resolve();
-      }
-
-      setTimeout(() => {
+      const checkReady = (): void => {
         if (this.ready) {
           return resolve();
         }
-
-        // delay : 0.05s, 0.1s, 0.2s 0.4s, 0.8s, 0.5s, 1s, and repeat infinity last two
-        return this.waitReady(delay <= 500 ? delay * 2 : 500);
-      }, delay);
+        setTimeout(checkReady, delay);
+      };
+      checkReady();
     });
   }
 
@@ -295,27 +290,37 @@ export class ArcClient extends DJSClient {
    * @param handlers - The handlers to load
    * @returns the number of tasks loaded
    */
-  async loadHandlers(handlers: HandlersList): Promise<Result<true, InternalError>> {
-    if (handlers.events) {
+  async loadHandlers(handlers: HandlersList, logs = false): Promise<void> {
+    if (handlers.events && handlers.events.length > 0) {
       await this.eventManager.loadEvents(handlers.events);
-    }
-    if (handlers.tasks) {
-      const [err] = await this.taskManager.loadTasks(handlers.tasks);
-      if (err) {
-        return error(err);
+      if (logs) {
+        this.eventManager.logger.info(`Loaded ${handlers.events.length} events`);
       }
     }
-    if (handlers.components) {
-      await this.componentManager.loadComponents(handlers.components);
+    if (handlers.tasks && handlers.tasks.length > 0) {
+      const [err] = await this.taskManager.loadTasks(handlers.tasks);
+      if (err) {
+        this.logger.fatalError(err);
+      }
+      if (logs) {
+        this.taskManager.logger.info(`Loaded ${handlers.tasks.length} tasks`);
+      }
     }
-    if (handlers.commands) {
+    if (handlers.components && handlers.components.length > 0) {
+      await this.componentManager.loadComponents(handlers.components);
+      if (logs) {
+        this.componentManager.logger.info(`Loaded ${handlers.components.length} components`);
+      }
+    }
+    if (handlers.commands && handlers.commands.length > 0) {
       await this.waitReady();
       const [err] = await this.loadCommands(handlers.commands);
       if (err) {
-        return error(err);
+        this.logger.fatalError(err);
+      }
+      if (logs) {
+        this.commandManager.logger.info(`Loaded ${handlers.commands.length} commands`);
       }
     }
-
-    return ok(true);
   }
 }
