@@ -52,11 +52,6 @@ export const NewCommand = new Command("new")
   .addOption(new Option("-m --message", "create a message command"))
   .addOption(new Option("-u --user", "create a user command"))
   .action(async (type, options) => {
-    if (type !== "commands") {
-      console.error("not implemented yet");
-      process.exit(1);
-    }
-
     const [err, projectOptions] = await parseArcscordFile();
     if (err) {
       throw err;
@@ -74,8 +69,14 @@ export const NewCommand = new Command("new")
         fileToCheck.push(...(await handleNewCommand(projectOptions, { ...options, name: handlerName, subFolders, i18n })));
         break;
       }
+
+      case "events": {
+        fileToCheck.push(...(await handleNewEvent(projectOptions, { ...options, name: handlerName, subFolders })));
+        break;
+      }
       default: {
-        throw new Error("not implemented yet");
+        console.error("not implemented yet");
+        process.exit(1);
       }
     }
 
@@ -224,6 +225,33 @@ async function updateSubCommandDef(projectOptions: ArcscordFileData, commandsOpt
 
   await writeFile(definitionPath, newDefinitionFileContent, "utf8");
   return [definitionPath, created];
+}
+
+type NewEventOptions = {
+  name: string;
+  subFolders: string;
+};
+async function handleNewEvent(projectOptions: ArcscordFileData, eventsOptions: NewEventOptions): Promise<[string, boolean][]> {
+  const templatePath = new URL(`../../templates/event/event.ts`, import.meta.url).pathname;
+
+  const fileContent = (await readFile(templatePath, "utf8")).replaceAll("{{name}}", eventsOptions.name);
+
+  const fileRoot = path.resolve(projectOptions.basePaths.root, projectOptions.basePaths.events, eventsOptions.subFolders, `${camelOrPascalToSnakeCase(eventsOptions.name)}.ts`);
+
+  checkIfFileExist(fileRoot);
+
+  await mkdir(path.resolve(projectOptions.basePaths.root, projectOptions.basePaths.events, eventsOptions.subFolders), { recursive: true });
+
+  await writeFile(fileRoot, fileContent, "utf8");
+
+  const importPath = `${projectOptions.basePaths.events
+    + (eventsOptions.subFolders
+      ? `/${eventsOptions.subFolders}`
+      : "")
+  }/${camelOrPascalToSnakeCase(eventsOptions.name)}.ts`;
+
+  await updateHandlersList(projectOptions, `${eventsOptions.name}Event`, importPath, "events");
+  return [[fileRoot, true], [projectOptions.basePaths.handlerList, false]];
 }
 
 async function updateHandlersList(projectOptions: ArcscordFileData, handlerName: string, handlerPath: string, handlerType: "commands" | "events" | "components" | "tasks"): Promise<void> {
