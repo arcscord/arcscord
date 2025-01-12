@@ -8,7 +8,13 @@ export const disableRowButton = createButton({
       label: "Disable Row",
       customId: `disableRow${id}`,
     }),
-  run: (ctx) => {
-    return ctx.disableComponent("actionRow");
+  run: async (ctx) => {
+    const [err] = await ctx.disableComponent("actionRow", true);
+    if (err) {
+      return ctx.error(err);
+    }
+    return ctx.reply("Successfully disabled action row", {
+      ephemeral: true,
+    });
   },
 });

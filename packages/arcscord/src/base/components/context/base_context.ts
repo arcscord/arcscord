@@ -57,6 +57,11 @@ export class BaseComponentContext<
   defer: boolean = false;
 
   /**
+   * If interaction already has a reply
+   */
+  hasReply: boolean = false;
+
+  /**
    * Additional middleware results
    */
   additional: MiddlewaresResults<M>;
@@ -121,6 +126,7 @@ export class BaseComponentContext<
       }
 
       await this.interaction.reply(message);
+      this.hasReply = true;
       return ok(true);
     }
     catch (e) {
@@ -164,6 +170,7 @@ export class BaseComponentContext<
       }
 
       await this.interaction.editReply(message);
+      this.hasReply = true;
       return ok(true);
     }
     catch (e) {

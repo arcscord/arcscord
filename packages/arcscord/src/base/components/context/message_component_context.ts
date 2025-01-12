@@ -45,6 +45,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
   async showModal(modal: ModalComponentData): Promise<ComponentRunResult> {
     try {
       await this.interaction.showModal(modal);
+      this.hasReply = true;
       return ok(true);
     }
     catch (e) {
@@ -65,6 +66,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
   async deferUpdateMessage(): Promise<ComponentRunResult> {
     try {
       await this.interaction.deferUpdate();
+      this.defer = true;
       return ok(true);
     }
     catch (e) {
@@ -81,13 +83,21 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
   /**
    * Updates the message.
    * @param options - The MessageEditOptions instance.
+   * @param withoutInteraction - If the interaction should be updated without the interaction
    * @returns A Promise that resolves to a ComponentRunResult.
    */
   async updateMessage(
     options: MessageEditOptions,
+    withoutInteraction: boolean = false,
   ): Promise<ComponentRunResult> {
     try {
-      await this.interaction.update(options);
+      if (this.hasReply || this.defer || withoutInteraction) {
+        this.interaction.message.edit(options);
+      }
+      else {
+        await this.interaction.update(options);
+        this.hasReply = true;
+      }
       return ok(true);
     }
     catch (e) {
@@ -104,6 +114,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
   /**
    * Disables a component.
    * @param selection - The selection criteria ("component" | "actionRow" | "all").
+   * @param withoutInteraction - If the interaction should be updated without the interaction
    * @returns A Promise that resolves to a ComponentRunResult.
    *
    * @remarks
@@ -116,6 +127,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
    */
   disableComponent(
     selection: "component" | "actionRow" | "all" = "all",
+    withoutInteraction: boolean = false,
   ): Promise<ComponentRunResult> {
     const components = this.interaction.message.components;
     let newComponents: (
@@ -182,7 +194,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
         }
     }
 
-    return this.updateMessage({ components: newComponents });
+    return this.updateMessage({ components: newComponents }, withoutInteraction);
   }
 
   private componentMatch(component: MessageActionRowComponent): boolean {
