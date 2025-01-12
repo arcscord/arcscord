@@ -112,11 +112,6 @@ export class LocaleManager extends BaseManager {
   static i18n = i18next;
 
   /**
-   * The name of the manager.
-   */
-  readonly name = "locale";
-
-  /**
    * Enable or disable the locale manager
    */
   readonly enabled: boolean;
@@ -151,7 +146,7 @@ export class LocaleManager extends BaseManager {
    * @param options - Options to configure the LocaleManager.
    */
   constructor(client: ArcClient, options: LocaleManagerOptions = { enabled: false }) {
-    super(client);
+    super(client, "locale");
 
     this.options = options;
     this.enabled = options.enabled ?? false;

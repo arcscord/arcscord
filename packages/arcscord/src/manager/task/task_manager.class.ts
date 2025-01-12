@@ -10,8 +10,6 @@ import { CronJob } from "cron";
  * Represents a manager for handling tasks.
  */
 export class TaskManager extends BaseManager {
-  name = "task";
-
   /**
    * A map to store tasks and their corresponding cron jobs or intervals.
    */
@@ -23,10 +21,10 @@ export class TaskManager extends BaseManager {
   options: Required<TaskManagerOptions>;
 
   constructor(client: ArcClient, options?: TaskManagerOptions) {
-    super(client);
+    super(client, "task");
 
     this.options = {
-      errorHandler: this.errorHandler,
+      errorHandler: this.errorHandler.bind(this),
       ...options,
     };
   }

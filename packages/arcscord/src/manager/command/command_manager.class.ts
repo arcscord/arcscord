@@ -49,16 +49,14 @@ export class CommandManager
   implements CommandResultHandlerImplementer {
   commands: Map<string, Command> = new Map();
 
-  name = "command";
-
   options: Required<CommandManagerOptions>;
 
   constructor(client: ArcClient, options?: CommandManagerOptions) {
-    super(client);
+    super(client, "command");
 
     this.options = {
-      resultHandler: this.resultHandler,
-      errorHandler: this.errorHandler,
+      resultHandler: this.resultHandler.bind(this),
+      errorHandler: this.errorHandler.bind(this),
       ...options,
     };
 

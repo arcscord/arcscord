@@ -11,16 +11,14 @@ import { anyToError, error } from "@arcscord/error";
  * Manages event handling for the Discord client.
  */
 export class EventManager extends BaseManager {
-  name = "event";
-
   options: Required<EventManagerOptions>;
 
   constructor(client: ArcClient, options?: EventManagerOptions) {
-    super(client);
+    super(client, "event");
 
     this.options = {
       autoIntents: false,
-      resultHandler: this.handleResult,
+      resultHandler: this.handleResult.bind(this),
       ...options,
     };
   }

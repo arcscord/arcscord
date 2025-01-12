@@ -13,31 +13,18 @@ export abstract class BaseManager {
   /**
    * The name of the manager. Should be defined by subclasses.
    */
-  abstract name: string;
+  name: string;
 
+  logger: LoggerInterface;
   /**
    * Constructs a new instance of the BaseManager.
    *
    * @param client - The ArcClient instance.
    */
-  constructor(client: ArcClient) {
+  constructor(client: ArcClient, name: string) {
     this.client = client;
-  }
-
-  /**
-   * @internal
-   */
-  _logger?: LoggerInterface;
-
-  /**
-   * Retrieves the logger associated with the manager.
-   * If no logger exists, a new one is created using the client's logger constructor.
-   */
-  get logger(): LoggerInterface {
-    if (!this._logger) {
-      this._logger = this.client.createLogger(this.name);
-    }
-    return this._logger;
+    this.logger = client.createLogger(name);
+    this.name = name;
   }
 
   /**

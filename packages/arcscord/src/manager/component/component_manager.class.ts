@@ -31,8 +31,6 @@ import { ComponentType } from "discord-api-types/v10";
  * Manages and handles interactive components
  */
 export class ComponentManager extends BaseManager {
-  name = "components";
-
   components: ComponentList = {
     [ComponentType.Button]: new Map(),
     [ComponentType.StringSelect]: new Map(),
@@ -46,7 +44,7 @@ export class ComponentManager extends BaseManager {
   options: Required<ComponentManagerOptions>;
 
   constructor(client: ArcClient, options?: ComponentManagerOptions) {
-    super(client);
+    super(client, "component");
 
     this.options = {
       resultHandler: this.handleResult.bind(this),
