@@ -11,7 +11,7 @@ describe("packageJson function", () => {
     expect(result.description).toBe("A discord bot made with arcscord");
     expect(result.scripts).toEqual({
       start: "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-      dev: "npx nodemon --exec node --import=@swc-node/register/esm-register ./src/index.ts dev debug",
+      dev: "npx nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
     });
     expect(result.dependencies).toHaveProperty("arcscord");
     expect(result.dependencies).toHaveProperty("discord.js");

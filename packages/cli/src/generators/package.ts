@@ -35,7 +35,7 @@ export function generatePackageJson(options: PackageJSONOptions): string {
     description: "A discord bot made with arcscord",
     scripts: {
       start: "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-      dev: "npx nodemon --exec node --import=@swc-node/register/esm-register ./src/index.ts dev debug",
+      dev: "npx nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
     },
     dependencies: {
       "arcscord": dependenciesVersions.arcscord,
