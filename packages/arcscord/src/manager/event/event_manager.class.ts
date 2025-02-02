@@ -58,7 +58,7 @@ export class EventManager extends BaseManager {
       try {
         const context = new EventContext(this.client, event);
         const result = await event.run(context, ...args);
-        this.trace(`run event ${event.name}, result : ${result[0] || "error"}`);
+        this.trace(`run event ${event.name}, result : ${result[1] || "error"}`);
         this.options.resultHandler({
           result,
           event,
@@ -80,17 +80,10 @@ export class EventManager extends BaseManager {
   }
 
   async handleResult(infos: EventResultHandlerInfos): Promise<void> {
-    const [err, result] = infos.result;
+    const [err] = infos.result;
     if (err !== null) {
       err.generateId();
       this.logger.logError(err);
-      return;
     }
-
-    this.logger.info(
-      `${infos.eventName} event used by ${infos.event.name}. Result : ${
-        typeof result === "string" ? result : "success"
-      }`,
-    );
   }
 }
