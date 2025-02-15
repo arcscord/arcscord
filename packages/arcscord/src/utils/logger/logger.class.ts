@@ -1,9 +1,9 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerInterface, LogLevel } from "#/utils/logger/logger.type";
-import type { BaseError } from "@arcscord/better-error";
 import * as process from "node:process";
 import { stringifyDebugValues } from "#/utils";
 import { colorDebugValue, formatLog, formatShortDebug } from "#/utils/logger/logger.util";
+import { BaseError } from "@arcscord/better-error";
 
 export class ArcLogger implements LoggerInterface {
   /**
@@ -90,8 +90,20 @@ export class ArcLogger implements LoggerInterface {
    * Logs a BaseError instance.
    * @param error - The error to log.
    */
-  logError(error: BaseError): void {
-    this.error(error.fullMessage(), error.getDebugString());
+  logError(error: BaseError | unknown | unknown[] | Error): void {
+    if (error instanceof BaseError) {
+      this.error(error.fullMessage());
+      if (error.id) {
+        this.debug(`error id : ${error.id}`);
+      }
+    }
+    else if (error instanceof Error) {
+      this.error(error.message);
+    }
+    else {
+      this.error("A non-error object was happened !");
+    }
+    this.loggerFunction(error);
   }
 
   /**
