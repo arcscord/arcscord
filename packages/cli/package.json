@@ -34,7 +34,7 @@
     "i18next": "^23.16.8",
     "tsup": "^8.3.6",
     "vite": "5.4.12",
-    "vitest": "^2.1.9"
+    "vitest": "^3.0.5"
   },
   "dependencies": {
     "@arcscord/error": "^2.0.1",
