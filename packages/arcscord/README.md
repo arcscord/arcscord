@@ -151,19 +151,31 @@ client.loadComponents([roleSelectMenu]);
 
 ```ts
 // declaration
-import { buildModal, createModal } from "arcscord";
+import { buildLabel, buildModal, buildTextInput, createModal } from "arcscord";
 
 export const modal = createModal({
   matcher: "modal",
-  build: title => buildModal(title, "modal", {
-    label: "name",
-    style: "short",
-    customId: "name",
-  }, {
-    label: "age",
-    style: "short",
-    customId: "age",
-  }),
+  build: title =>
+    buildModal(
+      title,
+      "modal",
+      buildLabel({
+        label: "Name",
+        component: buildTextInput({
+          customId: "name",
+          style: "short",
+          required: true,
+        }),
+      }),
+      buildLabel({
+        label: "Age",
+        component: buildTextInput({
+          customId: "age",
+          style: "short",
+          required: true,
+        }),
+      }),
+    ),
   run: (ctx) => {
     return ctx.reply(`Your name is ${ctx.values.get("name")} and you are ${ctx.values.get("age")} old !`);
   },

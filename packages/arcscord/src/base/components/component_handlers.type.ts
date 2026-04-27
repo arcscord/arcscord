@@ -8,8 +8,9 @@ import type {
   StringSelectMenuComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
+import type { componentHandlerTypeEnum } from "#/base/components/component.enum";
 import type { ComponentRunResult } from "#/base/components/component.type";
-import type { Button, TypedSelectMenuOptions } from "#/base/components/component_definer.type";
+import type { Button, MessageComponentType, TypedSelectMenuOptions } from "#/base/components/component_definer.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import type { ButtonContext } from "#/base/components/context/button_context";
 import type { ModalContext } from "#/base/components/context/modal_context";
@@ -30,11 +31,6 @@ export type MatcherType = "begin" | "full";
  * Base properties for all component types.
  */
 export type BaseComponentHandler<Middlewares extends ComponentMiddleware[] = ComponentMiddleware[]> = {
-  /**
-   * The type of the component.
-   */
-  type: Exclude<ComponentType, ComponentType.ActionRow>;
-
   /**
    * The matcher string, it compares with customId by type defined in {@link BaseComponentProps.matcherType|matcherType}.
    */
@@ -60,12 +56,38 @@ export type BaseComponentHandler<Middlewares extends ComponentMiddleware[] = Com
 };
 
 /**
+ * Base properties for message component handlers.
+ */
+export type BaseMessageComponentHandler<Middlewares extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentHandler<Middlewares> & {
+  /**
+   * The Discord message component type.
+   */
+  type: MessageComponentType;
+
+  /**
+   * The Discord interaction family handled by this handler.
+   */
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
+};
+
+/**
+ * Base properties for modal submit handlers.
+ */
+export type BaseModalSubmitHandler<Middlewares extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentHandler<Middlewares> & {
+  /**
+   * The Discord interaction family handled by this handler.
+   */
+  handlerType: typeof componentHandlerTypeEnum.modal;
+};
+
+/**
  * Properties for a button component.
  */
 export type ButtonComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler<M> & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.Button;
 
   /**
@@ -87,6 +109,7 @@ export type StringSelectMenuComponentHandler<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   Typed extends TypedSelectMenuOptions | undefined = undefined,
 > = BaseComponentHandler<M> & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.StringSelect;
 
   /**
@@ -107,6 +130,7 @@ export type UserSelectMenuComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.UserSelect;
 
   /**
@@ -127,6 +151,7 @@ export type RoleSelectMenuComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.RoleSelect;
 
   /**
@@ -147,6 +172,7 @@ export type MentionableSelectMenuComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.MentionableSelect;
 
   /**
@@ -167,6 +193,7 @@ export type ChannelSelectMenuComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.ChannelSelect;
 
   /**
@@ -187,7 +214,7 @@ export type ModalComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = BaseComponentHandler & {
-  type: ComponentType.TextInput;
+  handlerType: typeof componentHandlerTypeEnum.modal;
 
   /**
    * Function to build the modal.

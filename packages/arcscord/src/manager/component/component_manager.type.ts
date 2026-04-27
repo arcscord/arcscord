@@ -35,7 +35,7 @@ export type ComponentList = {
   [ComponentType.RoleSelect]: Map<string, RoleSelectMenuComponentHandler>;
   [ComponentType.MentionableSelect]: Map<string, MentionableSelectMenuComponentHandler>;
   [ComponentType.ChannelSelect]: Map<string, ChannelSelectMenuComponentHandler>;
-  [ComponentType.TextInput]: Map<string, ModalComponentHandler>;
+  modal: Map<string, ModalComponentHandler>;
 };
 
 /**

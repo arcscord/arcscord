@@ -16,7 +16,7 @@ import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
-import { ButtonContext } from "#/base/components";
+import { ButtonContext, componentHandlerTypeEnum } from "#/base/components";
 import { ModalContext } from "#/base/components/context/modal_context";
 import {
   ChannelSelectMenuContext,
@@ -39,7 +39,7 @@ export class ComponentManager extends BaseManager {
     [ComponentType.RoleSelect]: new Map(),
     [ComponentType.MentionableSelect]: new Map(),
     [ComponentType.ChannelSelect]: new Map(),
-    [ComponentType.TextInput]: new Map<string, ModalComponentHandler>(),
+    modal: new Map<string, ModalComponentHandler>(),
   };
 
   options: Required<ComponentManagerOptions>;
@@ -77,11 +77,16 @@ export class ComponentManager extends BaseManager {
    * @param component - component to load
    */
   loadComponent(component: ComponentHandler): void {
-    // @ts-expect-error fix error with others context types
-    this.components[component.type].set(component.matcher, component);
+    if (component.handlerType === componentHandlerTypeEnum.modal) {
+      this.components.modal.set(component.matcher, component);
+    }
+    else {
+      // @ts-expect-error fix error with others context types
+      this.components[component.type].set(component.matcher, component);
+    }
 
     this.trace(
-      `loaded ${component.type} with matcher ${component.matcher} with type ${component.matcherType || "begin"}`,
+      `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with matcher ${component.matcher} with type ${component.matcherType || "begin"}`,
     );
   }
 
@@ -93,7 +98,7 @@ export class ComponentManager extends BaseManager {
   ): Promise<void> {
     /* Modal submit */
     if (interaction.isModalSubmit()) {
-      return this.handleComponentInteraction(interaction, ComponentType.TextInput);
+      return this.handleComponentInteraction(interaction, "modal");
     }
 
     switch (true) {
@@ -123,7 +128,7 @@ export class ComponentManager extends BaseManager {
     }
   }
 
-  private createContext(interaction: MessageComponentInteraction | ModalSubmitInteraction, type: ComponentType, locale: string): Result<ComponentContext, ComponentError> {
+  private createContext(interaction: MessageComponentInteraction | ModalSubmitInteraction, type: keyof ComponentList, locale: string): Result<ComponentContext, ComponentError> {
     switch (type) {
       case ComponentType.Button:
         return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale }));
@@ -153,7 +158,7 @@ export class ComponentManager extends BaseManager {
           locale,
           values: (interaction as ChannelSelectMenuInteraction).channels.map(c => c),
         }));
-      case ComponentType.TextInput:
+      case "modal":
         return ok(new ModalContext(this.client, interaction as ModalSubmitInteraction, { locale }));
       default:
         return error(new ComponentError({

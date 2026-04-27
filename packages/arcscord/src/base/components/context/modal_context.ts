@@ -3,6 +3,8 @@ import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import { BaseComponentContext } from "#/base/components/context/base_context";
 
+export type ModalContextValue = string | readonly string[] | boolean | null;
+
 /**
  * `DmModalContext` is a class representing the context of a modal interaction within a direct message (DM).
  */
@@ -10,9 +12,9 @@ export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[
   interaction: ModalSubmitInteraction;
 
   /**
-   * Map of field custom IDs to their values.
+   * Map of field custom IDs to their submitted values.
    */
-  values: Map<string, string>;
+  values: Map<string, ModalContextValue>;
 
   /**
    * Constructs a DM modal context.
@@ -25,15 +27,17 @@ export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[
 
     this.interaction = interaction;
 
-    this.values = new Map<string, string>(
-      Array.from(interaction.fields.fields.values()).flatMap((field) => {
-        if (!("value" in field) || typeof field.value !== "string") {
-          return [];
-        }
+    const values: [string, ModalContextValue][] = [];
+    for (const field of interaction.fields.fields.values()) {
+      if ("value" in field) {
+        values.push([field.customId, field.value]);
+      }
+      else if ("values" in field) {
+        values.push([field.customId, field.values]);
+      }
+    }
 
-        return [[field.customId, field.value]];
-      }),
-    );
+    this.values = new Map<string, ModalContextValue>(values);
   }
 
   isModalContext(): this is ModalContext {

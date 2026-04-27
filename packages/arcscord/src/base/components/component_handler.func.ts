@@ -5,6 +5,7 @@ import type {
 } from "#/base/components/component_handlers.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import { ComponentType } from "discord-api-types/v10";
+import { componentHandlerTypeEnum } from "#/base/components/component.enum";
 
 /**
  * Create a select menu
@@ -30,8 +31,8 @@ import { ComponentType } from "discord-api-types/v10";
 export function createSelectMenu<
   O extends string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
->(options: SelectMenuComponentHandler<O, M>): SelectMenuComponentHandler<O, M> {
-  return options;
+>(options: Omit<SelectMenuComponentHandler<O, M>, "handlerType">): SelectMenuComponentHandler<O, M> {
+  return { ...options, handlerType: componentHandlerTypeEnum.messageComponent } as SelectMenuComponentHandler<O, M>;
 }
 
 /**
@@ -57,8 +58,8 @@ export function createSelectMenu<
 export function createButton<
   O extends string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
->(options: Omit<ButtonComponentHandler<O, M>, "type">): ButtonComponentHandler<O, M> {
-  return { ...options, type: ComponentType.Button };
+>(options: Omit<ButtonComponentHandler<O, M>, "type" | "handlerType">): ButtonComponentHandler<O, M> {
+  return { ...options, type: ComponentType.Button, handlerType: componentHandlerTypeEnum.messageComponent };
 }
 
 /**
@@ -70,11 +71,17 @@ export function createButton<
  * ```ts
  * const myFamousModal = createModal({
  *   matcher: "famousModal",
- *   build: (label) => buildModal(label, "famousModal", {
- *     style: "short",
- *     label: "entry",
- *     customId: "entry",
- *   }),
+ *   build: title => buildModal(
+ *     title,
+ *     "famousModal",
+ *     buildLabel({
+ *       label: "Entry",
+ *       component: buildTextInput({
+ *         customId: "entry",
+ *         style: "short",
+ *       }),
+ *     }),
+ *   ),
  *   run: (ctx) => {
  *     return ctx.reply(`You reply with ${ctx.values.get("entry") || "nothing"}`);
  *   },
@@ -85,6 +92,6 @@ export function createButton<
 export function createModal<
   O extends string[],
   M extends ComponentMiddleware[] = [],
->(options: Omit<ModalComponentHandler<O, M>, "type">): ModalComponentHandler<O, M> {
-  return { ...options, type: ComponentType.TextInput };
+>(options: Omit<ModalComponentHandler<O, M>, "handlerType">): ModalComponentHandler<O, M> {
+  return { ...options, handlerType: componentHandlerTypeEnum.modal };
 }

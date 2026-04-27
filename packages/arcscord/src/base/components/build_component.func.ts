@@ -2,28 +2,75 @@ import type {
   ActionRowData,
   ButtonComponentData,
   ChannelSelectMenuComponentData,
+  CheckboxComponentData,
+  CheckboxGroupComponentData,
   ComponentEmojiResolvable,
+  ContainerComponentData,
+  FileComponentData,
+  FileUploadComponentData,
+  LabelComponentData,
+  MediaGalleryComponentData,
   MentionableSelectMenuComponentData,
   ModalComponentData,
+  RadioGroupComponentData,
   RoleSelectMenuComponentData,
+  SectionComponentData,
+  SeparatorComponentData,
   StringSelectMenuComponentData,
+  TextDisplayComponentData,
   TextInputComponentData,
+  ThumbnailComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
 import type { Button } from "#/base";
 import type {
   ChannelSelectMenu,
+  Checkbox,
+  CheckboxGroup,
   ClickableButton,
+  Container,
+  File,
+  FileUpload,
+  Label,
+  LabeledTextInput,
   LinkButton,
+  MediaGallery,
   MentionableSelectMenu,
+  PremiumButton,
+  RadioGroup,
   RoleSelectMenu,
+  Section,
+  Separator,
   StringSelectMenu,
+  TextDisplay,
   TextInput,
+  Thumbnail,
   TypedTextInput,
   UserSelectMenu,
 } from "#/base/components/component_definer.type";
 import { ButtonStyle, ComponentType } from "discord-api-types/v10";
-import { buttonToAPI, selectMenuToAPI, textInputToAPI } from "#/base/components/build_component.util";
+import {
+  buttonToAPI,
+  checkboxGroupToAPI,
+  checkboxToAPI,
+  containerToAPI,
+  fileToAPI,
+  fileUploadToAPI,
+  labelToAPI,
+  mediaGalleryToAPI,
+  radioGroupToAPI,
+  sectionToAPI,
+  selectMenuToAPI,
+  separatorToAPI,
+  textDisplayToAPI,
+  textInputToAPI,
+  thumbnailToAPI,
+} from "#/base/components/build_component.util";
+
+type ModalTopLevelComponentInput
+  = | import("#/base/components/component_definer.type").ModalTopLevelComponent
+    | LabelComponentData
+    | TextDisplayComponentData;
 
 /**
  * Build a link button
@@ -61,6 +108,20 @@ export function buildLinkButton(
     ...options,
     type: ComponentType.Button,
     style: ButtonStyle.Link,
+  };
+}
+
+/**
+ * Build a premium button.
+ * @param options options of premium button
+ */
+export function buildPremiumButton(
+  options: Omit<PremiumButton, "type" | "style">,
+): PremiumButton {
+  return {
+    ...options,
+    type: ComponentType.Button,
+    style: ButtonStyle.Premium,
   };
 }
 
@@ -144,7 +205,7 @@ export function buildButtonActionRow(
  * ```
  */
 export function buildStringSelectMenu(
-  options: Omit<StringSelectMenu, "type">,
+  options: Omit<StringSelectMenu<"message">, "type">,
 ): ActionRowData<StringSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
@@ -168,7 +229,7 @@ export function buildStringSelectMenu(
  * ```
  */
 export function buildUserSelectMenu(
-  option: Omit<UserSelectMenu, "type">,
+  option: Omit<UserSelectMenu<"message">, "type">,
 ): ActionRowData<UserSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
@@ -194,7 +255,7 @@ export function buildUserSelectMenu(
  * ```
  */
 export function buildRoleSelectMenu(
-  option: Omit<RoleSelectMenu, "type">,
+  option: Omit<RoleSelectMenu<"message">, "type">,
 ): ActionRowData<RoleSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
@@ -224,7 +285,7 @@ export function buildRoleSelectMenu(
  * ```
  */
 export function buildMentionableSelectMenu(
-  option: Omit<MentionableSelectMenu, "type">,
+  option: Omit<MentionableSelectMenu<"message">, "type">,
 ): ActionRowData<MentionableSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
@@ -250,7 +311,7 @@ export function buildMentionableSelectMenu(
  * ```
  */
 export function buildChannelSelectMenu(
-  option: Omit<ChannelSelectMenu, "type">,
+  option: Omit<ChannelSelectMenu<"message">, "type">,
 ): ActionRowData<ChannelSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
@@ -263,73 +324,261 @@ export function buildChannelSelectMenu(
   };
 }
 
-function isUntypedTextInput(
-  input: Omit<TextInput, "type"> | TypedTextInput,
-): input is Omit<TextInput, "type"> {
-  return "label" in input && typeof input.label === "string";
+/**
+ * Build a string select menu component for a modal label.
+ */
+export function buildStringSelectModalComponent(
+  options: Omit<StringSelectMenu<"modal">, "type">,
+): StringSelectMenuComponentData {
+  return selectMenuToAPI({
+    ...options,
+    type: ComponentType.StringSelect,
+  }) as StringSelectMenuComponentData;
 }
 
 /**
- * Build a typed modal (Soon)
+ * Build a user select menu component for a modal label.
+ */
+export function buildUserSelectModalComponent(
+  option: Omit<UserSelectMenu<"modal">, "type">,
+): UserSelectMenuComponentData {
+  return selectMenuToAPI({
+    ...option,
+    type: ComponentType.UserSelect,
+  }) as UserSelectMenuComponentData;
+}
+
+/**
+ * Build a role select menu component for a modal label.
+ */
+export function buildRoleSelectModalComponent(
+  option: Omit<RoleSelectMenu<"modal">, "type">,
+): RoleSelectMenuComponentData {
+  return selectMenuToAPI({
+    ...option,
+    type: ComponentType.RoleSelect,
+  }) as RoleSelectMenuComponentData;
+}
+
+/**
+ * Build a mentionable select menu component for a modal label.
+ */
+export function buildMentionableSelectModalComponent(
+  option: Omit<MentionableSelectMenu<"modal">, "type">,
+): MentionableSelectMenuComponentData {
+  return selectMenuToAPI({
+    ...option,
+    type: ComponentType.MentionableSelect,
+  }) as MentionableSelectMenuComponentData;
+}
+
+/**
+ * Build a channel select menu component for a modal label.
+ */
+export function buildChannelSelectModalComponent(
+  option: Omit<ChannelSelectMenu<"modal">, "type">,
+): ChannelSelectMenuComponentData {
+  return selectMenuToAPI({
+    ...option,
+    type: ComponentType.ChannelSelect,
+  }) as ChannelSelectMenuComponentData;
+}
+
+/**
+ * Build a text input component for a modal label or legacy action row.
+ */
+export function buildTextInput(
+  options: Omit<TextInput, "type">,
+): TextInputComponentData {
+  return textInputToAPI({ ...options, type: ComponentType.TextInput });
+}
+
+/**
+ * Build a text display component.
+ */
+export function buildTextDisplay(
+  options: Omit<TextDisplay, "type">,
+): TextDisplayComponentData {
+  return textDisplayToAPI({ ...options, type: ComponentType.TextDisplay });
+}
+
+/**
+ * Build a thumbnail component.
+ */
+export function buildThumbnail(
+  options: Omit<Thumbnail, "type">,
+): ThumbnailComponentData {
+  return thumbnailToAPI({ ...options, type: ComponentType.Thumbnail });
+}
+
+/**
+ * Build a section component.
+ */
+export function buildSection(
+  options: Omit<Section, "type">,
+): SectionComponentData {
+  return sectionToAPI({ ...options, type: ComponentType.Section });
+}
+
+/**
+ * Build a media gallery component.
+ */
+export function buildMediaGallery(
+  options: Omit<MediaGallery, "type">,
+): MediaGalleryComponentData {
+  return mediaGalleryToAPI({ ...options, type: ComponentType.MediaGallery });
+}
+
+/**
+ * Build a file component.
+ */
+export function buildFile(
+  options: Omit<File, "type">,
+): FileComponentData {
+  return fileToAPI({ ...options, type: ComponentType.File });
+}
+
+/**
+ * Build a separator component.
+ */
+export function buildSeparator(
+  options: Omit<Separator, "type"> = {},
+): SeparatorComponentData {
+  return separatorToAPI({ ...options, type: ComponentType.Separator });
+}
+
+/**
+ * Build a container component.
+ */
+export function buildContainer(
+  options: Omit<Container, "type">,
+): ContainerComponentData {
+  return containerToAPI({ ...options, type: ComponentType.Container });
+}
+
+/**
+ * Build a file upload component for a modal label.
+ */
+export function buildFileUpload(
+  options: Omit<FileUpload, "type">,
+): FileUploadComponentData {
+  return fileUploadToAPI({ ...options, type: ComponentType.FileUpload });
+}
+
+/**
+ * Build a radio group component for a modal label.
+ */
+export function buildRadioGroup(
+  options: Omit<RadioGroup, "type">,
+): RadioGroupComponentData {
+  return radioGroupToAPI({ ...options, type: ComponentType.RadioGroup });
+}
+
+/**
+ * Build a checkbox group component for a modal label.
+ */
+export function buildCheckboxGroup(
+  options: Omit<CheckboxGroup, "type">,
+): CheckboxGroupComponentData {
+  return checkboxGroupToAPI({ ...options, type: ComponentType.CheckboxGroup });
+}
+
+/**
+ * Build a checkbox component for a modal label.
+ */
+export function buildCheckbox(
+  options: Omit<Checkbox, "type">,
+): CheckboxComponentData {
+  return checkboxToAPI({ ...options, type: ComponentType.Checkbox });
+}
+
+/**
+ * Build a label component for modals.
+ */
+export function buildLabel(
+  options: Omit<Label, "type">,
+): LabelComponentData {
+  return labelToAPI({ ...options, type: ComponentType.Label });
+}
+
+function isLegacyTextInput(
+  input: Omit<LabeledTextInput, "type"> | TypedTextInput,
+): input is Omit<LabeledTextInput, "type"> {
+  return "label" in input && typeof input.label === "string";
+}
+
+function isModalTopLevelComponentInput(input: unknown): input is ModalTopLevelComponentInput {
+  return (
+    typeof input === "object"
+    && input !== null
+    && "type" in input
+    && (input.type === ComponentType.Label || input.type === ComponentType.TextDisplay)
+  );
+}
+
+/**
+ * Build a modal.
  * @param title - The title of the modal
  * @param customId - The custom ID of the modal
- * @param textInput - Typed text input
+ * @param component - A components v2 top-level modal component, or legacy text input data
+ * @param components - Additional modal components
  * @example
  * ```ts
- * buildModal("My Modal", "modal-1", {
- *   name: {
- *     style: "short",
+ * buildModal(
+ *   "Profile",
+ *   "profile-modal",
+ *   buildLabel({
  *     label: "Name",
- *   },
- *   presentation: {
- *     style: "paragraph",
- *     label: "Presentation",
- *   },
- * });
+ *     component: buildTextInput({
+ *       customId: "name",
+ *       style: "short",
+ *       required: true,
+ *     }),
+ *   }),
+ * )
  * ```
  */
+export function buildModal(
+  title: string,
+  customId: string,
+  component: ModalTopLevelComponentInput,
+  ...components: ModalTopLevelComponentInput[]
+): ModalComponentData;
 export function buildModal(
   title: string,
   customId: string,
   textInput: TypedTextInput,
 ): ModalComponentData;
-/**
- * Build a modal
- * @param title - The title of the modal
- * @param customId - The custom ID of the modal
- * @param textInput - A single text input component
- * @param textInputs - Additional text input components
- * @example
- * ```ts
- * buildModal("My Modal", "modal-1", {
- *   input1: {
- *     label: "Label 1",
- *     style: "short",
- *   },
- *   input2: {
- *     label: "Label 2",
- *     style: "paragraph",
- *   },
- * });
- * ```
- */
 export function buildModal(
   title: string,
   customId: string,
-  textInput: Omit<TextInput, "type">,
-  ...textInputs: Omit<TextInput, "type">[]
+  textInput: Omit<LabeledTextInput, "type">,
+  ...textInputs: Omit<LabeledTextInput, "type">[]
 ): ModalComponentData;
-
 export function buildModal(
   title: string,
   customId: string,
-  textInput: Omit<TextInput, "type"> | TypedTextInput,
-  ...textInputs: Omit<TextInput, "type">[]
+  component: ModalTopLevelComponentInput | Omit<LabeledTextInput, "type"> | TypedTextInput,
+  ...components: Array<ModalTopLevelComponentInput | Omit<LabeledTextInput, "type">>
 ): ModalComponentData {
-  let components: ActionRowData<TextInputComponentData>[];
-  if (isUntypedTextInput(textInput)) {
-    textInputs.unshift(textInput);
-    components = textInputs.map((input) => {
+  if (isModalTopLevelComponentInput(component)) {
+    return {
+      title,
+      customId,
+      components: [component, ...components as ModalTopLevelComponentInput[]].map((modalComponent) => {
+        if (modalComponent.type === ComponentType.Label) {
+          return labelToAPI(modalComponent as import("#/base/components/component_definer.type").Label);
+        }
+        return textDisplayToAPI(modalComponent as import("#/base/components/component_definer.type").TextDisplay);
+      }),
+    };
+  }
+
+  let modalComponents: ActionRowData<TextInputComponentData>[];
+  const legacyComponent = component as Omit<LabeledTextInput, "type"> | TypedTextInput;
+  if (isLegacyTextInput(legacyComponent)) {
+    const textInputs = [legacyComponent, ...components as Array<Omit<LabeledTextInput, "type">>];
+    modalComponents = textInputs.map((input) => {
       return {
         type: ComponentType.ActionRow,
         components: [textInputToAPI({ ...input, type: ComponentType.TextInput })],
@@ -337,12 +586,12 @@ export function buildModal(
     });
   }
   else {
-    components = Object.keys(textInput).map((key) => {
+    modalComponents = Object.keys(legacyComponent).map((key) => {
       return {
         type: ComponentType.ActionRow,
         components: [
           textInputToAPI({
-            ...textInput[key],
+            ...legacyComponent[key],
             customId: key,
             type: ComponentType.TextInput,
           }),
@@ -354,6 +603,6 @@ export function buildModal(
   return {
     title,
     customId,
-    components,
+    components: modalComponents,
   };
 }
