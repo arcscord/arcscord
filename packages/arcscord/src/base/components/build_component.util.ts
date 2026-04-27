@@ -187,12 +187,14 @@ export function selectMenuToAPI(
   };
 }
 
-export function textInputToAPI(textInput: TextInput): TextInputComponentData {
+export function textInputToAPI(textInput: TextInput | TextInputComponentData): TextInputComponentData {
   return {
     type: ComponentType.TextInput,
     customId: textInput.customId,
     ...(textInput.label ? { label: textInput.label } : {}),
-    style: textInputStyleEnum[textInput.style],
+    style: typeof textInput.style === "string"
+      ? textInputStyleEnum[textInput.style]
+      : textInput.style,
     minLength: textInput.minLength,
     maxLength: textInput.maxLength,
     required: textInput.required,
@@ -332,7 +334,7 @@ export function checkboxToAPI(checkbox: Checkbox): CheckboxComponentData {
 export function componentInLabelToAPI(component: ComponentInLabel): LabelComponentData["component"] {
   switch (component.type) {
     case ComponentType.TextInput:
-      return textInputToAPI(component);
+      return textInputToAPI(component as TextInput | TextInputComponentData);
     case ComponentType.StringSelect:
     case ComponentType.UserSelect:
     case ComponentType.RoleSelect:
@@ -340,13 +342,13 @@ export function componentInLabelToAPI(component: ComponentInLabel): LabelCompone
     case ComponentType.ChannelSelect:
       return selectMenuToAPI(component as ModalSelectMenu);
     case ComponentType.FileUpload:
-      return fileUploadToAPI(component);
+      return fileUploadToAPI(component as FileUpload);
     case ComponentType.RadioGroup:
-      return radioGroupToAPI(component);
+      return radioGroupToAPI(component as RadioGroup);
     case ComponentType.CheckboxGroup:
-      return checkboxGroupToAPI(component);
+      return checkboxGroupToAPI(component as CheckboxGroup);
     case ComponentType.Checkbox:
-      return checkboxToAPI(component);
+      return checkboxToAPI(component as Checkbox);
   }
 }
 

@@ -5,6 +5,7 @@ import type {
   CheckboxGroupComponentData,
   CheckboxGroupOption,
   ComponentEmojiResolvable,
+  ComponentInLabelData,
   ContainerComponentData,
   FileComponentData,
   FileUploadComponentData,
@@ -437,7 +438,8 @@ export type ComponentInLabel
     | FileUpload
     | RadioGroup
     | CheckboxGroup
-    | Checkbox;
+    | Checkbox
+    | ComponentInLabelData;
 
 /**
  * Type for a modal label component.

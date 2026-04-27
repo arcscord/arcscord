@@ -7,6 +7,8 @@ import type { ComponentMiddleware } from "#/base/components/component_middleware
 import { ComponentType } from "discord-api-types/v10";
 import { componentHandlerTypeEnum } from "#/base/components/component.enum";
 
+type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
+
 /**
  * Create a select menu
  *
@@ -31,7 +33,7 @@ import { componentHandlerTypeEnum } from "#/base/components/component.enum";
 export function createSelectMenu<
   O extends string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
->(options: Omit<SelectMenuComponentHandler<O, M>, "handlerType">): SelectMenuComponentHandler<O, M> {
+>(options: HandlerOptions<SelectMenuComponentHandler<O, M>>): SelectMenuComponentHandler<O, M> {
   return { ...options, handlerType: componentHandlerTypeEnum.messageComponent } as SelectMenuComponentHandler<O, M>;
 }
 
