@@ -11,11 +11,14 @@ jobs:
   label_sync:
     name: Synchronize Labels Automatically
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
     steps:
       - name: Retrieve Project Code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Execute Label Synchronization
-        uses: crazy-max/ghaction-github-labeler@v5
+        uses: crazy-max/ghaction-github-labeler@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           yaml-file: .github/labels.yml
