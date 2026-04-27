@@ -46,25 +46,25 @@
   "dependencies": {
     "@arcscord/better-error": "^1.0.4",
     "@arcscord/error": "^2.0.1",
-    "cron": "^4.3.1",
-    "dayjs": "^1.11.13",
-    "discord-api-types": "^0.38.8",
-    "discord.js": "^14.19.3",
-    "i18next": "^25.2.1",
+    "cron": "^4.4.0",
+    "dayjs": "^1.11.20",
+    "discord-api-types": "^0.38.47",
+    "discord.js": "^14.26.3",
+    "i18next": "^26.0.8",
     "tintify": "^1.1.0",
-    "typescript": "^5.8.3"
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "@swc-node/core": "^1.13.3",
-    "@swc-node/register": "^1.10.10",
-    "@types/node": "^22.15.24",
+    "@swc-node/core": "^1.14.1",
+    "@swc-node/register": "^1.11.1",
+    "@types/node": "^25.6.0",
     "tsc-alias": "^1.8.16",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.5.0",
-    "typedoc": "^0.28.5",
-    "vite": "6.3.5",
-    "vite-tsconfig-paths": "^5.1.4",
-    "vitest": "^3.1.4"
+    "tsup": "^8.5.1",
+    "typedoc": "^0.28.19",
+    "vite": "8.0.10",
+    "vite-tsconfig-paths": "^6.1.1",
+    "vitest": "^4.1.5"
   },
   "files": [
     "dist/"

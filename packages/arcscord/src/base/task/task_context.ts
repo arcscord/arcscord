@@ -1,8 +1,8 @@
 import type { ArcClient, TaskResult } from "#/base";
 import type { TaskHandler } from "#/base/task/task.type";
 import type { TaskErrorOptions } from "#/utils";
-import { TaskError } from "#/utils";
 import { error, ok } from "@arcscord/error";
+import { TaskError } from "#/utils";
 
 type TaskContextOptions = {
   nextRun: Date;

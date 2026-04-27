@@ -1,10 +1,3 @@
-import type {
-  buttonColorEnum,
-  buttonStyleEnum,
-  componentTypesEnum,
-  textInputStyleEnum,
-} from "#/base/components/component.enum";
-import type { ChannelType } from "#/utils/discord/type/channel.type";
 import type { ButtonStyle, ComponentType } from "discord-api-types/v10";
 import type {
   ChannelSelectMenuComponentData,
@@ -14,6 +7,13 @@ import type {
   StringSelectMenuComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
+import type {
+  buttonColorEnum,
+  buttonStyleEnum,
+  componentTypesEnum,
+  textInputStyleEnum,
+} from "#/base/components/component.enum";
+import type { ChannelType } from "#/utils/discord/type/channel.type";
 
 /**
  * Type for Discord component types by name
@@ -128,8 +128,8 @@ export type StringSelectMenu = BaseSelectMenu & {
 /**
  * @internal
  */
-export type StringSelectMenuValues<T extends TypedSelectMenuOptions> =
-  (keyof T)[];
+export type StringSelectMenuValues<T extends TypedSelectMenuOptions>
+  = (keyof T)[];
 
 /**
  * Type for a user select menu.
@@ -167,22 +167,22 @@ export type ChannelSelectMenu = BaseSelectMenu & {
 /**
  * Union type for all select menu variants.
  */
-export type SelectMenu =
-  | UserSelectMenu
-  | RoleSelectMenu
-  | MentionableSelectMenu
-  | ChannelSelectMenu
-  | StringSelectMenu;
+export type SelectMenu
+  = | UserSelectMenu
+    | RoleSelectMenu
+    | MentionableSelectMenu
+    | ChannelSelectMenu
+    | StringSelectMenu;
 
 /**
  * Union type for all select menu component data types.
  */
-export type AnySelectMenuComponentData =
-  | StringSelectMenuComponentData
-  | UserSelectMenuComponentData
-  | RoleSelectMenuComponentData
-  | MentionableSelectMenuComponentData
-  | ChannelSelectMenuComponentData;
+export type AnySelectMenuComponentData
+  = | StringSelectMenuComponentData
+    | UserSelectMenuComponentData
+    | RoleSelectMenuComponentData
+    | MentionableSelectMenuComponentData
+    | ChannelSelectMenuComponentData;
 
 /**
  * Type for Discord text input styles by name.

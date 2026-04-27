@@ -1,6 +1,6 @@
+import type { BaseError } from "@arcscord/better-error";
 import type { TaskHandler } from "#/base";
 import type { TaskError } from "#/utils";
-import type { BaseError } from "@arcscord/better-error";
 
 export type TaskErrorHandlerInfos = {
   /**
@@ -20,7 +20,7 @@ export type TaskErrorHandlerInfos = {
 };
 
 export type TaskErrorHandler = (
-  infos: TaskErrorHandlerInfos
+  infos: TaskErrorHandlerInfos,
 ) => void | Promise<void>;
 
 /**

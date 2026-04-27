@@ -5,8 +5,8 @@ export async function additionalPrompt({
 }: {
   i18n?: boolean;
 }): Promise<{
-    i18n: boolean;
-  }> {
+  i18n: boolean;
+}> {
   if (i18n) {
     return { i18n: true };
   }

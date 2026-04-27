@@ -1,6 +1,6 @@
+import type { ButtonInteraction } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { ButtonInteraction } from "discord.js";
 import { MessageComponentContext } from "#/base/components/context/message_component_context";
 
 /**

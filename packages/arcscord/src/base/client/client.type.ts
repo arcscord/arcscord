@@ -1,9 +1,9 @@
+import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
 import type { EventManagerOptions, TaskManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
 import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type";
 import type { LoggerConstructor } from "#/utils/logger/logger.type";
-import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
 import type { Command } from "../command";
 import type { ComponentHandler } from "../components";
 import type { EventHandler } from "../event";

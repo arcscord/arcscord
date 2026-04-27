@@ -1,5 +1,5 @@
-import type { ComponentError } from "#/utils";
 import type { Result } from "@arcscord/error";
+import type { ComponentError } from "#/utils";
 
 /**
  * Represents the result of running a component.

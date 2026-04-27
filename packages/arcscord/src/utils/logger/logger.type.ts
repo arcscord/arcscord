@@ -1,6 +1,6 @@
+import type { BaseError } from "@arcscord/better-error";
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { logLevels } from "#/utils/logger/logger.enum";
-import type { BaseError } from "@arcscord/better-error";
 
 /**
  * @internal
@@ -67,7 +67,7 @@ export type LoggerInterface = {
    */
   error: (
     message: string,
-    debugs?: (string | DebugValueString)[] | DebugValues
+    debugs?: (string | DebugValueString)[] | DebugValues,
   ) => void;
 
   /**
@@ -83,7 +83,7 @@ export type LoggerInterface = {
    */
   fatal: (
     message: string,
-    debugs?: (string | DebugValueString)[] | DebugValues
+    debugs?: (string | DebugValueString)[] | DebugValues,
   ) => never;
 
   /**

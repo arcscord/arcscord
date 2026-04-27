@@ -1,8 +1,8 @@
+import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
 import type { commandOptionTypesEnum } from "#/base/command/command.enum";
 import type { LocaleCallback } from "#/manager";
 import type { ChannelType } from "#/utils/discord/type/channel.type";
 import type { LocaleMap } from "#/utils/discord/type/locale.type";
-import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
 
 /**
  * Specifies the type for command options.
@@ -224,8 +224,8 @@ export type AttachmentOption = BaseSlashOption & {
 /**
  * Defines the option type for command options.
  */
-export type Option = BaseSlashOption &
-  (
+export type Option = BaseSlashOption
+  & (
     | (BaseStringOption & (ChoiceOptionString | Autocomplete))
     | (BaseIntegerOption & (ChoiceOptionNumber | Autocomplete))
     | BooleanOption
@@ -245,8 +245,8 @@ export type OptionsList = { [key: string]: Option };
 /**
  * @internal
  */
-type StringChoiceValue<T extends StringChoices> =
-  T extends Array<infer U>
+type StringChoiceValue<T extends StringChoices>
+  = T extends Array<infer U>
     ? U extends string
       ? U
       : U extends ChoiceString
@@ -257,14 +257,14 @@ type StringChoiceValue<T extends StringChoices> =
 /**
  * @internal
  */
-type StringChoice<T extends ChoiceOptionString> =
-  T["choices"] extends StringChoices ? StringChoiceValue<T["choices"]> : never;
+type StringChoice<T extends ChoiceOptionString>
+  = T["choices"] extends StringChoices ? StringChoiceValue<T["choices"]> : never;
 
 /**
  * @internal
  */
-type NumberChoiceValue<T extends NumberChoices> =
-  T extends Array<infer U>
+type NumberChoiceValue<T extends NumberChoices>
+  = T extends Array<infer U>
     ? U extends number
       ? U
       : U extends ChoiceNumber
@@ -275,8 +275,8 @@ type NumberChoiceValue<T extends NumberChoices> =
 /**
  * @internal
  */
-type NumberChoice<T extends ChoiceOptionNumber> =
-  T["choices"] extends NumberChoices ? NumberChoiceValue<T["choices"]> : never;
+type NumberChoice<T extends ChoiceOptionNumber>
+  = T["choices"] extends NumberChoices ? NumberChoiceValue<T["choices"]> : never;
 
 /**
  * @internal

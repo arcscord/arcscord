@@ -1,5 +1,5 @@
-import type { ArcClient } from "#/base";
 import type { BaseMessageOptions } from "discord.js";
+import type { ArcClient } from "#/base";
 
 export function internalErrorEmbed(
   client: ArcClient,

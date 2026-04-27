@@ -1,9 +1,9 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerInterface, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
+import { BaseError } from "@arcscord/better-error";
 import { stringifyDebugValues } from "#/utils";
 import { colorDebugValue, formatLog, formatShortDebug } from "#/utils/logger/logger.util";
-import { BaseError } from "@arcscord/better-error";
 
 export class ArcLogger implements LoggerInterface {
   /**

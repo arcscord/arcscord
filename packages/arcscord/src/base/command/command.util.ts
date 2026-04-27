@@ -1,3 +1,10 @@
+import type { Result } from "@arcscord/error";
+import type {
+  AutocompleteInteraction,
+  ChatInputCommandInteraction,
+  CommandInteraction,
+  CommandInteractionOption,
+} from "discord.js";
 import type { AutocompleteCommand, CommandHandler } from "#/base";
 import type {
   FullCommandDefinition,
@@ -7,13 +14,6 @@ import type {
   SlashWithSubsCommandDefinition,
 } from "#/base/command/command_definition.type";
 import type { ContextOptions, Option, OptionalContextOption, OptionsList } from "#/base/command/option.type";
-import type { Result } from "@arcscord/error";
-import type {
-  AutocompleteInteraction,
-  ChatInputCommandInteraction,
-  CommandInteraction,
-  CommandInteractionOption,
-} from "discord.js";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandOptionType } from "discord-api-types/v10";
@@ -428,11 +428,10 @@ export async function parseOptions<T extends OptionsList>(
         if ("choices" in option && option.choices) {
           if (Array.isArray(option.choices)) {
             if (
-              !option.choices.find(choice =>
+              !option.choices.some(choice =>
                 typeof choice === "string"
                   ? choice === value
-                  : choice.value === value,
-              )
+                  : choice.value === value)
             ) {
               return error(
                 new BaseError({
@@ -520,11 +519,10 @@ export async function parseOptions<T extends OptionsList>(
         if ("choices" in option && option.choices) {
           if (Array.isArray(option.choices)) {
             if (
-              !option.choices.find(choice =>
+              !option.choices.some(choice =>
                 typeof choice === "number"
                   ? choice === value
-                  : choice.value === value,
-              )
+                  : choice.value === value)
             ) {
               return error(
                 new BaseError({

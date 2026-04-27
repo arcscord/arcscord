@@ -1,11 +1,11 @@
-import type { ArcClient, CommandOptions } from "#/base";
-import type { MaybePromise } from "#/utils/type/util.type";
 import type { Result } from "@arcscord/error";
 import type {
   CommandInteraction,
   InteractionReplyOptions,
   MessagePayload,
 } from "discord.js";
+import type { ArcClient, CommandOptions } from "#/base";
+import type { MaybePromise } from "#/utils/type/util.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 

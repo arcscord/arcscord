@@ -1,6 +1,6 @@
+import type { ModalSubmitInteraction } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { ModalSubmitInteraction } from "discord.js";
 import { BaseComponentContext } from "#/base/components/context/base_context";
 
 /**
@@ -26,7 +26,13 @@ export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[
     this.interaction = interaction;
 
     this.values = new Map<string, string>(
-      interaction.fields.fields.map(field => [field.customId, field.value]),
+      Array.from(interaction.fields.fields.values()).flatMap((field) => {
+        if (!("value" in field) || typeof field.value !== "string") {
+          return [];
+        }
+
+        return [[field.customId, field.value]];
+      }),
     );
   }
 

@@ -1,5 +1,5 @@
-import type { EventHandler } from "#/base/event/event.type";
 import type { ErrorOptions } from "@arcscord/better-error";
+import type { EventHandler } from "#/base/event/event.type";
 import { BaseError } from "@arcscord/better-error";
 
 /**

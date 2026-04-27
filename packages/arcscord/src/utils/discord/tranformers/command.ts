@@ -1,10 +1,10 @@
+import type { APIApplicationCommandBasicOption, APIApplicationCommandOptionChoice } from "discord-api-types/v10";
 import type { ArcClient } from "#/base";
 import type { CommandContexts, CommandIntegrationType } from "#/base/command/command_definition.type";
 import type { ChoiceNumber, ChoiceString, CommandOptionType, Option, OptionsList } from "#/base/command/option.type";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils";
 import type { ChannelType } from "#/utils/discord/type/channel.type";
-import type { APIApplicationCommandBasicOption, APIApplicationCommandOptionChoice } from "discord-api-types/v10";
 import { commandContextsEnum, commandIntegrationTypesEnum, commandOptionTypesEnum } from "#/base/command/command.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 

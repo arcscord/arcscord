@@ -1,3 +1,19 @@
+import type { APIInteractionGuildMember } from "discord-api-types/v10";
+import type {
+  ChatInputCommandInteraction,
+  CommandInteraction,
+  GuildMember,
+  InteractionDeferReplyOptions,
+  InteractionEditReplyOptions,
+  InteractionReplyOptions,
+  Message,
+  MessageContextMenuCommandInteraction,
+  MessagePayload,
+  ModalComponentData,
+  User,
+  UserContextMenuCommandInteraction,
+} from "discord.js";
+import type i18next from "i18next";
 import type { ArcClient, CommandHandler, CommandRunResult } from "#/base";
 import type {
   CommandContexts,
@@ -16,25 +32,9 @@ import type {
   MessageCommandContextDocs,
 } from "#/base/utils";
 import type { CommandErrorOptions } from "#/utils";
-import type { APIInteractionGuildMember } from "discord-api-types/v10";
-import type {
-  ChatInputCommandInteraction,
-  CommandInteraction,
-  GuildMember,
-  InteractionDeferReplyOptions,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
-  Message,
-  MessageContextMenuCommandInteraction,
-  MessagePayload,
-  ModalComponentData,
-  User,
-  UserContextMenuCommandInteraction,
-} from "discord.js";
-import type i18next from "i18next";
-import { CommandError } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";
 import { InteractionContextType } from "discord.js";
+import { CommandError } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
 
 /**
@@ -143,31 +143,20 @@ export class BaseCommandContext<
       this.t = this.client.localeManager.t;
     }
   }
-  /**
-   * Reply to the interaction with a message
-   */
-  async reply(
-    message: string,
-    options?: Omit<InteractionReplyOptions, "content">
-  ): Promise<CommandRunResult>;
 
   /**
    * Reply to the interaction with options
    */
   async reply(
-    options: MessagePayload | InteractionReplyOptions
-  ): Promise<CommandRunResult>;
-
-  async reply(
-    message: string | MessagePayload | InteractionReplyOptions,
-    options?: Omit<InteractionReplyOptions, "content">,
+    options: MessagePayload | InteractionReplyOptions | string,
+    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
   ): Promise<CommandRunResult> {
     try {
-      if (options && typeof message === "string") {
-        message = { ...options, content: message };
-      }
-
-      await this.interaction.reply(message);
+      await this.interaction.reply(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
       return ok(true);
     }
     catch (e) {
@@ -182,30 +171,18 @@ export class BaseCommandContext<
   }
 
   /**
-   * Edit the reply to the interaction with a message
-   */
-  async editReply(
-    message: string,
-    options?: Omit<InteractionEditReplyOptions, "content">
-  ): Promise<CommandRunResult>;
-
-  /**
    * Edit the reply to the interaction with options
    */
   async editReply(
-    options: MessagePayload | InteractionEditReplyOptions
-  ): Promise<CommandRunResult>;
-
-  async editReply(
-    message: string | MessagePayload | InteractionEditReplyOptions,
-    options?: Omit<InteractionReplyOptions, "content">,
+    options: MessagePayload | InteractionEditReplyOptions | string,
+    extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
   ): Promise<CommandRunResult> {
     try {
-      if (options && typeof message === "string") {
-        message = { ...options, content: message };
-      }
-
-      await this.interaction.editReply(message);
+      await this.interaction.editReply(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
       return ok(true);
     }
     catch (e) {
@@ -336,7 +313,7 @@ type ContextOptionsDef<
  */
 export type SlashCommandContextBuilderOptions<
   T extends PartialCommandDefinitionForSlash | SubCommandDefinition = | PartialCommandDefinitionForSlash
-  | SubCommandDefinition,
+    | SubCommandDefinition,
   M extends CommandMiddleware[] = CommandMiddleware[],
 > = BaseCommandContextBuilderOptions<M> & {
   options: ContextOptionsDef<T>;
@@ -347,7 +324,7 @@ export type SlashCommandContextBuilderOptions<
  */
 export class SlashCommandContext<
   T extends PartialCommandDefinitionForSlash | SubCommandDefinition = | PartialCommandDefinitionForSlash
-  | SubCommandDefinition,
+    | SubCommandDefinition,
   M extends CommandMiddleware[] = CommandMiddleware[],
 > extends BaseCommandContext<M> {
   options: ContextOptionsDef<T>;
@@ -470,11 +447,10 @@ export class UserCommandContext<
  */
 export type CommandContext<
   T extends FullCommandDefinition | SubCommandDefinition = | FullCommandDefinition
-  | SubCommandDefinition,
+    | SubCommandDefinition,
   M extends CommandMiddleware[] = CommandMiddleware[],
 > = T extends FullCommandDefinition
-  ?
-  | (T extends PartialCommandDefinitionForSlash
+  ? | (T extends PartialCommandDefinitionForSlash
     ? SlashCommandContext<T, M>
     : never)
   | (T extends PartialCommandDefinitionForMessage

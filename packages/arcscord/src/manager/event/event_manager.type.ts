@@ -1,8 +1,8 @@
-import type { EventHandler } from "#/base/event";
-import type { EventError } from "#/utils";
 import type { BaseError } from "@arcscord/better-error";
 import type { Result } from "@arcscord/error";
 import type { ClientEvents } from "discord.js";
+import type { EventHandler } from "#/base/event";
+import type { EventError } from "#/utils";
 
 export type EventResultHandlerInfos = {
   /**
@@ -22,7 +22,7 @@ export type EventResultHandlerInfos = {
 };
 
 export type EventResultHandler = (
-  infos: EventResultHandlerInfos
+  infos: EventResultHandlerInfos,
 ) => void | Promise<void>;
 
 export type EventManagerOptions = {

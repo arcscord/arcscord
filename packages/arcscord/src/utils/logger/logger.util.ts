@@ -1,5 +1,6 @@
 import type { DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerConstructor, LoggerInterface, LogLevel } from "#/utils/logger/logger.type";
+import { effectReset } from "tintify";
 import { DayJS } from "#/utils/dayjs/dayjs";
 import {
   DATE_COLOR,
@@ -14,7 +15,6 @@ import {
   SHORT_DEBUG_SPACING,
   SPACE_FILLER,
 } from "#/utils/logger/logger.const";
-import { effectReset } from "tintify";
 
 export function formatLog(
   logLevel: LogLevel,

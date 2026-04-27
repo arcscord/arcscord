@@ -1,15 +1,16 @@
 import type {
+  APIApplicationCommandSubcommandGroupOption,
+  APIApplicationCommandSubcommandOption,
+  RESTPostAPIChatInputApplicationCommandsJSONBody,
+} from "discord-api-types/v10";
+import type {
   APICommandObject,
   ArcClient,
   FullCommandDefinition,
   SlashWithSubsCommandDefinition,
   SubCommandDefinition,
 } from "#/base";
-import type {
-  APIApplicationCommandSubcommandGroupOption,
-  APIApplicationCommandSubcommandOption,
-  RESTPostAPIChatInputApplicationCommandsJSONBody,
-} from "discord-api-types/v10";
+import { ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10";
 import {
   contextsToAPI,
   integrationTypeToAPI,
@@ -17,7 +18,6 @@ import {
   optionListToAPI,
 } from "#/utils/discord/tranformers/command";
 import { permissionToAPI } from "#/utils/discord/tranformers/permission";
-import { ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10";
 
 export function commandToAPI(definer: FullCommandDefinition, client: ArcClient): APICommandObject {
   const obj: APICommandObject = {};

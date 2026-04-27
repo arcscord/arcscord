@@ -1,5 +1,5 @@
-import type { GuildTextFirstBasedChannel } from "#/utils/discord/utils/util.type";
 import type { GuildBasedChannel } from "discord.js";
+import type { GuildTextFirstBasedChannel } from "#/utils/discord/utils/util.type";
 import { ChannelType } from "discord-api-types/v10";
 
 /**

@@ -1,3 +1,6 @@
+import type { BaseError } from "@arcscord/better-error";
+import type { Result } from "@arcscord/error";
+import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, PermissionsString } from "discord.js";
 import type { TaskHandler } from "#/base";
 import type { ArcClientOptions, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
@@ -5,10 +8,9 @@ import type { ComponentHandler } from "#/base/components/component_handlers.type
 import type { EventHandler } from "#/base/event/event.type";
 import type { InternalError } from "#/utils/error/class/internal_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
-import type { BaseError } from "@arcscord/better-error";
-import type { Result } from "@arcscord/error";
-import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, PermissionsString } from "discord.js";
 import * as process from "node:process";
+import { error, ok } from "@arcscord/error";
+import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
 import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
@@ -16,8 +18,6 @@ import { LocaleManager } from "#/manager/locale/locale_manager.class";
 import { TaskManager } from "#/manager/task/task_manager.class";
 import { ArcLogger } from "#/utils/logger/logger.class";
 import { createLogger } from "#/utils/logger/logger.util";
-import { error, ok } from "@arcscord/error";
-import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
 
 export class ArcClient extends DJSClient {
   /**

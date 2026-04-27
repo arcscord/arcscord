@@ -1,7 +1,7 @@
 import * as console from "node:console";
-import { defaultLogger } from "#/utils";
 import { BaseError } from "@arcscord/better-error";
 import { describe, expect, it } from "vitest";
+import { defaultLogger } from "#/utils";
 import { formatLog } from "./logger.util";
 
 describe("logs texts", () => {

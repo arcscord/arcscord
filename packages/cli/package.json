@@ -30,24 +30,25 @@
   },
   "devDependencies": {
     "@types/babel__generator": "^7.27.0",
-    "@types/babel__traverse": "^7.20.7",
-    "i18next": "^25.2.1",
-    "tsup": "^8.5.0",
-    "vite": "6.3.5",
-    "vitest": "^3.1.4"
+    "@types/babel__traverse": "^7.28.0",
+    "@types/node": "^25.6.0",
+    "i18next": "^26.0.8",
+    "tsup": "^8.5.1",
+    "vite": "8.0.10",
+    "vitest": "^4.1.5"
   },
   "dependencies": {
     "@arcscord/error": "^2.0.1",
-    "@babel/generator": "^7.27.3",
-    "@babel/parser": "^7.27.3",
-    "@babel/traverse": "^7.27.3",
-    "@babel/types": "^7.27.3",
+    "@babel/generator": "^7.29.1",
+    "@babel/parser": "^7.29.2",
+    "@babel/traverse": "^7.29.0",
+    "@babel/types": "^7.29.0",
     "@commander-js/extra-typings": "^14.0.0",
-    "@inquirer/prompts": "^7.5.3",
+    "@inquirer/prompts": "^8.4.2",
     "arcscord": "workspace:^",
-    "commander": "^14.0.0",
-    "typescript": "^5.8.3",
-    "zod": "^3.25.36"
+    "commander": "^14.0.3",
+    "typescript": "^6.0.3",
+    "zod": "^4.3.6"
   },
   "type": "module",
   "files": [

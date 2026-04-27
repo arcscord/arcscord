@@ -1,15 +1,3 @@
-import type { Button } from "#/base";
-import type {
-  ChannelSelectMenu,
-  ClickableButton,
-  LinkButton,
-  MentionableSelectMenu,
-  RoleSelectMenu,
-  StringSelectMenu,
-  TextInput,
-  TypedTextInput,
-  UserSelectMenu,
-} from "#/base/components/component_definer.type";
 import type {
   ActionRowData,
   ButtonComponentData,
@@ -22,8 +10,20 @@ import type {
   TextInputComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
-import { buttonToAPI, selectMenuToAPI, textInputToAPI } from "#/base/components/build_component.util";
+import type { Button } from "#/base";
+import type {
+  ChannelSelectMenu,
+  ClickableButton,
+  LinkButton,
+  MentionableSelectMenu,
+  RoleSelectMenu,
+  StringSelectMenu,
+  TextInput,
+  TypedTextInput,
+  UserSelectMenu,
+} from "#/base/components/component_definer.type";
 import { ButtonStyle, ComponentType } from "discord-api-types/v10";
+import { buttonToAPI, selectMenuToAPI, textInputToAPI } from "#/base/components/build_component.util";
 
 /**
  * Build a link button
@@ -37,7 +37,7 @@ import { ButtonStyle, ComponentType } from "discord-api-types/v10";
  * ```
  */
 export function buildLinkButton(
-  options: Omit<LinkButton, "type" | "style"> & { label: string }
+  options: Omit<LinkButton, "type" | "style"> & { label: string },
 ): LinkButton;
 /**
  * Build a link button
@@ -51,7 +51,7 @@ export function buildLinkButton(
  * ```
  */
 export function buildLinkButton(
-  options: Omit<LinkButton, "type" | "style"> & { emoji: ComponentEmojiResolvable }
+  options: Omit<LinkButton, "type" | "style"> & { emoji: ComponentEmojiResolvable },
 ): LinkButton;
 
 export function buildLinkButton(
@@ -78,7 +78,7 @@ export function buildLinkButton(
  * ```
  */
 export function buildClickableButton(
-  options: Omit<ClickableButton, "type"> & { label: string }
+  options: Omit<ClickableButton, "type"> & { label: string },
 ): ClickableButton;
 /**
  * Build a clickable button
@@ -94,7 +94,7 @@ export function buildClickableButton(
  * ```
  */
 export function buildClickableButton(
-  options: Omit<ClickableButton, "type"> & { emoji: ComponentEmojiResolvable }
+  options: Omit<ClickableButton, "type"> & { emoji: ComponentEmojiResolvable },
 ): ClickableButton;
 
 export function buildClickableButton(
@@ -106,12 +106,12 @@ export function buildClickableButton(
   };
 }
 
-type ButtonList =
-  | [Button]
-  | [Button, Button]
-  | [Button, Button, Button]
-  | [Button, Button, Button, Button]
-  | [Button, Button, Button, Button, Button];
+type ButtonList
+  = | [Button]
+    | [Button, Button]
+    | [Button, Button, Button]
+    | [Button, Button, Button, Button]
+    | [Button, Button, Button, Button, Button];
 
 /**
  * Make an actionRow of buttons
@@ -291,7 +291,7 @@ function isUntypedTextInput(
 export function buildModal(
   title: string,
   customId: string,
-  textInput: TypedTextInput
+  textInput: TypedTextInput,
 ): ModalComponentData;
 /**
  * Build a modal

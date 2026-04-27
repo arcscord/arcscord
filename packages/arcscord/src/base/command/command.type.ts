@@ -1,14 +1,14 @@
-import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
-import type { AutocompleteContext } from "#/base/command/autocomplete_context";
-import type { CommandMiddleware } from "#/base/command/command_middleware";
-import type { CommandError } from "#/utils/error/class/command_error";
-import type { MaybePromise } from "#/utils/type/util.type";
 import type { Result } from "@arcscord/error";
 import type {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import type { PermissionsString } from "discord.js";
+import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
+import type { AutocompleteContext } from "#/base/command/autocomplete_context";
+import type { CommandMiddleware } from "#/base/command/command_middleware";
+import type { CommandError } from "#/utils/error/class/command_error";
+import type { MaybePromise } from "#/utils/type/util.type";
 
 /**
  * Options for a command.
@@ -70,7 +70,7 @@ export type AutocompleteCommand = {
  */
 export type CommandHandler<
   Build extends SubCommandDefinition | FullCommandDefinition = | SubCommandDefinition
-  | FullCommandDefinition,
+    | FullCommandDefinition,
   Middlewares extends CommandMiddleware[] = CommandMiddleware[],
 > = {
   /**
@@ -91,7 +91,7 @@ export type CommandHandler<
    * @returns A result of the command execution.
    */
   run: (
-    ctx: CommandContext<Build, Middlewares>
+    ctx: CommandContext<Build, Middlewares>,
   ) => MaybePromise<CommandRunResult>;
 
   /**

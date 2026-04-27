@@ -22,9 +22,9 @@ export type CancelCommandMiddleware = {
  * Union type representing the result of a command middleware run.
  * @template T - The object that the middleware return
  */
-export type CommandMiddlewareRun<T extends NonNullable<unknown>> =
-  | NextCommandMiddleware<T>
-  | CancelCommandMiddleware;
+export type CommandMiddlewareRun<T extends NonNullable<unknown>>
+  = | NextCommandMiddleware<T>
+    | CancelCommandMiddleware;
 
 /**
  * Abstract class representing a command middleware.

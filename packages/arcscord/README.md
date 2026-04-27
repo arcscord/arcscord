@@ -13,7 +13,7 @@ package !
 `pnpm add arcscord`<br>
 or `npm install arcscord`
 
-# Example
+## Example
 
 - [Command](#command)
 - [Button](#button)

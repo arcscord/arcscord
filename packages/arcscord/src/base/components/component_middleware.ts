@@ -22,9 +22,9 @@ export type CancelComponentMiddleware = {
  * Union type representing the result of a component middleware run.
  * @template T - The object that the middleware return
  */
-export type ComponentMiddlewareRun<T extends NonNullable<unknown>> =
-  | NextComponentMiddleware<T>
-  | CancelComponentMiddleware;
+export type ComponentMiddlewareRun<T extends NonNullable<unknown>>
+  = | NextComponentMiddleware<T>
+    | CancelComponentMiddleware;
 
 /**
  * Abstract class representing a component middleware.

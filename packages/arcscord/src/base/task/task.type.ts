@@ -1,7 +1,7 @@
+import type { Result } from "@arcscord/error";
 import type { TaskContext } from "#/base/task/task_context";
 import type { MaybePromise } from "#/utils";
 import type { TaskError } from "#/utils/error/class/task_error";
-import type { Result } from "@arcscord/error";
 
 /**
  * Represents a result of a task, which can be either a success or an error.

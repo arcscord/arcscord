@@ -1,5 +1,6 @@
 import type { ESBuildOptions } from "vite";
-import { defaultExclude, defineConfig, type ViteUserConfig } from "vitest/config";
+import type { ViteUserConfig } from "vitest/config";
+import { defaultExclude, defineConfig } from "vitest/config";
 
 export function createVitestConfig(options: ViteUserConfig = {}) {
   return defineConfig({
@@ -7,7 +8,7 @@ export function createVitestConfig(options: ViteUserConfig = {}) {
     test: {
       ...options?.test,
       globals: true,
-      exclude: [...defaultExclude, "**/*.no.test.ts"],
+      exclude: [...defaultExclude, "**/dist/**", "**/*.no.test.*"],
     },
     esbuild: {
       ...options?.esbuild,

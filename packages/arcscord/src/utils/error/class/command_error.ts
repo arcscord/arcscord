@@ -1,8 +1,8 @@
+import type { ErrorOptions } from "@arcscord/better-error";
+import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
 import type { CommandHandler } from "#/base/command";
 import type { AutocompleteContext } from "#/base/command/autocomplete_context";
 import type { BaseCommandContext } from "#/base/command/command_context";
-import type { ErrorOptions } from "@arcscord/better-error";
-import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
 import { commandInteractionToString } from "#/base/command";
 import { InteractionError } from "#/utils/error/class/interaction_error";
 

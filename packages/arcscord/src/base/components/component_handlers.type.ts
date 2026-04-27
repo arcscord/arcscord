@@ -1,3 +1,13 @@
+import type { ComponentType } from "discord-api-types/v10";
+import type {
+  ActionRowData,
+  ChannelSelectMenuComponentData,
+  MentionableSelectMenuComponentData,
+  ModalComponentData,
+  RoleSelectMenuComponentData,
+  StringSelectMenuComponentData,
+  UserSelectMenuComponentData,
+} from "discord.js";
 import type { ComponentRunResult } from "#/base/components/component.type";
 import type { Button, TypedSelectMenuOptions } from "#/base/components/component_definer.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
@@ -10,16 +20,6 @@ import type {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base/components/context/select_menu_context";
-import type { ComponentType } from "discord-api-types/v10";
-import type {
-  ActionRowData,
-  ChannelSelectMenuComponentData,
-  MentionableSelectMenuComponentData,
-  ModalComponentData,
-  RoleSelectMenuComponentData,
-  StringSelectMenuComponentData,
-  UserSelectMenuComponentData,
-} from "discord.js";
 
 /**
  * the type of match for custom id
@@ -207,15 +207,15 @@ export type SelectMenuComponentHandler<
   O extends string[] = string[],
   M extends ComponentMiddleware[] = ComponentMiddleware[],
 > = StringSelectMenuComponentHandler<O, M>
-| UserSelectMenuComponentHandler<O, M>
-| RoleSelectMenuComponentHandler<O, M>
-| MentionableSelectMenuComponentHandler<O, M>
-| ChannelSelectMenuComponentHandler<O, M>;
+  | UserSelectMenuComponentHandler<O, M>
+  | RoleSelectMenuComponentHandler<O, M>
+  | MentionableSelectMenuComponentHandler<O, M>
+  | ChannelSelectMenuComponentHandler<O, M>;
 
 /**
  * Union type for all component properties.
  */
-export type ComponentHandler =
-  | ButtonComponentHandler
-  | SelectMenuComponentHandler
-  | ModalComponentHandler;
+export type ComponentHandler
+  = | ButtonComponentHandler
+    | SelectMenuComponentHandler
+    | ModalComponentHandler;

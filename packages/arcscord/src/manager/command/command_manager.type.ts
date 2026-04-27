@@ -1,8 +1,8 @@
-import type { CommandContext, CommandHandler } from "#/base";
-import type { CommandError } from "#/utils";
 import type { BaseError } from "@arcscord/better-error";
 import type { Result } from "@arcscord/error";
 import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
+import type { CommandContext, CommandHandler } from "#/base";
+import type { CommandError } from "#/utils";
 
 /**
  * all infos that you have aces to handle a command result
@@ -89,22 +89,22 @@ type RegularCommandErrorHandlerInfos = BaseCommandErrorHandlerInfos & {
 /**
  * Information required for handling command errors.
  */
-export type CommandErrorHandlerInfos =
-  | AutocompleteErrorHandlerInfos
-  | RegularCommandErrorHandlerInfos;
+export type CommandErrorHandlerInfos
+  = | AutocompleteErrorHandlerInfos
+    | RegularCommandErrorHandlerInfos;
 
 /**
  * Type for handling command results.
  */
 export type CommandResultHandler = (
-  infos: CommandResultHandlerInfos
+  infos: CommandResultHandlerInfos,
 ) => void | Promise<void>;
 
 /**
  * Type for handling command errors.
  */
 export type CommandErrorHandler = (
-  infos: CommandErrorHandlerInfos
+  infos: CommandErrorHandlerInfos,
 ) => void | Promise<void>;
 
 /**

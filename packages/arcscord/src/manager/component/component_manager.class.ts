@@ -1,6 +1,4 @@
-import type { ArcClient, ComponentContext } from "#/base";
-import type { ComponentHandler, ModalComponentHandler } from "#/base/components/component_handlers.type";
-import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import type { Result } from "@arcscord/error";
 import type {
   BaseMessageOptions,
   ButtonInteraction,
@@ -12,6 +10,12 @@ import type {
   StringSelectMenuInteraction,
   UserSelectMenuInteraction,
 } from "discord.js";
+import type { ArcClient, ComponentContext } from "#/base";
+import type { ComponentHandler, ModalComponentHandler } from "#/base/components/component_handlers.type";
+import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import { BaseError } from "@arcscord/better-error";
+import { anyToError, error, ok } from "@arcscord/error";
+import { ComponentType } from "discord-api-types/v10";
 import { ButtonContext } from "#/base/components";
 import { ModalContext } from "#/base/components/context/modal_context";
 import {
@@ -23,9 +27,6 @@ import {
 } from "#/base/components/context/select_menu_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { ComponentError, internalErrorEmbed } from "#/utils";
-import { BaseError } from "@arcscord/better-error";
-import { anyToError, error, ok, type Result } from "@arcscord/error";
-import { ComponentType } from "discord-api-types/v10";
 
 /**
  * Manages and handles interactive components
@@ -164,7 +165,7 @@ export class ComponentManager extends BaseManager {
 
   private async handleComponentInteraction(
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
-    type: Exclude<ComponentType, ComponentType.ActionRow>,
+    type: keyof ComponentList,
   ): Promise<void> {
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
@@ -238,7 +239,7 @@ export class ComponentManager extends BaseManager {
 
   private findMatchingComponents(
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
-    type: Exclude<ComponentType, ComponentType.ActionRow>,
+    type: keyof ComponentList,
   ): Result<ComponentHandler[], ComponentError> {
     const components: ComponentHandler[] = [];
     const componentsList = this.components[type];
@@ -356,9 +357,9 @@ export class ComponentManager extends BaseManager {
     const replyResult = defer
       ? await interaction.editReply(message).then(ok).catch(error)
       : await interaction.reply({
-        ...message,
-        ephemeral: true,
-      }).then(ok).catch(error);
+          ...message,
+          ephemeral: true,
+        }).then(ok).catch(error);
 
     if (!replyResult[1]) {
       this.logger.error("failed to send error message", {

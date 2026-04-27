@@ -1,6 +1,7 @@
+import type { Options } from "tsup";
 import { relative, resolve as resolveDir } from "node:path";
 import process from "node:process";
-import { defineConfig, type Options } from "tsup";
+import { defineConfig } from "tsup";
 
 const baseOptions: Options = {
   clean: true,

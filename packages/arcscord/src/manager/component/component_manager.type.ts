@@ -1,3 +1,7 @@
+import type { BaseError } from "@arcscord/better-error";
+import type { Result } from "@arcscord/error";
+import type { ComponentType } from "discord-api-types/v10";
+import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 import type {
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
@@ -10,10 +14,6 @@ import type {
 } from "#/base/components/component_handlers.type";
 import type { ComponentContext } from "#/base/components/context";
 import type { ComponentError } from "#/utils";
-import type { BaseError } from "@arcscord/better-error";
-import type { Result } from "@arcscord/error";
-import type { ComponentType } from "discord-api-types/v10";
-import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 
 /**
  * @internal
@@ -112,14 +112,14 @@ export type ComponentErrorHandlerInfos = {
  * Type for handling component results.
  */
 export type ComponentResultHandler = (
-  infos: ComponentResultHandlerInfos
+  infos: ComponentResultHandlerInfos,
 ) => void | Promise<void>;
 
 /**
  * Type for handling component errors.
  */
 export type ComponentErrorHandler = (
-  infos: ComponentErrorHandlerInfos
+  infos: ComponentErrorHandlerInfos,
 ) => void | Promise<void>;
 
 /**

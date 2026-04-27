@@ -1,4 +1,10 @@
 import type {
+  ApplicationCommandOptionChoiceData,
+  AutocompleteFocusedOption,
+  AutocompleteInteraction,
+} from "discord.js";
+import type i18next from "i18next";
+import type {
   ArcClient,
   CommandHandler,
   CommandRunResult,
@@ -7,14 +13,8 @@ import type {
 } from "#/base";
 import type { ContextDocs } from "#/base/utils/context.type";
 import type { CommandErrorOptions } from "#/utils";
-import type {
-  ApplicationCommandOptionChoiceData,
-  AutocompleteFocusedOption,
-  AutocompleteInteraction,
-} from "discord.js";
-import type i18next from "i18next";
-import { CommandError } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";
+import { CommandError } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
 
 type BaseAutocompleteOptions = {

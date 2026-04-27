@@ -1,4 +1,13 @@
 import type {
+  InteractionDeferReplyOptions,
+  InteractionEditReplyOptions,
+  InteractionReplyOptions,
+  MessageComponentInteraction,
+  MessagePayload,
+  ModalSubmitInteraction,
+} from "discord.js";
+import type i18next from "i18next";
+import type {
   ArcClient,
   ButtonContext,
   ChannelSelectMenuContext,
@@ -11,18 +20,11 @@ import type {
 } from "#/base";
 import type { ComponentRunResult, SelectMenuContext } from "#/base/components";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type {
-  InteractionDeferReplyOptions,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
-  MessageComponentInteraction,
-  MessagePayload,
-  ModalSubmitInteraction,
-} from "discord.js";
-import type i18next from "i18next";
-import { type ContextDocs, InteractionContext } from "#/base/utils";
-import { ComponentError, type ComponentErrorOptions } from "#/utils";
+import type { ContextDocs } from "#/base/utils";
+import type { ComponentErrorOptions } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";
+import { InteractionContext } from "#/base/utils";
+import { ComponentError } from "#/utils";
 
 /**
  * @internal
@@ -98,34 +100,19 @@ export class BaseComponentContext<
 
   /**
    * Responds to the interaction by sending a reply message.
-   * @param message The reply message or options.
-   * @param options Optional additional reply options.
-   * @returns The result of the reply operation.
-   */
-  async reply(
-    message: string,
-    options?: Omit<InteractionReplyOptions, "content">
-  ): Promise<ComponentRunResult>;
-
-  /**
-   * Responds to the interaction by sending a reply message.
    * @param options Reply options.
    * @returns The result of the reply operation.
    */
   async reply(
-    options: MessagePayload | InteractionReplyOptions
-  ): Promise<ComponentRunResult>;
-
-  async reply(
-    message: string | MessagePayload | InteractionReplyOptions,
-    options?: Omit<InteractionReplyOptions, "content">,
+    options: MessagePayload | InteractionReplyOptions | string,
+    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
   ): Promise<ComponentRunResult> {
     try {
-      if (options && typeof message === "string") {
-        message = { ...options, content: message };
-      }
-
-      await this.interaction.reply(message);
+      await this.interaction.reply(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
       this.hasReply = true;
       return ok(true);
     }
@@ -142,34 +129,19 @@ export class BaseComponentContext<
 
   /**
    * Edits an existing reply message in the interaction.
-   * @param message The new message content or options.
-   * @param options Optional additional edit reply options.
-   * @returns The result of the edit operation.
-   */
-  async editReply(
-    message: string,
-    options?: Omit<InteractionEditReplyOptions, "content">
-  ): Promise<ComponentRunResult>;
-
-  /**
-   * Edits an existing reply message in the interaction.
    * @param options Edit reply options.
    * @returns The result of the edit operation.
    */
   async editReply(
-    options: MessagePayload | InteractionEditReplyOptions
-  ): Promise<ComponentRunResult>;
-
-  async editReply(
-    message: string | MessagePayload | InteractionEditReplyOptions,
-    options?: Omit<InteractionReplyOptions, "content">,
+    options: MessagePayload | InteractionEditReplyOptions | string,
+    extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
   ): Promise<ComponentRunResult> {
     try {
-      if (options && typeof message === "string") {
-        message = { ...options, content: message };
-      }
-
-      await this.interaction.editReply(message);
+      await this.interaction.editReply(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
       this.hasReply = true;
       return ok(true);
     }

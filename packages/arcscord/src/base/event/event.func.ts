@@ -1,6 +1,6 @@
+import type { ClientEvents } from "discord.js";
 import type { EventHandler } from "#/base/event/event.type";
 import type { OptionalProperties } from "#/utils";
-import type { ClientEvents } from "discord.js";
 
 /**
  * Creates an event handler with the given options.

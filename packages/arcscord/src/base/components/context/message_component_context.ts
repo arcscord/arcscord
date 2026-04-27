@@ -1,18 +1,18 @@
-import type { ArcClient, BaseComponentContextOptions } from "#/base";
-import type { ComponentRunResult } from "#/base/components";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { APIActionRowComponent, APIMessageActionRowComponent } from "discord-api-types/v10";
+import type { APIActionRowComponent, APIComponentInMessageActionRow } from "discord-api-types/v10";
 import type {
-  ActionRow,
   Message,
   MessageActionRowComponent,
   MessageComponentInteraction,
   MessageEditOptions,
   ModalComponentData,
 } from "discord.js";
+import type { ArcClient, BaseComponentContextOptions } from "#/base";
+import type { ComponentRunResult } from "#/base/components";
+import type { ComponentMiddleware } from "#/base/components/component_middleware";
+import { anyToError, error, ok } from "@arcscord/error";
+import { ComponentType } from "discord-api-types/v10";
 import { BaseComponentContext } from "#/base/components/context/base_context";
 import { ComponentError } from "#/utils";
-import { anyToError, error, ok } from "@arcscord/error";
 
 /**
  * MessageComponentContext class.
@@ -130,14 +130,15 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
     withoutInteraction: boolean = false,
   ): Promise<ComponentRunResult> {
     const components = this.interaction.message.components;
-    let newComponents: (
-      | APIActionRowComponent<APIMessageActionRowComponent>
-      | ActionRow<MessageActionRowComponent>
-    )[] = [];
+    let newComponents: Array<NonNullable<MessageEditOptions["components"]>[number]> = [];
 
     switch (selection) {
       case "all":
         newComponents = components.map((row) => {
+          if (row.type !== ComponentType.ActionRow) {
+            return row;
+          }
+
           return {
             ...row.data,
             components: row.components.map((component) => {
@@ -146,13 +147,18 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
                 disabled: true,
               };
             }),
-          };
+          } satisfies APIActionRowComponent<APIComponentInMessageActionRow>;
         });
         break;
       case "actionRow":
         for (const row of components) {
+          if (row.type !== ComponentType.ActionRow) {
+            newComponents.push(row);
+            continue;
+          }
+
           if (
-            row.components.find(component => this.componentMatch(component))
+            row.components.some(component => this.componentMatch(component))
           ) {
             newComponents.push({
               ...row.data,
@@ -162,7 +168,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
                   disabled: true,
                 };
               }),
-            });
+            } satisfies APIActionRowComponent<APIComponentInMessageActionRow>);
           }
           else {
             newComponents.push(row);
@@ -171,8 +177,13 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
         break;
       case "component":
         for (const row of components) {
+          if (row.type !== ComponentType.ActionRow) {
+            newComponents.push(row);
+            continue;
+          }
+
           if (
-            row.components.find(component => this.componentMatch(component))
+            row.components.some(component => this.componentMatch(component))
           ) {
             newComponents.push({
               ...row.data,
@@ -186,7 +197,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
                       ...component.data,
                     };
               }),
-            });
+            } satisfies APIActionRowComponent<APIComponentInMessageActionRow>);
           }
           else {
             newComponents.push(row);

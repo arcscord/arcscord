@@ -1,5 +1,5 @@
-import type { InteractionErrorOptions } from "#/utils/error/class/interaction_error";
 import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
+import type { InteractionErrorOptions } from "#/utils/error/class/interaction_error";
 import { InteractionError } from "#/utils/error/class/interaction_error";
 
 /**

@@ -4,7 +4,7 @@
     "lib": ["esnext", "dom"],
     "noEmit": true,
     "incremental": false,
-    "types": ["vitest/globals"]
+    "types": ["node", "vitest/globals"]
   },
   "include": ["packages/", "scripts/", "./vitest.config.ts", "./vitest.workspace.ts"]
 }

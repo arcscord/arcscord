@@ -7,7 +7,7 @@ import { demo2SubCommand } from "./base2";
 export const baseCommand = {
   name: "base",
   description: "Command description",
-  subCommandGroup: {
+  subCommandsGroups: {
     example: {
       description: "Example sub command group",
       subCommands: [demo2SubCommand]
@@ -22,7 +22,7 @@ export const baseCommand = {
   name: "base",
   description: "Command description",
   subCommands: [demoSubCommand],
-  subCommandGroup: {
+  subCommandsGroups: {
   }
 } satisfies SlashWithSubsCommandDefinition;`;
 
@@ -33,7 +33,7 @@ export const baseCommand = {
   name: "base",
   description: "Command description",
   subCommands: [demoSubCommand],
-  subCommandGroup: {
+  subCommandsGroups: {
     example: {
       description: "Example sub command group",
       subCommands: [demo2SubCommand]
@@ -92,7 +92,7 @@ describe("sub_def_commands", () => {
 
     const result = addToSubDefinition(options);
     expect(result).toContain("import { newSubCommand } from \"./newSubCommand.js\";");
-    expect(result).toContain("subCommandGroup: {");
+    expect(result).toContain("subCommandsGroups: {");
     expect(result).toContain("newGroup: {");
     expect(result).toContain("subCommands: [newSubCommand]");
   });

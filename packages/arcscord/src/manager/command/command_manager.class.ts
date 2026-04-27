@@ -1,3 +1,12 @@
+import type { Result } from "@arcscord/error";
+import type { RESTPostAPIApplicationCommandsJSONBody } from "discord-api-types/v10";
+import type {
+  ApplicationCommand,
+  ApplicationCommandDataResolvable,
+  AutocompleteInteraction,
+  BaseMessageOptions,
+  CommandInteraction,
+} from "discord.js";
 import type { ArcClient } from "#/base";
 import type { CommandHandler } from "#/base/command";
 import type { Command } from "#/base/command/command_definition.type";
@@ -9,15 +18,9 @@ import type {
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
 } from "#/manager/command/command_manager.type";
-import type { Result } from "@arcscord/error";
-import type { RESTPostAPIApplicationCommandsJSONBody } from "discord-api-types/v10";
-import type {
-  ApplicationCommand,
-  ApplicationCommandDataResolvable,
-  AutocompleteInteraction,
-  BaseMessageOptions,
-  CommandInteraction,
-} from "discord.js";
+import { BaseError } from "@arcscord/better-error";
+import { anyToError, error, ok } from "@arcscord/error";
+import { ApplicationCommandType } from "discord-api-types/v10";
 import {
   AutocompleteContext,
   commandInteractionToString,
@@ -37,9 +40,6 @@ import { BaseManager } from "#/base/manager/manager.class";
 import { CommandError } from "#/utils";
 import { internalErrorEmbed } from "#/utils/discord/embed/embed.const";
 import { InternalError } from "#/utils/error/class/internal_error";
-import { BaseError } from "@arcscord/better-error";
-import { anyToError, error, ok } from "@arcscord/error";
-import { ApplicationCommandType } from "discord-api-types/v10";
 
 /**
  * The `CommandManager` class is responsible for managing commands;
@@ -521,9 +521,9 @@ export class CommandManager
       if ("name" in command.build) {
         const [err, options] = command.build.options
           ? await parseOptions<typeof command.build.options>(
-            interaction,
-            command.build.options,
-          )
+              interaction,
+              command.build.options,
+            )
           : [null, null];
 
         if (err) {
@@ -545,9 +545,9 @@ export class CommandManager
       else if (command.build.slash) {
         const [err, options] = command.build.slash.options
           ? await parseOptions<typeof command.build.slash.options>(
-            interaction,
-            command.build.slash.options,
-          )
+              interaction,
+              command.build.slash.options,
+            )
           : [null, null];
 
         if (err) {

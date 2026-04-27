@@ -1,11 +1,11 @@
 import type { ArcClient } from "#/base/client/client.class";
 import type { EventHandler } from "#/base/event/event.type";
 import type { EventManagerOptions, EventResultHandlerInfos } from "./event_manager.type";
+import { anyToError, error } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
 import { EventError } from "#/utils";
-import { anyToError, error } from "@arcscord/error";
 
 /**
  * Manages event handling for the Discord client.

@@ -1,6 +1,3 @@
-import type { ArcClient, BaseComponentContextOptions } from "#/base";
-import type { StringSelectMenuValues, TypedSelectMenuOptions } from "#/base/components";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import type {
   APIChannel,
   APIRole,
@@ -13,6 +10,9 @@ import type {
   User,
   UserSelectMenuInteraction,
 } from "discord.js";
+import type { ArcClient, BaseComponentContextOptions } from "#/base";
+import type { StringSelectMenuValues, TypedSelectMenuOptions } from "#/base/components";
+import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import { MessageComponentContext } from "#/base/components/context/message_component_context";
 
 /**

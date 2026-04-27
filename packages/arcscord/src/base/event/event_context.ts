@@ -2,8 +2,8 @@ import type { ArcClient, EventHandleResult } from "#/base";
 import type { EventHandler } from "#/base/event/event.type";
 import type { ContextDocs } from "#/base/utils";
 import type { EventErrorOptions } from "#/utils";
-import { EventError } from "#/utils";
 import { error, ok } from "@arcscord/error";
+import { EventError } from "#/utils";
 
 /**
  * The context in which an event handler is executed.

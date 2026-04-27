@@ -1,9 +1,9 @@
+import type { PermissionsString } from "discord.js";
 import type { CommandHandler } from "#/base";
 import type { commandContextsEnum, commandIntegrationTypesEnum } from "#/base/command/command.enum";
 import type { OptionsList } from "#/base/command/option.type";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils/discord/type/locale.type";
-import type { PermissionsString } from "discord.js";
 
 /**
  * Type representing command integration types.
@@ -180,6 +180,6 @@ export type PartialCommandDefinitionForUser = Required<Pick<FullCommandDefinitio
 /**
  * Union type for different command definitions.
  */
-export type Command =
-  | CommandHandler<FullCommandDefinition>
-  | SlashWithSubsCommandDefinition;
+export type Command
+  = | CommandHandler<FullCommandDefinition>
+    | SlashWithSubsCommandDefinition;

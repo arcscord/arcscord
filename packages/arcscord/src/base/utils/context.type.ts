@@ -1,5 +1,5 @@
-import type { ArcClient, CommandHandler } from "#/base";
 import type { BaseInteraction, Guild, GuildBasedChannel, GuildMember, Message, User } from "discord.js";
+import type { ArcClient, CommandHandler } from "#/base";
 
 /**
  * FOR DOCS ONLY

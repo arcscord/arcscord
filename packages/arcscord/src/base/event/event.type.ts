@@ -1,8 +1,8 @@
+import type { Result } from "@arcscord/error";
+import type { BitFieldResolvable, ClientEvents, GatewayIntentsString } from "discord.js";
 import type { EventContext } from "#/base/event/event_context";
 import type { MaybePromise } from "#/utils";
 import type { EventError } from "#/utils/error/class/event_error";
-import type { Result } from "@arcscord/error";
-import type { BitFieldResolvable, ClientEvents, GatewayIntentsString } from "discord.js";
 
 /**
  * Represents the result of an event handler.

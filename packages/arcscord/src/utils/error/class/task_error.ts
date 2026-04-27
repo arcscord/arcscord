@@ -1,5 +1,5 @@
-import type { TaskHandler } from "#/base/task/task.type";
 import type { ErrorOptions } from "@arcscord/better-error";
+import type { TaskHandler } from "#/base/task/task.type";
 import { BaseError } from "@arcscord/better-error";
 
 /**

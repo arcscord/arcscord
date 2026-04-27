@@ -37,11 +37,11 @@
   },
   "dependencies": {
     "arcscord": "workspace:^",
-    "discord.js": "^14.19.3",
-    "typescript": "^5.8.3"
+    "discord.js": "^14.26.3",
+    "typescript": "^6.0.3"
   },
   "devDependencies": {
-    "tsup": "^8.5.0"
+    "tsup": "^8.5.1"
   },
   "files": [
     "dist/"
