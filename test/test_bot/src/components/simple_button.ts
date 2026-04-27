@@ -12,3 +12,15 @@ export const simpleButton = createButton({
     return ctx.reply("Clicked !");
   },
 });
+export const redSimpleButton = createButton({
+  matcher: "red_simple_button",
+  build: () =>
+    buildClickableButton({
+      label: "Red Simple Button",
+      style: "danger",
+      customId: "red_simple_button",
+    }),
+  run: (ctx) => {
+    return ctx.reply("Clicked red button !");
+  },
+});
