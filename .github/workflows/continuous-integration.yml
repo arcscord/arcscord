@@ -34,7 +34,7 @@ jobs:
       - name: Checkout Project
         uses: actions/checkout@v6
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v8
       - name: Add problem matchers
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
       - name: Use Node.js v24
@@ -42,12 +42,18 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
+      - name: Clean pnpm cache
+        run: pnpm store prune
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
       - name: Build code
         run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        timeout-minutes: 15
       - name: Typecheck code
         run: pnpm typecheck
+        timeout-minutes: 10
 
   UnitTesting:
     name: Unit Tests
