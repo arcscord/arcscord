@@ -26,6 +26,29 @@ export type LogLevel = keyof typeof logLevels;
 export type LogFunc = (...data: unknown[]) => void;
 
 /**
+ * Options for a secondary diagnostic error output.
+ */
+export type DiagnosticLoggerOptions = {
+  /**
+   * Enable the diagnostic sink.
+   * @default false
+   */
+  enabled?: boolean;
+
+  /**
+   * Function used to write diagnostic reports.
+   * If omitted, diagnostics are disabled even when enabled is true.
+   */
+  loggerFunc?: LogFunc;
+
+  /**
+   * Diagnostic output format.
+   * @default "json"
+   */
+  format?: "pretty" | "json";
+};
+
+/**
  * Options for ArcLogger output and filtering.
  */
 export type LoggerOptions = {
@@ -40,6 +63,11 @@ export type LoggerOptions = {
    * @default process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT || "pretty"
    */
   format?: "pretty" | "json";
+
+  /**
+   * Optional secondary output for full error diagnostics.
+   */
+  diagnostics?: DiagnosticLoggerOptions;
 };
 
 /**

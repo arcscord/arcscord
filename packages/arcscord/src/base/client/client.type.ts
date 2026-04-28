@@ -40,6 +40,30 @@ export type ArcClientLoggerOptions = {
    * @default process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT || "pretty"
    */
   format?: LoggerOptions["format"];
+
+  /**
+   * Optional secondary output for detailed error diagnostics.
+   * Console logs stay readable while diagnostics can be stored elsewhere.
+   *
+   * @example
+   * ```ts
+   * const diagnostics: string[] = [];
+   *
+   * const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+   *   intents: [],
+   *   logger: {
+   *     level: "info",
+   *     format: "pretty",
+   *     diagnostics: {
+   *       enabled: true,
+   *       format: "json",
+   *       loggerFunc: line => diagnostics.push(String(line)),
+   *     },
+   *   },
+   * });
+   * ```
+   */
+  diagnostics?: LoggerOptions["diagnostics"];
 };
 
 /**

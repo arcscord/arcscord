@@ -13,6 +13,7 @@ export type {
   SerializedError,
 } from "./logger.report";
 export type {
+  DiagnosticLoggerOptions,
   LogFunc,
   LoggerConstructor,
   LoggerInterface,

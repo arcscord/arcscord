@@ -29,6 +29,16 @@ export class ArcLogger implements LoggerInterface {
   logFormat: Required<LoggerOptions>["format"];
 
   /**
+   * Optional secondary sink for detailed diagnostics.
+   */
+  diagnosticLoggerFunction?: LogFunc;
+
+  /**
+   * Diagnostic output format.
+   */
+  diagnosticFormat: Required<LoggerOptions>["format"];
+
+  /**
    * Constructs an instance of the class with the specified process name and logger function.
    *
    * @param name - The name of the process.
@@ -41,6 +51,10 @@ export class ArcLogger implements LoggerInterface {
     this.loggerFunction = loggerFunction;
     this.logLevel = resolveLogLevel(options.level || process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL);
     this.logFormat = resolveLogFormat(options.format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT);
+    this.diagnosticLoggerFunction = options.diagnostics?.enabled
+      ? options.diagnostics.loggerFunc
+      : undefined;
+    this.diagnosticFormat = resolveLogFormat(options.diagnostics?.format || "json");
   }
 
   /**
@@ -112,6 +126,7 @@ export class ArcLogger implements LoggerInterface {
         ? renderJsonErrorReport(report, this.processName)
         : renderErrorReport(report, this.processName),
     );
+    this.writeDiagnosticReport(report);
   }
 
   /**
@@ -143,6 +158,7 @@ export class ArcLogger implements LoggerInterface {
         ? renderJsonErrorReport(report, this.processName)
         : renderErrorReport(report, this.processName),
     );
+    this.writeDiagnosticReport(report);
     return process.exit(1);
   }
 
@@ -160,6 +176,18 @@ export class ArcLogger implements LoggerInterface {
       shouldUseJsonLogs(this.logFormat)
         ? formatJsonLog(level, message, this.processName)
         : formatLog(level, message, this.processName),
+    );
+  }
+
+  private writeDiagnosticReport(report: ReturnType<typeof createErrorReport>): void {
+    if (!this.diagnosticLoggerFunction) {
+      return;
+    }
+
+    this.diagnosticLoggerFunction(
+      shouldUseJsonLogs(this.diagnosticFormat)
+        ? renderJsonErrorReport(report, this.processName)
+        : renderErrorReport(report, this.processName),
     );
   }
 }
