@@ -22,6 +22,7 @@ or `npm install arcscord`
 - [Event](#event)
 - [Task](#task)
 - [Localization](#localization)
+- [Logger diagnostics](#logger-diagnostics)
 
 ## Command
 
@@ -247,5 +248,32 @@ export const i18nCommand = createCommand({
   },
 });
 ```
+
+## Logger diagnostics
+
+Keep console logs readable and send detailed error reports to a separate sink.
+
+```ts
+import { ArcClient } from "arcscord";
+
+const diagnostics: string[] = [];
+
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: [],
+  logger: {
+    level: "info",
+    format: "pretty",
+    diagnostics: {
+      enabled: true,
+      format: "json",
+      loggerFunc: (line) => {
+        diagnostics.push(String(line));
+      },
+    },
+  },
+});
+```
+
+For production, replace `diagnostics.push` with a file writer, or any external log sink.
 
 [Go up](#arcscord)
