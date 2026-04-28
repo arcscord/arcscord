@@ -385,7 +385,7 @@ export class ComponentManager extends BaseManager {
       );
     }
 
-    this.logger.info(
+    this.logger.debug(
       `${infos.interaction.user.username} used component ${infos.component.matcher}. Result : ${
         typeof result === "string" ? result : "success"
       }`,
@@ -393,7 +393,8 @@ export class ComponentManager extends BaseManager {
   }
 
   async handleError(infos: ComponentErrorHandlerInfos): Promise<void> {
-    this.logger.logError(infos.error.generateId());
+    const error = infos.error.generateId();
+    this.logger.logError(error);
 
     if (!infos.interaction) {
       return;
@@ -402,7 +403,7 @@ export class ComponentManager extends BaseManager {
     if (!infos.internal) {
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, infos.error.generateId().id),
+        internalErrorEmbed(this.client, error.id),
         infos.context?.defer,
       );
     }

@@ -842,7 +842,7 @@ export class CommandManager
       );
     }
 
-    this.logger.info(
+    this.logger.debug(
       `${infos.interaction.user.username} used command ${commandInteractionToString(infos.interaction)}. Result : ${
         typeof result === "string" ? result : "success"
       }`,
@@ -850,12 +850,13 @@ export class CommandManager
   }
 
   async errorHandler(infos: CommandErrorHandlerInfos): Promise<void> {
-    this.logger.logError(infos.error.generateId());
+    const error = infos.error.generateId();
+    this.logger.logError(error);
 
     if (!infos.autocomplete) {
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, infos.error.generateId().id),
+        internalErrorEmbed(this.client, error.id),
         infos.context?.defer,
       );
     }

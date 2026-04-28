@@ -58,7 +58,7 @@ export class EventManager extends BaseManager {
       try {
         const context = new EventContext(this.client, event);
         const result = await event.run(context, ...args);
-        this.trace(`run event ${event.name}, result : ${result[1] || "error"}`);
+        this.logger.debug(`run event ${event.name}, result : ${result[1] || "error"}`);
         this.options.resultHandler({
           result,
           event,

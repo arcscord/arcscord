@@ -1,9 +1,10 @@
+import type { BaseError } from "@arcscord/better-error";
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
-import type { LogFunc, LoggerInterface, LogLevel } from "#/utils/logger/logger.type";
+import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
-import { BaseError } from "@arcscord/better-error";
 import { stringifyDebugValues } from "#/utils";
-import { colorDebugValue, formatLog, formatShortDebug } from "#/utils/logger/logger.util";
+import { createErrorReport, renderErrorReport, renderJsonErrorReport } from "#/utils/logger/logger.report";
+import { colorDebugValue, formatJsonLog, formatLog, formatShortDebug, resolveLogFormat, resolveLogLevel, shouldLog, shouldUseJsonLogs } from "#/utils/logger/logger.util";
 
 export class ArcLogger implements LoggerInterface {
   /**
@@ -18,6 +19,16 @@ export class ArcLogger implements LoggerInterface {
   loggerFunction: LogFunc;
 
   /**
+   * Minimum level to emit.
+   */
+  logLevel: LogLevel;
+
+  /**
+   * Output format.
+   */
+  logFormat: Required<LoggerOptions>["format"];
+
+  /**
    * Constructs an instance of the class with the specified process name and logger function.
    *
    * @param name - The name of the process.
@@ -25,9 +36,11 @@ export class ArcLogger implements LoggerInterface {
    * @return A new instance of the class.
    */
   // eslint-disable-next-line no-console
-  constructor(name: string, loggerFunction: LogFunc = console.log) {
+  constructor(name: string, loggerFunction: LogFunc = console.log, options: LoggerOptions = {}) {
     this.processName = name;
     this.loggerFunction = loggerFunction;
+    this.logLevel = resolveLogLevel(options.level || process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL);
+    this.logFormat = resolveLogFormat(options.format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT);
   }
 
   /**
@@ -35,9 +48,7 @@ export class ArcLogger implements LoggerInterface {
    * @param message - The message to log.
    */
   trace(message: string): void {
-    if (process.argv.includes("debug")) {
-      this.log("trace", message);
-    }
+    this.log("trace", message);
   }
 
   /**
@@ -91,19 +102,16 @@ export class ArcLogger implements LoggerInterface {
    * @param error - The error to log.
    */
   logError(error: BaseError | unknown | unknown[] | Error): void {
-    if (error instanceof BaseError) {
-      this.error(error.fullMessage());
-      if (error.id) {
-        this.debug(`error id : ${error.id}`);
-      }
+    if (!shouldLog("error", this.logLevel)) {
+      return;
     }
-    else if (error instanceof Error) {
-      this.error(error.message);
-    }
-    else {
-      this.error("A non-error object was happened !");
-    }
-    this.loggerFunction(error);
+
+    const report = createErrorReport(error);
+    this.loggerFunction(
+      shouldUseJsonLogs(this.logFormat)
+        ? renderJsonErrorReport(report, this.processName)
+        : renderErrorReport(report, this.processName),
+    );
   }
 
   /**
@@ -129,7 +137,13 @@ export class ArcLogger implements LoggerInterface {
    * @param error - The error to log.
    */
   fatalError(error: BaseError): never {
-    this.fatal(error.fullMessage(), error.getDebugString());
+    const report = createErrorReport(error, "fatal");
+    this.loggerFunction(
+      shouldUseJsonLogs(this.logFormat)
+        ? renderJsonErrorReport(report, this.processName)
+        : renderErrorReport(report, this.processName),
+    );
+    return process.exit(1);
   }
 
   /**
@@ -138,7 +152,15 @@ export class ArcLogger implements LoggerInterface {
    * @param message - The message to log.
    */
   log(level: LogLevel, message: string): void {
-    this.loggerFunction(formatLog(level, message, this.processName));
+    if (!shouldLog(level, this.logLevel)) {
+      return;
+    }
+
+    this.loggerFunction(
+      shouldUseJsonLogs(this.logFormat)
+        ? formatJsonLog(level, message, this.processName)
+        : formatLog(level, message, this.processName),
+    );
   }
 }
 

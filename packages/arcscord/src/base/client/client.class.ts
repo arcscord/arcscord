@@ -8,7 +8,6 @@ import type { ComponentHandler } from "#/base/components/component_handlers.type
 import type { EventHandler } from "#/base/event/event.type";
 import type { InternalError } from "#/utils/error/class/internal_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
-import * as process from "node:process";
 import { error, ok } from "@arcscord/error";
 import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
 import { ComponentManager } from "#/manager";
@@ -90,6 +89,7 @@ export class ArcClient extends DJSClient {
       this.loggerConstructor,
       "main",
       options.logger?.loggerFunc,
+      options.logger,
     );
 
     this.defaultMessages = Object.assign<
@@ -135,7 +135,7 @@ export class ArcClient extends DJSClient {
 
     this.arcOptions = {
       autoIntents: false,
-      enableInternalTrace: process.env.NODE_ENV === "development" || process.argv.includes("dev"),
+      enableInternalTrace: false,
       ...options,
     };
 
@@ -187,6 +187,7 @@ export class ArcClient extends DJSClient {
       this.loggerConstructor,
       name,
       this.arcOptions.logger?.loggerFunc,
+      this.arcOptions.logger,
     );
   }
 

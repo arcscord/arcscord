@@ -3,7 +3,7 @@ import type { EventManagerOptions, TaskManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
 import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type";
-import type { LoggerConstructor } from "#/utils/logger/logger.type";
+import type { LoggerConstructor, LoggerOptions } from "#/utils/logger/logger.type";
 import type { Command } from "../command";
 import type { ComponentHandler } from "../components";
 import type { EventHandler } from "../event";
@@ -26,6 +26,20 @@ export type ArcClientLoggerOptions = {
    * @default {@link ArcLogger}
    */
   customLogger?: LoggerConstructor;
+
+  /**
+   * Minimum level to log.
+   * Use "debug" in development to show command/component/event/task execution logs.
+   * @default process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL || "info"
+   */
+  level?: LoggerOptions["level"];
+
+  /**
+   * Logger output format.
+   * Use "json" in production/container logs.
+   * @default process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT || "pretty"
+   */
+  format?: LoggerOptions["format"];
 };
 
 /**
@@ -62,7 +76,7 @@ export type ArcClientOptions = ClientOptions & {
 
   /**
    * if you want the lib trace logs
-   * @default process.env.NODE_ENV === "development" || process.argv.includes("dev")
+   * @default false
    */
   enableInternalTrace?: boolean;
 };

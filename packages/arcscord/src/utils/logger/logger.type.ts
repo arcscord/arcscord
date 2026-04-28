@@ -26,10 +26,27 @@ export type LogLevel = keyof typeof logLevels;
 export type LogFunc = (...data: unknown[]) => void;
 
 /**
+ * Options for ArcLogger output and filtering.
+ */
+export type LoggerOptions = {
+  /**
+   * Minimum level to log.
+   * @default process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL || "info"
+   */
+  level?: LogLevel | "warn";
+
+  /**
+   * Output format.
+   * @default process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT || "pretty"
+   */
+  format?: "pretty" | "json";
+};
+
+/**
  * Constructor type for creating a LoggerInterface.
  */
 export type LoggerConstructor = {
-  new(name: string, logFunc?: LogFunc): LoggerInterface;
+  new(name: string, logFunc?: LogFunc, options?: LoggerOptions): LoggerInterface;
 };
 
 /**
@@ -74,7 +91,7 @@ export type LoggerInterface = {
    * Logs an error object.
    * @param error - The error to be logged.
    */
-  logError: (error: BaseError) => void;
+  logError: (error: BaseError | Error | unknown | unknown[]) => void;
 
   /**
    * Logs a fatal message and halts execution.

@@ -136,7 +136,7 @@ export class TaskManager extends BaseManager {
         });
       }
 
-      this.trace(`executed task ${task.name} with result : ${result}`);
+      this.logger.debug(`executed task ${task.name} with result : ${result}`);
     }
     catch (e) {
       this.options.errorHandler({

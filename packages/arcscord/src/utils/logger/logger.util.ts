@@ -1,5 +1,6 @@
 import type { DebugValueString } from "#/utils/error/error.type";
-import type { LogFunc, LoggerConstructor, LoggerInterface, LogLevel } from "#/utils/logger/logger.type";
+import type { LogFunc, LoggerConstructor, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
+import * as process from "node:process";
 import { effectReset } from "tintify";
 import { DayJS } from "#/utils/dayjs/dayjs";
 import {
@@ -15,6 +16,46 @@ import {
   SHORT_DEBUG_SPACING,
   SPACE_FILLER,
 } from "#/utils/logger/logger.const";
+
+export function resolveLogLevel(level?: string): LogLevel {
+  if (level === "warn") {
+    return "warning";
+  }
+
+  if (level && level in logLevelInfos) {
+    return level as LogLevel;
+  }
+
+  return "info";
+}
+
+export function resolveLogFormat(format?: string): Required<LoggerOptions>["format"] {
+  return format === "json" ? "json" : "pretty";
+}
+
+export function shouldUseJsonLogs(format?: LoggerOptions["format"]): boolean {
+  return resolveLogFormat(format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT) === "json";
+}
+
+export function formatJsonLog(
+  logLevel: LogLevel,
+  message: string,
+  processName = "main",
+): string {
+  return JSON.stringify({
+    time: new Date().toISOString(),
+    level: logLevel,
+    process: processName,
+    message,
+  });
+}
+
+export function shouldLog(
+  level: LogLevel,
+  configuredLevel = resolveLogLevel(process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL),
+): boolean {
+  return logLevelInfos[level].logPriority <= logLevelInfos[configuredLevel].logPriority;
+}
 
 export function formatLog(
   logLevel: LogLevel,
@@ -74,7 +115,8 @@ export function createLogger(
   constructorFunc: LoggerConstructor,
   name: string,
   logFunc?: LogFunc,
+  options?: LoggerOptions,
 ): LoggerInterface {
   // eslint-disable-next-line no-console,new-cap
-  return new constructorFunc(name, logFunc || console.log);
+  return new constructorFunc(name, logFunc || console.log, options);
 }
