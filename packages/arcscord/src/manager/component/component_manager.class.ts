@@ -374,7 +374,7 @@ export class ComponentManager extends BaseManager {
   }
 
   async handleResult(infos: ComponentResultHandlerInfos): Promise<void> {
-    const [err, result] = infos.result;
+    const [err] = infos.result;
     if (err !== null) {
       err.generateId();
       this.logger.logError(err);
@@ -385,11 +385,7 @@ export class ComponentManager extends BaseManager {
       );
     }
 
-    this.logger.debug(
-      `${infos.interaction.user.username} used component ${infos.component.matcher}. Result : ${
-        typeof result === "string" ? result : "success"
-      }`,
-    );
+    this.logger.debug(`Component executed: ${infos.component.matcher}`);
   }
 
   async handleError(infos: ComponentErrorHandlerInfos): Promise<void> {

@@ -127,7 +127,7 @@ export class TaskManager extends BaseManager {
       const context = new TaskContext(this.client, task, {
         nextRun: next,
       });
-      const [err, result] = await task.run(context);
+      const [err] = await task.run(context);
       if (err) {
         this.options.errorHandler({
           error: err,
@@ -136,7 +136,7 @@ export class TaskManager extends BaseManager {
         });
       }
 
-      this.logger.debug(`executed task ${task.name} with result : ${result}`);
+      this.logger.debug(`Task executed: ${task.name}`);
     }
     catch (e) {
       this.options.errorHandler({

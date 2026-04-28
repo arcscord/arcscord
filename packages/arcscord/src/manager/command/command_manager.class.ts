@@ -168,7 +168,7 @@ export class CommandManager
     try {
       const data = await this.client.application.commands.set(commands);
       this.trace(
-        `Loaded ${commands.length} commands globally with success!`,
+        `Registered ${commands.length} global commands`,
       );
       return ok(data.map(cmd => cmd));
     }
@@ -201,7 +201,7 @@ export class CommandManager
     try {
       const data = await guild.commands.set(commands);
       this.trace(
-        `loaded ${commands.length} commands builders for guild ${guildId} with success !`,
+        `Registered ${commands.length} guild commands for guild ${guildId}`,
       );
       return ok(data.map(cmd => cmd));
     }
@@ -501,7 +501,7 @@ export class CommandManager
 
     if (!next) {
       this.logger.trace(
-        `precheck for user ${interaction.user.username} with command ${infos.resolvedName} don't passed`,
+        `Command precheck blocked ${infos.resolvedName}`,
       );
       return;
     }
@@ -779,7 +779,7 @@ export class CommandManager
     });
 
     try {
-      const [err2, result] = await command.autocomplete(context);
+      const [err2] = await command.autocomplete(context);
       if (err2) {
         return this.handleError({
           error: err2,
@@ -790,7 +790,7 @@ export class CommandManager
       }
 
       this.trace(
-        `Run autocomplete for command ${infos.resolvedName}, result : ${result}`,
+        `Autocomplete handled for command ${infos.resolvedName}`,
       );
     }
     catch (e) {
@@ -831,7 +831,7 @@ export class CommandManager
   }
 
   async resultHandler(infos: CommandResultHandlerInfos): Promise<void> {
-    const [err, result] = infos.result;
+    const [err] = infos.result;
     if (err !== null) {
       err.generateId();
       this.logger.logError(err);
@@ -842,11 +842,7 @@ export class CommandManager
       );
     }
 
-    this.logger.debug(
-      `${infos.interaction.user.username} used command ${commandInteractionToString(infos.interaction)}. Result : ${
-        typeof result === "string" ? result : "success"
-      }`,
-    );
+    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`);
   }
 
   async errorHandler(infos: CommandErrorHandlerInfos): Promise<void> {
