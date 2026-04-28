@@ -37,7 +37,7 @@ async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-client.on("ready", async () => {
+client.on("clientReady", async () => {
   await sleep(1000);
   const [err, count] = await client.commandManager.deleteUnloadedCommands();
   if (err) {
