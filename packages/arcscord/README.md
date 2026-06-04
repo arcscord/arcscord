@@ -20,7 +20,6 @@ or `npm install arcscord`
 - [Select Menu](#select-menu)
 - [Modal](#modal)
 - [Event](#event)
-- [Task](#task)
 - [Localization](#localization)
 - [Logger diagnostics](#logger-diagnostics)
 
@@ -206,25 +205,6 @@ export const messageEvent = createEvent({
 
 // register
 client.loadEvents([messageEvent]);
-```
-
-## Task
-
-```ts
-// declaration
-import { createTask } from "arcscord";
-
-export const cronTask = createTask({
-  interval: "*/10 * * * *", // allowed : duration in ms, cron string or array of cron string
-  name: "cron",
-  run: (ctx) => {
-    console.log(`Running cron task, next run ${ctx.nextRun.toISOString()}`);
-    return ctx.ok(true);
-  },
-});
-
-// register
-client.loadTasks([cronTask]);
 ```
 
 ## Localization

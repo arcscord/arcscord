@@ -46,7 +46,6 @@
   "dependencies": {
     "@arcscord/better-error": "^1.0.4",
     "@arcscord/error": "^2.0.1",
-    "cron": "^4.4.0",
     "dayjs": "^1.11.20",
     "discord-api-types": "^0.38.47",
     "discord.js": "^14.26.3",

@@ -20,9 +20,9 @@ import { camelOrPascalToSnakeCase } from "../utils/string.js";
 export const NewCommand = new Command("new")
   .description("create a new handler")
   .addArgument(new commander.Argument("<type>")
-    .choices(["command", "cmd", "c", "component", "comp", "cp", "event", "e", "task", "t"] as const)
-    .argParser((type): "commands" | "events" | "components" | "tasks" => {
-      if (!["command", "cmd", "c", "component", "comp", "cp", "event", "e", "task", "t"].includes(type)) {
+    .choices(["command", "cmd", "c", "component", "comp", "cp", "event", "e"] as const)
+    .argParser((type): "commands" | "events" | "components" => {
+      if (!["command", "cmd", "c", "component", "comp", "cp", "event", "e"].includes(type)) {
         throw new Error("Invalid type");
       }
       switch (type) {
@@ -37,9 +37,6 @@ export const NewCommand = new Command("new")
         case "event":
         case "e":
           return "events";
-        case "task":
-        case "t":
-          return "tasks";
       }
       throw new Error("Invalid type");
     }))
@@ -252,7 +249,7 @@ async function handleNewEvent(projectOptions: ArcscordFileData, eventsOptions: N
   return [[fileRoot, true], [projectOptions.basePaths.handlerList, false]];
 }
 
-async function updateHandlersList(projectOptions: ArcscordFileData, handlerName: string, handlerPath: string, handlerType: "commands" | "events" | "components" | "tasks"): Promise<void> {
+async function updateHandlersList(projectOptions: ArcscordFileData, handlerName: string, handlerPath: string, handlerType: "commands" | "events" | "components"): Promise<void> {
   const handlersListFile = await readFile(projectOptions.basePaths.handlerList, "utf8");
   const newContent = addHandlerToList({
     name: handlerName,

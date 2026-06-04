@@ -7,7 +7,6 @@ export default {
   commands: [],
   components: [],
   events: [],
-  tasks: [],
 } satisfies HandlersList;`;
 
 describe("handler_list", () => {
@@ -26,8 +25,7 @@ import { test } from "./commands/test";
 export default {
   commands: [test],
   components: [],
-  events: [],
-  tasks: []
+  events: []
 } satisfies HandlersList;`);
   });
   it("should add a component to the list", () => {
@@ -45,8 +43,7 @@ import { test } from "./components/test";
 export default {
   commands: [],
   components: [test],
-  events: [],
-  tasks: []
+  events: []
 } satisfies HandlersList;`);
   });
   it("should add an event to the list", () => {
@@ -64,27 +61,7 @@ import { test } from "./events/test";
 export default {
   commands: [],
   components: [],
-  events: [test],
-  tasks: []
-} satisfies HandlersList;`);
-  });
-  it("should add a task to the list", () => {
-    const result = addHandlerToList({
-      name: "test",
-      path: "./tasks/test",
-      type: "tasks",
-      fileContent: defaultFileContent,
-      importExtension: "",
-    });
-
-    expect(result).toBe(`// AUTO GENERATED FILE AND AUTO UPDATED WITH CLI
-import type { HandlersList } from "arcscord";
-import { test } from "./tasks/test";
-export default {
-  commands: [],
-  components: [],
-  events: [],
-  tasks: [test]
+  events: [test]
 } satisfies HandlersList;`);
   });
   it("should add a command and a component to the list", () => {
@@ -111,8 +88,7 @@ import { testComponent } from "./components/test";
 export default {
   commands: [testCommand],
   components: [testComponent],
-  events: [],
-  tasks: []
+  events: []
 } satisfies HandlersList;`);
   });
   it("should add a command with good import", () => {
@@ -130,8 +106,7 @@ import { test } from "./commands/test.ts";
 export default {
   commands: [test],
   components: [],
-  events: [],
-  tasks: []
+  events: []
 } satisfies HandlersList;`);
   });
 });

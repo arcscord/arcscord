@@ -5,5 +5,4 @@ export default {
   commands: [],
   components: [],
   events: [],
-  tasks: [],
 } satisfies HandlersList;

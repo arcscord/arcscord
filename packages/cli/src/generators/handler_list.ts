@@ -7,7 +7,7 @@ import { addImport } from "./utils.js";
 export type AddHandlerToListOptions = {
   name: string;
   path: string;
-  type: "commands" | "events" | "components" | "tasks";
+  type: "commands" | "events" | "components";
   fileContent: string;
   importExtension: string;
 };

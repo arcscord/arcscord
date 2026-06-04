@@ -21,13 +21,9 @@ import { redSimpleButton, simpleButton } from "./components/simple_button";
 import { stringSelectMenu } from "./components/string_select_menu";
 import { userSelectMenu } from "./components/user_select_menu";
 import { messageEvent } from "./event/message";
-import { cronTask } from "./task/cron";
-import { intervalTask } from "./task/interval";
-import { multiCronTask } from "./task/multi_cron";
 
 export default {
   events: [messageEvent],
-  tasks: [cronTask, multiCronTask, intervalTask],
   components: [
     simpleButton,
     redSimpleButton,

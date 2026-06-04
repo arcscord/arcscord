@@ -1,7 +1,5 @@
-import type { BaseError } from "@arcscord/better-error";
 import type { Result } from "@arcscord/error";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, PermissionsString } from "discord.js";
-import type { TaskHandler } from "#/base";
 import type { ArcClientOptions, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/component_handlers.type";
@@ -14,7 +12,6 @@ import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
 import { LocaleManager } from "#/manager/locale/locale_manager.class";
-import { TaskManager } from "#/manager/task/task_manager.class";
 import { ArcLogger } from "#/utils/logger/logger.class";
 import { createLogger } from "#/utils/logger/logger.util";
 
@@ -28,11 +25,6 @@ export class ArcClient extends DJSClient {
    * The manager for events
    */
   eventManager: EventManager;
-
-  /**
-   * The manager for tasks
-   */
-  taskManager: TaskManager;
 
   /**
    * The manager for components
@@ -140,7 +132,6 @@ export class ArcClient extends DJSClient {
     };
 
     this.commandManager = new CommandManager(this, options.managers?.command);
-    this.taskManager = new TaskManager(this, options.managers?.task);
     this.eventManager = new EventManager(this, options.managers?.event);
     this.componentManager = new ComponentManager(this, options.managers?.component);
     this.localeManager = new LocaleManager(this, options.managers?.locale);
@@ -229,16 +220,6 @@ export class ArcClient extends DJSClient {
   }
 
   /**
-   * Loads and registers tasks
-   *
-   * @param tasks - The tasks to load
-   * @returns the number of tasks loaded
-   */
-  loadTasks(tasks: TaskHandler[]): Result<number, BaseError> {
-    return this.taskManager.loadTasks(tasks);
-  }
-
-  /**
    * Loads and registers components
    *
    * @param components - The components to load
@@ -289,22 +270,12 @@ export class ArcClient extends DJSClient {
    * Loads and registers handlers
    *
    * @param handlers - The handlers to load
-   * @returns the number of tasks loaded
    */
   async loadHandlers(handlers: HandlersList, logs = false): Promise<void> {
     if (handlers.events && handlers.events.length > 0) {
       await this.eventManager.loadEvents(handlers.events);
       if (logs) {
         this.eventManager.logger.info(`Loaded ${handlers.events.length} events`);
-      }
-    }
-    if (handlers.tasks && handlers.tasks.length > 0) {
-      const [err] = await this.taskManager.loadTasks(handlers.tasks);
-      if (err) {
-        this.logger.fatalError(err);
-      }
-      if (logs) {
-        this.taskManager.logger.info(`Loaded ${handlers.tasks.length} tasks`);
       }
     }
     if (handlers.components && handlers.components.length > 0) {

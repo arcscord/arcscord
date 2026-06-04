@@ -1,5 +1,5 @@
 import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
-import type { EventManagerOptions, TaskManagerOptions } from "#/manager";
+import type { EventManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
 import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type";
@@ -7,7 +7,6 @@ import type { LoggerConstructor, LoggerOptions } from "#/utils/logger/logger.typ
 import type { Command } from "../command";
 import type { ComponentHandler } from "../components";
 import type { EventHandler } from "../event";
-import type { TaskHandler } from "../task";
 
 /**
  * Represents the options for configuring the ArcClient Logger.
@@ -29,7 +28,7 @@ export type ArcClientLoggerOptions = {
 
   /**
    * Minimum level to log.
-   * Use "debug" in development to show command/component/event/task execution logs.
+   * Use "debug" in development to show command/component/event execution logs.
    * @default process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL || "info"
    */
   level?: LoggerOptions["level"];
@@ -125,11 +124,6 @@ export type ManagersOptions = {
   event?: EventManagerOptions;
 
   /**
-   * Configuration of {@link TaskManager} for customize task behavior
-   */
-  task?: TaskManagerOptions;
-
-  /**
    * Configuration of {@link ComponentManager} for customize component behavior
    */
   component?: ComponentManagerOptions;
@@ -171,10 +165,6 @@ export type HandlersList = {
    * List of components
    */
   components?: ComponentHandler[];
-  /**
-   * List of tasks
-   */
-  tasks?: TaskHandler[];
   /**
    * List of events
    */

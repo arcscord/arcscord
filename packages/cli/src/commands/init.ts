@@ -96,7 +96,6 @@ export const InitCommand = new Command("init")
         commands: "./commands",
         events: "./events",
         components: "./components",
-        tasks: "./tasks",
         handlerList: "./src/_handlers.ts",
       },
     }), "utf8");

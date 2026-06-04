@@ -23,7 +23,6 @@ export type BasePaths = {
   commands: string;
   events: string;
   components: string;
-  tasks: string;
   handlerList: string;
 };
 

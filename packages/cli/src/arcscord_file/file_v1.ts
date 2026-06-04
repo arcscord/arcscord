@@ -11,7 +11,6 @@ const fileDataSchema = z.object({
     commands: z.string(),
     events: z.string(),
     components: z.string(),
-    tasks: z.string(),
     handlerList: z.string(),
   }),
   options: z.array(z.enum(["i18n", "eslint", "prettier"])),
