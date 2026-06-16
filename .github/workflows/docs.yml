@@ -5,7 +5,12 @@ on:
   # Runs on pushes targeting the default branch
   push:
     branches: [main]
-    paths: ["docs/**"]
+    paths:
+      - "docs/**"
+      - "packages/**"
+      - "scripts/**"
+      - "typedoc*.json"
+      - pnpm-lock.yaml
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -33,7 +38,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
       - name: Install pnpm
-        uses: pnpm/action-setup@v5
+        uses: pnpm/action-setup@v6
       - name: Setup NodeJS
         uses: actions/setup-node@v6
         with:

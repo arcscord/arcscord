@@ -73,11 +73,11 @@ importers:
   packages/arcscord:
     dependencies:
       '@arcscord/better-error':
-        specifier: ^1.0.4
-        version: 1.0.4
+        specifier: workspace:^
+        version: link:../better_error
       '@arcscord/error':
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: workspace:^
+        version: link:../error
       dayjs:
         specifier: ^1.11.20
         version: 1.11.20
@@ -128,11 +128,32 @@ importers:
         specifier: ^4.1.5
         version: 4.1.5(@types/node@25.6.0)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3))
 
+  packages/better_error:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.15.32)(jiti@2.6.1)(postcss@8.5.15)(typescript@6.0.3)(yaml@2.8.3)
+      typedoc:
+        specifier: ^0.28.19
+        version: 0.28.19(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
+      vite:
+        specifier: 8.0.16
+        version: 8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3)
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.5(@types/node@25.6.0)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3))
+
   packages/cli:
     dependencies:
       '@arcscord/error':
-        specifier: ^2.0.1
-        version: 2.0.1
+        specifier: workspace:^
+        version: link:../error
       '@babel/generator':
         specifier: ^7.29.1
         version: 7.29.1
@@ -179,6 +200,27 @@ importers:
       tsup:
         specifier: ^8.5.1
         version: 8.5.1(@swc/core@1.15.32)(jiti@2.6.1)(postcss@8.5.15)(typescript@6.0.3)(yaml@2.8.3)
+      vite:
+        specifier: 8.0.16
+        version: 8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3)
+      vitest:
+        specifier: ^4.1.5
+        version: 4.1.5(@types/node@25.6.0)(vite@8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3))
+
+  packages/error:
+    devDependencies:
+      '@types/node':
+        specifier: ^25.6.0
+        version: 25.6.0
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(@swc/core@1.15.32)(jiti@2.6.1)(postcss@8.5.15)(typescript@6.0.3)(yaml@2.8.3)
+      typedoc:
+        specifier: ^0.28.19
+        version: 0.28.19(typescript@6.0.3)
+      typescript:
+        specifier: ^6.0.3
+        version: 6.0.3
       vite:
         specifier: 8.0.16
         version: 8.0.16(@types/node@25.6.0)(esbuild@0.27.7)(jiti@2.6.1)(yaml@2.8.3)
@@ -307,12 +349,6 @@ packages:
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
-
-  '@arcscord/better-error@1.0.4':
-    resolution: {integrity: sha512-GCa8pBQrIA7RyecyTiWUybAbP/pcM5F8RtPRW5q3lSWrU8c4u8uJJ9Ic2V0Z2RavulmtaXNHWIPjOkZ1s8qE4g==}
-
-  '@arcscord/error@2.0.1':
-    resolution: {integrity: sha512-uNihRNZecOHsKohibjbU5mObHMGohr/kGRNAIoYldcl3Cwy3m3zpuWHmLXuGkFqDZDPBGncIZjWotEsNgEIV9w==}
 
   '@babel/code-frame@7.29.0':
     resolution: {integrity: sha512-9NhCeYjq9+3uxgdtp20LSiJXJvN0FeCtNGpJxuMFZ1Kv3cWUNb6DOhJwUvcVCzKGR66cw4njwM6hrJLqgOwbcw==}
@@ -3964,10 +4000,6 @@ snapshots:
     dependencies:
       package-manager-detector: 1.6.0
       tinyexec: 1.1.1
-
-  '@arcscord/better-error@1.0.4': {}
-
-  '@arcscord/error@2.0.1': {}
 
   '@babel/code-frame@7.29.0':
     dependencies:
