@@ -18,8 +18,11 @@ import { MessageComponentContext } from "#/base/components/context/message_compo
 /**
  * Base context for select menu interactions.
  */
-export class SelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends MessageComponentContext<M> {
-  isSelectMenuContext(): this is SelectMenuContext {
+export class SelectMenuContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends MessageComponentContext<M, Route> {
+  isSelectMenuContext(): this is SelectMenuContext<M, Route> {
     return true;
   }
 }
@@ -30,7 +33,8 @@ export class SelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddle
 export type StringSelectMenuContextOptions<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   T extends TypedSelectMenuOptions | undefined = undefined,
-> = BaseComponentContextOptions<M> & {
+  Route extends string = string,
+> = BaseComponentContextOptions<M, Route> & {
   values: T extends TypedSelectMenuOptions
     ? StringSelectMenuValues<T>
     : string[];
@@ -42,7 +46,8 @@ export type StringSelectMenuContextOptions<
 export class StringSelectMenuContext<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   T extends TypedSelectMenuOptions | undefined = undefined,
-> extends SelectMenuContext<M> {
+  Route extends string = string,
+> extends SelectMenuContext<M, Route> {
   values: T extends TypedSelectMenuOptions
     ? StringSelectMenuValues<T>
     : string[];
@@ -52,14 +57,14 @@ export class StringSelectMenuContext<
   constructor(
     client: ArcClient,
     interaction: StringSelectMenuInteraction,
-    options: StringSelectMenuContextOptions<M, T>,
+    options: StringSelectMenuContextOptions<M, T, Route>,
   ) {
     super(client, interaction, options);
     this.values = options.values;
     this.interaction = interaction;
   }
 
-  isStringSelectMenuContext(): this is StringSelectMenuContext {
+  isStringSelectMenuContext(): this is StringSelectMenuContext<M, T, Route> {
     return true;
   }
 }
@@ -67,28 +72,34 @@ export class StringSelectMenuContext<
 /**
  * Options for the UserSelectMenuContext.
  */
-export type UserSelectMenuContextOptions<M extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentContextOptions<M> & {
+export type UserSelectMenuContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> = BaseComponentContextOptions<M, Route> & {
   values: User[];
 };
 
 /**
  * Context for user select menu interactions.
  */
-export class UserSelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends SelectMenuContext<M> {
+export class UserSelectMenuContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends SelectMenuContext<M, Route> {
   values: User[];
   interaction: UserSelectMenuInteraction;
 
   constructor(
     client: ArcClient,
     interaction: UserSelectMenuInteraction,
-    options: UserSelectMenuContextOptions,
+    options: UserSelectMenuContextOptions<M, Route>,
   ) {
     super(client, interaction, options);
     this.values = options.values;
     this.interaction = interaction;
   }
 
-  isUserSelectMenuContext(): this is UserSelectMenuContext {
+  isUserSelectMenuContext(): this is UserSelectMenuContext<M, Route> {
     return true;
   }
 }
@@ -96,28 +107,34 @@ export class UserSelectMenuContext<M extends ComponentMiddleware[] = ComponentMi
 /**
  * Options for the RoleSelectMenuContext.
  */
-export type RoleSelectMenuContextOptions<M extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentContextOptions<M> & {
+export type RoleSelectMenuContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> = BaseComponentContextOptions<M, Route> & {
   values: (Role | APIRole)[];
 };
 
 /**
  * Context for role select menu interactions.
  */
-export class RoleSelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends SelectMenuContext<M> {
+export class RoleSelectMenuContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends SelectMenuContext<M, Route> {
   values: (Role | APIRole)[];
   interaction: RoleSelectMenuInteraction;
 
   constructor(
     client: ArcClient,
     interaction: RoleSelectMenuInteraction,
-    options: RoleSelectMenuContextOptions,
+    options: RoleSelectMenuContextOptions<M, Route>,
   ) {
     super(client, interaction, options);
     this.values = options.values;
     this.interaction = interaction;
   }
 
-  isRoleSelectMenuContext(): this is RoleSelectMenuContext {
+  isRoleSelectMenuContext(): this is RoleSelectMenuContext<M, Route> {
     return true;
   }
 }
@@ -125,7 +142,10 @@ export class RoleSelectMenuContext<M extends ComponentMiddleware[] = ComponentMi
 /**
  * Options for the MentionableSelectMenuContext.
  */
-export type MentionableSelectMenuContextOptions<M extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentContextOptions<M> & {
+export type MentionableSelectMenuContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> = BaseComponentContextOptions<M, Route> & {
   roles: (Role | APIRole)[];
   users: User[];
 };
@@ -133,7 +153,10 @@ export type MentionableSelectMenuContextOptions<M extends ComponentMiddleware[] 
 /**
  * Context for mentionable select menu interactions.
  */
-export class MentionableSelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends SelectMenuContext<M> {
+export class MentionableSelectMenuContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends SelectMenuContext<M, Route> {
   values: (Role | User | APIRole)[];
   roles: (Role | APIRole)[];
   users: User[];
@@ -142,7 +165,7 @@ export class MentionableSelectMenuContext<M extends ComponentMiddleware[] = Comp
   constructor(
     client: ArcClient,
     interaction: MentionableSelectMenuInteraction,
-    options: MentionableSelectMenuContextOptions,
+    options: MentionableSelectMenuContextOptions<M, Route>,
   ) {
     super(client, interaction, options);
     this.interaction = interaction;
@@ -151,7 +174,7 @@ export class MentionableSelectMenuContext<M extends ComponentMiddleware[] = Comp
     this.values = [...options.roles, ...options.users];
   }
 
-  isMentionableSelectMenuContext(): this is MentionableSelectMenuContext {
+  isMentionableSelectMenuContext(): this is MentionableSelectMenuContext<M, Route> {
     return true;
   }
 }
@@ -159,28 +182,34 @@ export class MentionableSelectMenuContext<M extends ComponentMiddleware[] = Comp
 /**
  * Options for the ChannelSelectMenuContext.
  */
-export type ChannelSelectMenuContextOptions<M extends ComponentMiddleware[] = ComponentMiddleware[]> = BaseComponentContextOptions<M> & {
+export type ChannelSelectMenuContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> = BaseComponentContextOptions<M, Route> & {
   values: (Channel | APIChannel)[];
 };
 
 /**
  * Context for channel select menu interactions.
  */
-export class ChannelSelectMenuContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends SelectMenuContext<M> {
+export class ChannelSelectMenuContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends SelectMenuContext<M, Route> {
   values: (Channel | APIChannel)[];
   interaction: ChannelSelectMenuInteraction;
 
   constructor(
     client: ArcClient,
     interaction: ChannelSelectMenuInteraction,
-    options: ChannelSelectMenuContextOptions,
+    options: ChannelSelectMenuContextOptions<M, Route>,
   ) {
     super(client, interaction, options);
     this.values = options.values;
     this.interaction = interaction;
   }
 
-  isChannelSelectMenuContext(): this is ChannelSelectMenuContext {
+  isChannelSelectMenuContext(): this is ChannelSelectMenuContext<M, Route> {
     return true;
   }
 }

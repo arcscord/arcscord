@@ -1,13 +1,28 @@
 import type {
   ButtonComponentHandler,
+  ChannelSelectMenuComponentHandler,
+  IdInitialiseFunction,
+  MentionableSelectMenuComponentHandler,
   ModalComponentHandler,
+  RoleSelectMenuComponentHandler,
   SelectMenuComponentHandler,
+  StringSelectMenuComponentHandler,
+  UserSelectMenuComponentHandler,
 } from "#/base/components/component_handlers.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import { ComponentType } from "discord-api-types/v10";
 import { componentHandlerTypeEnum } from "#/base/components/component.enum";
+import { createRouteId } from "#/base/components/component_route.util";
 
 type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
+
+type ComponentBuilderOptions<
+  Handler extends { build: (...args: any[]) => unknown },
+  Options extends string[],
+  Route extends string,
+> = Omit<Handler, "build"> & {
+  build: (id: IdInitialiseFunction<Route>, ...args: Options) => ReturnType<Handler["build"]>;
+};
 
 /**
  * Create a select menu
@@ -18,9 +33,9 @@ type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
  * ```ts
  * const selectMenu = createSelectMenu({
  *   type: "userSelect",
- *   matcher: "selectMenu",
- *   build: () => buildUserSelectMenu({
- *     customId: "selectMenu",
+ *   route: "selectMenu",
+ *   build: id => buildUserSelectMenu({
+ *     customId: id(),
  *     maxValues: 10,
  *     minValues: 1,
  *   }),
@@ -31,10 +46,41 @@ type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
  * ```
  */
 export function createSelectMenu<
-  O extends string[],
-  M extends ComponentMiddleware[] = ComponentMiddleware[],
->(options: HandlerOptions<SelectMenuComponentHandler<O, M>>): SelectMenuComponentHandler<O, M> {
-  return { ...options, handlerType: componentHandlerTypeEnum.messageComponent } as SelectMenuComponentHandler<O, M>;
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<StringSelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): StringSelectMenuComponentHandler<Options, Middleware, Route>;
+export function createSelectMenu<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<UserSelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): UserSelectMenuComponentHandler<Options, Middleware, Route>;
+export function createSelectMenu<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<RoleSelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): RoleSelectMenuComponentHandler<Options, Middleware, Route>;
+export function createSelectMenu<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<MentionableSelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): MentionableSelectMenuComponentHandler<Options, Middleware, Route>;
+export function createSelectMenu<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<ChannelSelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): ChannelSelectMenuComponentHandler<Options, Middleware, Route>;
+export function createSelectMenu<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: HandlerOptions<ComponentBuilderOptions<SelectMenuComponentHandler<Options, Middleware, Route>, Options, Route>>): SelectMenuComponentHandler<Options, Middleware, Route> {
+  const buildId = createRouteId(options.route);
+  return {
+    ...options,
+    build: (...args: Options) => options.build(buildId, ...args),
+    handlerType: componentHandlerTypeEnum.messageComponent,
+  } as SelectMenuComponentHandler<Options, Middleware, Route>;
 }
 
 /**
@@ -45,10 +91,10 @@ export function createSelectMenu<
  * @example
  * ```ts
  * const button = createButton({
- *   matcher: "button",
- *   build: () => buildClickableButton({
+ *   route: "button",
+ *   build: id => buildClickableButton({
  *     style: "success",
- *     customId: "button",
+ *     customId: id(),
  *     label: "Click Here",
  *   }),
  *   run: (ctx) => {
@@ -58,10 +104,17 @@ export function createSelectMenu<
  * ```
  */
 export function createButton<
-  O extends string[],
-  M extends ComponentMiddleware[] = ComponentMiddleware[],
->(options: Omit<ButtonComponentHandler<O, M>, "type" | "handlerType">): ButtonComponentHandler<O, M> {
-  return { ...options, type: ComponentType.Button, handlerType: componentHandlerTypeEnum.messageComponent };
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+>(options: Omit<ComponentBuilderOptions<ButtonComponentHandler<Options, Middleware, Route>, Options, Route>, "type" | "handlerType">): ButtonComponentHandler<Options, Middleware, Route> {
+  const buildId = createRouteId(options.route);
+  return {
+    ...options,
+    build: (...args: Options) => options.build(buildId, ...args),
+    type: ComponentType.Button,
+    handlerType: componentHandlerTypeEnum.messageComponent,
+  };
 }
 
 /**
@@ -72,10 +125,10 @@ export function createButton<
  * @example
  * ```ts
  * const myFamousModal = createModal({
- *   matcher: "famousModal",
- *   build: title => buildModal(
+ *   route: "famousModal",
+ *   build: (id, title) => buildModal(
  *     title,
- *     "famousModal",
+ *     id(),
  *     buildLabel({
  *       label: "Entry",
  *       component: buildTextInput({
@@ -92,8 +145,14 @@ export function createButton<
  *
  */
 export function createModal<
-  O extends string[],
-  M extends ComponentMiddleware[] = [],
->(options: Omit<ModalComponentHandler<O, M>, "handlerType">): ModalComponentHandler<O, M> {
-  return { ...options, handlerType: componentHandlerTypeEnum.modal };
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = [],
+  Route extends string = string,
+>(options: Omit<ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route>, Options, Route>, "handlerType">): ModalComponentHandler<Options, Middleware, Route> {
+  const buildId = createRouteId(options.route);
+  return {
+    ...options,
+    build: (...args: Options) => options.build(buildId, ...args),
+    handlerType: componentHandlerTypeEnum.modal,
+  };
 }

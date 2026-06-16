@@ -18,7 +18,10 @@ import { ComponentError } from "#/utils";
  * MessageComponentContext class.
  * Extends ComponentContext and provides context for message component interactions.
  */
-export class MessageComponentContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends BaseComponentContext<M> {
+export class MessageComponentContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends BaseComponentContext<M, Route> {
   interaction: MessageComponentInteraction;
 
   message: Message;
@@ -29,7 +32,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
    * @param interaction - The MessageComponentInteraction instance.
    * @param options
    */
-  constructor(client: ArcClient, interaction: MessageComponentInteraction, options: BaseComponentContextOptions<M>) {
+  constructor(client: ArcClient, interaction: MessageComponentInteraction, options: BaseComponentContextOptions<M, Route>) {
     super(client, interaction, options);
 
     this.interaction = interaction;
@@ -215,7 +218,7 @@ export class MessageComponentContext<M extends ComponentMiddleware[] = Component
     );
   }
 
-  isMessageComponentContext(): this is MessageComponentContext {
+  isMessageComponentContext(): this is MessageComponentContext<M, Route> {
     return true;
   }
 }

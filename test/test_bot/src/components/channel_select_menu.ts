@@ -3,10 +3,10 @@ import { ComponentType } from "discord.js";
 
 export const channelSelectMenu = createSelectMenu({
   type: ComponentType.ChannelSelect,
-  matcher: "channel_select_menu",
-  build: () =>
+  route: "channel_select_menu",
+  build: id =>
     buildChannelSelectMenu({
-      customId: "channel_select_menu",
+      customId: id(),
       placeholder: "Select a channel",
     }),
   run: (ctx) => {

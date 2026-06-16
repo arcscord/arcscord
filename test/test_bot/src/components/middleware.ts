@@ -20,12 +20,12 @@ class Middleware extends ComponentMiddleware {
 }
 
 export const middleWareButton = createButton({
-  build: () => buildClickableButton({
+  route: "middleware",
+  build: id => buildClickableButton({
     label: "Click",
     style: "green",
-    customId: "middleware",
+    customId: id(),
   }),
-  matcher: "middleware",
   use: [new Middleware()],
   run: (ctx) => {
     return ctx.reply("Clicked", {

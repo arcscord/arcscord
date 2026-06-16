@@ -23,11 +23,11 @@ function formatValue(value: unknown): string {
 }
 
 export const profileModal = createModal({
-  matcher: "modal:profile",
-  build: title =>
+  route: "modal/profile",
+  build: (id, title) =>
     buildModal(
       title,
-      "modal:profile",
+      id(),
       buildLabel({
         label: "Name",
         component: buildTextInput({
@@ -53,11 +53,11 @@ export const profileModal = createModal({
 });
 
 export const feedbackModal = createModal({
-  matcher: "modal:feedback",
-  build: title =>
+  route: "modal/feedback",
+  build: (id, title) =>
     buildModal(
       title,
-      "modal:feedback",
+      id(),
       buildTextDisplay({
         content: "Use the fields below to send structured feedback.",
       }),
@@ -92,11 +92,11 @@ export const feedbackModal = createModal({
 });
 
 export const surveyModal = createModal({
-  matcher: "modal:survey",
-  build: title =>
+  route: "modal/survey",
+  build: (id, title) =>
     buildModal(
       title,
-      "modal:survey",
+      id(),
       buildLabel({
         label: "Mood",
         component: buildRadioGroup({

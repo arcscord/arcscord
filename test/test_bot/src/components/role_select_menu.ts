@@ -3,11 +3,11 @@ import { ComponentType, EmbedBuilder } from "discord.js";
 
 export const roleSelectMenu = createSelectMenu({
   type: ComponentType.RoleSelect,
-  matcher: "role_select_menu",
-  build: placeHolder =>
+  route: "role_select_menu",
+  build: (id, placeHolder) =>
     buildRoleSelectMenu({
       placeholder: placeHolder,
-      customId: "role_select_menu",
+      customId: id(),
       maxValues: 1,
       minValues: 1,
     }),

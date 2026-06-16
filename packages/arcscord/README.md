@@ -87,11 +87,11 @@ await client.loadCommands([avatarCommand]); // need be ready
 import { buildClickableButton, createButton } from "arcscord";
 
 export const simpleButton = createButton({
-  matcher: "simple_button",
-  build: () => buildClickableButton({
+  route: "simple_button",
+  build: id => buildClickableButton({
     label: "Simple Button",
     style: "secondary",
-    customId: "simple_button",
+    customId: id(),
   }),
   run: (ctx) => {
     return ctx.reply("Clicked !");
@@ -117,10 +117,10 @@ import { EmbedBuilder } from "discord.js";
 
 export const roleSelectMenu = createSelectMenu({
   type: ComponentType.RoleSelect,
-  matcher: "role_select_menu",
-  build: placeHolder => buildRoleSelectMenu({
+  route: "role_select_menu",
+  build: (id, placeHolder) => buildRoleSelectMenu({
     placeholder: placeHolder,
-    customId: "role_select_menu",
+    customId: id(),
     maxValues: 1,
     minValues: 1,
   }),
@@ -154,11 +154,11 @@ client.loadComponents([roleSelectMenu]);
 import { buildLabel, buildModal, buildTextInput, createModal } from "arcscord";
 
 export const modal = createModal({
-  matcher: "modal",
-  build: title =>
+  route: "modal",
+  build: (id, title) =>
     buildModal(
       title,
-      "modal",
+      id(),
       buildLabel({
         label: "Name",
         component: buildTextInput({

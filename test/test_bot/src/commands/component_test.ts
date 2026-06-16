@@ -15,6 +15,7 @@ import { mentionableSelectMenu } from "../components/mentionable_select_menu";
 import { middleWareButton } from "../components/middleware";
 import { feedbackModal, profileModal, surveyModal } from "../components/modal";
 import { roleSelectMenu } from "../components/role_select_menu";
+import { routeParamsButton } from "../components/route_params_button";
 import { redSimpleButton, simpleButton } from "../components/simple_button";
 import { stringSelectMenu } from "../components/string_select_menu";
 import { userSelectMenu } from "../components/user_select_menu";
@@ -77,6 +78,10 @@ export const componentTestCommand = createCommand({
             {
               name: "components_v2_complete",
               value: "components_v2_complete",
+            },
+            {
+              name: "route_params",
+              value: "route_params",
             },
             "middleware",
           ],
@@ -265,6 +270,11 @@ export const componentTestCommand = createCommand({
       case "middleware":
         return ctx.reply({
           components: [buildButtonActionRow(middleWareButton.build())],
+          content: ctx.options.component,
+        });
+      case "route_params":
+        return ctx.reply({
+          components: [buildButtonActionRow(routeParamsButton.build(ctx.user.id, "all/active"))],
           content: ctx.options.component,
         });
       default:

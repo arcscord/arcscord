@@ -3,10 +3,10 @@ import { ComponentType, EmbedBuilder } from "discord.js";
 
 export const userSelectMenu = createSelectMenu({
   type: ComponentType.UserSelect,
-  matcher: "user_select_menu",
-  build: () =>
+  route: "user_select_menu",
+  build: id =>
     buildUserSelectMenu({
-      customId: "user_select_menu",
+      customId: id(),
       minValues: 1,
       maxValues: 25,
     }),

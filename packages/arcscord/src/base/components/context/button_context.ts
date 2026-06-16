@@ -7,7 +7,10 @@ import { MessageComponentContext } from "#/base/components/context/message_compo
  * BaseButtonContext class.
  * Extends MessageComponentContext and provides context for button interactions.
  */
-export class ButtonContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends MessageComponentContext<M> {
+export class ButtonContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends MessageComponentContext<M, Route> {
   interaction: ButtonInteraction;
 
   /**
@@ -16,13 +19,13 @@ export class ButtonContext<M extends ComponentMiddleware[] = ComponentMiddleware
    * @param interaction - The ButtonInteraction instance.
    * @param options
    */
-  constructor(client: ArcClient, interaction: ButtonInteraction, options: BaseComponentContextOptions<M>) {
+  constructor(client: ArcClient, interaction: ButtonInteraction, options: BaseComponentContextOptions<M, Route>) {
     super(client, interaction, options);
 
     this.interaction = interaction;
   }
 
-  isButtonContext(): this is ButtonContext {
+  isButtonContext(): this is ButtonContext<M, Route> {
     return true;
   }
 }

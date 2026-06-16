@@ -12,11 +12,13 @@ import type {
 } from "discord.js";
 import type { ArcClient, ComponentContext } from "#/base";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/component_handlers.type";
+import type { CompiledComponentRoute } from "#/base/components/component_route.util";
 import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
 import { ButtonContext, componentHandlerTypeEnum } from "#/base/components";
+import { compileComponentRoute, matchComponentRoute } from "#/base/components/component_route.util";
 import { ModalContext } from "#/base/components/context/modal_context";
 import {
   ChannelSelectMenuContext,
@@ -27,6 +29,11 @@ import {
 } from "#/base/components/context/select_menu_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { ComponentError, internalErrorEmbed } from "#/utils";
+
+type MatchedComponent = {
+  component: ComponentHandler;
+  params: Record<string, string>;
+};
 
 /**
  * Manages and handles interactive components
@@ -43,6 +50,8 @@ export class ComponentManager extends BaseManager {
   };
 
   options: Required<ComponentManagerOptions>;
+
+  private compiledRoutes = new WeakMap<ComponentHandler, CompiledComponentRoute>();
 
   constructor(client: ArcClient, options?: ComponentManagerOptions) {
     super(client, "component");
@@ -77,16 +86,27 @@ export class ComponentManager extends BaseManager {
    * @param component - component to load
    */
   loadComponent(component: ComponentHandler): void {
+    const compiledRoute = compileComponentRoute(component.route);
+    const componentsList = component.handlerType === componentHandlerTypeEnum.modal
+      ? this.components.modal
+      : this.components[component.type];
+
+    if (componentsList.has(compiledRoute.canonical)) {
+      throw new BaseError(`Duplicate component route ${component.route}`);
+    }
+
+    this.compiledRoutes.set(component, compiledRoute);
+
     if (component.handlerType === componentHandlerTypeEnum.modal) {
-      this.components.modal.set(component.matcher, component);
+      this.components.modal.set(compiledRoute.canonical, component);
     }
     else {
-      // @ts-expect-error fix error with others context types
-      this.components[component.type].set(component.matcher, component);
+      // @ts-expect-error fix error with others component types
+      this.components[component.type].set(compiledRoute.canonical, component);
     }
 
     this.trace(
-      `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with matcher ${component.matcher} with type ${component.matcherType || "begin"}`,
+      `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
     );
   }
 
@@ -128,38 +148,48 @@ export class ComponentManager extends BaseManager {
     }
   }
 
-  private createContext(interaction: MessageComponentInteraction | ModalSubmitInteraction, type: keyof ComponentList, locale: string): Result<ComponentContext, ComponentError> {
+  private createContext(
+    interaction: MessageComponentInteraction | ModalSubmitInteraction,
+    type: keyof ComponentList,
+    locale: string,
+    params: Record<string, string>,
+  ): Result<ComponentContext, ComponentError> {
     switch (type) {
       case ComponentType.Button:
-        return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale }));
+        return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale, params }));
       case ComponentType.StringSelect:
         return ok(new StringSelectMenuContext(this.client, interaction as StringSelectMenuInteraction, {
           locale,
+          params,
           values: (interaction as StringSelectMenuInteraction).values,
         }));
       case ComponentType.UserSelect:
         return ok(new UserSelectMenuContext(this.client, interaction as UserSelectMenuInteraction, {
           locale,
+          params,
           values: (interaction as UserSelectMenuInteraction).users.map(u => u),
         }));
       case ComponentType.RoleSelect:
         return ok(new RoleSelectMenuContext(this.client, interaction as RoleSelectMenuInteraction, {
           locale,
+          params,
           values: (interaction as RoleSelectMenuInteraction).roles.map(r => r),
         }));
       case ComponentType.MentionableSelect:
         return ok(new MentionableSelectMenuContext(this.client, interaction as MentionableSelectMenuInteraction, {
           locale,
+          params,
           users: (interaction as MentionableSelectMenuInteraction).users.map(u => u),
           roles: (interaction as MentionableSelectMenuInteraction).roles.map(r => r),
         }));
       case ComponentType.ChannelSelect:
         return ok(new ChannelSelectMenuContext(this.client, interaction as ChannelSelectMenuInteraction, {
           locale,
+          params,
           values: (interaction as ChannelSelectMenuInteraction).channels.map(c => c),
         }));
       case "modal":
-        return ok(new ModalContext(this.client, interaction as ModalSubmitInteraction, { locale }));
+        return ok(new ModalContext(this.client, interaction as ModalSubmitInteraction, { locale, params }));
       default:
         return error(new ComponentError({
           message: `Unknown component type: ${type}`,
@@ -206,7 +236,9 @@ export class ComponentManager extends BaseManager {
       });
     }
 
-    const [err2, context] = this.createContext(interaction, type, locale);
+    const component = components[0];
+
+    const [err2, context] = this.createContext(interaction, type, locale, component.params);
     if (err2) {
       return this.options.errorHandler({
         error: err2,
@@ -214,23 +246,21 @@ export class ComponentManager extends BaseManager {
       });
     }
 
-    const component = components[0];
-
-    const [err3] = await this.handlePreReply(component, context);
+    const [err3] = await this.handlePreReply(component.component, context);
     if (err3) {
       return this.options.errorHandler({
         error: err3,
-        component,
+        component: component.component,
         context,
         internal: true,
       });
     }
 
-    const [err4, middlewareResult] = await this.runMiddleware(component, context);
+    const [err4, middlewareResult] = await this.runMiddleware(component.component, context);
     if (err4) {
       return this.options.errorHandler({
         error: err4,
-        component,
+        component: component.component,
         context,
         internal: false,
       });
@@ -239,22 +269,22 @@ export class ComponentManager extends BaseManager {
       return;
     }
 
-    await this.executeComponent(component, context);
+    await this.executeComponent(component.component, context);
   }
 
   private findMatchingComponents(
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
-  ): Result<ComponentHandler[], ComponentError> {
-    const components: ComponentHandler[] = [];
+  ): Result<MatchedComponent[], ComponentError> {
+    const components: MatchedComponent[] = [];
     const componentsList = this.components[type];
 
     for (const [, component] of componentsList.entries()) {
-      if (component.matcherType === "full" && interaction.customId === component.matcher) {
-        components.push(component);
-      }
-      else if (interaction.customId.startsWith(component.matcher)) {
-        components.push(component);
+      const compiledRoute = this.compiledRoutes.get(component) ?? compileComponentRoute(component.route);
+      const params = matchComponentRoute(compiledRoute, interaction.customId);
+
+      if (params !== null) {
+        components.push({ component, params });
       }
     }
 
@@ -263,7 +293,7 @@ export class ComponentManager extends BaseManager {
         message: `didn't found component with id ${interaction.customId}`,
         interaction,
         debugs: {
-          availableMatcher: componentsList.keys(),
+          availableRoutes: componentsList.keys(),
           type,
         },
       }));
@@ -321,7 +351,7 @@ export class ComponentManager extends BaseManager {
     catch (e) {
       const bError = new ComponentError({
         interaction: context.interaction,
-        message: `failed to run component with match ${component.matcher}`,
+        message: `failed to run component with route ${component.route}`,
         originalError: anyToError(e),
       });
       return this.options.resultHandler({
@@ -385,7 +415,7 @@ export class ComponentManager extends BaseManager {
       );
     }
 
-    this.logger.debug(`Component executed: ${infos.component.matcher}`);
+    this.logger.debug(`Component executed: ${infos.component.route}`);
   }
 
   async handleError(infos: ComponentErrorHandlerInfos): Promise<void> {

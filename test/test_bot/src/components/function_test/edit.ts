@@ -1,12 +1,12 @@
 import { buildClickableButton, createButton } from "arcscord";
 
 export const editButton = createButton({
-  matcher: "edit",
-  build: () =>
+  route: "edit",
+  build: id =>
     buildClickableButton({
       style: "primary",
       label: "Edit",
-      customId: "edit",
+      customId: id(),
     }),
   run: (ctx) => {
     return ctx.updateMessage({

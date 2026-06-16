@@ -17,6 +17,7 @@ import { mentionableSelectMenu } from "./components/mentionable_select_menu";
 import { middleWareButton } from "./components/middleware";
 import { feedbackModal, profileModal, surveyModal } from "./components/modal";
 import { roleSelectMenu } from "./components/role_select_menu";
+import { routeParamsButton } from "./components/route_params_button";
 import { redSimpleButton, simpleButton } from "./components/simple_button";
 import { stringSelectMenu } from "./components/string_select_menu";
 import { userSelectMenu } from "./components/user_select_menu";
@@ -41,6 +42,7 @@ export default {
     editButton,
     deferEditButton,
     middleWareButton,
+    routeParamsButton,
   ],
   commands: [
     avatarCommand,

@@ -3,10 +3,10 @@ import { ComponentType, User } from "discord.js";
 
 export const mentionableSelectMenu = createSelectMenu({
   type: ComponentType.MentionableSelect,
-  matcher: "mentionable_select_menu",
-  build: () =>
+  route: "mentionable_select_menu",
+  build: id =>
     buildMentionableSelectMenu({
-      customId: "mentionable_select_menu",
+      customId: id(),
     }),
   run: (ctx) => {
     const value = ctx.values[0];

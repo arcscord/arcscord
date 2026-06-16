@@ -1,12 +1,12 @@
 import { buildClickableButton, createButton } from "arcscord";
 
 export const disableRowButton = createButton({
-  matcher: "disableRow",
-  build: id =>
+  route: "disableRow/{id}",
+  build: (id, value) =>
     buildClickableButton({
       style: "red",
       label: "Disable Row",
-      customId: `disableRow${id}`,
+      customId: id({ id: value }),
     }),
   run: async (ctx) => {
     const [err] = await ctx.disableComponent("actionRow", true);

@@ -8,7 +8,10 @@ export type ModalContextValue = string | readonly string[] | boolean | null;
 /**
  * `DmModalContext` is a class representing the context of a modal interaction within a direct message (DM).
  */
-export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[]> extends BaseComponentContext<M> {
+export class ModalContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> extends BaseComponentContext<M, Route> {
   interaction: ModalSubmitInteraction;
 
   /**
@@ -22,7 +25,7 @@ export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[
    * @param interaction - The modal submit interaction.
    * @param options
    */
-  constructor(client: ArcClient, interaction: ModalSubmitInteraction, options: BaseComponentContextOptions<M>) {
+  constructor(client: ArcClient, interaction: ModalSubmitInteraction, options: BaseComponentContextOptions<M, Route>) {
     super(client, interaction, options);
 
     this.interaction = interaction;
@@ -40,7 +43,7 @@ export class ModalContext<M extends ComponentMiddleware[] = ComponentMiddleware[
     this.values = new Map<string, ModalContextValue>(values);
   }
 
-  isModalContext(): this is ModalContext {
+  isModalContext(): this is ModalContext<M, Route> {
     return true;
   }
 }

@@ -19,6 +19,7 @@ import type {
   UserSelectMenuContext,
 } from "#/base";
 import type { ComponentRunResult, SelectMenuContext } from "#/base/components";
+import type { RouteVariablesObject } from "#/base/components/component_handlers.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import type { ContextDocs } from "#/base/utils";
 import type { ComponentErrorOptions } from "#/utils";
@@ -35,21 +36,31 @@ type MiddlewaresResults<M extends ComponentMiddleware[]> = {
   >;
 };
 
-export type BaseComponentContextOptions<M extends ComponentMiddleware[] = ComponentMiddleware[]> = {
+export type BaseComponentContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+> = {
   additional?: MiddlewaresResults<M>;
   locale: string;
+  params?: RouteVariablesObject<Route>;
 };
 /**
  * Base Component context
  */
 export class BaseComponentContext<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
   InGuild extends true | false = true | false,
 > extends InteractionContext<InGuild> implements Omit<ContextDocs, "command" | "resolvedCommandName"> {
   /**
    * The custom id of the component
    */
   customId: string;
+
+  /**
+   * Route parameters extracted from the component custom ID.
+   */
+  params: RouteVariablesObject<Route>;
 
   interaction: MessageComponentInteraction | ModalSubmitInteraction;
 
@@ -82,10 +93,11 @@ export class BaseComponentContext<
   constructor(
     client: ArcClient,
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
-    options: BaseComponentContextOptions<M>,
+    options: BaseComponentContextOptions<M, Route>,
   ) {
     super(client, interaction);
     this.customId = interaction.customId;
+    this.params = options.params || ({} as RouteVariablesObject<Route>);
     this.interaction = interaction;
 
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
@@ -225,7 +237,7 @@ export class BaseComponentContext<
    * Checks if the current context is a button context.
    * @returns True if it is a button context, false otherwise.
    */
-  isButtonContext(): this is ButtonContext {
+  isButtonContext(): this is ButtonContext<M, Route> {
     return false;
   }
 
@@ -233,7 +245,7 @@ export class BaseComponentContext<
    * Checks if the current context is a modal context.
    * @returns True if it is a modal context, false otherwise.
    */
-  isModalContext(): this is ModalContext {
+  isModalContext(): this is ModalContext<M, Route> {
     return false;
   }
 
@@ -241,7 +253,7 @@ export class BaseComponentContext<
    * Checks if the current context is a string select menu context.
    * @returns True if it is a string select menu context, false otherwise.
    */
-  isStringSelectMenuContext(): this is StringSelectMenuContext {
+  isStringSelectMenuContext(): this is StringSelectMenuContext<M, undefined, Route> {
     return false;
   }
 
@@ -249,7 +261,7 @@ export class BaseComponentContext<
    * Checks if the current context is a user select menu context.
    * @returns True if it is a user select menu context, false otherwise.
    */
-  isUserSelectMenuContext(): this is UserSelectMenuContext {
+  isUserSelectMenuContext(): this is UserSelectMenuContext<M, Route> {
     return false;
   }
 
@@ -257,7 +269,7 @@ export class BaseComponentContext<
    * Checks if the current context is a role select menu context.
    * @returns True if it is a role select menu context, false otherwise.
    */
-  isRoleSelectMenuContext(): this is RoleSelectMenuContext {
+  isRoleSelectMenuContext(): this is RoleSelectMenuContext<M, Route> {
     return false;
   }
 
@@ -265,7 +277,7 @@ export class BaseComponentContext<
    * Checks if the current context is a mentionable select menu context.
    * @returns True if it is a mentionable select menu context, false otherwise.
    */
-  isMentionableSelectMenuContext(): this is MentionableSelectMenuContext {
+  isMentionableSelectMenuContext(): this is MentionableSelectMenuContext<M, Route> {
     return false;
   }
 
@@ -273,7 +285,7 @@ export class BaseComponentContext<
    * Checks if the current context is a channel select menu context.
    * @returns True if it is a channel select menu context, false otherwise.
    */
-  isChannelSelectMenuContext(): this is ChannelSelectMenuContext {
+  isChannelSelectMenuContext(): this is ChannelSelectMenuContext<M, Route> {
     return false;
   }
 
@@ -281,7 +293,7 @@ export class BaseComponentContext<
    * Checks if the current context is a select menu context.
    * @returns True if it is a select menu context, false otherwise.
    */
-  isSelectMenuContext(): this is SelectMenuContext {
+  isSelectMenuContext(): this is SelectMenuContext<M, Route> {
     return false;
   }
 
@@ -289,7 +301,7 @@ export class BaseComponentContext<
    * Checks if the current context is a message component context.
    * @returns True if it is a message component context, false otherwise.
    */
-  isMessageComponentContext(): this is MessageComponentContext {
+  isMessageComponentContext(): this is MessageComponentContext<M, Route> {
     return false;
   }
 }

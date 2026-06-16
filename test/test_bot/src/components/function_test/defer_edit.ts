@@ -1,12 +1,12 @@
 import { buildClickableButton, createButton } from "arcscord";
 
 export const deferEditButton = createButton({
-  matcher: "deferEdit",
-  build: () =>
+  route: "deferEdit",
+  build: id =>
     buildClickableButton({
       style: "primary",
       label: "Edit",
-      customId: "deferEdit",
+      customId: id(),
     }),
   run: (ctx) => {
     return ctx.deferUpdateMessage();
