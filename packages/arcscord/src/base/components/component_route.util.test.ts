@@ -48,6 +48,19 @@ describe("component route utils", () => {
     expect(validateComponentRoute("test/info")).toBeNull();
   });
 
+  it("rejects duplicate route parameters", () => {
+    expect(validateComponentRoute("test/{userId}/{userId}")).toBe("route parameter \"userId\" is declared more than once");
+    expect(() => compileComponentRoute("test/{filter}/info/{filter}")).toThrow("route parameter \"filter\" is declared more than once");
+  });
+
+  it("rejects invalid characters in route declarations", () => {
+    expect(validateComponentRoute("test/info full")).toBe("route segment \"info full\" is invalid, expected letters, numbers, _, or -");
+    expect(validateComponentRoute("test/info%full")).toBe("route segment \"info%full\" is invalid, expected letters, numbers, _, or -");
+    expect(validateComponentRoute("test/info.full")).toBe("route segment \"info.full\" is invalid, expected letters, numbers, _, or -");
+    expect(validateComponentRoute("test/{user.id}")).toBe("route parameter \"user.id\" is invalid, expected letters, numbers, or _, and cannot start with a number");
+    expect(validateComponentRoute("test/{user id}")).toBe("route parameter \"user id\" is invalid, expected letters, numbers, or _, and cannot start with a number");
+  });
+
   it("reads static and dynamic route parts", () => {
     expect(readRouteParts("test/info/{userId}/{filter}")).toEqual([
       { type: "static", value: "test" },

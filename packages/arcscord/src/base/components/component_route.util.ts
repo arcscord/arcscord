@@ -37,6 +37,7 @@ export function validateComponentRoute(route: string): string | null {
   }
 
   const segments = route.split("/");
+  const paramNames = new Set<string>();
   for (let i = 0; i < segments.length; i++) {
     const segment = segments[i];
 
@@ -64,6 +65,11 @@ export function validateComponentRoute(route: string): string | null {
         return `route parameter "${paramName}" is invalid, expected letters, numbers, or _, and cannot start with a number`;
       }
 
+      if (paramNames.has(paramName)) {
+        return `route parameter "${paramName}" is declared more than once`;
+      }
+
+      paramNames.add(paramName);
       continue;
     }
 
