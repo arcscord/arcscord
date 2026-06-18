@@ -123,7 +123,6 @@ describe("component builders", () => {
           customId: "status",
           placeholder: "Status",
           disabled: undefined,
-          required: true,
           minValues: undefined,
           maxValues: undefined,
           options: [
