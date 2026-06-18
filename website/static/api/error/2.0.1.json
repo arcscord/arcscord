@@ -25,7 +25,7 @@
           "fileName": "type.ts",
           "line": 7,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/type.ts#L7"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/type.ts#L7"
         }
       ],
       "typeParameters": [
@@ -115,7 +115,7 @@
           "fileName": "type.ts",
           "line": 21,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/type.ts#L21"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/type.ts#L21"
         }
       ],
       "typeParameters": [
@@ -181,7 +181,7 @@
           "fileName": "type.ts",
           "line": 14,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/type.ts#L14"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/type.ts#L14"
         }
       ],
       "typeParameters": [
@@ -239,7 +239,7 @@
           "fileName": "util.ts",
           "line": 7,
           "character": 16,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/util.ts#L7"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/util.ts#L7"
         }
       ],
       "signatures": [
@@ -273,7 +273,7 @@
               "fileName": "util.ts",
               "line": 7,
               "character": 16,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/util.ts#L7"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/util.ts#L7"
             }
           ],
           "parameters": [
@@ -321,7 +321,7 @@
           "fileName": "func.ts",
           "line": 22,
           "character": 16,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L22"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L22"
         }
       ],
       "signatures": [
@@ -355,7 +355,7 @@
               "fileName": "func.ts",
               "line": 22,
               "character": 16,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L22"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L22"
             }
           ],
           "typeParameters": [
@@ -438,7 +438,7 @@
           "fileName": "func.ts",
           "line": 33,
           "character": 22,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L33"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L33"
         }
       ],
       "signatures": [
@@ -472,7 +472,7 @@
               "fileName": "func.ts",
               "line": 33,
               "character": 22,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L33"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L33"
             }
           ],
           "typeParameters": [
@@ -628,7 +628,7 @@
           "fileName": "func.ts",
           "line": 54,
           "character": 16,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L54"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L54"
         }
       ],
       "signatures": [
@@ -678,7 +678,7 @@
               "fileName": "func.ts",
               "line": 54,
               "character": 16,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L54"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L54"
             }
           ],
           "typeParameters": [
@@ -896,7 +896,7 @@
           "fileName": "func.ts",
           "line": 11,
           "character": 16,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L11"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L11"
         }
       ],
       "signatures": [
@@ -930,7 +930,7 @@
               "fileName": "func.ts",
               "line": 11,
               "character": 16,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/error/src/func.ts#L11"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/error/src/func.ts#L11"
             }
           ],
           "typeParameters": [

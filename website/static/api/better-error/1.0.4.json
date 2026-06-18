@@ -32,7 +32,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 22,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L22"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L22"
             }
           ],
           "signatures": [
@@ -55,7 +55,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 22,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L22"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L22"
                 }
               ],
               "parameters": [
@@ -124,7 +124,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 13,
               "character": 12,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L13"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L13"
             }
           ],
           "type": {
@@ -163,7 +163,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 15,
               "character": 12,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L15"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L15"
             }
           ],
           "type": {
@@ -185,7 +185,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 14,
               "character": 12,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L14"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L14"
             }
           ],
           "type": {
@@ -282,7 +282,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 11,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L11"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L11"
             }
           ],
           "type": {
@@ -401,13 +401,13 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 60,
               "character": 6,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L60"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L60"
             },
             {
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 69,
               "character": 6,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L69"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L69"
             }
           ],
           "getSignature": {
@@ -440,7 +440,7 @@
                 "fileName": "packages/better_error/src/base_error.ts",
                 "line": 60,
                 "character": 6,
-                "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L60"
+                "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L60"
               }
             ],
             "type": {
@@ -476,7 +476,7 @@
                 "fileName": "packages/better_error/src/base_error.ts",
                 "line": 69,
                 "character": 6,
-                "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L69"
+                "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L69"
               }
             ],
             "parameters": [
@@ -517,7 +517,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 51,
               "character": 6,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L51"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L51"
             }
           ],
           "getSignature": {
@@ -550,7 +550,7 @@
                 "fileName": "packages/better_error/src/base_error.ts",
                 "line": 51,
                 "character": 6,
-                "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L51"
+                "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L51"
               }
             ],
             "type": {
@@ -591,7 +591,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 200,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L200"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L200"
             }
           ],
           "signatures": [
@@ -625,7 +625,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 200,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L200"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L200"
                 }
               ],
               "type": {
@@ -660,7 +660,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 216,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L216"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L216"
             }
           ],
           "signatures": [
@@ -694,7 +694,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 216,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L216"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L216"
                 }
               ],
               "type": {
@@ -715,7 +715,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 78,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L78"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L78"
             }
           ],
           "signatures": [
@@ -749,7 +749,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 78,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L78"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L78"
                 }
               ],
               "type": {
@@ -770,7 +770,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 89,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L89"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L89"
             }
           ],
           "signatures": [
@@ -804,7 +804,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 89,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L89"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L89"
                 }
               ],
               "parameters": [
@@ -851,7 +851,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 161,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L161"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L161"
             }
           ],
           "signatures": [
@@ -885,7 +885,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 161,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L161"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L161"
                 }
               ],
               "parameters": [
@@ -932,7 +932,7 @@
               "fileName": "packages/better_error/src/base_error.ts",
               "line": 180,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L180"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L180"
             }
           ],
           "signatures": [
@@ -966,7 +966,7 @@
                   "fileName": "packages/better_error/src/base_error.ts",
                   "line": 180,
                   "character": 2,
-                  "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L180"
+                  "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L180"
                 }
               ],
               "parameters": [
@@ -1435,7 +1435,7 @@
           "fileName": "packages/better_error/src/base_error.ts",
           "line": 7,
           "character": 13,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/base_error.ts#L7"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/base_error.ts#L7"
         }
       ],
       "extendedTypes": [
@@ -1470,7 +1470,7 @@
           "fileName": "packages/better_error/src/type.ts",
           "line": 6,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L6"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L6"
         }
       ],
       "type": {
@@ -1513,7 +1513,7 @@
           "fileName": "packages/better_error/src/type.ts",
           "line": 11,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L11"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L11"
         }
       ],
       "type": {
@@ -1584,7 +1584,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 42,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L42"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L42"
             }
           ],
           "type": {
@@ -1613,7 +1613,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 47,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L47"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L47"
             }
           ],
           "type": {
@@ -1642,7 +1642,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 36,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L36"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L36"
             }
           ],
           "type": {
@@ -1671,7 +1671,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 20,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L20"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L20"
             }
           ],
           "type": {
@@ -1711,7 +1711,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 26,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L26"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L26"
             }
           ],
           "type": {
@@ -1740,7 +1740,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 31,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L31"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L31"
             }
           ],
           "type": {
@@ -1784,7 +1784,7 @@
           "fileName": "packages/better_error/src/type.ts",
           "line": 16,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L16"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L16"
         }
       ]
     },
@@ -1835,7 +1835,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 58,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L58"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L58"
             }
           ],
           "type": {
@@ -1875,7 +1875,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 64,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L64"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L64"
             }
           ],
           "type": {
@@ -1926,7 +1926,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 87,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L87"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L87"
             }
           ],
           "type": {
@@ -1970,7 +1970,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 71,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L71"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L71"
             }
           ],
           "type": {
@@ -2026,7 +2026,7 @@
               "fileName": "packages/better_error/src/type.ts",
               "line": 81,
               "character": 2,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L81"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L81"
             }
           ],
           "type": {
@@ -2054,7 +2054,7 @@
           "fileName": "packages/better_error/src/type.ts",
           "line": 53,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L53"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L53"
         }
       ]
     },
@@ -2093,7 +2093,7 @@
           "fileName": "packages/better_error/src/type.ts",
           "line": 96,
           "character": 12,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/type.ts#L96"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/type.ts#L96"
         }
       ],
       "type": {
@@ -2121,7 +2121,7 @@
           "fileName": "packages/better_error/src/util.ts",
           "line": 10,
           "character": 16,
-          "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/util.ts#L10"
+          "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/util.ts#L10"
         }
       ],
       "signatures": [
@@ -2155,7 +2155,7 @@
               "fileName": "packages/better_error/src/util.ts",
               "line": 10,
               "character": 16,
-              "url": "https://github.com/arcscord/arcscord/blob/52cfcd82c31e9ca0924be2296f6fa9156be71819/packages/better_error/src/util.ts#L10"
+              "url": "https://github.com/arcscord/arcscord/blob/75718fbf92cb61caa8572d38dfe8ee1356fb770a/packages/better_error/src/util.ts#L10"
             }
           ],
           "parameters": [
