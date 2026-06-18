@@ -1,0 +1,64 @@
+name: Feature request
+description: Suggest an improvement or new capability for Arcscord.
+title: "feat: "
+labels:
+  - feature
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for concrete product or API improvements. For support questions, please use Discord first.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package would this affect?
+      options:
+        - arcscord
+        - "@arcscord/cli"
+        - "@arcscord/middleware"
+        - "@arcscord/error"
+        - "@arcscord/better-error"
+        - website/docs
+        - multiple packages
+        - unknown
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What workflow is difficult, missing, or error-prone today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or API you would like.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider?
+    validations:
+      required: false
+  - type: textarea
+    id: examples
+    attributes:
+      label: Example usage
+      description: Optional code sample or documentation sketch.
+      render: ts
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: This is not a support question.
+          required: true

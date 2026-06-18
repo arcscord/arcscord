@@ -1,0 +1,79 @@
+name: Bug report
+description: Report reproducible behavior that is not working as expected.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting a bug. Do not include Discord bot tokens, webhook URLs, npm tokens, private keys, or other secrets.
+  - type: dropdown
+    id: package
+    attributes:
+      label: Package
+      description: Which package is affected?
+      options:
+        - arcscord
+        - "@arcscord/cli"
+        - "@arcscord/middleware"
+        - "@arcscord/error"
+        - "@arcscord/better-error"
+        - website/docs
+        - unknown
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Package version
+      placeholder: "for example: 0.3.0-preview2"
+    validations:
+      required: false
+  - type: input
+    id: runtime-and-package-manager
+    attributes:
+      label: Runtime and package manager
+      description: Include the runtime and installer/runner you use.
+      placeholder: "for example: Node.js 24 + pnpm 10, Bun 1.x, Deno 2.x, Node.js 24 + npm 11"
+    validations:
+      required: true
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current behavior
+      description: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: What did you expect to happen?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal reproduction
+      description: Provide a small code sample, repository, or step-by-step reproduction.
+      render: ts
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs or stack trace
+      description: Paste relevant logs after removing secrets.
+      render: shell
+    validations:
+      required: false
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checks
+      options:
+        - label: I searched existing issues and pull requests.
+          required: true
+        - label: I removed tokens, secrets, and private data from this report.
+          required: true

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Arcscord Discord support
+    url: https://discord.gg/4geBanVWGR
+    about: Ask usage questions, get troubleshooting help, and discuss ideas before opening an issue.
+  - name: Security policy
+    url: https://github.com/arcscord/arcscord/blob/main/.github/SECURITY.md
+    about: Report vulnerabilities privately. Do not open public security issues.

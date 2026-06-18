@@ -28,4 +28,4 @@ Thank you to all the people who already contributed to Arcscord!
   <img src="https://contrib.rocks/image?repo=arcscord/arcscord" alt="Arcscord contributors" />
 </a>
 
-[contributing]: https://github.com/sapphiredev/.github/blob/main/.github/CONTRIBUTING.md
+[contributing]: https://github.com/arcscord/arcscord/blob/main/.github/CONTRIBUTING.md
