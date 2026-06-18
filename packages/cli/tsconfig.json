@@ -10,5 +10,10 @@
   },
   "include": [
     "src/**/*" // Only include files in the src directory
+  ],
+  "exclude": [
+    "src/**/*.test.ts",
+    "src/**/*.test.mts",
+    "src/**/_test/**"
   ]
 }

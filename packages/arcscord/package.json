@@ -66,6 +66,7 @@
     "vitest": "^4.1.5"
   },
   "files": [
-    "dist/"
+    "dist/cjs/",
+    "dist/esm/"
   ]
 }

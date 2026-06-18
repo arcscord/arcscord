@@ -7,7 +7,8 @@ const options = { recursive: true, force: true };
 const paths = [
   // Dist folders
   new URL("arcscord/dist/", packagesDir),
-  new URL("better-error/dist/", packagesDir),
+  new URL("better_error/dist/", packagesDir),
+  new URL("cli/dist/", packagesDir),
   new URL("error/dist/", packagesDir),
   new URL("middleware/dist/", packagesDir),
 ];

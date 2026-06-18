@@ -10,13 +10,15 @@ const paths = [
 
   // Nested node_modules folders
   new URL("arcscord/node_modules/", packagesDir),
-  new URL("better-error/node_modules/", packagesDir),
+  new URL("better_error/node_modules/", packagesDir),
+  new URL("cli/node_modules/", packagesDir),
   new URL("error/node_modules/", packagesDir),
   new URL("middleware/node_modules/", packagesDir),
 
   // Dist folders
   new URL("arcscord/dist/", packagesDir),
-  new URL("better-error/dist/", packagesDir),
+  new URL("better_error/dist/", packagesDir),
+  new URL("cli/dist/", packagesDir),
   new URL("error/dist/", packagesDir),
   new URL("middleware/dist/", packagesDir),
 ];

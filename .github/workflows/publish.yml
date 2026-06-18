@@ -38,15 +38,27 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Clean build artifacts
+        run: pnpm clean
       - name: Build code
         run: pnpm build
+      - name: Lint code
+        run: pnpm lint --fix=false
+      - name: Typecheck code
+        run: pnpm typecheck
+      - name: Run unit tests
+        run: pnpm test
+      - name: Validate package contents
+        run: pnpm pack --pack-destination /tmp
+        working-directory: "packages/${{inputs.package}}"
       - name: Publish
         run: |
-          if [ -n "${{ inputs.tag }}" ]; then
-            npm publish --provenance --access public --tag ${{ inputs.tag }}
+          if [ -n "$PUBLISH_TAG" ]; then
+            pnpm publish --provenance --access public --no-git-checks --tag "$PUBLISH_TAG"
           else
-            npm publish --provenance --access public
+            pnpm publish --provenance --access public --no-git-checks
           fi
         working-directory: "packages/${{inputs.package}}"
         env:
+          PUBLISH_TAG: ${{ inputs.tag }}
           NODE_AUTH_TOKEN: ${{secrets.NPM_SECRET}}

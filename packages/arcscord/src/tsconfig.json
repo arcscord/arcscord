@@ -5,9 +5,15 @@
     "baseUrl": ".",
     "outDir": "../dist",
     "incremental": false,
+    "noEmit": true,
     "skipLibCheck": true,
     "paths": {
       "#/*": ["./*"]
     }
-  }
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.no.test.ts",
+    "**/_test/**"
+  ]
 }
