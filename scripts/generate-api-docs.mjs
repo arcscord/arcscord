@@ -11,6 +11,7 @@ const packagesArgIndex = process.argv.indexOf("--packages");
 const selectedPackages = packagesArgIndex === -1
   ? undefined
   : new Set(process.argv[packagesArgIndex + 1]?.split(",").map(value => value.trim()).filter(Boolean));
+const force = process.argv.includes("--force");
 
 if (!["dev", "release"].includes(channel)) {
   console.error(`Invalid docs channel "${channel}". Expected "dev" or "release".`);
@@ -64,7 +65,10 @@ for (const pkg of packages) {
 
   mkdirSync(outDir, { recursive: true });
 
-  if (shouldGenerate) {
+  if (shouldGenerate && channel === "release" && existsSync(outFile) && !force) {
+    console.log(`Skipping ${pkg.slug} ${version}; ${outFile} already exists.`);
+  }
+  else if (shouldGenerate) {
     writeFileSync(docsTsconfig, `${JSON.stringify({
       extends: join(root, pkg.tsconfig),
       include: [join(root, pkg.dir, "src/**/*.ts")],

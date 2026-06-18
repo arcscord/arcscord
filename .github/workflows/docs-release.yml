@@ -39,19 +39,31 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build code
         run: pnpm build
-      - name: Generate release API docs
-        run: pnpm docs:api:release
       - name: Resolve release ref name
         run: echo "RELEASE_REF_NAME=${{ github.event.inputs.release_ref || github.ref_name }}" >> "$GITHUB_ENV"
+      - name: Resolve release API packages
+        id: release-packages
+        run: node scripts/resolve-release-doc-packages.mjs
+      - name: Generate release API docs
+        run: node scripts/generate-api-docs.mjs --channel release --packages "${{ steps.release-packages.outputs.packages }}"
       - name: Preserve release API snapshots
-        run: tar --exclude="*/dev.json" --exclude="manifest.json" -cf /tmp/arcscord-release-api.tar website/static/api
+        env:
+          RELEASE_PACKAGES: ${{ steps.release-packages.outputs.packages }}
+        run: |
+          rm -rf /tmp/arcscord-release-api
+          node scripts/copy-release-api-snapshots.mjs /tmp/arcscord-release-api
       - name: Move release API snapshots to main
         run: |
           git reset --hard
           git clean -fd website/static/api
-          git fetch origin main
-          git switch main
-          tar -xf /tmp/arcscord-release-api.tar
+          git fetch origin main:refs/remotes/origin/main
+          if git show-ref --verify --quiet refs/heads/main; then
+            git switch main
+            git reset --hard origin/main
+          else
+            git switch --create main origin/main
+          fi
+          cp -R /tmp/arcscord-release-api/website/static/api/. website/static/api/
       - name: Generate dev API docs
         run: pnpm docs:api
       - name: Commit release API snapshots
