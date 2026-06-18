@@ -10,6 +10,15 @@
 - name: feature
   color: a2eeef
   description: New feature or request
+- name: dependencies
+  color: 0366d6
+  description: Dependency updates
+- name: security
+  color: ee0701
+  description: Security fixes and vulnerability reports
+- name: ci
+  color: 5319e7
+  description: Continuous integration and workflow changes
 - name: good first issue
   color: 7057ff
   description: Good for newcomers
