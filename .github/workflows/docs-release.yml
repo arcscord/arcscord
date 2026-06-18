@@ -23,11 +23,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout release source
         uses: actions/checkout@v6
         with:
           ref: ${{ github.event.inputs.release_ref || github.ref }}
           fetch-depth: 0
+      - name: Checkout docs tools
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          path: docs-tools
+          fetch-depth: 1
       - name: Install pnpm
         uses: pnpm/action-setup@v6
       - name: Setup NodeJS
@@ -43,15 +49,15 @@ jobs:
         run: echo "RELEASE_REF_NAME=${{ github.event.inputs.release_ref || github.ref_name }}" >> "$GITHUB_ENV"
       - name: Resolve release API packages
         id: release-packages
-        run: node scripts/resolve-release-doc-packages.mjs
+        run: node docs-tools/scripts/resolve-release-doc-packages.mjs --source-root .
       - name: Generate release API docs
-        run: node scripts/generate-api-docs.mjs --channel release --packages "${{ steps.release-packages.outputs.packages }}"
+        run: node docs-tools/scripts/generate-api-docs.mjs --source-root . --output-root . --channel release --packages "${{ steps.release-packages.outputs.packages }}"
       - name: Preserve release API snapshots
         env:
           RELEASE_PACKAGES: ${{ steps.release-packages.outputs.packages }}
         run: |
           rm -rf /tmp/arcscord-release-api
-          node scripts/copy-release-api-snapshots.mjs /tmp/arcscord-release-api
+          node docs-tools/scripts/copy-release-api-snapshots.mjs /tmp/arcscord-release-api
       - name: Move release API snapshots to main
         run: |
           git reset --hard
@@ -64,6 +70,8 @@ jobs:
             git switch --create main origin/main
           fi
           cp -R /tmp/arcscord-release-api/website/static/api/. website/static/api/
+      - name: Install main dependencies
+        run: pnpm install --frozen-lockfile
       - name: Generate dev API docs
         run: pnpm docs:api
       - name: Commit release API snapshots

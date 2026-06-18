@@ -1,10 +1,18 @@
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const root = dirname(dirname(fileURLToPath(import.meta.url)));
+const scriptRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const sourceRootArgIndex = process.argv.indexOf("--source-root");
+const outputRootArgIndex = process.argv.indexOf("--output-root");
+const sourceRoot = sourceRootArgIndex === -1
+  ? scriptRoot
+  : resolve(process.cwd(), process.argv[sourceRootArgIndex + 1]);
+const outputRoot = outputRootArgIndex === -1
+  ? sourceRoot
+  : resolve(process.cwd(), process.argv[outputRootArgIndex + 1]);
 const channelArgIndex = process.argv.indexOf("--channel");
 const channel = channelArgIndex === -1 ? "dev" : process.argv[channelArgIndex + 1];
 const packagesArgIndex = process.argv.indexOf("--packages");
@@ -41,8 +49,8 @@ const packages = [
   },
 ];
 
-const apiRoot = join(root, "website/static/api");
-const typedocConfigRoot = join(root, "website/.typedoc");
+const apiRoot = join(outputRoot, "website/static/api");
+const typedocConfigRoot = join(outputRoot, "website/.typedoc");
 mkdirSync(apiRoot, { recursive: true });
 mkdirSync(typedocConfigRoot, { recursive: true });
 
@@ -53,7 +61,7 @@ const manifest = {
 };
 
 for (const pkg of packages) {
-  const packageJson = JSON.parse(readFileSync(join(root, pkg.dir, "package.json"), "utf8"));
+  const packageJson = JSON.parse(readFileSync(join(sourceRoot, pkg.dir, "package.json"), "utf8"));
   const version = channel === "dev" ? "dev" : packageJson.version;
   const outDir = join(apiRoot, pkg.slug);
   const outFile = join(outDir, `${version}.json`);
@@ -70,17 +78,17 @@ for (const pkg of packages) {
   }
   else if (shouldGenerate) {
     writeFileSync(docsTsconfig, `${JSON.stringify({
-      extends: join(root, pkg.tsconfig),
-      include: [join(root, pkg.dir, "src/**/*.ts")],
+      extends: join(sourceRoot, pkg.tsconfig),
+      include: [join(sourceRoot, pkg.dir, "src/**/*.ts")],
       exclude: [
-        join(root, pkg.dir, "src/**/*.test.ts"),
-        join(root, pkg.dir, "src/**/*.no.test.ts"),
-        join(root, pkg.dir, "tests/**"),
+        join(sourceRoot, pkg.dir, "src/**/*.test.ts"),
+        join(sourceRoot, pkg.dir, "src/**/*.no.test.ts"),
+        join(sourceRoot, pkg.dir, "tests/**"),
       ],
     }, null, 2)}\n`);
     writeFileSync(typedocConfig, `${JSON.stringify({
       $schema: "https://typedoc.org/schema.json",
-      entryPoints: [join(root, pkg.dir, "src/index.ts")],
+      entryPoints: [join(sourceRoot, pkg.dir, "src/index.ts")],
       entryPointStrategy: "resolve",
       excludeInternal: true,
       includeVersion: true,
@@ -98,7 +106,7 @@ for (const pkg of packages) {
         typedocConfig,
       ],
       {
-        cwd: root,
+        cwd: sourceRoot,
         stdio: "inherit",
       },
     );

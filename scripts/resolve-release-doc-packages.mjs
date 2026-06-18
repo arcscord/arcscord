@@ -1,8 +1,11 @@
 import { appendFileSync, readFileSync } from "node:fs";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import process from "node:process";
 
-const root = process.cwd();
+const sourceRootArgIndex = process.argv.indexOf("--source-root");
+const sourceRoot = sourceRootArgIndex === -1
+  ? process.cwd()
+  : resolve(process.cwd(), process.argv[sourceRootArgIndex + 1]);
 const releaseRef = process.env.RELEASE_REF_NAME ?? "";
 const releaseVersion = releaseRef
   .replace(/^refs\/tags\//, "")
@@ -17,7 +20,7 @@ const packages = [
 
 const matches = packages
   .map((pkg) => {
-    const packageJson = JSON.parse(readFileSync(join(root, pkg.dir, "package.json"), "utf8"));
+    const packageJson = JSON.parse(readFileSync(join(sourceRoot, pkg.dir, "package.json"), "utf8"));
     return { ...pkg, name: packageJson.name, version: packageJson.version };
   })
   .filter(pkg => pkg.version === releaseVersion);
