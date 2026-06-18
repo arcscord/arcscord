@@ -35,10 +35,6 @@
   width: 2rem;
 }
 
-.navbar__logo img {
-  transform: translateX(-14%);
-}
-
 .navbar__title {
   color: var(--arcscord-ink);
   font-weight: 800;

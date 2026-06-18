@@ -42,8 +42,8 @@ const config: Config = {
       title: "Arcscord",
       logo: {
         alt: "Arcscord logo",
-        src: "img/logo-navbar.png",
-        srcDark: "img/logo-navbar.png",
+        src: "img/logo.svg",
+        srcDark: "img/logo.svg",
       },
       items: [
         { type: "docSidebar", sidebarId: "guideSidebar", position: "left", label: "Guide" },
