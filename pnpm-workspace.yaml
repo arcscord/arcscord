@@ -3,7 +3,10 @@ shellEmulator: true
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
+  - detect-port@1.6.1
+  - semver@6.3.1
 
 packages:
   - "packages/*"
   - "test/*"
+  - website

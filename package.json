@@ -13,8 +13,11 @@
     "typecheck": "pnpm -r run typecheck",
     "test": "vitest run",
     "test:test-bot": "pnpm -r --filter '@arcscord/test-bot' run start",
-    "docs:api": "typedoc",
-    "docs:json": "pnpm -r run docs",
+    "docs:api": "node scripts/generate-api-docs.mjs --channel dev",
+    "docs:api:release": "node scripts/generate-api-docs.mjs --channel release",
+    "docs:build": "pnpm docs:api && pnpm --filter @arcscord/website build",
+    "docs:start": "pnpm docs:api && pnpm --filter @arcscord/website start",
+    "docs:json": "pnpm docs:api",
     "prepare": "husky",
     "preinstall": "npx only-allow pnpm"
   },

@@ -14,6 +14,7 @@ node_modules/
 
 # Build Artifacts
 dist/
+static_docs/
 test_out/
 *.tsbuildinfo
 *.zip
@@ -27,6 +28,11 @@ test_out/
 *.heapsnapshot
 *.log
 coverage/
+website/.typedoc/
+website/.docusaurus/
+website/build/
+website/static/api/manifest.json
+website/static/api/**/dev.json
 
 # Ignore package locks
 package-lock.json

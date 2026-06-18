@@ -1,0 +1,414 @@
+:root {
+  --ifm-color-primary: #377bc3;
+  --ifm-color-primary-dark: #2f6caf;
+  --ifm-color-primary-darker: #2a609c;
+  --ifm-color-primary-darkest: #214d7d;
+  --ifm-color-primary-light: #5f87df;
+  --ifm-color-primary-lighter: #8298ed;
+  --ifm-color-primary-lightest: #aec0f6;
+  --ifm-code-font-size: 95%;
+  --arcscord-blue: #377bc3;
+  --arcscord-periwinkle: #8298ed;
+  --arcscord-sky: #b7d0f1;
+  --arcscord-leaf: #7cff00;
+  --arcscord-bow: #8a4b22;
+  --arcscord-ink: #172033;
+  --ifm-navbar-background-color: #f8fbff;
+  --ifm-footer-background-color: #172033;
+}
+
+[data-theme="dark"] {
+  --ifm-color-primary: #8298ed;
+  --ifm-color-primary-dark: #6f86df;
+  --ifm-color-primary-darker: #607ad2;
+  --ifm-color-primary-darkest: #3f5cb5;
+  --ifm-color-primary-light: #9bacf2;
+  --ifm-color-primary-lighter: #b7c5f7;
+  --ifm-color-primary-lightest: #dbe3ff;
+  --ifm-background-color: #0f1522;
+  --ifm-navbar-background-color: #121a2a;
+  --ifm-footer-background-color: #080c14;
+}
+
+.navbar__logo {
+  height: 2rem;
+  width: 2rem;
+}
+
+.navbar__logo img {
+  transform: translateX(-14%);
+}
+
+.navbar__title {
+  color: var(--arcscord-ink);
+  font-weight: 800;
+}
+
+[data-theme="dark"] .navbar__title {
+  color: #edf2ff;
+}
+
+.theme-doc-markdown h1,
+.theme-doc-markdown h2 {
+  color: var(--arcscord-blue);
+}
+
+[data-theme="dark"] .theme-doc-markdown h1,
+[data-theme="dark"] .theme-doc-markdown h2 {
+  color: var(--arcscord-periwinkle);
+}
+
+.api-shell {
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  min-height: calc(100vh - var(--ifm-navbar-height));
+}
+
+.api-sidebar {
+  position: sticky;
+  top: var(--ifm-navbar-height);
+  height: calc(100vh - var(--ifm-navbar-height));
+  overflow: auto;
+  border-right: 1px solid var(--ifm-color-emphasis-200);
+  background: color-mix(in srgb, var(--arcscord-sky) 9%, var(--ifm-background-color));
+  padding: 1rem;
+}
+
+.api-sidebar__controls {
+  display: grid;
+  gap: 0.45rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+}
+
+.api-sidebar__controls label {
+  margin-top: 0.4rem;
+  color: var(--ifm-color-emphasis-800);
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.api-sidebar__controls select,
+.api-sidebar__controls input {
+  width: 100%;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 6px;
+  padding: 0.55rem 0.65rem;
+  color: var(--ifm-font-color-base);
+  background: var(--ifm-background-color);
+}
+
+.api-search {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.api-search input {
+  padding-right: 4.25rem;
+}
+
+.api-search kbd {
+  position: absolute;
+  right: 0.45rem;
+  border: 1px solid var(--ifm-color-emphasis-300);
+  border-radius: 4px;
+  padding: 0.12rem 0.3rem;
+  color: var(--ifm-color-emphasis-700);
+  background: color-mix(in srgb, var(--ifm-color-emphasis-100) 70%, var(--ifm-background-color));
+  font: 700 0.72rem/1.2 var(--ifm-font-family-base);
+  pointer-events: none;
+}
+
+.api-nav {
+  padding: 1rem 0 2rem;
+}
+
+.api-nav h2 {
+  margin: 1rem 0 0.4rem;
+  color: var(--arcscord-blue);
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+[data-theme="dark"] .api-nav h2 {
+  color: var(--arcscord-periwinkle);
+}
+
+.api-nav__item {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 0.42rem 0.55rem;
+  color: var(--ifm-font-color-base);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.api-nav__item:hover,
+.api-nav__item--active {
+  color: var(--arcscord-ink);
+  background: color-mix(in srgb, var(--arcscord-periwinkle) 22%, transparent);
+}
+
+[data-theme="dark"] .api-nav__item:hover,
+[data-theme="dark"] .api-nav__item--active {
+  color: #f8fbff;
+}
+
+.api-content {
+  max-width: 1080px;
+  width: 100%;
+  padding: 2rem clamp(1.25rem, 4vw, 4rem) 4rem;
+}
+
+.api-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.api-header h1 {
+  margin: 0;
+  color: var(--arcscord-blue);
+  font-size: clamp(2rem, 4vw, 3.25rem);
+}
+
+[data-theme="dark"] .api-header h1 {
+  color: var(--arcscord-periwinkle);
+}
+
+.api-eyebrow,
+.api-source,
+.api-member__meta {
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.api-eyebrow {
+  margin: 0 0 0.25rem;
+}
+
+.api-badge {
+  border: 1px solid color-mix(in srgb, var(--arcscord-periwinkle) 55%, var(--ifm-color-emphasis-200));
+  border-radius: 999px;
+  padding: 0.35rem 0.65rem;
+  color: var(--arcscord-blue);
+  background: color-mix(in srgb, var(--arcscord-sky) 22%, var(--ifm-background-color));
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.api-signature,
+.api-example {
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  padding: 1rem;
+  overflow: auto;
+  background: #282c34;
+  color: #abb2bf;
+}
+
+.api-signature code,
+.api-example code {
+  color: inherit;
+}
+
+.api-token--keyword {
+  color: #c678dd;
+}
+
+.api-token--name {
+  color: #61afef;
+  font-weight: 700;
+}
+
+.api-token--param {
+  color: #e5c07b;
+}
+
+.api-token--operator,
+.api-type--operator {
+  color: #abb2bf;
+}
+
+.api-type {
+  display: inline;
+  border: 0;
+  padding: 0;
+  color: #56b6c2;
+  background: transparent;
+  font: inherit;
+}
+
+.api-type--intrinsic,
+.api-type--literal {
+  color: #98c379;
+}
+
+.api-type--object {
+  color: #d19a66;
+}
+
+.api-type--reference {
+  color: #61afef;
+}
+
+.api-type--external {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.25rem;
+  color: #61afef;
+}
+
+.api-type__vendor {
+  border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
+  border-radius: 4px;
+  padding: 0 0.18rem;
+  color: #5865f2;
+  font-size: 0.68em;
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.api-type__external-icon {
+  width: 0.82em;
+  height: 0.82em;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
+button.api-type {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 0.18em;
+}
+
+button.api-type:hover,
+a.api-type:hover {
+  color: #9cdcfe;
+}
+
+.api-description {
+  max-width: 72ch;
+  font-size: 1.05rem;
+}
+
+.api-relations {
+  display: grid;
+  gap: 0.5rem;
+  max-width: 76ch;
+  margin: 1rem 0 1.5rem;
+  padding: 1rem;
+  border: 1px solid var(--ifm-color-emphasis-200);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--arcscord-sky) 10%, var(--ifm-background-color));
+}
+
+.api-relations div {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr);
+  gap: 1rem;
+}
+
+.api-relations dt {
+  color: var(--ifm-color-emphasis-700);
+  font-weight: 800;
+}
+
+.api-relations dd {
+  margin: 0;
+}
+
+.api-relations .api-type {
+  color: var(--arcscord-blue);
+}
+
+[data-theme="dark"] .api-relations .api-type {
+  color: var(--arcscord-periwinkle);
+}
+
+.api-error {
+  border-left: 4px solid #d33;
+  padding: 0.75rem 1rem;
+  background: color-mix(in srgb, #d33 10%, var(--ifm-background-color));
+}
+
+.api-members {
+  margin-top: 2rem;
+}
+
+.api-member {
+  border-top: 1px solid var(--ifm-color-emphasis-200);
+  padding: 1.25rem 0;
+}
+
+.api-member h3 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: 1rem;
+}
+
+.api-member code,
+.api-param code {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.api-params {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.85rem;
+}
+
+.api-params h4 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.api-param {
+  display: grid;
+  grid-template-columns: minmax(180px, 0.38fr) minmax(0, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 900px) {
+  .api-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .api-sidebar {
+    position: static;
+    height: auto;
+    border-right: 0;
+    border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  }
+
+  .api-nav {
+    max-height: 42vh;
+    overflow: auto;
+  }
+
+  .api-param {
+    grid-template-columns: 1fr;
+    gap: 0.25rem;
+  }
+
+  .api-relations div {
+    grid-template-columns: 1fr;
+    gap: 0.15rem;
+  }
+}

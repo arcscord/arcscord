@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-labelledby="title desc">
+  <title id="title">Arcscord logo</title>
+  <desc id="desc">A compact Arcscord mark inspired by the project mascot colors.</desc>
+  <rect width="96" height="96" rx="22" fill="#8298ed"/>
+  <path d="M15 61c6 12 18 20 33 20 19 0 34-15 34-34 0-9-4-18-10-24v44H24a35 35 0 0 1-9-6Z" fill="#377bc3" opacity=".72"/>
+  <path d="M21 44c-5 0-9-4-9-9s4-9 9-9h7v18h-7Z" fill="#b7d0f1" stroke="#172033" stroke-width="3"/>
+  <path d="M75 44c5 0 9-4 9-9s-4-9-9-9h-7v18h7Z" fill="#b7d0f1" stroke="#172033" stroke-width="3"/>
+  <rect x="25" y="20" width="46" height="38" rx="13" fill="#8298ed" stroke="#172033" stroke-width="3"/>
+  <circle cx="37" cy="39" r="4.7" fill="#06080d"/>
+  <circle cx="59" cy="39" r="4.7" fill="#06080d"/>
+  <path d="M43 45h10a6 6 0 0 1 0 12H43a6 6 0 0 1 0-12Z" fill="#b7d0f1" stroke="#172033" stroke-width="2"/>
+  <path d="M57 53c-2 4-5 6-9 6" fill="none" stroke="#172033" stroke-width="2" stroke-linecap="round"/>
+  <path d="M61 26c4-5 8-7 13-4-2 4-6 6-13 4Z" fill="#7cff00" stroke="#172033" stroke-width="2"/>
+  <path d="M25 17c-12 16-17 39-4 62" fill="none" stroke="#8a4b22" stroke-width="7" stroke-linecap="round"/>
+  <path d="M31 20 64 80" fill="none" stroke="#172033" stroke-width="2" stroke-linecap="round"/>
+  <text x="48" y="77" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="800" fill="#fff">TS</text>
+</svg>

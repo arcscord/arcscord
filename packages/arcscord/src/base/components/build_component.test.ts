@@ -114,7 +114,6 @@ describe("component builders", () => {
     expect(buildStringSelectMenu({
       customId: "status",
       placeholder: "Status",
-      required: true,
       options: ["open", "closed"],
     })).toEqual({
       type: ComponentType.ActionRow,
@@ -219,7 +218,7 @@ describe("component builders", () => {
 
   it("builds sections, containers, labels, and modal input components", () => {
     const section = buildSection({
-      components: [buildTextDisplay({ content: "Profile" })],
+      components: [{ type: ComponentType.TextDisplay, content: "Profile" }],
       accessory: buildClickableButton({ customId: "open", style: "primary", label: "Open" }),
     });
 
