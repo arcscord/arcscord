@@ -1,7 +1,6 @@
 minimumReleaseAgeExclude:
   - "@types/node@26.0.0"
 shellEmulator: true
-confirmModulesPurge: false
 
 trustPolicy: no-downgrade
 trustPolicyExclude:
