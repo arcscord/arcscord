@@ -58,9 +58,5 @@
   "lint-staged": {
     "*": "eslint --fix"
   },
-  "resolutions": {
-    "ansi-regex": "^5.0.1",
-    "minimist": "^1.2.8"
-  },
   "packageManager": "pnpm@11.8.0"
 }
