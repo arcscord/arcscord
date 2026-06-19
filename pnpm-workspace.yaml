@@ -10,3 +10,8 @@ packages:
   - "packages/*"
   - "test/*"
   - website
+
+allowBuilds:
+  "@swc/core": true
+  core-js: true
+  esbuild: false

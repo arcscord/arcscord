@@ -47,7 +47,7 @@
     "url": "git+https://github.com/arcscord/arcscord.git"
   },
   "engines": {
-    "node": ">=v24.0.0",
+    "node": ">=24.11.0",
     "npm": ">=9.0.0"
   },
   "commitlint": {
@@ -62,5 +62,5 @@
     "ansi-regex": "^5.0.1",
     "minimist": "^1.2.8"
   },
-  "packageManager": "pnpm@10.33.2"
+  "packageManager": "pnpm@11.8.0"
 }

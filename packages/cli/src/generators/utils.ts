@@ -1,11 +1,13 @@
-import type { NodePath, VisitNode } from "@babel/traverse";
+import type { NodePath } from "@babel/traverse";
 import * as types from "@babel/types";
+
+type ProgramVisitor = (path: NodePath<types.Program>) => void;
 
 export function addImport(
   pathName: string,
   importName: string,
   returnCallback?: (importExist: boolean | null, importNameExist: boolean | null) => void,
-): VisitNode<types.Node, types.Program> {
+): ProgramVisitor {
   return function (path: NodePath<types.Program>) {
     const existingImportName = path.node.body.some((node) => {
       if (!types.isImportDeclaration(node)) {
