@@ -1,3 +1,5 @@
+minimumReleaseAgeExclude:
+  - "@types/node@26.0.0"
 shellEmulator: true
 
 trustPolicy: no-downgrade
@@ -11,7 +13,15 @@ packages:
   - "test/*"
   - website
 
+overrides:
+  ansi-regex: ^5.0.1
+  minimist: ^1.2.8
+
+peerDependencyRules:
+  allowedVersions:
+    tsconfck>typescript: "6"
+
 allowBuilds:
   "@swc/core": true
-  core-js: true
-  esbuild: false
+  core-js: false
+  esbuild: true
