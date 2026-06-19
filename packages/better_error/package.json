@@ -37,12 +37,12 @@
     "docs": "typedoc"
   },
   "devDependencies": {
-    "@types/node": "^25.6.0",
+    "@types/node": "^26.0.0",
     "tsup": "^8.5.1",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "vite": "8.0.16",
-    "vitest": "^4.1.5"
+    "vitest": "^4.1.9"
   },
   "files": [
     "dist/cjs/",
