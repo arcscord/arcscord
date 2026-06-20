@@ -14,6 +14,12 @@ export type ComponentPermissionMiddlewareMessageOptions = {
   user: User;
 };
 
+/**
+ * Restricts a component handler to members that have every required Discord permission.
+ *
+ * When the member is missing permissions, the middleware cancels the handler and
+ * sends the configured message callback instead of continuing.
+ */
 export class ComponentPermissionMiddleware extends ComponentMiddleware {
   name = "componentPermission" as const;
 
@@ -21,6 +27,15 @@ export class ComponentPermissionMiddleware extends ComponentMiddleware {
 
   message: MessageOptions<ComponentPermissionMiddlewareMessageOptions>;
 
+  /**
+   * Creates a permission guard for component handlers.
+   *
+   * Duplicate permissions are ignored. The message callback receives both the
+   * full required permission list and the permissions missing from the current member.
+   *
+   * @param permissions Discord permissions required to continue the component handler.
+   * @param message Message factory used when the current member is missing permissions.
+   */
   constructor(
     permissions: Iterable<PermissionsString>,
     message: MessageOptions<ComponentPermissionMiddlewareMessageOptions>,

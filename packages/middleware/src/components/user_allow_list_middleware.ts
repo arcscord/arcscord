@@ -7,6 +7,12 @@ export type ComponentUserAllowListMiddlewareNext = {
   allowed: true;
 };
 
+/**
+ * Restricts a component handler to a fixed list of Discord user IDs.
+ *
+ * Users outside the allowlist receive the configured message and the component
+ * middleware chain is cancelled.
+ */
 export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
   name = "userAllowList" as const;
 
@@ -14,6 +20,14 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
 
   message: MessageOptions;
 
+  /**
+   * Creates a component allowlist middleware.
+   *
+   * User IDs are trimmed and empty values are ignored before the allowlist is stored.
+   *
+   * @param userIds Discord user IDs allowed to use the component.
+   * @param message Message sent when the current user is not in the allowlist.
+   */
   constructor(userIds: Iterable<string>, message: MessageOptions) {
     super();
 

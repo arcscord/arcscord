@@ -2,11 +2,22 @@ import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
 
+/**
+ * Restricts a message component to the user who created the original interaction.
+ *
+ * If the original interaction author cannot be detected, the middleware continues
+ * with an `ignore` status so other middleware or the handler can decide what to do.
+ */
 export class AuthorOnlyMiddleware extends ComponentMiddleware {
   name = "authorOnly" as const;
 
   message: MessageOptions;
 
+  /**
+   * Creates an author-only component middleware.
+   *
+   * @param message Message sent when a different user tries to use the component.
+   */
   constructor(message: MessageOptions) {
     super();
 

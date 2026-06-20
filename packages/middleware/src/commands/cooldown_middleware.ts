@@ -11,6 +11,12 @@ type CooldownMessageOptions = {
   commandName: string;
 };
 
+/**
+ * Prevents a user from running a command again before a configured cooldown expires.
+ *
+ * Cooldowns are tracked per user ID. When a user is still on cooldown, the
+ * middleware cancels the command and sends the configured message callback.
+ */
 export class CooldownMiddleware extends CommandMiddleware {
   name = "cooldown" as const;
 
@@ -20,6 +26,13 @@ export class CooldownMiddleware extends CommandMiddleware {
 
   message: MessageOptions<CooldownMessageOptions>;
 
+  /**
+   * Creates a command cooldown middleware.
+   *
+   * @param duration Cooldown duration in seconds.
+   * @param message Message factory used while the user is still on cooldown.
+   * @param autoClear Cleanup interval in seconds, or `false` to disable automatic cleanup.
+   */
   constructor(duration: number, message: MessageOptions<CooldownMessageOptions>, autoClear: false | number = 3600) {
     super();
     this.duration = duration;
