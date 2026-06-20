@@ -2,6 +2,7 @@ import type { CommandContext } from "./command_context";
 import type { CommandMiddlewareRun } from "./command_middleware";
 import { ok } from "@arcscord/error";
 import { describe, expect, it, vi } from "vitest";
+import { createMockCommandContext } from "#/testing";
 import { CommandManager } from "../../manager/command/command_manager.class";
 import { CommandError } from "../../utils/error/class/command_error";
 import { CommandMiddleware } from "./command_middleware";
@@ -14,23 +15,11 @@ class TestCommandMiddleware extends CommandMiddleware {
   }
 }
 
-const interaction = {
-  channel: null,
-  commandId: "command_1",
-  guild: null,
-  isChatInputCommand: () => false,
-  isMessageContextMenuCommand: () => false,
-  isUserContextMenuCommand: () => false,
-  user: {
-    id: "user_1",
-    username: "test-user",
+const context = createMockCommandContext({
+  interaction: {
+    kind: "unknown",
   },
-};
-
-const context = {
-  command: {},
-  interaction,
-} as CommandContext;
+});
 
 const runMiddleware = (
   CommandManager.prototype as unknown as {

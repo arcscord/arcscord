@@ -2,6 +2,7 @@ import type { ComponentMiddlewareRun } from "./component_middleware";
 import type { ComponentContext } from "./context";
 import { ok } from "@arcscord/error";
 import { describe, expect, it, vi } from "vitest";
+import { createMockComponentContext } from "#/testing";
 import { ComponentManager } from "../../manager/component/component_manager.class";
 import { ComponentError } from "../../utils/error/class/component_error";
 import { ComponentMiddleware } from "./component_middleware";
@@ -14,18 +15,7 @@ class TestComponentMiddleware extends ComponentMiddleware {
   }
 }
 
-const interaction = {
-  channel: null,
-  guild: null,
-  user: {
-    id: "user_1",
-    username: "test-user",
-  },
-};
-
-const context = {
-  interaction,
-} as ComponentContext;
+const context = createMockComponentContext();
 
 const runMiddleware = (
   ComponentManager.prototype as unknown as {
@@ -58,7 +48,7 @@ describe("componentMiddleware", () => {
 
   it("creates an error result", () => {
     const middleware = new TestComponentMiddleware();
-    const error = new ComponentError({ message: "middleware failed", interaction: interaction as any });
+    const error = new ComponentError({ message: "middleware failed", interaction: context.interaction });
 
     expect(middleware.error(error)).toEqual({
       cancel: null,
@@ -114,7 +104,7 @@ describe("componentMiddleware", () => {
   });
 
   it("returns an error when middleware fails", async () => {
-    const middlewareError = new ComponentError({ message: "middleware failed", interaction: interaction as any });
+    const middlewareError = new ComponentError({ message: "middleware failed", interaction: context.interaction });
     const fail = new class extends ComponentMiddleware {
       readonly name = "fail" as const;
 

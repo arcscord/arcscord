@@ -4,5 +4,10 @@
     "rootDir": "./",
     "outDir": "../dist",
     "incremental": false
-  }
+  },
+  "exclude": [
+    "**/*.test.ts",
+    "**/*.no.test.ts",
+    "**/_test/**"
+  ]
 }

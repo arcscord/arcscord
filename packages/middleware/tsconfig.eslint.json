@@ -1,4 +1,12 @@
 {
   "extends": "../../tsconfig.eslint.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "#/*": ["../arcscord/src/*"],
+      "arcscord": ["../arcscord/src/index.ts"],
+      "arcscord/testing": ["../arcscord/src/testing/index.ts"]
+    }
+  },
   "include": ["src", "tsup.config.ts"]
 }

@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
-import { createMockComponentContext } from "../_test/context";
+import { createMockComponentContext } from "arcscord/testing";
+import { describe, expect, it, vi } from "vitest";
 import { ComponentUserAllowListMiddleware } from "./user_allow_list_middleware";
+
+function createContext(options: Parameters<typeof createMockComponentContext>[0] = {}) {
+  return createMockComponentContext({
+    ...options,
+    mockFunction: implementation => vi.fn(implementation),
+  });
+}
 
 describe("componentUserAllowListMiddleware", () => {
   it("continues when the user is allowed", () => {
@@ -8,7 +15,7 @@ describe("componentUserAllowListMiddleware", () => {
       content: "Not allowed",
     });
 
-    expect(middleware.run(createMockComponentContext({ userId: "user_1" }))).toEqual({
+    expect(middleware.run(createContext({ userId: "user_1" }))).toEqual({
       cancel: null,
       error: null,
       next: {
@@ -21,7 +28,7 @@ describe("componentUserAllowListMiddleware", () => {
     const middleware = new ComponentUserAllowListMiddleware(["user_1"], {
       content: "Not allowed",
     });
-    const ctx = createMockComponentContext({ userId: "user_2" });
+    const ctx = createContext({ userId: "user_2" });
 
     const result = middleware.run(ctx);
 
@@ -39,7 +46,7 @@ describe("componentUserAllowListMiddleware", () => {
     const middleware = new ComponentUserAllowListMiddleware(["user_1"], {
       content: "Not allowed",
     });
-    const ctx = createMockComponentContext({ defer: true, userId: "user_2" });
+    const ctx = createContext({ defer: true, userId: "user_2" });
 
     const result = middleware.run(ctx);
 

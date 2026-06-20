@@ -25,13 +25,25 @@
   "module": "dist/esm/index.mjs",
   "types": "dist/cjs/index.d.ts",
   "exports": {
-    "import": {
-      "types": "./dist/esm/index.d.mts",
-      "default": "./dist/esm/index.mjs"
+    ".": {
+      "import": {
+        "types": "./dist/esm/index.d.mts",
+        "default": "./dist/esm/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.ts",
+        "default": "./dist/cjs/index.cjs"
+      }
     },
-    "require": {
-      "types": "./dist/cjs/index.d.ts",
-      "default": "./dist/cjs/index.cjs"
+    "./testing": {
+      "import": {
+        "types": "./dist/esm/testing/index.d.mts",
+        "default": "./dist/esm/testing/index.mjs"
+      },
+      "require": {
+        "types": "./dist/cjs/testing/index.d.ts",
+        "default": "./dist/cjs/testing/index.cjs"
+      }
     }
   },
   "imports": {

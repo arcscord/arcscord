@@ -1,5 +1,6 @@
 import { ApplicationCommandOptionType } from "discord-api-types/v10";
 import { describe, expect, it } from "vitest";
+import { createMockCommandInteraction } from "#/testing";
 import {
   commandInteractionToString,
   slashCommandOptionValueToString,
@@ -23,8 +24,7 @@ describe("command util string formatting", () => {
   });
 
   it("formats chat input commands without options by default", () => {
-    const interaction = {
-      isChatInputCommand: () => true,
+    const interaction = createMockCommandInteraction({
       commandName: "ping",
       commandId: "cmd_1",
       options: {
@@ -32,14 +32,13 @@ describe("command util string formatting", () => {
           { type: ApplicationCommandOptionType.String, name: "target", value: "world" },
         ],
       },
-    } as any;
+    });
 
     expect(commandInteractionToString(interaction)).toBe("slash:ping (cmd_1)");
   });
 
   it("formats chat input commands with subcommands and options", () => {
-    const interaction = {
-      isChatInputCommand: () => true,
+    const interaction = createMockCommandInteraction({
       commandName: "admin",
       commandId: "cmd_2",
       options: {
@@ -60,7 +59,7 @@ describe("command util string formatting", () => {
           },
         ],
       },
-    } as any;
+    });
 
     expect(commandInteractionToString(interaction, false)).toBe(
       "slash:admin.users.ban (cmd_2) target=User<user_1> reason=String<spam>",
@@ -68,22 +67,19 @@ describe("command util string formatting", () => {
   });
 
   it("formats user context menu commands", () => {
-    const interaction = {
-      isChatInputCommand: () => false,
-      isUserContextMenuCommand: () => true,
+    const interaction = createMockCommandInteraction({
+      kind: "userContextMenu",
       commandName: "Profile",
       commandId: "cmd_3",
       targetId: "user_1",
-    } as any;
+    });
 
     expect(commandInteractionToString(interaction)).toBe("user:Profile (cmd_3) targetUser=user_1");
   });
 
   it("formats message context menu commands", () => {
-    const interaction = {
-      isChatInputCommand: () => false,
-      isUserContextMenuCommand: () => false,
-      isMessageContextMenuCommand: () => true,
+    const interaction = createMockCommandInteraction({
+      kind: "messageContextMenu",
       commandName: "Info",
       commandId: "cmd_4",
       targetId: "message_1",
@@ -91,7 +87,7 @@ describe("command util string formatting", () => {
         channelId: "channel_1",
         guildId: "guild_1",
       },
-    } as any;
+    });
 
     expect(commandInteractionToString(interaction)).toBe(
       "msg:Info (cmd_4) targetMessage=message_1 targetChannel=channel_1 targetGuild=guild_1",
@@ -99,11 +95,9 @@ describe("command util string formatting", () => {
   });
 
   it("formats unknown command interactions", () => {
-    const interaction = {
-      isChatInputCommand: () => false,
-      isUserContextMenuCommand: () => false,
-      isMessageContextMenuCommand: () => false,
-    } as any;
+    const interaction = createMockCommandInteraction({
+      kind: "unknown",
+    });
 
     expect(commandInteractionToString(interaction)).toBe("Unknown Command");
   });

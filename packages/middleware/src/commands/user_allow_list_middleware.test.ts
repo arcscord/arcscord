@@ -1,6 +1,13 @@
-import { describe, expect, it } from "vitest";
-import { createMockCommandContext } from "../_test/context";
+import { createMockCommandContext } from "arcscord/testing";
+import { describe, expect, it, vi } from "vitest";
 import { CommandUserAllowListMiddleware } from "./user_allow_list_middleware";
+
+function createContext(options: Parameters<typeof createMockCommandContext>[0] = {}) {
+  return createMockCommandContext({
+    ...options,
+    mockFunction: implementation => vi.fn(implementation),
+  });
+}
 
 describe("commandUserAllowListMiddleware", () => {
   it("continues when the user is allowed", () => {
@@ -8,7 +15,7 @@ describe("commandUserAllowListMiddleware", () => {
       content: "Not allowed",
     });
 
-    expect(middleware.run(createMockCommandContext({ userId: "user_1" }))).toEqual({
+    expect(middleware.run(createContext({ userId: "user_1" }))).toEqual({
       cancel: null,
       error: null,
       next: {
@@ -21,7 +28,7 @@ describe("commandUserAllowListMiddleware", () => {
     const middleware = new CommandUserAllowListMiddleware(["user_1"], {
       content: "Not allowed",
     });
-    const ctx = createMockCommandContext({ userId: "user_2" });
+    const ctx = createContext({ userId: "user_2" });
 
     const result = middleware.run(ctx);
 
@@ -39,7 +46,7 @@ describe("commandUserAllowListMiddleware", () => {
     const middleware = new CommandUserAllowListMiddleware(["user_1"], {
       content: "Not allowed",
     });
-    const ctx = createMockCommandContext({ defer: true, userId: "user_2" });
+    const ctx = createContext({ defer: true, userId: "user_2" });
 
     const result = middleware.run(ctx);
 

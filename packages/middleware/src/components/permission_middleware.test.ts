@@ -1,13 +1,20 @@
-import { describe, expect, it } from "vitest";
-import { createMockComponentContext } from "../_test/context";
+import { createMockComponentContext } from "arcscord/testing";
+import { describe, expect, it, vi } from "vitest";
 import { ComponentPermissionMiddleware } from "./permission_middleware";
+
+function createContext(options: Parameters<typeof createMockComponentContext>[0] = {}) {
+  return createMockComponentContext({
+    ...options,
+    mockFunction: implementation => vi.fn(implementation),
+  });
+}
 
 describe("componentPermissionMiddleware", () => {
   it("continues when the member has every required permission", () => {
     const middleware = new ComponentPermissionMiddleware(["ManageMessages", "BanMembers"], () => ({
       content: "Missing permissions",
     }));
-    const ctx = createMockComponentContext({
+    const ctx = createContext({
       memberPermissions: ["ManageMessages", "BanMembers"],
     });
 
@@ -24,7 +31,7 @@ describe("componentPermissionMiddleware", () => {
     const middleware = new ComponentPermissionMiddleware(["ManageMessages", "BanMembers"], ({ missingPermissions }) => ({
       content: `Missing: ${missingPermissions.join(", ")}`,
     }));
-    const ctx = createMockComponentContext({
+    const ctx = createContext({
       memberPermissions: ["ManageMessages"],
     });
 
@@ -44,7 +51,7 @@ describe("componentPermissionMiddleware", () => {
     const middleware = new ComponentPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `Missing: ${missingPermissions.join(", ")}`,
     }));
-    const ctx = createMockComponentContext({
+    const ctx = createContext({
       defer: true,
       memberPermissions: [],
     });

@@ -7,6 +7,8 @@ export default createVitestConfig({
   resolve: {
     alias: {
       "#/": new URL("./packages/arcscord/src/", import.meta.url).pathname,
+      "arcscord/testing": new URL("./packages/arcscord/src/testing/index.ts", import.meta.url).pathname,
+      "arcscord": new URL("./packages/arcscord/src/index.ts", import.meta.url).pathname,
     },
   },
 });
