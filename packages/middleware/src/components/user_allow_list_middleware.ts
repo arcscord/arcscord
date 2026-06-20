@@ -26,7 +26,7 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
    * User IDs are trimmed and empty values are ignored before the allowlist is stored.
    *
    * @param userIds Discord user IDs allowed to use the component.
-   * @param message Message sent when the current user is not in the allowlist.
+   * @param message Static Discord message sent when the current user is not in the allowlist.
    */
   constructor(userIds: Iterable<string>, message: MessageOptions) {
     super();

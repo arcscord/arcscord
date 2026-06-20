@@ -3,11 +3,30 @@ import type { User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
 
-type CooldownMessageOptions = {
+export type CooldownMessageOptions = {
+  /**
+   * User who triggered the command.
+   */
   user: User;
+
+  /**
+   * Configured cooldown duration in seconds.
+   */
   cooldownDuration: number;
+
+  /**
+   * Remaining cooldown time in milliseconds.
+   */
   cooldownRemaining: number;
+
+  /**
+   * Date when the current cooldown ends.
+   */
   cooldownEnd: Date;
+
+  /**
+   * Discord command name that triggered the cooldown.
+   */
   commandName: string;
 };
 
@@ -30,7 +49,7 @@ export class CooldownMiddleware extends CommandMiddleware {
    * Creates a command cooldown middleware.
    *
    * @param duration Cooldown duration in seconds.
-   * @param message Message factory used while the user is still on cooldown.
+   * @param message Callback called when the command is still on cooldown. It receives {@link CooldownMessageOptions} and returns the Discord message to send.
    * @param autoClear Cleanup interval in seconds, or `false` to disable automatic cleanup.
    */
   constructor(duration: number, message: MessageOptions<CooldownMessageOptions>, autoClear: false | number = 3600) {

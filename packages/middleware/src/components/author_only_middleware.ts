@@ -16,7 +16,7 @@ export class AuthorOnlyMiddleware extends ComponentMiddleware {
   /**
    * Creates an author-only component middleware.
    *
-   * @param message Message sent when a different user tries to use the component.
+   * @param message Static Discord message sent when a different user tries to use the component.
    */
   constructor(message: MessageOptions) {
     super();

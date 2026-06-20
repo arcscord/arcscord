@@ -9,8 +9,19 @@ export type ComponentPermissionMiddlewareNext = {
 };
 
 export type ComponentPermissionMiddlewareMessageOptions = {
+  /**
+   * Required permissions the current member does not have.
+   */
   missingPermissions: PermissionsString[];
+
+  /**
+   * Full required permission list configured on the middleware.
+   */
   permissions: PermissionsString[];
+
+  /**
+   * User who triggered the component interaction.
+   */
   user: User;
 };
 
@@ -34,7 +45,7 @@ export class ComponentPermissionMiddleware extends ComponentMiddleware {
    * full required permission list and the permissions missing from the current member.
    *
    * @param permissions Discord permissions required to continue the component handler.
-   * @param message Message factory used when the current member is missing permissions.
+   * @param message Callback called when the current member is missing permissions. It receives {@link ComponentPermissionMiddlewareMessageOptions} and returns the Discord message to send.
    */
   constructor(
     permissions: Iterable<PermissionsString>,
