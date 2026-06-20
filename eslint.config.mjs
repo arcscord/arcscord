@@ -9,7 +9,7 @@ export default antfu(
     },
     typescript: true,
     ignores: [
-      "docs/*",
+      "website/docs/*",
       "json_docs/*",
       ".vscode/settings.json",
       "packages/cli/templates/**",
