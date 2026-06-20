@@ -233,6 +233,8 @@ For best type inference, define middleware names with `as const`.
 readonly name = "userScope" as const;
 ```
 
+Middleware names must be unique inside a single `use` array. Arcscord rejects duplicate names before running any middleware, because duplicate names would overwrite the same `ctx.additional[name]` entry.
+
 ## Choosing `next`, `cancel`, or `error`
 
 Use `next` when the handler should continue:

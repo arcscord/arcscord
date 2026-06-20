@@ -773,6 +773,19 @@ export class CommandManager
     if (!command.use || command.use.length === 0) {
       return ok({});
     }
+    const middlewareNames = new Set<string>();
+    for (const middleware of command.use) {
+      if (middlewareNames.has(middleware.name)) {
+        return error(new CommandError({
+          message: `duplicate middleware name "${middleware.name}"`,
+          ctx: context,
+          debugs: {
+            middlewareName: middleware.name,
+          },
+        }));
+      }
+      middlewareNames.add(middleware.name);
+    }
     for (const middleware of command.use) {
       try {
         const result = await middleware.run(context);

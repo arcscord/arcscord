@@ -81,6 +81,21 @@ describe("commandMiddleware", () => {
     expect(additional).toEqual({ test: { allowed: true } });
   });
 
+  it("returns an error when middleware names are duplicated", async () => {
+    const first = new TestCommandMiddleware();
+    const second = new TestCommandMiddleware();
+    const firstRun = vi.spyOn(first, "run");
+    const secondRun = vi.spyOn(second, "run");
+
+    const [err, additional] = await runMiddleware({ use: [first, second] } as any, context);
+
+    expect(err).toBeInstanceOf(CommandError);
+    expect(err?.message).toBe("duplicate middleware name \"test\"");
+    expect(additional).toBeNull();
+    expect(firstRun).not.toHaveBeenCalled();
+    expect(secondRun).not.toHaveBeenCalled();
+  });
+
   it("stops when middleware cancels", async () => {
     const cancel = new class extends CommandMiddleware {
       readonly name = "cancel" as const;

@@ -370,6 +370,19 @@ export class ComponentManager extends BaseManager {
     if (!component.use || component.use.length === 0) {
       return ok({});
     }
+    const middlewareNames = new Set<string>();
+    for (const middleware of component.use) {
+      if (middlewareNames.has(middleware.name)) {
+        return error(new ComponentError({
+          message: `duplicate middleware name "${middleware.name}"`,
+          interaction: context.interaction,
+          debugs: {
+            middlewareName: middleware.name,
+          },
+        }));
+      }
+      middlewareNames.add(middleware.name);
+    }
     for (const middleware of component.use) {
       try {
         const result = await middleware.run(context);
