@@ -33,12 +33,6 @@ export type CommandOptions = {
    */
   preReplyEphemeral?: boolean;
 
-  /**
-   * Whether the command is restricted to developers only.
-   * @see {@link ArcClientOptions.developers}
-   * @default false
-   */
-  developerCommand?: boolean;
 };
 
 /**

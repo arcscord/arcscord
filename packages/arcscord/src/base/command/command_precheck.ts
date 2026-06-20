@@ -33,16 +33,6 @@ export function preCheck(
   client: ArcClient,
   interaction: CommandInteraction,
 ): MaybePromise<Result<boolean, BaseError>> {
-  if (options.developerCommand) {
-    if (
-      !client.arcOptions.developers?.find(
-        v => v.trim() === interaction.user.id,
-      )
-    ) {
-      return baseReply(interaction, client.defaultMessages.devOnly, false);
-    }
-  }
-
   const neededPermissions = options.neededPermissions || [];
   if (neededPermissions.length > 0 && interaction.inGuild()) {
     const missingPermissions = neededPermissions.filter(

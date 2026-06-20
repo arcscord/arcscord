@@ -113,14 +113,6 @@ export class ArcClient extends DJSClient {
             ],
           };
         },
-        devOnly: {
-          embeds: [
-            new EmbedBuilder()
-              .setTitle("Reserved to Developer")
-              .setDescription("This command is reserved for bot developers")
-              .setColor("Red"),
-          ],
-        },
       },
       options.baseMessages,
     );
@@ -246,14 +238,6 @@ export class ArcClient extends DJSClient {
    */
   getMissingPermissionsMessage(permissionsMissing: PermissionsString[]): BaseMessageOptions {
     return this.defaultMessages.missingPermissions(permissionsMissing);
-  }
-
-  /**
-   * Gets a message indicating the command is for developers only
-   * @returns The developer-only message
-   */
-  getDevOnlyMessage(): BaseMessageOptions {
-    return this.defaultMessages.devOnly;
   }
 
   addIntents(intents: BitFieldResolvable<GatewayIntentsString, number>): void {
