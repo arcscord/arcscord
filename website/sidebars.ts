@@ -11,6 +11,7 @@ const sidebars: SidebarsConfig = {
         "guide/client",
         "guide/commands",
         "guide/components",
+        "guide/middleware",
         "guide/events",
         "guide/localization",
         "guide/logger",
