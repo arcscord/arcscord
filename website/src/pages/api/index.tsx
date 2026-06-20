@@ -40,6 +40,17 @@ type TypeDocType = {
   declaration?: TypeDocReflection;
 };
 
+type TypeDocCommentPart = {
+  kind?: string;
+  tag?: string;
+  text?: string;
+  target?: number | {
+    packageName?: string;
+    packagePath?: string;
+    qualifiedName?: string;
+  };
+};
+
 type TypeDocReflection = {
   id: number;
   name: string;
@@ -52,8 +63,8 @@ type TypeDocReflection = {
     isProtected?: boolean;
   };
   comment?: {
-    summary?: Array<{ text?: string }>;
-    blockTags?: Array<{ tag: string; content?: Array<{ text?: string }> }>;
+    summary?: TypeDocCommentPart[];
+    blockTags?: Array<{ tag: string; content?: TypeDocCommentPart[] }>;
   };
   type?: TypeDocType;
   extendedTypes?: TypeDocType[];
@@ -103,8 +114,18 @@ function commentText(reflection: TypeDocReflection | undefined): string {
   return reflection?.comment?.summary?.map(part => part.text ?? "").join("").trim() ?? "";
 }
 
+function hasComment(reflection: TypeDocReflection | undefined): boolean {
+  return commentText(reflection).length > 0;
+}
+
 function primarySignature(reflection: TypeDocReflection | undefined): TypeDocReflection | undefined {
   return reflection?.signatures?.[0] ?? reflection;
+}
+
+function displayCommentParts(reflection: TypeDocReflection | undefined): TypeDocCommentPart[] {
+  return hasComment(reflection)
+    ? reflection?.comment?.summary ?? []
+    : primarySignature(reflection)?.comment?.summary ?? [];
 }
 
 function displayComment(reflection: TypeDocReflection | undefined): string {
@@ -384,6 +405,37 @@ function buildTopLevelNameMap(symbols: TypeDocReflection[]): Map<string, number>
   return map;
 }
 
+function inlineLinkOwnerId(
+  part: TypeDocCommentPart,
+  ownerMap: Map<number, number>,
+  nameMap: Map<string, number>,
+): number | undefined {
+  if (part.kind !== "inline-tag" || part.tag !== "@link")
+    return undefined;
+
+  if (typeof part.target === "number")
+    return ownerMap.get(part.target);
+
+  const qualifiedName = typeof part.target === "object" ? part.target.qualifiedName : undefined;
+  const candidates = [
+    part.text,
+    qualifiedName,
+    lastSegment(qualifiedName, "."),
+    lastSegment(qualifiedName, "/"),
+  ].filter((candidate): candidate is string => Boolean(candidate));
+
+  for (const candidate of candidates) {
+    const exact = nameMap.get(candidate);
+    if (exact)
+      return exact;
+    const normalized = nameMap.get(candidate.toLowerCase());
+    if (normalized)
+      return normalized;
+  }
+
+  return undefined;
+}
+
 function internalPackageName(type: TypeDocType): string | undefined {
   return typeof type.target === "object"
     ? type.target.packageName ?? type.package
@@ -477,6 +529,44 @@ function ExampleBlock({ example }: { example: string }): ReactNode {
   }
 
   return <CodeBlock>{example}</CodeBlock>;
+}
+
+function CommentView({
+  reflection,
+  ownerMap,
+  nameMap,
+  onSelectSymbol,
+}: {
+  reflection: TypeDocReflection | undefined;
+  ownerMap: Map<number, number>;
+  nameMap: Map<string, number>;
+  onSelectSymbol: (id: number) => void;
+}): ReactNode {
+  return (
+    <>
+      {displayCommentParts(reflection).map((part, index) => {
+        if (part.kind !== "inline-tag" || part.tag !== "@link")
+          return <span key={index}>{part.text ?? ""}</span>;
+
+        const ownerId = inlineLinkOwnerId(part, ownerMap, nameMap);
+        const label = part.text || "link";
+
+        if (!ownerId)
+          return <span key={index}>{label}</span>;
+
+        return (
+          <button
+            key={index}
+            className="api-comment-link"
+            type="button"
+            onClick={() => onSelectSymbol(ownerId)}
+          >
+            {label}
+          </button>
+        );
+      })}
+    </>
+  );
 }
 
 function TypeView({
@@ -956,7 +1046,11 @@ export default function ApiPage(): ReactNode {
               {shouldShowSignature(selectedSymbol) && (
                 <pre className="api-signature"><code><SignatureView reflection={selectedSymbol} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} /></code></pre>
               )}
-              {displayComment(selectedSymbol) && <p className="api-description">{displayComment(selectedSymbol)}</p>}
+              {displayComment(selectedSymbol) && (
+                <p className="api-description">
+                  <CommentView reflection={selectedSymbol} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} />
+                </p>
+              )}
 
               {relatedTypes(selectedSymbol).length > 0 && (
                 <dl className="api-relations">
@@ -1005,7 +1099,11 @@ export default function ApiPage(): ReactNode {
                       <article key={member.id} className="api-member">
                         <div className="api-member__meta">{kindName(member)}</div>
                         <h3><code><SignatureView reflection={member} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} /></code></h3>
-                        {displayComment(member) && <p>{displayComment(member)}</p>}
+                        {displayComment(member) && (
+                          <p>
+                            <CommentView reflection={member} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} />
+                          </p>
+                        )}
                         {signature.parameters?.length
                           ? (
                               <div className="api-params">
@@ -1020,7 +1118,11 @@ export default function ApiPage(): ReactNode {
                                       <span className="api-token api-token--operator">: </span>
                                       <TypeView type={parameter.type} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} />
                                     </code>
-                                    {displayComment(parameter) && <span>{displayComment(parameter)}</span>}
+                                    {displayComment(parameter) && (
+                                      <span>
+                                        <CommentView reflection={parameter} ownerMap={ownerMap} nameMap={nameMap} onSelectSymbol={selectSymbol} />
+                                      </span>
+                                    )}
                                   </div>
                                 ))}
                               </div>

@@ -304,6 +304,22 @@ a.api-type:hover {
   font-size: 1.05rem;
 }
 
+.api-comment-link {
+  border: 0;
+  padding: 0;
+  color: var(--ifm-link-color);
+  background: transparent;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+  text-underline-offset: 0.16em;
+  cursor: pointer;
+}
+
+.api-comment-link:hover {
+  color: var(--ifm-link-hover-color);
+}
+
 .api-relations {
   display: grid;
   gap: 0.5rem;
