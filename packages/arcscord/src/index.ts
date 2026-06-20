@@ -55,6 +55,7 @@ export {
 export type {
   CancelCommandMiddleware,
   CommandMiddlewareRun,
+  ErrorCommandMiddleware,
   NextCommandMiddleware,
 } from "./base/command/command_middleware";
 export type {
@@ -207,6 +208,7 @@ export {
 export type {
   CancelComponentMiddleware,
   ComponentMiddlewareRun,
+  ErrorComponentMiddleware,
   NextComponentMiddleware,
 } from "./base/components/component_middleware";
 export {

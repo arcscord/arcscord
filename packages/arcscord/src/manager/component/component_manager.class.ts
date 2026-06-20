@@ -365,21 +365,37 @@ export class ComponentManager extends BaseManager {
     }
   }
 
-  private async runMiddleware(props: ComponentHandler, context: ComponentContext): Promise<Result<object | false, ComponentError>> {
-    const additional: Record<string, Record<string, unknown>> = {};
-    if (!props.use || props.use.length === 0) {
+  private async runMiddleware(component: ComponentHandler, context: ComponentContext): Promise<Result<object | false, ComponentError>> {
+    const additional: Record<string, NonNullable<unknown>> = {};
+    if (!component.use || component.use.length === 0) {
       return ok({});
     }
-    for (const middleware of props.use) {
-      const result = await middleware.run(context);
-      if (result.cancel) {
-        const [err] = await result.cancel;
-        if (err) {
-          return error(err);
+    for (const middleware of component.use) {
+      try {
+        const result = await middleware.run(context);
+        if (result.error) {
+          return error(await result.error);
         }
-        return ok(false);
+
+        if (result.cancel) {
+          const [err] = await result.cancel;
+          if (err) {
+            return error(err);
+          }
+          return ok(false);
+        }
+        additional[middleware.name] = result.next;
       }
-      additional[middleware.name] = result.next;
+      catch (e) {
+        return error(new ComponentError({
+          message: `failed to run middleware : ${anyToError(e).message}`,
+          interaction: context.interaction,
+          originalError: anyToError(e),
+          debugs: {
+            middlewareName: middleware.name,
+          },
+        }));
+      }
     }
     return ok(additional);
   }

@@ -1,4 +1,5 @@
 import type { ComponentContext, ComponentRunResult } from "#/base";
+import type { ComponentError } from "#/utils/error/class/component_error";
 import type { MaybePromise } from "#/utils/type/util.type";
 
 /**
@@ -7,6 +8,7 @@ import type { MaybePromise } from "#/utils/type/util.type";
  */
 export type NextComponentMiddleware<T extends NonNullable<unknown>> = {
   cancel: null;
+  error: null;
   next: T;
 };
 
@@ -15,6 +17,16 @@ export type NextComponentMiddleware<T extends NonNullable<unknown>> = {
  */
 export type CancelComponentMiddleware = {
   cancel: MaybePromise<ComponentRunResult>;
+  error: null;
+  next: null;
+};
+
+/**
+ * Represents a component middleware that fails the component.
+ */
+export type ErrorComponentMiddleware = {
+  cancel: null;
+  error: MaybePromise<ComponentError>;
   next: null;
 };
 
@@ -24,7 +36,8 @@ export type CancelComponentMiddleware = {
  */
 export type ComponentMiddlewareRun<T extends NonNullable<unknown>>
   = | NextComponentMiddleware<T>
-    | CancelComponentMiddleware;
+    | CancelComponentMiddleware
+    | ErrorComponentMiddleware;
 
 /**
  * Abstract class representing a component middleware.
@@ -55,6 +68,7 @@ export abstract class ComponentMiddleware {
   next<T extends NonNullable<unknown>>(value: T): ComponentMiddlewareRun<T> {
     return {
       cancel: null,
+      error: null,
       next: value,
     };
   }
@@ -70,6 +84,23 @@ export abstract class ComponentMiddleware {
   ): ComponentMiddlewareRun<T> {
     return {
       cancel: value,
+      error: null,
+      next: null,
+    };
+  }
+
+  /**
+   * Create the error middleware run result.
+   * @template T - The type of the next value when the middleware does not fail.
+   * @param value - The error value.
+   * @returns The error middleware run result.
+   */
+  error<T extends NonNullable<unknown>>(
+    value: MaybePromise<ComponentError>,
+  ): ComponentMiddlewareRun<T> {
+    return {
+      cancel: null,
+      error: value,
       next: null,
     };
   }

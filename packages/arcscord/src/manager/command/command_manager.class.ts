@@ -8,7 +8,7 @@ import type {
   CommandInteraction,
 } from "discord.js";
 import type { ArcClient } from "#/base";
-import type { CommandHandler } from "#/base/command";
+import type { CommandContext, CommandHandler } from "#/base/command";
 import type { Command } from "#/base/command/command_definition.type";
 import type {
   CommandErrorHandler,
@@ -655,59 +655,20 @@ export class CommandManager
     const start = Date.now();
     /* Middlewares */
 
-    if (command.use && command.use.length > 0) {
-      for (const middleware of command.use) {
-        try {
-          // @ts-expect-error fix generics with middleware
-          const result = await middleware.run(context);
-          if (result.cancel) {
-            const [err4, result2] = await result.cancel;
-            if (err4) {
-              return this.handleError({
-                error: err4,
-                interaction,
-                internal: true,
-              });
-            }
-            const infos: CommandResultHandlerInfos = {
-              result: ok(
-                `Middleware ${middleware.name} stopped, result : ${result2}`,
-              ),
-              interaction,
-              command,
-              defer: context.defer,
-              start,
-              end: Date.now(),
-            };
-
-            return this.handleResult(infos);
-          }
-
-          context.additional[middleware.name] = result.next;
-        }
-        catch (e) {
-          const infos: CommandResultHandlerInfos = {
-            result: error(
-              new CommandError({
-                message: `failed to run middleware : ${anyToError(e).message}`,
-                ctx: context,
-                originalError: anyToError(e),
-                debugs: {
-                  middlewareName: middleware.name,
-                },
-              }),
-            ),
-            interaction,
-            command,
-            defer: context.defer,
-            start,
-            end: Date.now(),
-          };
-
-          return this.handleResult(infos);
-        }
-      }
+    const [err4, middlewareResult] = await this.runMiddleware(command, context as CommandContext);
+    if (err4) {
+      return this.handleError({
+        error: err4,
+        interaction,
+        command,
+        context: context as CommandContext,
+        internal: false,
+      });
     }
+    if (!middlewareResult) {
+      return;
+    }
+    context.additional = middlewareResult as typeof context.additional;
 
     /* Command Run */
 
@@ -805,6 +766,41 @@ export class CommandManager
         autocomplete: true,
       });
     }
+  }
+
+  private async runMiddleware(command: CommandHandler, context: CommandContext): Promise<Result<object | false, CommandError>> {
+    const additional: Record<string, NonNullable<unknown>> = {};
+    if (!command.use || command.use.length === 0) {
+      return ok({});
+    }
+    for (const middleware of command.use) {
+      try {
+        const result = await middleware.run(context);
+        if (result.error) {
+          return error(await result.error);
+        }
+
+        if (result.cancel) {
+          const [err] = await result.cancel;
+          if (err) {
+            return error(err);
+          }
+          return ok(false);
+        }
+        additional[middleware.name] = result.next;
+      }
+      catch (e) {
+        return error(new CommandError({
+          message: `failed to run middleware : ${anyToError(e).message}`,
+          ctx: context,
+          originalError: anyToError(e),
+          debugs: {
+            middlewareName: middleware.name,
+          },
+        }));
+      }
+    }
+    return ok(additional);
   }
 
   async sendInternalError(

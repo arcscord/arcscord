@@ -1,4 +1,5 @@
 import type { CommandContext, CommandRunResult } from "#/base";
+import type { CommandError } from "#/utils/error/class/command_error";
 import type { MaybePromise } from "#/utils/type/util.type";
 
 /**
@@ -7,6 +8,7 @@ import type { MaybePromise } from "#/utils/type/util.type";
  */
 export type NextCommandMiddleware<T extends NonNullable<unknown>> = {
   cancel: null;
+  error: null;
   next: T;
 };
 
@@ -15,6 +17,16 @@ export type NextCommandMiddleware<T extends NonNullable<unknown>> = {
  */
 export type CancelCommandMiddleware = {
   cancel: MaybePromise<CommandRunResult>;
+  error: null;
+  next: null;
+};
+
+/**
+ * Represents a command middleware that fails the command.
+ */
+export type ErrorCommandMiddleware = {
+  cancel: null;
+  error: MaybePromise<CommandError>;
   next: null;
 };
 
@@ -24,7 +36,8 @@ export type CancelCommandMiddleware = {
  */
 export type CommandMiddlewareRun<T extends NonNullable<unknown>>
   = | NextCommandMiddleware<T>
-    | CancelCommandMiddleware;
+    | CancelCommandMiddleware
+    | ErrorCommandMiddleware;
 
 /**
  * Abstract class representing a command middleware.
@@ -55,6 +68,7 @@ export abstract class CommandMiddleware {
   next<T extends NonNullable<unknown>>(value: T): CommandMiddlewareRun<T> {
     return {
       cancel: null,
+      error: null,
       next: value,
     };
   }
@@ -70,6 +84,23 @@ export abstract class CommandMiddleware {
   ): CommandMiddlewareRun<T> {
     return {
       cancel: value,
+      error: null,
+      next: null,
+    };
+  }
+
+  /**
+   * Create the error middleware run result.
+   * @template T - The type of the next value when the middleware does not fail.
+   * @param value - The error value.
+   * @returns The error middleware run result.
+   */
+  error<T extends NonNullable<unknown>>(
+    value: MaybePromise<CommandError>,
+  ): CommandMiddlewareRun<T> {
+    return {
+      cancel: null,
+      error: value,
       next: null,
     };
   }
