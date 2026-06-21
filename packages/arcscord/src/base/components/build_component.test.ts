@@ -1,4 +1,12 @@
 import { ButtonStyle, ComponentType } from "discord-api-types/v10";
+import {
+  ButtonBuilder,
+  ChannelSelectMenuBuilder,
+  MentionableSelectMenuBuilder,
+  RoleSelectMenuBuilder,
+  StringSelectMenuBuilder,
+  UserSelectMenuBuilder,
+} from "discord.js";
 import { describe, expect, it } from "vitest";
 import {
   buildButtonActionRow,
@@ -12,15 +20,18 @@ import {
   buildLabel,
   buildLinkButton,
   buildMediaGallery,
+  buildMentionableSelectMenu,
   buildModal,
   buildPremiumButton,
   buildRadioGroup,
+  buildRoleSelectMenu,
   buildSection,
   buildSeparator,
   buildStringSelectMenu,
   buildTextDisplay,
   buildTextInput,
   buildThumbnail,
+  buildUserSelectMenu,
 } from "./build_component.func";
 import {
   buttonToAPI,
@@ -93,6 +104,28 @@ describe("component builders", () => {
     });
   });
 
+  it("builds button action rows from discord.js button builders", () => {
+    const button = new ButtonBuilder()
+      .setCustomId("confirm")
+      .setLabel("Confirm")
+      .setStyle(ButtonStyle.Success)
+      .setDisabled(true);
+
+    expect(buildButtonActionRow(button)).toEqual({
+      type: ComponentType.ActionRow,
+      components: [
+        {
+          type: ComponentType.Button,
+          customId: "confirm",
+          label: "Confirm",
+          style: ButtonStyle.Success,
+          emoji: undefined,
+          disabled: true,
+        },
+      ],
+    });
+  });
+
   it("converts select menu options from strings, records, and option objects", () => {
     expect(selectMenuOptionsToAPI(["one", "two"])).toEqual([
       { label: "one", value: "one" },
@@ -145,6 +178,54 @@ describe("component builders", () => {
           channelTypes: [0, 15],
         }),
       ],
+    });
+  });
+
+  it("builds select menu action rows from discord.js select menu builders", () => {
+    const stringSelect = new StringSelectMenuBuilder()
+      .setCustomId("status")
+      .setPlaceholder("Status")
+      .setMinValues(1)
+      .setMaxValues(2)
+      .addOptions(
+        { label: "Open", value: "open" },
+        { label: "Closed", value: "closed" },
+      );
+
+    expect(buildStringSelectMenu(stringSelect)).toEqual({
+      type: ComponentType.ActionRow,
+      components: [
+        {
+          type: ComponentType.StringSelect,
+          customId: "status",
+          placeholder: "Status",
+          disabled: undefined,
+          required: undefined,
+          minValues: 1,
+          maxValues: 2,
+          options: [
+            { label: "Open", value: "open" },
+            { label: "Closed", value: "closed" },
+          ],
+        },
+      ],
+    });
+
+    expect(buildUserSelectMenu(new UserSelectMenuBuilder().setCustomId("user"))).toMatchObject({
+      type: ComponentType.ActionRow,
+      components: [{ type: ComponentType.UserSelect, customId: "user" }],
+    });
+    expect(buildRoleSelectMenu(new RoleSelectMenuBuilder().setCustomId("role"))).toMatchObject({
+      type: ComponentType.ActionRow,
+      components: [{ type: ComponentType.RoleSelect, customId: "role" }],
+    });
+    expect(buildMentionableSelectMenu(new MentionableSelectMenuBuilder().setCustomId("mention"))).toMatchObject({
+      type: ComponentType.ActionRow,
+      components: [{ type: ComponentType.MentionableSelect, customId: "mention" }],
+    });
+    expect(buildChannelSelectMenu(new ChannelSelectMenuBuilder().setCustomId("channel"))).toMatchObject({
+      type: ComponentType.ActionRow,
+      components: [{ type: ComponentType.ChannelSelect, customId: "channel" }],
     });
   });
 

@@ -1,6 +1,10 @@
 import type {
+  APIButtonComponent,
+  APISelectMenuComponent,
   APISelectMenuDefaultValue,
+  ButtonBuilder,
   ButtonComponentData,
+  ChannelSelectMenuBuilder,
   CheckboxComponentData,
   CheckboxGroupComponentData,
   ContainerComponentData,
@@ -9,13 +13,17 @@ import type {
   FileUploadComponentData,
   LabelComponentData,
   MediaGalleryComponentData,
+  MentionableSelectMenuBuilder,
   RadioGroupComponentData,
+  RoleSelectMenuBuilder,
   SectionComponentData,
   SelectMenuComponentOptionData,
   SeparatorComponentData,
+  StringSelectMenuBuilder,
   TextDisplayComponentData,
   TextInputComponentData,
   ThumbnailComponentData,
+  UserSelectMenuBuilder,
 } from "discord.js";
 import type {
   AnySelectMenuComponentData,
@@ -48,7 +56,60 @@ import {
 } from "#/base/components/component.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 
-export function buttonToAPI(button: Button): ButtonComponentData {
+export type DiscordSelectMenuBuilder
+  = | StringSelectMenuBuilder
+    | UserSelectMenuBuilder
+    | RoleSelectMenuBuilder
+    | MentionableSelectMenuBuilder
+    | ChannelSelectMenuBuilder;
+
+export type ButtonInput = Button | ButtonBuilder;
+export type SelectMenuInput = SelectMenu | DiscordSelectMenuBuilder;
+
+function isButtonBuilder(button: ButtonInput): button is ButtonBuilder {
+  return "toJSON" in button;
+}
+
+function isSelectMenuBuilder(selectMenu: SelectMenuInput): selectMenu is DiscordSelectMenuBuilder {
+  return "toJSON" in selectMenu;
+}
+
+function apiButtonToData(button: APIButtonComponent): ButtonComponentData {
+  if ("sku_id" in button) {
+    return {
+      type: ComponentType.Button,
+      style: button.style,
+      skuId: button.sku_id,
+      disabled: button.disabled,
+    } as unknown as ButtonComponentData;
+  }
+
+  if ("custom_id" in button) {
+    return {
+      type: ComponentType.Button,
+      style: button.style,
+      customId: button.custom_id,
+      label: button.label,
+      emoji: button.emoji,
+      disabled: button.disabled,
+    };
+  }
+
+  return {
+    type: ComponentType.Button,
+    style: button.style,
+    url: button.url,
+    label: button.label,
+    emoji: button.emoji,
+    disabled: button.disabled,
+  };
+}
+
+export function buttonToAPI(button: ButtonInput): ButtonComponentData {
+  if (isButtonBuilder(button)) {
+    return apiButtonToData(button.toJSON());
+  }
+
   if ("skuId" in button) {
     return {
       type: ComponentType.Button,
@@ -76,6 +137,53 @@ export function buttonToAPI(button: Button): ButtonComponentData {
     emoji: button.emoji,
     disabled: button.disabled,
   };
+}
+
+function apiSelectMenuToData(
+  selectMenu: APISelectMenuComponent,
+): AnySelectMenuComponentData {
+  const base = {
+    customId: selectMenu.custom_id,
+    placeholder: selectMenu.placeholder,
+    disabled: selectMenu.disabled,
+    required: selectMenu.required ? true as const : undefined,
+    minValues: selectMenu.min_values,
+    maxValues: selectMenu.max_values,
+  };
+
+  switch (selectMenu.type) {
+    case ComponentType.StringSelect:
+      return {
+        ...base,
+        type: ComponentType.StringSelect,
+        options: selectMenu.options,
+      };
+    case ComponentType.ChannelSelect:
+      return {
+        ...base,
+        type: ComponentType.ChannelSelect,
+        defaultValues: selectMenu.default_values,
+        channelTypes: selectMenu.channel_types,
+      };
+    case ComponentType.UserSelect:
+      return {
+        ...base,
+        type: ComponentType.UserSelect,
+        defaultValues: selectMenu.default_values,
+      };
+    case ComponentType.RoleSelect:
+      return {
+        ...base,
+        type: ComponentType.RoleSelect,
+        defaultValues: selectMenu.default_values,
+      };
+    case ComponentType.MentionableSelect:
+      return {
+        ...base,
+        type: ComponentType.MentionableSelect,
+        defaultValues: selectMenu.default_values,
+      };
+  }
 }
 
 export function selectMenuOptionsToAPI(
@@ -110,8 +218,12 @@ export function selectMenuOptionsToAPI(
 }
 
 export function selectMenuToAPI(
-  selectMenu: SelectMenu,
+  selectMenu: SelectMenuInput,
 ): AnySelectMenuComponentData {
+  if (isSelectMenuBuilder(selectMenu)) {
+    return apiSelectMenuToData(selectMenu.toJSON());
+  }
+
   if (selectMenu.type === ComponentType.StringSelect) {
     return {
       type: ComponentType.StringSelect,

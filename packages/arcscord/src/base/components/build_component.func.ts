@@ -1,6 +1,8 @@
 import type {
   ActionRowData,
+  ButtonBuilder,
   ButtonComponentData,
+  ChannelSelectMenuBuilder,
   ChannelSelectMenuComponentData,
   CheckboxComponentData,
   CheckboxGroupComponentData,
@@ -10,16 +12,20 @@ import type {
   FileUploadComponentData,
   LabelComponentData,
   MediaGalleryComponentData,
+  MentionableSelectMenuBuilder,
   MentionableSelectMenuComponentData,
   ModalComponentData,
   RadioGroupComponentData,
+  RoleSelectMenuBuilder,
   RoleSelectMenuComponentData,
   SectionComponentData,
   SeparatorComponentData,
+  StringSelectMenuBuilder,
   StringSelectMenuComponentData,
   TextDisplayComponentData,
   TextInputComponentData,
   ThumbnailComponentData,
+  UserSelectMenuBuilder,
   UserSelectMenuComponentData,
 } from "discord.js";
 import type { Button } from "#/base";
@@ -168,11 +174,11 @@ export function buildClickableButton(
 }
 
 type ButtonList
-  = | [Button]
-    | [Button, Button]
-    | [Button, Button, Button]
-    | [Button, Button, Button, Button]
-    | [Button, Button, Button, Button, Button];
+  = | [Button | ButtonBuilder]
+    | [Button | ButtonBuilder, Button | ButtonBuilder]
+    | [Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder]
+    | [Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder]
+    | [Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder, Button | ButtonBuilder];
 
 /**
  * Make an actionRow of buttons
@@ -206,14 +212,22 @@ export function buildButtonActionRow(
  */
 export function buildStringSelectMenu(
   options: Omit<StringSelectMenu<"message">, "type">,
+): ActionRowData<StringSelectMenuComponentData>;
+export function buildStringSelectMenu(
+  options: StringSelectMenuBuilder,
+): ActionRowData<StringSelectMenuComponentData>;
+export function buildStringSelectMenu(
+  options: Omit<StringSelectMenu<"message">, "type"> | StringSelectMenuBuilder,
 ): ActionRowData<StringSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
     components: [
-      selectMenuToAPI({
-        ...options,
-        type: ComponentType.StringSelect,
-      }) as StringSelectMenuComponentData,
+      selectMenuToAPI("toJSON" in options
+        ? options
+        : {
+            ...options,
+            type: ComponentType.StringSelect,
+          }) as StringSelectMenuComponentData,
     ],
   };
 }
@@ -230,14 +244,22 @@ export function buildStringSelectMenu(
  */
 export function buildUserSelectMenu(
   option: Omit<UserSelectMenu<"message">, "type">,
+): ActionRowData<UserSelectMenuComponentData>;
+export function buildUserSelectMenu(
+  option: UserSelectMenuBuilder,
+): ActionRowData<UserSelectMenuComponentData>;
+export function buildUserSelectMenu(
+  option: Omit<UserSelectMenu<"message">, "type"> | UserSelectMenuBuilder,
 ): ActionRowData<UserSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
     components: [
-      selectMenuToAPI({
-        ...option,
-        type: ComponentType.UserSelect,
-      }) as UserSelectMenuComponentData,
+      selectMenuToAPI("toJSON" in option
+        ? option
+        : {
+            ...option,
+            type: ComponentType.UserSelect,
+          }) as UserSelectMenuComponentData,
     ],
   };
 }
@@ -256,14 +278,22 @@ export function buildUserSelectMenu(
  */
 export function buildRoleSelectMenu(
   option: Omit<RoleSelectMenu<"message">, "type">,
+): ActionRowData<RoleSelectMenuComponentData>;
+export function buildRoleSelectMenu(
+  option: RoleSelectMenuBuilder,
+): ActionRowData<RoleSelectMenuComponentData>;
+export function buildRoleSelectMenu(
+  option: Omit<RoleSelectMenu<"message">, "type"> | RoleSelectMenuBuilder,
 ): ActionRowData<RoleSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
     components: [
-      selectMenuToAPI({
-        ...option,
-        type: ComponentType.RoleSelect,
-      }) as RoleSelectMenuComponentData,
+      selectMenuToAPI("toJSON" in option
+        ? option
+        : {
+            ...option,
+            type: ComponentType.RoleSelect,
+          }) as RoleSelectMenuComponentData,
     ],
   };
 }
@@ -286,14 +316,22 @@ export function buildRoleSelectMenu(
  */
 export function buildMentionableSelectMenu(
   option: Omit<MentionableSelectMenu<"message">, "type">,
+): ActionRowData<MentionableSelectMenuComponentData>;
+export function buildMentionableSelectMenu(
+  option: MentionableSelectMenuBuilder,
+): ActionRowData<MentionableSelectMenuComponentData>;
+export function buildMentionableSelectMenu(
+  option: Omit<MentionableSelectMenu<"message">, "type"> | MentionableSelectMenuBuilder,
 ): ActionRowData<MentionableSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
     components: [
-      selectMenuToAPI({
-        ...option,
-        type: ComponentType.MentionableSelect,
-      }) as MentionableSelectMenuComponentData,
+      selectMenuToAPI("toJSON" in option
+        ? option
+        : {
+            ...option,
+            type: ComponentType.MentionableSelect,
+          }) as MentionableSelectMenuComponentData,
     ],
   };
 }
@@ -312,14 +350,22 @@ export function buildMentionableSelectMenu(
  */
 export function buildChannelSelectMenu(
   option: Omit<ChannelSelectMenu<"message">, "type">,
+): ActionRowData<ChannelSelectMenuComponentData>;
+export function buildChannelSelectMenu(
+  option: ChannelSelectMenuBuilder,
+): ActionRowData<ChannelSelectMenuComponentData>;
+export function buildChannelSelectMenu(
+  option: Omit<ChannelSelectMenu<"message">, "type"> | ChannelSelectMenuBuilder,
 ): ActionRowData<ChannelSelectMenuComponentData> {
   return {
     type: ComponentType.ActionRow,
     components: [
-      selectMenuToAPI({
-        ...option,
-        type: ComponentType.ChannelSelect,
-      }) as ChannelSelectMenuComponentData,
+      selectMenuToAPI("toJSON" in option
+        ? option
+        : {
+            ...option,
+            type: ComponentType.ChannelSelect,
+          }) as ChannelSelectMenuComponentData,
     ],
   };
 }
