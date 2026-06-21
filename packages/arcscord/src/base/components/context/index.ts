@@ -7,6 +7,7 @@ import type {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base";
+import type { TypedSelectMenuOptions } from "#/base/components/component_definer.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 
 export * from "./base_context";
@@ -19,6 +20,7 @@ export type ComponentContext<Route extends string = string>
   = | ButtonContext<ComponentMiddleware[], Route>
     | ModalContext<ComponentMiddleware[], Route>
     | StringSelectMenuContext<ComponentMiddleware[], undefined, Route>
+    | StringSelectMenuContext<ComponentMiddleware[], TypedSelectMenuOptions, Route, number | undefined>
     | UserSelectMenuContext<ComponentMiddleware[], Route>
     | MentionableSelectMenuContext<ComponentMiddleware[], Route>
     | RoleSelectMenuContext<ComponentMiddleware[], Route>

@@ -124,6 +124,7 @@ export type StringSelectMenuComponentHandler<
   Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
   Typed extends TypedSelectMenuOptions | undefined = undefined,
+  MaxValues extends number | undefined = number | undefined,
 > = BaseComponentHandler<Middleware, Route> & {
   handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.StringSelect;
@@ -136,8 +137,36 @@ export type StringSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: StringSelectMenuContext<Middleware, Typed, Route>) => Promise<ComponentRunResult>;
-} & (Typed extends TypedSelectMenuOptions ? { values: Typed } : NonNullable<unknown>);
+  run: (ctx: StringSelectMenuContext<Middleware, Typed, Route, MaxValues>) => Promise<ComponentRunResult>;
+} & (Typed extends TypedSelectMenuOptions
+  ? { typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot<Typed, MaxValues>> }
+  : NonNullable<unknown>);
+
+/**
+ * Runtime snapshot of values used to build a typed string select.
+ *
+ * @internal
+ */
+export type TypedStringSelectSnapshot<
+  Values extends TypedSelectMenuOptions = TypedSelectMenuOptions,
+  MaxValues extends number | undefined = number | undefined,
+> = {
+  values: Values;
+  maxValues?: MaxValues;
+};
+
+/**
+ * Storage-compatible string select handler shape.
+ *
+ * @internal
+ */
+export type AnyStringSelectMenuComponentHandler = BaseComponentHandler<ComponentMiddleware[], string> & {
+  handlerType?: typeof componentHandlerTypeEnum.messageComponent;
+  type: ComponentType.StringSelect;
+  build: (...args: string[]) => ActionRowData<StringSelectMenuComponentData>;
+  typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot>;
+  run: (ctx: StringSelectMenuContext<ComponentMiddleware[], never, string>) => Promise<ComponentRunResult>;
+};
 
 /**
  * Properties for a user select menu component.
@@ -266,5 +295,6 @@ export type SelectMenuComponentHandler<
  */
 export type ComponentHandler
   = | ButtonComponentHandler
-    | SelectMenuComponentHandler
+    | AnyStringSelectMenuComponentHandler
+    | Exclude<SelectMenuComponentHandler, StringSelectMenuComponentHandler>
     | ModalComponentHandler;

@@ -18,6 +18,8 @@ import { roleSelectMenu } from "../components/role_select_menu";
 import { routeParamsButton } from "../components/route_params_button";
 import { redSimpleButton, simpleButton } from "../components/simple_button";
 import { stringSelectMenu } from "../components/string_select_menu";
+import { typedSingleStringSelectMenu } from "../components/typed_single_string_select_menu";
+import { typedStringSelectMenu } from "../components/typed_string_select_menu";
 import { userSelectMenu } from "../components/user_select_menu";
 
 export const componentTestCommand = createCommand({
@@ -38,6 +40,14 @@ export const componentTestCommand = createCommand({
             {
               name: "string_select",
               value: "string_select",
+            },
+            {
+              name: "typed_string_select",
+              value: "typed_string_select",
+            },
+            {
+              name: "typed_single_string_select",
+              value: "typed_single_string_select",
             },
             {
               name: "user_select",
@@ -99,6 +109,16 @@ export const componentTestCommand = createCommand({
       case "string_select":
         return ctx.reply({
           components: [stringSelectMenu.build("fun", "happy")],
+          content: ctx.options.component,
+        });
+      case "typed_string_select":
+        return ctx.reply({
+          components: [typedStringSelectMenu.build()],
+          content: ctx.options.component,
+        });
+      case "typed_single_string_select":
+        return ctx.reply({
+          components: [typedSingleStringSelectMenu.build()],
           content: ctx.options.component,
         });
       case "user_select":

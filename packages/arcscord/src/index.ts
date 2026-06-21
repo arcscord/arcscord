@@ -183,6 +183,7 @@ export {
   createButton,
   createModal,
   createSelectMenu,
+  createTypedStringMenu,
 } from "./base/components/component_handler.func";
 export type {
   BaseComponentHandler,

@@ -11,6 +11,7 @@ import type {
   UserSelectMenuInteraction,
 } from "discord.js";
 import type { ArcClient, ComponentContext } from "#/base";
+import type { TypedSelectMenuOptions } from "#/base/components/component_definer.type";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/component_route.util";
 import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
@@ -33,6 +34,14 @@ import { ComponentError, internalErrorEmbed } from "#/utils";
 type MatchedComponent = {
   component: ComponentHandler;
   params: Record<string, string>;
+};
+
+type TypedStringSelectComponent = ComponentHandler & {
+  type: ComponentType.StringSelect;
+  typedStringSelectSnapshots: Map<string, {
+    values: TypedSelectMenuOptions;
+    maxValues?: number;
+  }>;
 };
 
 /**
@@ -153,16 +162,24 @@ export class ComponentManager extends BaseManager {
     type: keyof ComponentList,
     locale: string,
     params: Record<string, string>,
+    component: ComponentHandler,
   ): Result<ComponentContext, ComponentError> {
     switch (type) {
       case ComponentType.Button:
         return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale, params }));
-      case ComponentType.StringSelect:
-        return ok(new StringSelectMenuContext(this.client, interaction as StringSelectMenuInteraction, {
+      case ComponentType.StringSelect: {
+        const stringSelectInteraction = interaction as StringSelectMenuInteraction;
+        const [validationError, values] = this.validateStringSelectValues(stringSelectInteraction, component);
+        if (validationError) {
+          return error(validationError);
+        }
+
+        return ok(new StringSelectMenuContext(this.client, stringSelectInteraction, {
           locale,
           params,
-          values: (interaction as StringSelectMenuInteraction).values,
-        }));
+          values: values as never,
+        }) as ComponentContext);
+      }
       case ComponentType.UserSelect:
         return ok(new UserSelectMenuContext(this.client, interaction as UserSelectMenuInteraction, {
           locale,
@@ -196,6 +213,56 @@ export class ComponentManager extends BaseManager {
           interaction,
         }));
     }
+  }
+
+  private isTypedStringSelectComponent(component: ComponentHandler): component is TypedStringSelectComponent {
+    return (
+      "type" in component
+      && component.type === ComponentType.StringSelect
+      && "typedStringSelectSnapshots" in component
+      && component.typedStringSelectSnapshots instanceof Map
+    );
+  }
+
+  private validateStringSelectValues(
+    interaction: StringSelectMenuInteraction,
+    component: ComponentHandler,
+  ): Result<string | string[], ComponentError> {
+    const selectedValues = interaction.values;
+
+    if (!this.isTypedStringSelectComponent(component)) {
+      return ok(selectedValues);
+    }
+
+    const snapshot = component.typedStringSelectSnapshots.get(interaction.customId);
+    if (!snapshot) {
+      return error(new ComponentError({
+        message: `missing typed string select values snapshot for ${component.route}`,
+        interaction,
+        debugs: {
+          customId: interaction.customId,
+          route: component.route,
+        },
+      }));
+    }
+
+    const allowedValues = Object.keys(snapshot.values);
+    const allowedValuesSet = new Set(allowedValues);
+    const invalidValues = selectedValues.filter(value => !allowedValuesSet.has(value));
+
+    if (invalidValues.length === 0) {
+      return ok(snapshot.maxValues === 1 ? selectedValues[0] : selectedValues);
+    }
+
+    return error(new ComponentError({
+      message: `received invalid values for typed string select ${component.route}`,
+      interaction,
+      debugs: {
+        allowedValues,
+        invalidValues,
+        selectedValues,
+      },
+    }));
   }
 
   private async handleComponentInteraction(
@@ -238,7 +305,7 @@ export class ComponentManager extends BaseManager {
 
     const component = components[0];
 
-    const [err2, context] = this.createContext(interaction, type, locale, component.params);
+    const [err2, context] = this.createContext(interaction, type, locale, component.params, component.component);
     if (err2) {
       return this.options.errorHandler({
         error: err2,

@@ -34,9 +34,10 @@ export type StringSelectMenuContextOptions<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   T extends TypedSelectMenuOptions | undefined = undefined,
   Route extends string = string,
+  MaxValues extends number | undefined = number | undefined,
 > = BaseComponentContextOptions<M, Route> & {
   values: T extends TypedSelectMenuOptions
-    ? StringSelectMenuValues<T>
+    ? StringSelectMenuValues<T, MaxValues>
     : string[];
 };
 
@@ -47,9 +48,10 @@ export class StringSelectMenuContext<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   T extends TypedSelectMenuOptions | undefined = undefined,
   Route extends string = string,
+  MaxValues extends number | undefined = number | undefined,
 > extends SelectMenuContext<M, Route> {
   values: T extends TypedSelectMenuOptions
-    ? StringSelectMenuValues<T>
+    ? StringSelectMenuValues<T, MaxValues>
     : string[];
 
   interaction: StringSelectMenuInteraction;
@@ -57,7 +59,7 @@ export class StringSelectMenuContext<
   constructor(
     client: ArcClient,
     interaction: StringSelectMenuInteraction,
-    options: StringSelectMenuContextOptions<M, T, Route>,
+    options: StringSelectMenuContextOptions<M, T, Route, MaxValues>,
   ) {
     super(client, interaction, options);
     this.values = options.values;

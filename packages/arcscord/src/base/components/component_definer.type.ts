@@ -224,8 +224,12 @@ export type StringSelectMenu<Usage extends ComponentUsage = ComponentUsage> = Ba
 /**
  * @internal
  */
-export type StringSelectMenuValues<T extends TypedSelectMenuOptions>
-  = (keyof T)[];
+export type StringSelectMenuValues<
+  T extends TypedSelectMenuOptions,
+  MaxValues extends number | undefined = number | undefined,
+> = MaxValues extends 1
+  ? Extract<keyof T, string>
+  : Array<Extract<keyof T, string>>;
 
 /**
  * Type for a user select menu.

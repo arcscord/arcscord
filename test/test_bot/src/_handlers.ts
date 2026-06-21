@@ -20,6 +20,8 @@ import { roleSelectMenu } from "./components/role_select_menu";
 import { routeParamsButton } from "./components/route_params_button";
 import { redSimpleButton, simpleButton } from "./components/simple_button";
 import { stringSelectMenu } from "./components/string_select_menu";
+import { typedSingleStringSelectMenu } from "./components/typed_single_string_select_menu";
+import { typedStringSelectMenu } from "./components/typed_string_select_menu";
 import { userSelectMenu } from "./components/user_select_menu";
 import { messageEvent } from "./event/message";
 
@@ -29,6 +31,8 @@ export default {
     simpleButton,
     redSimpleButton,
     stringSelectMenu,
+    typedStringSelectMenu,
+    typedSingleStringSelectMenu,
     userSelectMenu,
     roleSelectMenu,
     mentionableSelectMenu,
