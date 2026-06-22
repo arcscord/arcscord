@@ -15,6 +15,7 @@ const sidebars: SidebarsConfig = {
         "guide/events",
         "guide/localization",
         "guide/logger",
+        "guide/result-handler",
       ],
     },
     {
