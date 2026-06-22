@@ -3,7 +3,7 @@ import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, Perm
 import type { ArcClientOptions, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/component_handlers.type";
-import type { EventHandler } from "#/base/event/event.type";
+import type { AnyEventHandler } from "#/base/event/event.type";
 import type { InternalError } from "#/utils/error/class/internal_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
@@ -118,7 +118,6 @@ export class ArcClient extends DJSClient {
     );
 
     this.arcOptions = {
-      autoIntents: false,
       enableInternalTrace: false,
       ...options,
     };
@@ -206,8 +205,9 @@ export class ArcClient extends DJSClient {
    * Loads and registers events
    *
    * @param events - The events to load
+   * @returns The number of loaded event handlers.
    */
-  loadEvents(events: EventHandler[]): void {
+  loadEvents(events: AnyEventHandler[]): Promise<number> {
     return this.eventManager.loadEvents(events);
   }
 

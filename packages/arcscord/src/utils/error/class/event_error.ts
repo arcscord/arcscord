@@ -1,5 +1,5 @@
 import type { ErrorOptions } from "@arcscord/better-error";
-import type { EventHandler } from "#/base/event/event.type";
+import type { AnyEventHandler } from "#/base/event/event.type";
 import { BaseError } from "@arcscord/better-error";
 
 /**
@@ -9,7 +9,7 @@ export type EventErrorOptions = ErrorOptions & {
   /**
    * The event handler associated with the error.
    */
-  handler: EventHandler;
+  handler: AnyEventHandler;
 };
 
 /**
@@ -19,7 +19,7 @@ export class EventError extends BaseError {
   /**
    * The event handler associated with this error.
    */
-  handler: EventHandler;
+  handler: AnyEventHandler;
 
   /**
    * Creates a new instance of EventError.

@@ -6,7 +6,7 @@ import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type"
 import type { LoggerConstructor, LoggerOptions } from "#/utils/logger/logger.type";
 import type { Command } from "../command";
 import type { ComponentHandler } from "../components";
-import type { EventHandler } from "../event";
+import type { AnyEventHandler } from "../event";
 
 /**
  * Represents the options for configuring the ArcClient Logger.
@@ -80,13 +80,6 @@ export type ArcClientOptions = ClientOptions & {
   baseMessages?: MessageOptions;
 
   /**
-   * Indicates whether the intents for event should be detected by default.
-   * @default false
-   * @experimental
-   */
-  autoIntents?: boolean;
-
-  /**
    * Optional configuration object for specifying manager options.
    * This can be used to customize behavior or settings related to managers.
    */
@@ -158,5 +151,5 @@ export type HandlersList = {
   /**
    * List of events
    */
-  events?: EventHandler[];
+  events?: AnyEventHandler[];
 };

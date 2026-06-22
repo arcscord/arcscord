@@ -236,7 +236,13 @@ export type {
 } from "./base/components/context";
 
 export { createEvent } from "./base/event/event.func";
-export type { EventHandler, EventHandleResult } from "./base/event/event.type";
+export type {
+  AnyEventHandler,
+  EventBeforeReadyMode,
+  EventHandler,
+  EventHandleResult,
+  EventHandlerOptions,
+} from "./base/event/event.type";
 export { EventContext } from "./base/event/event_context";
 
 export { BaseManager } from "./base/manager/manager.class";
@@ -276,10 +282,20 @@ export type {
 } from "./manager/component/component_manager.type";
 
 export type {
+  EventIntentCheckAction,
+  EventIntentCheckCoverage,
+  EventIntentCheckIssue,
+  EventIntentCheckIssueType,
+  EventIntentCheckOptions,
   EventManagerOptions,
   EventResultHandler,
   EventResultHandlerInfos,
 } from "./manager/event/event_manager.type";
+export type {
+  EventIntentAlternatives,
+  EventIntentCoverageTarget,
+  EventIntentRequirement,
+} from "./manager/event/intents_map";
 export type {
   BaseLocaleManagerOptions,
   LangDetector,

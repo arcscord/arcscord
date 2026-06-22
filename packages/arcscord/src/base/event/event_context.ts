@@ -1,5 +1,6 @@
+import type { ClientEvents } from "discord.js";
 import type { ArcClient, EventHandleResult } from "#/base";
-import type { EventHandler } from "#/base/event/event.type";
+import type { AnyEventHandler, EventHandler } from "#/base/event/event.type";
 import type { ContextDocs } from "#/base/utils";
 import type { EventErrorOptions } from "#/utils";
 import { error, ok } from "@arcscord/error";
@@ -8,13 +9,13 @@ import { EventError } from "#/utils";
 /**
  * The context in which an event handler is executed.
  */
-export class EventContext implements Pick<ContextDocs, "client"> {
+export class EventContext<E extends keyof ClientEvents = keyof ClientEvents> implements Pick<ContextDocs, "client"> {
   client: ArcClient;
 
   /**
    * The event handler.
    */
-  handler: EventHandler;
+  handler: EventHandler<E>;
 
   /**
    * Creates an instance of EventContext.
@@ -22,7 +23,7 @@ export class EventContext implements Pick<ContextDocs, "client"> {
    * @param client - The client instance.
    * @param handler - The event handler.
    */
-  constructor(client: ArcClient, handler: EventHandler) {
+  constructor(client: ArcClient, handler: EventHandler<E>) {
     this.client = client;
     this.handler = handler;
   }
@@ -44,7 +45,7 @@ export class EventContext implements Pick<ContextDocs, "client"> {
    * @returns An error event handle result.
    */
   error(options: Omit<EventErrorOptions, "handler">): EventHandleResult {
-    return error(new EventError({ ...options, handler: this.handler }));
+    return error(new EventError({ ...options, handler: this.handler as unknown as AnyEventHandler }));
   }
 
   /**

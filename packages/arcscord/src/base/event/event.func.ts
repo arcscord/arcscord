@@ -21,9 +21,9 @@ import type { OptionalProperties } from "#/utils";
  */
 export function createEvent<E extends keyof ClientEvents>(
   options: OptionalProperties<EventHandler<E>, "name">,
-): EventHandler {
+): EventHandler<E> {
   if (!options.name) {
     options.name = options.event;
   }
-  return options as unknown as EventHandler;
+  return options as EventHandler<E>;
 }

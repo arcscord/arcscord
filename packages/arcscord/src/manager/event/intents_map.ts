@@ -1,113 +1,138 @@
-import type { BitFieldResolvable, ClientEvents, GatewayIntentsString } from "discord.js";
-import { GatewayIntentBits } from "discord-api-types/v10";
-// Based of https://discord.com/developers/docs/topics/gateway#list-of-intents
+import type { ClientEvents, GatewayIntentsString } from "discord.js";
 
+export type EventIntentCoverageTarget = "guild" | "dm";
+
+export type EventIntentAlternatives = Partial<Record<EventIntentCoverageTarget, GatewayIntentsString>>;
+
+export type EventIntentRequirement
+  = | {
+    mode: "none";
+  }
+  | {
+    mode: "all";
+    intents: GatewayIntentsString[];
+  }
+  | {
+    mode: "oneOf";
+    intents: EventIntentAlternatives;
+  };
+
+const none = { mode: "none" } satisfies EventIntentRequirement;
+const all = (...intents: GatewayIntentsString[]): EventIntentRequirement => ({ mode: "all", intents });
+const oneOf = (intents: EventIntentAlternatives): EventIntentRequirement => ({ mode: "oneOf", intents });
+
+/**
+ * Maps discord.js client events to the gateway intents documented by Discord.
+ *
+ * Source: https://docs.discord.com/developers/events/gateway#list-of-intents
+ * This map is constrained to the events exposed by the installed discord.js
+ * `ClientEvents` type. Gateway events not exposed by discord.js are intentionally
+ * omitted until discord.js exposes matching client events.
+ */
 export const intentsMap = {
-  guildCreate: GatewayIntentBits.Guilds,
-  guildUpdate: GatewayIntentBits.Guilds,
-  guildDelete: GatewayIntentBits.Guilds,
-  roleCreate: GatewayIntentBits.Guilds,
-  roleUpdate: GatewayIntentBits.Guilds,
-  roleDelete: GatewayIntentBits.Guilds,
-  channelCreate: GatewayIntentBits.Guilds,
-  channelUpdate: GatewayIntentBits.Guilds,
-  channelDelete: GatewayIntentBits.Guilds,
-  channelPinsUpdate: [GatewayIntentBits.Guilds, GatewayIntentBits.DirectMessages],
-  threadCreate: GatewayIntentBits.Guilds,
-  threadUpdate: GatewayIntentBits.Guilds,
-  threadDelete: GatewayIntentBits.Guilds,
-  threadListSync: GatewayIntentBits.Guilds,
-  threadMemberUpdate: GatewayIntentBits.Guilds,
-  threadMembersUpdate: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
-  stageInstanceCreate: GatewayIntentBits.Guilds,
-  stageInstanceUpdate: GatewayIntentBits.Guilds,
-  stageInstanceDelete: GatewayIntentBits.Guilds,
+  guildCreate: all("Guilds"),
+  guildUpdate: all("Guilds"),
+  guildDelete: all("Guilds"),
+  roleCreate: all("Guilds"),
+  roleUpdate: all("Guilds"),
+  roleDelete: all("Guilds"),
+  channelCreate: all("Guilds"),
+  channelUpdate: all("Guilds"),
+  channelDelete: all("Guilds"),
+  channelPinsUpdate: oneOf({ guild: "Guilds", dm: "DirectMessages" }),
+  threadCreate: all("Guilds"),
+  threadUpdate: all("Guilds"),
+  threadDelete: all("Guilds"),
+  threadListSync: all("Guilds"),
+  threadMemberUpdate: all("Guilds"),
+  threadMembersUpdate: all("Guilds", "GuildMembers"),
+  stageInstanceCreate: all("Guilds"),
+  stageInstanceUpdate: all("Guilds"),
+  stageInstanceDelete: all("Guilds"),
 
-  guildMemberAdd: GatewayIntentBits.GuildMembers,
-  guildMemberUpdate: GatewayIntentBits.GuildMembers,
-  guildMemberRemove: GatewayIntentBits.GuildMembers,
+  guildMemberAdd: all("GuildMembers"),
+  guildMemberUpdate: all("GuildMembers"),
+  guildMemberRemove: all("GuildMembers"),
 
-  guildAuditLogEntryCreate: GatewayIntentBits.GuildModeration,
-  guildBanAdd: GatewayIntentBits.GuildModeration,
-  guildBanRemove: GatewayIntentBits.GuildModeration,
+  guildAuditLogEntryCreate: all("GuildModeration"),
+  guildBanAdd: all("GuildModeration"),
+  guildBanRemove: all("GuildModeration"),
 
-  emojiCreate: GatewayIntentBits.GuildExpressions,
-  emojiUpdate: GatewayIntentBits.GuildExpressions,
-  emojiDelete: GatewayIntentBits.GuildExpressions,
-  stickerCreate: GatewayIntentBits.GuildExpressions,
-  stickerUpdate: GatewayIntentBits.GuildExpressions,
-  stickerDelete: GatewayIntentBits.GuildExpressions,
+  emojiCreate: all("GuildExpressions"),
+  emojiUpdate: all("GuildExpressions"),
+  emojiDelete: all("GuildExpressions"),
+  stickerCreate: all("GuildExpressions"),
+  stickerUpdate: all("GuildExpressions"),
+  stickerDelete: all("GuildExpressions"),
+  guildSoundboardSoundCreate: all("GuildExpressions"),
+  guildSoundboardSoundDelete: all("GuildExpressions"),
+  guildSoundboardSoundUpdate: all("GuildExpressions"),
+  guildSoundboardSoundsUpdate: all("GuildExpressions"),
+  soundboardSounds: all("GuildExpressions"),
 
-  guildIntegrationsUpdate: GatewayIntentBits.GuildIntegrations,
-  interactionCreate: GatewayIntentBits.GuildIntegrations,
+  guildIntegrationsUpdate: all("GuildIntegrations"),
 
-  webhooksUpdate: GatewayIntentBits.GuildWebhooks,
-  webhookUpdate: GatewayIntentBits.GuildWebhooks,
+  webhooksUpdate: all("GuildWebhooks"),
+  webhookUpdate: all("GuildWebhooks"),
 
-  inviteCreate: GatewayIntentBits.GuildInvites,
-  inviteDelete: GatewayIntentBits.GuildInvites,
+  inviteCreate: all("GuildInvites"),
+  inviteDelete: all("GuildInvites"),
 
-  voiceStateUpdate: GatewayIntentBits.GuildVoiceStates,
+  voiceStateUpdate: all("GuildVoiceStates"),
+  voiceChannelEffectSend: all("GuildVoiceStates"),
 
-  presenceUpdate: GatewayIntentBits.GuildPresences,
+  presenceUpdate: all("GuildPresences"),
 
-  messageCreate: [GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages],
-  messageUpdate: [GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages],
-  messageDelete: [GatewayIntentBits.GuildMessages, GatewayIntentBits.DirectMessages],
-  messageDeleteBulk: GatewayIntentBits.GuildMessages,
+  messageCreate: oneOf({ guild: "GuildMessages", dm: "DirectMessages" }),
+  messageUpdate: oneOf({ guild: "GuildMessages", dm: "DirectMessages" }),
+  messageDelete: oneOf({ guild: "GuildMessages", dm: "DirectMessages" }),
+  messageDeleteBulk: all("GuildMessages"),
 
-  messageReactionAdd: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessageReactions],
-  messageReactionRemove: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessageReactions],
-  messageReactionRemoveAll: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessageReactions],
-  messageReactionRemoveEmoji: [GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.DirectMessageReactions],
+  messageReactionAdd: oneOf({ guild: "GuildMessageReactions", dm: "DirectMessageReactions" }),
+  messageReactionRemove: oneOf({ guild: "GuildMessageReactions", dm: "DirectMessageReactions" }),
+  messageReactionRemoveAll: oneOf({ guild: "GuildMessageReactions", dm: "DirectMessageReactions" }),
+  messageReactionRemoveEmoji: oneOf({ guild: "GuildMessageReactions", dm: "DirectMessageReactions" }),
 
-  typingStart: [GatewayIntentBits.GuildMessageTyping, GatewayIntentBits.DirectMessageTyping],
+  typingStart: oneOf({ guild: "GuildMessageTyping", dm: "DirectMessageTyping" }),
 
-  guildScheduledEventCreate: GatewayIntentBits.GuildScheduledEvents,
-  guildScheduledEventUpdate: GatewayIntentBits.GuildScheduledEvents,
-  guildScheduledEventDelete: GatewayIntentBits.GuildScheduledEvents,
-  guildScheduledEventUserAdd: GatewayIntentBits.GuildScheduledEvents,
-  guildScheduledEventUserRemove: GatewayIntentBits.GuildScheduledEvents,
+  guildScheduledEventCreate: all("GuildScheduledEvents"),
+  guildScheduledEventUpdate: all("GuildScheduledEvents"),
+  guildScheduledEventDelete: all("GuildScheduledEvents"),
+  guildScheduledEventUserAdd: all("GuildScheduledEvents"),
+  guildScheduledEventUserRemove: all("GuildScheduledEvents"),
 
-  autoModerationRuleCreate: GatewayIntentBits.AutoModerationConfiguration,
-  autoModerationRuleUpdate: GatewayIntentBits.AutoModerationConfiguration,
-  autoModerationRuleDelete: GatewayIntentBits.AutoModerationConfiguration,
+  autoModerationRuleCreate: all("AutoModerationConfiguration"),
+  autoModerationRuleUpdate: all("AutoModerationConfiguration"),
+  autoModerationRuleDelete: all("AutoModerationConfiguration"),
 
-  autoModerationActionExecution: GatewayIntentBits.AutoModerationExecution,
+  autoModerationActionExecution: all("AutoModerationExecution"),
 
-  messagePollVoteAdd: [GatewayIntentBits.GuildMessagePolls, GatewayIntentBits.DirectMessagePolls],
-  messagePollVoteRemove: [GatewayIntentBits.GuildMessagePolls, GatewayIntentBits.DirectMessagePolls],
+  messagePollVoteAdd: oneOf({ guild: "GuildMessagePolls", dm: "DirectMessagePolls" }),
+  messagePollVoteRemove: oneOf({ guild: "GuildMessagePolls", dm: "DirectMessagePolls" }),
 
-  // none
-  ready: 0,
-  error: 0,
-  debug: 0,
-  warn: 0,
-  applicationCommandPermissionsUpdate: 0,
-  cacheSweep: 0,
-  entitlementCreate: 0,
-  entitlementUpdate: 0,
-  entitlementDelete: 0,
-  guildAvailable: 0,
-  guildUnavailable: 0,
-  clientReady: 0,
-  guildSoundboardSoundCreate: GatewayIntentBits.GuildExpressions,
-  guildSoundboardSoundDelete: GatewayIntentBits.GuildExpressions,
-  guildSoundboardSoundUpdate: GatewayIntentBits.GuildExpressions,
-  guildSoundboardSoundsUpdate: GatewayIntentBits.GuildExpressions,
-  guildMemberAvailable: 0,
-  guildMembersChunk: 0,
-  invalidated: 0,
-  soundboardSounds: GatewayIntentBits.GuildExpressions,
-  subscriptionCreate: 0,
-  subscriptionDelete: 0,
-  subscriptionUpdate: 0,
-  userUpdate: 0,
-  voiceChannelEffectSend: GatewayIntentBits.GuildVoiceStates,
-  shardDisconnect: 0,
-  shardError: 0,
-  shardReady: 0,
-  shardReconnecting: 0,
-  shardResume: 0,
-
-} satisfies Record<keyof ClientEvents, BitFieldResolvable<GatewayIntentsString, number>>;
+  ready: none,
+  error: none,
+  debug: none,
+  warn: none,
+  applicationCommandPermissionsUpdate: none,
+  cacheSweep: none,
+  clientReady: none,
+  entitlementCreate: none,
+  entitlementUpdate: none,
+  entitlementDelete: none,
+  guildAvailable: none,
+  guildUnavailable: none,
+  guildMemberAvailable: none,
+  guildMembersChunk: none,
+  invalidated: none,
+  interactionCreate: none,
+  subscriptionCreate: none,
+  subscriptionDelete: none,
+  subscriptionUpdate: none,
+  userUpdate: none,
+  shardDisconnect: none,
+  shardError: none,
+  shardReady: none,
+  shardReconnecting: none,
+  shardResume: none,
+} satisfies Record<keyof ClientEvents, EventIntentRequirement>;

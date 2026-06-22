@@ -15,7 +15,6 @@ const client = new ArcClient(process.env.TOKEN as string, {
     "MessageContent",
   ],
   partials: [Partials.Reaction, Partials.Message, Partials.User],
-  autoIntents: true,
   enableInternalTrace: true,
   managers: {
     locale: {
