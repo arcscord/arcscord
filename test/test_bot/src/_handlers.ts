@@ -23,10 +23,11 @@ import { stringSelectMenu } from "./components/string_select_menu";
 import { typedSingleStringSelectMenu } from "./components/typed_single_string_select_menu";
 import { typedStringSelectMenu } from "./components/typed_string_select_menu";
 import { userSelectMenu } from "./components/user_select_menu";
+import { inviteEvent } from "./event/invite";
 import { messageEvent } from "./event/message";
 
 export default {
-  events: [messageEvent],
+  events: [messageEvent, inviteEvent],
   components: [
     simpleButton,
     redSimpleButton,

@@ -13,6 +13,7 @@ const client = new ArcClient(process.env.TOKEN as string, {
     "GuildMessageReactions",
     "DirectMessageReactions",
     "MessageContent",
+    "GuildMessages",
   ],
   partials: [Partials.Reaction, Partials.Message, Partials.User],
   enableInternalTrace: true,
