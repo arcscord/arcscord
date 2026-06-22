@@ -135,7 +135,7 @@ export class ArcClient extends DJSClient {
       version: "10",
     }).setToken(token);
 
-    this.on("ready", () => {
+    this.on("clientReady", () => {
       this.trace("bot connected...");
       this.ready = true;
     });

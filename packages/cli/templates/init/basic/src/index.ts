@@ -7,7 +7,7 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
   intents: [],
 });
 
-client.on("ready", async () => {
+client.on("clientReady", async () => {
   await client.loadHandlers(handlers);
   client.logger.info("Ready !");
 });
