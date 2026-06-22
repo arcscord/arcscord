@@ -31,12 +31,12 @@ export const intentsMap = {
   guildBanAdd: GatewayIntentBits.GuildModeration,
   guildBanRemove: GatewayIntentBits.GuildModeration,
 
-  emojiCreate: GatewayIntentBits.GuildEmojisAndStickers,
-  emojiUpdate: GatewayIntentBits.GuildEmojisAndStickers,
-  emojiDelete: GatewayIntentBits.GuildEmojisAndStickers,
-  stickerCreate: GatewayIntentBits.GuildEmojisAndStickers,
-  stickerUpdate: GatewayIntentBits.GuildEmojisAndStickers,
-  stickerDelete: GatewayIntentBits.GuildEmojisAndStickers,
+  emojiCreate: GatewayIntentBits.GuildExpressions,
+  emojiUpdate: GatewayIntentBits.GuildExpressions,
+  emojiDelete: GatewayIntentBits.GuildExpressions,
+  stickerCreate: GatewayIntentBits.GuildExpressions,
+  stickerUpdate: GatewayIntentBits.GuildExpressions,
+  stickerDelete: GatewayIntentBits.GuildExpressions,
 
   guildIntegrationsUpdate: GatewayIntentBits.GuildIntegrations,
   interactionCreate: GatewayIntentBits.GuildIntegrations,
