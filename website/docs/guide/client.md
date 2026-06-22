@@ -10,7 +10,20 @@ sidebar_position: 2
 import { ArcClient } from "arcscord";
 
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: [],
+  intents: ["Guilds"],
+  managers: {
+    event: {
+      intentCheck: {
+        missing: "warn",
+        partialCoverage: "off",
+        coverage: {
+          guild: true,
+          dm: true,
+        },
+        ignore: [],
+      },
+    },
+  },
 });
 ```
 
@@ -19,5 +32,5 @@ Load application features after the client is ready:
 ```ts
 await client.loadCommands([avatarCommand]);
 client.loadComponents([simpleButton]);
-client.loadEvents([messageEvent]);
+await client.loadEvents([messageEvent]);
 ```
