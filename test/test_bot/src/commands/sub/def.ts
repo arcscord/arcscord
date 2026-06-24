@@ -1,9 +1,9 @@
-import type { SlashWithSubsCommandDefinition } from "arcscord";
+import { buildCommandWithSubs } from "arcscord";
 import { autocompleteSubCommand } from "./autocomplete";
 import { buttonComponentSubCommand, modalComponentSubCommand, stringSelectMenuComponentSubCommand } from "./component";
 import { testMiddlewareSubCommand } from "./middleware";
 
-export const subCommand = {
+export const subCommand = buildCommandWithSubs({
   name: "sub",
   description: "sub command",
   subCommands: [
@@ -26,4 +26,4 @@ export const subCommand = {
       ],
     },
   },
-} satisfies SlashWithSubsCommandDefinition;
+});
