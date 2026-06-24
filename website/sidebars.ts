@@ -5,22 +5,40 @@ const sidebars: SidebarsConfig = {
     "intro",
     {
       type: "category",
-      label: "Core",
+      label: "Setup",
       items: [
         "guide/installation",
         "guide/client",
         "guide/commands",
-        "guide/components",
-        "guide/middleware",
         "guide/events",
         "guide/localization",
         "guide/logger",
+      ],
+    },
+    {
+      type: "category",
+      label: "Commands",
+      items: [
+        "guide/commands/slash",
+        "guide/commands/options",
+        "guide/commands/context-menu",
+        "guide/commands/subcommands",
+        "guide/commands/permissions-contexts",
+        "guide/commands/registration",
+        "guide/middleware",
         "guide/result-handler",
       ],
     },
     {
       type: "category",
-      label: "Packages",
+      label: "Components",
+      items: [
+        "guide/components",
+      ],
+    },
+    {
+      type: "category",
+      label: "External packages",
       items: [
         "packages/arcscord",
         "packages/cli",
