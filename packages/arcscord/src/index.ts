@@ -265,6 +265,9 @@ export {
   LocaleManager,
 } from "./manager";
 export type {
+  ApplicationCommandRegistration,
+} from "./manager";
+export type {
   CommandErrorHandler,
   CommandErrorHandlerInfos,
   CommandManagerOptions,

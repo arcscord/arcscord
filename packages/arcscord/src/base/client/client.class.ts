@@ -269,7 +269,9 @@ export class ArcClient extends DJSClient {
       }
     }
     if (handlers.commands && handlers.commands.length > 0) {
-      await this.waitReady();
+      if (!this.ready && !this.arcOptions.applicationId) {
+        await this.waitReady();
+      }
       const [err] = await this.loadCommands(handlers.commands);
       if (err) {
         this.logger.fatalError(err);

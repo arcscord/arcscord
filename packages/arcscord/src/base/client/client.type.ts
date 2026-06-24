@@ -70,6 +70,14 @@ export type ArcClientLoggerOptions = {
  */
 export type ArcClientOptions = ClientOptions & {
   /**
+   * Discord application id used to register commands before the client is ready.
+   *
+   * When provided, command registration can use the REST API directly instead
+   * of waiting for Discord.js to hydrate `client.application`.
+   */
+  applicationId?: string;
+
+  /**
    * Options for configuring the logger.
    */
   logger?: ArcClientLoggerOptions;
