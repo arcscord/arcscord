@@ -10,12 +10,20 @@ export type {
 export {
   AutocompleteContext,
 } from "./base/command/autocomplete_context";
+export type {
+  AutocompleteCommandPart,
+  AutocompleteHandler,
+  AutocompleteHandlers,
+  AutocompleteOptionName,
+} from "./base/command/autocomplete_context";
 export {
   commandContextsEnum,
   commandIntegrationTypesEnum,
   commandOptionTypesEnum,
 } from "./base/command/command.enum";
 export type {
+  AnyCommandHandler,
+  AnySubCommandHandler,
   AutocompleteCommand,
   CommandHandler,
   CommandOptions,

@@ -1,10 +1,14 @@
 import type { ErrorOptions } from "@arcscord/better-error";
 import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
-import type { CommandHandler } from "#/base/command";
-import type { AutocompleteContext } from "#/base/command/autocomplete_context";
+import type { AnyCommandHandler, AnySubCommandHandler } from "#/base/command";
 import type { BaseCommandContext } from "#/base/command/command_context";
 import { commandInteractionToString } from "#/base/command";
 import { InteractionError } from "#/utils/error/class/interaction_error";
+
+type CommandErrorContext = {
+  interaction: CommandInteraction | AutocompleteInteraction;
+  command: AnyCommandHandler | AnySubCommandHandler;
+};
 
 /**
  * Options for creating a CommandError.
@@ -13,7 +17,7 @@ export type CommandErrorOptions = ErrorOptions & {
   /**
    * The context of the command.
    */
-  ctx: BaseCommandContext | AutocompleteContext;
+  ctx: BaseCommandContext | CommandErrorContext;
 };
 
 /**
@@ -33,12 +37,12 @@ export class CommandError extends InteractionError {
   /**
    * The context associated with the command error.
    */
-  context: BaseCommandContext | AutocompleteContext;
+  context: BaseCommandContext | CommandErrorContext;
 
   /**
    * The command properties associated with the error.
    */
-  command: CommandHandler;
+  command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
    * Creates a new instance of `CommandError`.

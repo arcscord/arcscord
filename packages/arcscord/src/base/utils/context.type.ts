@@ -1,5 +1,5 @@
 import type { BaseInteraction, Guild, GuildBasedChannel, GuildMember, Message, User } from "discord.js";
-import type { ArcClient, CommandHandler } from "#/base";
+import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
 
 /**
  * FOR DOCS ONLY
@@ -24,7 +24,7 @@ export type ContextDocs = {
   /**
    * The command props for the command
    */
-  command: CommandHandler;
+  command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
    * The discord.js Interaction object

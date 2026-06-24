@@ -10,9 +10,10 @@ import type {
   BaseMessageOptions,
   CommandInteraction,
 } from "discord.js";
-import type { ArcClient } from "#/base";
-import type { CommandContext, CommandHandler } from "#/base/command";
-import type { Command } from "#/base/command/command_definition.type";
+import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
+import type { CommandContext } from "#/base/command";
+import type { Command, SlashWithSubsCommandDefinition, SubCommandDefinition } from "#/base/command/command_definition.type";
+import type { Option, OptionsList } from "#/base/command/option.type";
 import type {
   CommandErrorHandler,
   CommandErrorHandlerInfos,
@@ -104,6 +105,11 @@ export class CommandManager
 
     for (const command of commands) {
       if (!isSubCommand(command)) {
+        const [validationErr] = this.validateCommandAutocomplete(command, group);
+        if (validationErr) {
+          return error(validationErr);
+        }
+
         let hasPush = false;
         const data = commandToAPI(command.build, this.client);
 
@@ -144,6 +150,11 @@ export class CommandManager
         totalCommands++;
       }
       else {
+        const [validationErr] = this.validateSubCommandListAutocomplete(command, group);
+        if (validationErr) {
+          return error(validationErr);
+        }
+
         commandsBody.push(subCommandListToAPI(command, this.client));
         slashCommands++;
         this.trace(
@@ -157,6 +168,118 @@ export class CommandManager
     );
 
     return ok(commandsBody);
+  }
+
+  private validateCommandAutocomplete(command: AnyCommandHandler, group: string): Result<true, InternalError> {
+    if (!hasSlashCommand(command.build) || !command.build.slash.options) {
+      return this.validateAutocompleteHandlers(command.autocomplete, undefined, command.build.slash?.name ?? command.build.message?.name ?? command.build.user?.name ?? "unknown", group);
+    }
+
+    return this.validateAutocompleteHandlers(
+      command.autocomplete,
+      command.build.slash.options,
+      command.build.slash.name,
+      group,
+    );
+  }
+
+  private validateSubCommandListAutocomplete(command: SlashWithSubsCommandDefinition, group: string): Result<true, InternalError> {
+    for (const subCommand of command.subCommands ?? []) {
+      const [err] = this.validateSubCommandAutocomplete(subCommand.build, subCommand.autocomplete, `${command.name}.${subCommand.build.name}`, group);
+      if (err) {
+        return error(err);
+      }
+    }
+
+    if (command.subCommandsGroups) {
+      for (const [groupName, subCommandGroup] of Object.entries(command.subCommandsGroups)) {
+        for (const subCommand of subCommandGroup.subCommands) {
+          const [err] = this.validateSubCommandAutocomplete(
+            subCommand.build,
+            subCommand.autocomplete,
+            `${command.name}.${groupName}.${subCommand.build.name}`,
+            group,
+          );
+          if (err) {
+            return error(err);
+          }
+        }
+      }
+    }
+
+    return ok(true);
+  }
+
+  private validateSubCommandAutocomplete(
+    build: SubCommandDefinition,
+    handlers: Record<string, unknown> | undefined,
+    commandName: string,
+    group: string,
+  ): Result<true, InternalError> {
+    return this.validateAutocompleteHandlers(handlers, build.options, commandName, group);
+  }
+
+  private validateAutocompleteHandlers(
+    handlers: Record<string, unknown> | undefined,
+    options: OptionsList | undefined,
+    commandName: string,
+    group: string,
+  ): Result<true, InternalError> {
+    const autocompleteOptions = Object.entries(options ?? {})
+      .filter(([, option]) => this.isAutocompleteOption(option))
+      .map(([name]) => name);
+    const handlerNames = Object.keys(handlers ?? {});
+
+    for (const optionName of autocompleteOptions) {
+      if (!handlers?.[optionName]) {
+        return error(new InternalError({
+          message: `missing autocomplete handler for option "${optionName}" in command "${commandName}"`,
+          debugs: {
+            group,
+            commandName,
+            optionName,
+            handlers: handlerNames,
+          },
+        }));
+      }
+    }
+
+    for (const handlerName of handlerNames) {
+      const option = options?.[handlerName];
+      if (!option) {
+        return error(new InternalError({
+          message: `autocomplete handler "${handlerName}" does not match an option in command "${commandName}"`,
+          debugs: {
+            group,
+            commandName,
+            handlerName,
+            options: Object.keys(options ?? {}),
+          },
+        }));
+      }
+
+      if (!this.isAutocompleteOption(option)) {
+        return error(new InternalError({
+          message: `autocomplete handler "${handlerName}" targets an option without autocomplete enabled in command "${commandName}"`,
+          debugs: {
+            group,
+            commandName,
+            handlerName,
+            option,
+          },
+        }));
+      }
+    }
+
+    return ok(true);
+  }
+
+  private isAutocompleteOption(option: Option): boolean {
+    return (
+      (option.type === "string" || option.type === "integer" || option.type === "number")
+      && "autocomplete" in option
+      && option.autocomplete === true
+    );
   }
 
   /**
@@ -452,7 +575,7 @@ export class CommandManager
 
   private getCommand(interaction: CommandInteraction | AutocompleteInteraction): Result<
     {
-      cmd: CommandHandler;
+      cmd: AnyCommandHandler | AnySubCommandHandler;
       resolvedName: string;
     },
     BaseError
@@ -733,8 +856,8 @@ export class CommandManager
     /* Command Run */
 
     try {
-      // @ts-expect-error fix error with never type
-      const result = await command.run(context);
+      const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
+      const result = await run(context as CommandContext);
       const infos: CommandResultHandlerInfos = {
         result,
         interaction,
@@ -755,8 +878,7 @@ export class CommandManager
         }),
         interaction,
         command,
-        // @ts-expect-error fix error with never type
-        context,
+        context: context as CommandContext,
         internal: false,
       });
     }
@@ -778,11 +900,28 @@ export class CommandManager
     }
 
     const command = infos.cmd;
+    const focused = interaction.options.getFocused(true);
 
     if (!hasAutocomplete(command)) {
       return this.logger.warning(
         `Get autocomplete for command without autocomplete function : ${infos.resolvedName}`,
       );
+    }
+
+    const handler = command.autocomplete[focused.name];
+    if (!handler) {
+      return this.handleError({
+        error: new BaseError({
+          message: `no autocomplete handler found for option ${focused.name} in command ${infos.resolvedName}`,
+          debugs: {
+            focused,
+            handlers: Object.keys(command.autocomplete),
+          },
+        }),
+        interaction,
+        internal: true,
+        autocomplete: true,
+      });
     }
 
     /* Locale */
@@ -800,7 +939,7 @@ export class CommandManager
     });
 
     try {
-      const [err2] = await command.autocomplete(context);
+      const [err2] = await handler(context);
       if (err2) {
         return this.handleError({
           error: err2,
@@ -828,7 +967,7 @@ export class CommandManager
     }
   }
 
-  private async runMiddleware(command: CommandHandler, context: CommandContext): Promise<Result<object | false, CommandError>> {
+  private async runMiddleware(command: AnyCommandHandler | AnySubCommandHandler, context: CommandContext): Promise<Result<object | false, CommandError>> {
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!command.use || command.use.length === 0) {
       return ok({});

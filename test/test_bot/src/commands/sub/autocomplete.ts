@@ -20,10 +20,12 @@ export const autocompleteSubCommand = createCommand({
       content: `You choice ${ctx.options.anime}`,
     });
   },
-  autocomplete: (ctx) => {
-    const choices = animeList
-      .filter(anime => anime.includes(ctx.focus))
-      .slice(0, 25);
-    return ctx.sendChoices(choices);
+  autocomplete: {
+    anime: (ctx) => {
+      const choices = animeList
+        .filter(anime => anime.includes(ctx.value))
+        .slice(0, 25);
+      return ctx.sendChoices(choices);
+    },
   },
 });

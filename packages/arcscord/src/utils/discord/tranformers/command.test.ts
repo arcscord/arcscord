@@ -133,6 +133,17 @@ describe("command transformers", () => {
     });
   });
 
+  it("rejects options that combine choices and autocomplete", () => {
+    const client = createClient();
+
+    expect(() => optionToAPI("query", {
+      type: "string",
+      description: "Search query",
+      choices: ["one"],
+      autocomplete: true,
+    } as any, client)).toThrow("Option \"query\" cannot use choices and autocomplete together");
+  });
+
   it("preserves option declaration order in option lists", () => {
     const client = createClient();
 

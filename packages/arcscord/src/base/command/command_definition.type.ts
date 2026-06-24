@@ -1,6 +1,6 @@
 import type { PermissionsString } from "discord.js";
-import type { CommandHandler } from "#/base";
 import type { commandContextsEnum, commandIntegrationTypesEnum } from "#/base/command/command.enum";
+import type { AnyCommandHandler, AnySubCommandHandler } from "#/base/command/command.type";
 import type { OptionsList } from "#/base/command/option.type";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils/discord/type/locale.type";
@@ -114,7 +114,7 @@ export type SubCommandGroupDefinition = Omit<
   /**
    * List of subcommands in the group.
    */
-  subCommands: CommandHandler<SubCommandDefinition>[];
+  subCommands: AnySubCommandHandler[];
 };
 
 /**
@@ -134,7 +134,7 @@ export type SlashWithSubsCommandDefinition = BaseCommandDefinition & {
   /**
    * List of subcommands.
    */
-  subCommands?: CommandHandler<SubCommandDefinition>[];
+  subCommands?: AnySubCommandHandler[];
 
   /**
    * Groups of subcommands.
@@ -181,5 +181,5 @@ export type PartialCommandDefinitionForUser = Required<Pick<FullCommandDefinitio
  * Union type for different command definitions.
  */
 export type Command
-  = | CommandHandler<FullCommandDefinition>
+  = | AnyCommandHandler
     | SlashWithSubsCommandDefinition;

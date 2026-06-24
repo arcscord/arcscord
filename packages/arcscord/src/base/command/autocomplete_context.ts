@@ -5,14 +5,28 @@ import type {
 } from "discord.js";
 import type i18next from "i18next";
 import type {
+  AnyCommandHandler,
+  AnySubCommandHandler,
   ArcClient,
-  CommandHandler,
   CommandRunResult,
   NumberChoices,
   StringChoices,
 } from "#/base";
+import type {
+  FullCommandDefinition,
+  PartialCommandDefinitionForSlash,
+  SubCommandDefinition,
+} from "#/base/command/command_definition.type";
+import type {
+  BaseIntegerOption,
+  BaseNumberOption,
+  BaseStringOption,
+  Option,
+  OptionsList,
+} from "#/base/command/option.type";
 import type { ContextDocs } from "#/base/utils/context.type";
 import type { CommandErrorOptions } from "#/utils";
+import type { MaybePromise } from "#/utils/type/util.type";
 import { anyToError, error, ok } from "@arcscord/error";
 import { CommandError } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
@@ -23,13 +37,95 @@ type BaseAutocompleteOptions = {
   locale: string;
 };
 
+type AutocompleteOption = (BaseStringOption | BaseIntegerOption | BaseNumberOption) & {
+  autocomplete: true;
+};
+
+type AutocompleteOptionsDef<
+  T extends FullCommandDefinition | SubCommandDefinition,
+> = T extends PartialCommandDefinitionForSlash
+  ? T["slash"]["options"] extends OptionsList
+    ? T["slash"]["options"]
+    : never
+  : T extends SubCommandDefinition
+    ? T["options"] extends OptionsList
+      ? T["options"]
+      : never
+    : never;
+
+export type AutocompleteOptionName<T extends OptionsList> = {
+  [K in keyof T]: T[K] extends AutocompleteOption ? K : never;
+}[keyof T] & string;
+
+type AutocompleteOptionByName<
+  T extends OptionsList,
+  Name extends AutocompleteOptionName<T>,
+> = T[Name] extends AutocompleteOption ? T[Name] : never;
+
+type AutocompleteValue<T extends Option>
+  = T extends BaseStringOption | BaseIntegerOption | BaseNumberOption
+    ? string
+    : never;
+
+type AutocompleteChoices<T extends Option>
+  = T extends BaseStringOption
+    ? StringChoices
+    : T extends BaseIntegerOption | BaseNumberOption
+      ? NumberChoices
+      : never;
+
+export type AutocompleteHandler<
+  Build extends FullCommandDefinition | SubCommandDefinition,
+  Name extends AutocompleteOptionName<AutocompleteOptionsDef<Build>>,
+> = {
+  bivarianceHack: (
+    ctx: AutocompleteContext<Build, Name>,
+  ) => MaybePromise<CommandRunResult>;
+}["bivarianceHack"];
+
+export type AutocompleteHandlers<
+  Build extends FullCommandDefinition | SubCommandDefinition,
+> = {
+  [Name in AutocompleteOptionName<AutocompleteOptionsDef<Build>>]: AutocompleteHandler<Build, Name>;
+};
+
+export type AutocompleteCommandPart<
+  Build extends FullCommandDefinition | SubCommandDefinition,
+> = [AutocompleteOptionName<AutocompleteOptionsDef<Build>>] extends [never]
+  ? {
+      autocomplete?: never;
+    }
+  : {
+      autocomplete: AutocompleteHandlers<Build>;
+    };
+
+type AutocompleteChoicesFor<
+  Build extends FullCommandDefinition | SubCommandDefinition,
+  Name extends string,
+> = Name extends AutocompleteOptionName<AutocompleteOptionsDef<Build>>
+  ? AutocompleteChoices<AutocompleteOptionByName<AutocompleteOptionsDef<Build>, Name>>
+  : StringChoices | NumberChoices;
+
+type StoredCommandHandler = AnyCommandHandler | AnySubCommandHandler;
+
+type AutocompleteValueFor<
+  Build extends FullCommandDefinition | SubCommandDefinition,
+  Name extends string,
+> = Name extends AutocompleteOptionName<AutocompleteOptionsDef<Build>>
+  ? AutocompleteValue<AutocompleteOptionByName<AutocompleteOptionsDef<Build>, Name>>
+  : string;
+
 /**
  * Base class for handling autocomplete context.
  */
-export class AutocompleteContext<InGuild extends true | false = true | false> extends InteractionContext<InGuild> implements ContextDocs {
+export class AutocompleteContext<
+  Build extends FullCommandDefinition | SubCommandDefinition = FullCommandDefinition | SubCommandDefinition,
+  Name extends string = string,
+  InGuild extends true | false = true | false,
+> extends InteractionContext<InGuild> implements ContextDocs {
   client: ArcClient;
 
-  command: CommandHandler;
+  command: StoredCommandHandler;
 
   interaction: AutocompleteInteraction;
 
@@ -48,7 +144,7 @@ export class AutocompleteContext<InGuild extends true | false = true | false> ex
    * @param options - The base autocomplete options.
    */
   constructor(
-    command: CommandHandler,
+    command: StoredCommandHandler,
     interaction: AutocompleteInteraction,
     options: BaseAutocompleteOptions,
   ) {
@@ -66,10 +162,17 @@ export class AutocompleteContext<InGuild extends true | false = true | false> ex
   }
 
   /**
-   * Gets the focused option's value as a string.
+   * Gets the focused option name.
    */
-  get focus(): string {
-    return this.interaction.options.getFocused(false);
+  get name(): Name {
+    return this.fullFocus.name as Name;
+  }
+
+  /**
+   * Gets the focused option value.
+   */
+  get value(): AutocompleteValueFor<Build, Name> {
+    return this.fullFocus.value as AutocompleteValueFor<Build, Name>;
   }
 
   /**
@@ -86,7 +189,7 @@ export class AutocompleteContext<InGuild extends true | false = true | false> ex
    * @returns A promise that resolves to CommandRunResult.
    */
   async sendChoices(
-    choices: StringChoices | NumberChoices,
+    choices: AutocompleteChoicesFor<Build, Name>,
   ): Promise<CommandRunResult> {
     try {
       const apiChoices: ApplicationCommandOptionChoiceData[] = [];

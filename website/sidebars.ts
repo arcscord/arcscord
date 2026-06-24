@@ -21,6 +21,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "guide/commands/slash",
         "guide/commands/options",
+        "guide/commands/autocomplete",
         "guide/commands/context-menu",
         "guide/commands/subcommands",
         "guide/commands/permissions-contexts",

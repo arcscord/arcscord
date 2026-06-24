@@ -14,7 +14,7 @@ import type {
   UserContextMenuCommandInteraction,
 } from "discord.js";
 import type i18next from "i18next";
-import type { ArcClient, CommandHandler, CommandRunResult } from "#/base";
+import type { AnyCommandHandler, AnySubCommandHandler, ArcClient, CommandRunResult } from "#/base";
 import type {
   CommandContexts,
   CommandIntegrationType,
@@ -68,7 +68,7 @@ export class BaseCommandContext<
   /**
    * The command properties
    */
-  command: CommandHandler;
+  command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
    * The original Discord.js interaction
@@ -115,7 +115,7 @@ export class BaseCommandContext<
    * Construct a new BaseCommandContext
    */
   constructor(
-    command: CommandHandler,
+    command: AnyCommandHandler | AnySubCommandHandler,
     interaction: CommandInteraction,
     options: BaseCommandContextBuilderOptions<M>,
   ) {
@@ -340,7 +340,7 @@ export class SlashCommandContext<
   interaction: ChatInputCommandInteraction;
 
   constructor(
-    command: CommandHandler,
+    command: AnyCommandHandler | AnySubCommandHandler,
     interaction: ChatInputCommandInteraction,
     options: SlashCommandContextBuilderOptions<T, M>,
   ) {
@@ -380,7 +380,7 @@ export class MessageCommandContext<
   interaction: MessageContextMenuCommandInteraction;
 
   constructor(
-    command: CommandHandler,
+    command: AnyCommandHandler | AnySubCommandHandler,
     interaction: MessageContextMenuCommandInteraction,
     options: MessageCommandContextBuilderOptions<M>,
   ) {
@@ -429,7 +429,7 @@ export class UserCommandContext<
   interaction: UserContextMenuCommandInteraction;
 
   constructor(
-    command: CommandHandler,
+    command: AnyCommandHandler | AnySubCommandHandler,
     interaction: UserContextMenuCommandInteraction,
     options: UserCommandContextBuilderOptions<M>,
   ) {

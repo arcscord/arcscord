@@ -1,7 +1,7 @@
 import type { BaseError } from "@arcscord/better-error";
 import type { Result } from "@arcscord/error";
 import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
-import type { CommandContext, CommandHandler } from "#/base";
+import type { AnyCommandHandler, AnySubCommandHandler, CommandContext } from "#/base";
 import type { CommandError } from "#/utils";
 
 /**
@@ -21,7 +21,7 @@ export type CommandResultHandlerInfos = {
   /**
    * The command properties
    */
-  command: CommandHandler;
+  command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
    * Whether the response is deferred.
@@ -51,7 +51,7 @@ type BaseCommandErrorHandlerInfos = {
   /**
    * The command properties associated with the command.
    */
-  command?: CommandHandler;
+  command?: AnyCommandHandler | AnySubCommandHandler;
 
   /**
    * The context associated with the command.

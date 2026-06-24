@@ -5,7 +5,7 @@ import type {
   CommandInteraction,
   CommandInteractionOption,
 } from "discord.js";
-import type { AutocompleteCommand, CommandHandler } from "#/base";
+import type { AnyCommandHandler, AutocompleteCommand } from "#/base";
 import type {
   FullCommandDefinition,
   PartialCommandDefinitionForMessage,
@@ -23,7 +23,7 @@ import { BaseChannel, GuildMember, Role, User } from "discord.js";
  * @internal
  */
 export function isSubCommand(
-  props: CommandHandler | SlashWithSubsCommandDefinition,
+  props: AnyCommandHandler | SlashWithSubsCommandDefinition,
 ): props is SlashWithSubsCommandDefinition {
   return "name" in props;
 }

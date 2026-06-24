@@ -5,7 +5,7 @@ import type {
 } from "discord-api-types/v10";
 import type { PermissionsString } from "discord.js";
 import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
-import type { AutocompleteContext } from "#/base/command/autocomplete_context";
+import type { AutocompleteCommandPart, AutocompleteContext } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
 import type { CommandError } from "#/utils/error/class/command_error";
 import type { MaybePromise } from "#/utils/type/util.type";
@@ -53,8 +53,14 @@ export type APICommandObject = {
  * @internal
  */
 export type AutocompleteCommand = {
-  autocomplete: (ctx: AutocompleteContext) => Promise<CommandRunResult>;
+  autocomplete: Record<string, (ctx: AutocompleteContext) => MaybePromise<CommandRunResult>>;
 };
+
+type BivariantCommandCallback<Ctx> = {
+  bivarianceHack: (
+    ctx: Ctx,
+  ) => MaybePromise<CommandRunResult>;
+}["bivarianceHack"];
 
 /**
  * Command properties.
@@ -63,8 +69,7 @@ export type AutocompleteCommand = {
  * @template Middlewares - The list of middleware used in command
  */
 export type CommandHandler<
-  Build extends SubCommandDefinition | FullCommandDefinition = | SubCommandDefinition
-    | FullCommandDefinition,
+  Build extends SubCommandDefinition | FullCommandDefinition = SubCommandDefinition | FullCommandDefinition,
   Middlewares extends CommandMiddleware[] = CommandMiddleware[],
 > = {
   /**
@@ -84,21 +89,43 @@ export type CommandHandler<
    * @param ctx - The command context.
    * @returns A result of the command execution.
    */
-  run: (
-    ctx: CommandContext<Build, Middlewares>,
-  ) => MaybePromise<CommandRunResult>;
+  run: {
+    bivarianceHack: (
+      ctx: CommandContext<Build, Middlewares>,
+    ) => MaybePromise<CommandRunResult>;
+  }["bivarianceHack"];
 
   /**
    * Middlewares to be used with the command.
    */
   use?: Middlewares;
 
-  /**
-   * Autocomplete handler for the command.
-   *
-   * Never run if no autocomplete option exist
-   * @param ctx - The autocomplete context.
-   * @returns A result of the autocomplete execution.
-   */
-  autocomplete?: (ctx: AutocompleteContext) => MaybePromise<CommandRunResult>;
+} & AutocompleteCommandPart<Build>;
+
+/**
+ * Broad command handler shape used when storing heterogeneous commands.
+ *
+ * @internal
+ */
+export type AnyCommandHandler = {
+  build: FullCommandDefinition;
+  options?: CommandOptions;
+  // Heterogeneous command collections store handlers with different context types.
+  run: BivariantCommandCallback<any>;
+  use?: CommandMiddleware[];
+  autocomplete?: Record<string, BivariantCommandCallback<any>>;
+};
+
+/**
+ * Broad subcommand handler shape used when storing heterogeneous subcommands.
+ *
+ * @internal
+ */
+export type AnySubCommandHandler = {
+  build: SubCommandDefinition;
+  options?: CommandOptions;
+  // Heterogeneous subcommand collections store handlers with different option maps.
+  run: BivariantCommandCallback<any>;
+  use?: CommandMiddleware[];
+  autocomplete?: Record<string, BivariantCommandCallback<any>>;
 };

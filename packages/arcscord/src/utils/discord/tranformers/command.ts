@@ -113,6 +113,10 @@ export function optionToAPI(
   option: Option,
   client: ArcClient,
 ): APIApplicationCommandBasicOption {
+  if ("choices" in option && option.choices && option.autocomplete) {
+    throw new Error(`Option "${name}" cannot use choices and autocomplete together`);
+  }
+
   const baseOption: Omit<APIApplicationCommandBasicOption, "type"> = {
     name,
     description: option.description,
