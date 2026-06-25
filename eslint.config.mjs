@@ -13,6 +13,7 @@ export default antfu(
       "json_docs/*",
       ".vscode/settings.json",
       "packages/cli/templates/**",
+      ".local/*",
     ],
   },
   {
