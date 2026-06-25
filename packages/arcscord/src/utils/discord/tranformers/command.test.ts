@@ -1,3 +1,4 @@
+import i18next from "i18next";
 import { describe, expect, it, vi } from "vitest";
 import {
   contextsToAPI,
@@ -21,6 +22,40 @@ function createClient(enabled = true) {
       i18n: {
         getFixedT: vi.fn((lang: string) => (key: string) => `${lang}:${key}`),
       },
+    },
+  } as any;
+}
+
+async function createI18nClient() {
+  const i18n = i18next.createInstance();
+  await i18n.init({
+    resources: {
+      en: {
+        test: {
+          command: {
+            name: "i18n-en",
+          },
+        },
+      },
+      fr: {
+        test: {
+          command: {
+            name: "i18n-fr",
+          },
+        },
+      },
+    },
+    defaultNS: "test",
+    enableSelector: "optimize",
+  });
+
+  return {
+    localeManager: {
+      enabled: true,
+      trace: vi.fn(),
+      availableLanguages: new Set(["id", "en-US", "en-GB", "fr"]),
+      mapLanguage: vi.fn((locale: string) => locale.startsWith("en-") ? "en" : locale),
+      i18n,
     },
   } as any;
 }
@@ -54,12 +89,22 @@ describe("command transformers", () => {
     expect(client.localeManager.i18n.getFixedT).toHaveBeenCalledWith("en");
   });
 
-  it("sanitizes command name localizations", () => {
+  it("keeps command name localizations unchanged", () => {
     const client = createClient();
 
     expect(localizationToAPI(() => "admin.tools:reload", client, true)).toEqual({
-      "en-US": "admin-tools_reload",
-      "fr": "admin-tools_reload",
+      "en-US": "admin.tools:reload",
+      "fr": "admin.tools:reload",
+    });
+  });
+
+  it("builds callback localizations only for languages with loaded resources", async () => {
+    const client = await createI18nClient();
+
+    expect(localizationToAPI(t => t($ => $.command.name), client, true)).toEqual({
+      "en-US": "i18n-en",
+      "en-GB": "i18n-en",
+      "fr": "i18n-fr",
     });
   });
 

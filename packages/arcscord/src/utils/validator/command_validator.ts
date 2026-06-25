@@ -1,5 +1,4 @@
 import type { Result } from "@arcscord/error";
-import type { TFunction } from "i18next";
 import type { ArcClient } from "#/base";
 import type { AnyCommandHandler } from "#/base/command/command.type";
 import type {
@@ -18,6 +17,7 @@ import type { InternalError } from "#/utils/error/class/internal_error";
 import type { ValidationContext } from "./validator.util";
 import { error, ok } from "@arcscord/error";
 import { isSubCommand } from "#/base/command";
+import { localizationCallbackToMap } from "#/utils/discord/tranformers/localization";
 import {
   validateLocalizations,
   validateLowercase,
@@ -500,7 +500,10 @@ function validateSlashNameFormat(value: string, path: string, context: CommandVa
   );
 }
 
-function resolveLocalizations(localizations: LocaleMap | LocaleCallback | undefined, client: ArcClient): LocaleMap | undefined {
+function resolveLocalizations(
+  localizations: LocaleMap | LocaleCallback | undefined,
+  client: ArcClient,
+): LocaleMap | undefined {
   if (!localizations) {
     return undefined;
   }
@@ -513,12 +516,5 @@ function resolveLocalizations(localizations: LocaleMap | LocaleCallback | undefi
     return undefined;
   }
 
-  const localeMap: LocaleMap = {};
-  for (const locale of client.localeManager.availableLanguages) {
-    const lang = client.localeManager.mapLanguage(locale);
-    const t = client.localeManager.i18n.getFixedT(lang) as TFunction;
-    localeMap[locale] = localizations(t);
-  }
-
-  return localeMap;
+  return localizationCallbackToMap(localizations, client);
 }

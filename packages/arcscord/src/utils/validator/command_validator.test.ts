@@ -1,5 +1,6 @@
 import type { ArcClient } from "#/base";
 import { ApplicationCommandType } from "discord-api-types/v10";
+import i18next from "i18next";
 import { describe, expect, it, vi } from "vitest";
 import { buildCommandWithSubs, createCommand } from "#/base/command/command_func";
 import { CommandValidationError, validateCommands } from "#/utils";
@@ -19,6 +20,52 @@ function createMockClient(): ArcClient {
 
 function validateTestCommands(commands: Parameters<typeof validateCommands>[0]) {
   return validateCommands(commands, createMockClient(), {
+    createError: options => new CommandValidationError(options),
+    group: "globalCommands",
+  });
+}
+
+async function createI18nClient(): Promise<ArcClient> {
+  const i18n = i18next.createInstance();
+  await i18n.init({
+    resources: {
+      en: {
+        test: {
+          i18n: {
+            command: {
+              name: "i18n-en",
+              description: "test of i18n",
+            },
+          },
+        },
+      },
+      fr: {
+        test: {
+          i18n: {
+            command: {
+              name: "i18n-fr",
+              description: "test de i18n",
+            },
+          },
+        },
+      },
+    },
+    defaultNS: "test",
+    enableSelector: "optimize",
+  });
+
+  return {
+    localeManager: {
+      enabled: true,
+      availableLanguages: new Set(["id", "en-US", "en-GB", "fr"]),
+      i18n,
+      mapLanguage: (locale: string) => locale.startsWith("en-") ? "en" : locale,
+    },
+  } as unknown as ArcClient;
+}
+
+async function validateI18nTestCommands(commands: Parameters<typeof validateCommands>[0]) {
+  return validateCommands(commands, await createI18nClient(), {
     createError: options => new CommandValidationError(options),
     group: "globalCommands",
   });
@@ -134,6 +181,42 @@ describe("command validator", () => {
 
     expect(err).toBeInstanceOf(CommandValidationError);
     expect(err?.message).toBe("slash command \"search\" name localization \"fr\" must be lowercase when letters have lowercase variants");
+  });
+
+  it("validates selector localizations against loaded resource values", async () => {
+    const command = createCommand({
+      build: {
+        slash: {
+          name: "i18n",
+          nameLocalizations: t => t($ => $.i18n.command.name),
+          description: "default description",
+          descriptionLocalizations: t => t($ => $.i18n.command.description),
+        },
+      },
+      run: ctx => ctx.ok(),
+    });
+
+    const [err] = await validateI18nTestCommands([command]);
+
+    expect(err).toBeNull();
+  });
+
+  it("rejects invalid callback name localizations instead of sanitizing them", async () => {
+    const command = createCommand({
+      build: {
+        slash: {
+          name: "reload",
+          nameLocalizations: () => "admin.tools:reload",
+          description: "Reload tools",
+        },
+      },
+      run: ctx => ctx.ok(),
+    });
+
+    const [err] = await validateI18nTestCommands([command]);
+
+    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err?.message).toBe("slash command \"reload\" name localization \"en-US\" contains characters that Discord does not allow");
   });
 
   it("rejects unsupported localization keys", () => {

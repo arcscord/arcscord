@@ -7,8 +7,9 @@ import type { LocaleMap } from "#/utils";
 import type { ChannelType } from "#/utils/discord/type/channel.type";
 import { commandContextsEnum, commandIntegrationTypesEnum, commandOptionTypesEnum } from "#/base/command/command.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
+import { localizationCallbackToMap } from "./localization";
 
-export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefined, client: ArcClient, name = false): LocaleMap | undefined {
+export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefined, client: ArcClient, _name = false): LocaleMap | undefined {
   if (typeof locales === "undefined") {
     return undefined;
   }
@@ -19,17 +20,7 @@ export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefine
     client.localeManager.trace("locale manager is disabled, skip localization");
     return undefined;
   }
-  const newMap: LocaleMap = {};
-  for (const locale of client.localeManager.availableLanguages) {
-    const lang = client.localeManager.mapLanguage(locale);
-    const t = client.localeManager.i18n.getFixedT(lang);
-    let trad = locales(t);
-    if (name) {
-      trad = trad.replaceAll(".", "-").replaceAll(":", "_").slice(-32);
-    }
-    newMap[locale] = trad;
-  }
-  return newMap;
+  return localizationCallbackToMap(locales, client);
 }
 
 export function contextsToAPI(contexts: CommandContexts[]): number[] {
