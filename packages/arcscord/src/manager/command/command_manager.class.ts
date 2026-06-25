@@ -12,7 +12,11 @@ import type {
 } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
 import type { CommandContext } from "#/base/command";
-import type { Command, SlashWithSubsCommandDefinition, SubCommandDefinition } from "#/base/command/command_definition.type";
+import type {
+  Command,
+  SlashWithSubsCommandDefinition,
+  SubCommandDefinition,
+} from "#/base/command/command_definition.type";
 import type { Option, OptionsList } from "#/base/command/option.type";
 import type {
   CommandErrorHandler,
@@ -41,7 +45,7 @@ import {
 import { preCheck } from "#/base/command/command_precheck";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { BaseManager } from "#/base/manager/manager.class";
-import { CommandError } from "#/utils";
+import { CommandError, CommandValidationError, validateCommands } from "#/utils";
 import { internalErrorEmbed } from "#/utils/discord/embed/embed.const";
 import { InternalError } from "#/utils/error/class/internal_error";
 
@@ -97,6 +101,14 @@ export class CommandManager
     commands: Command[],
     group = "globalCommands",
   ): Result<RESTPostAPIApplicationCommandsJSONBody[], InternalError> {
+    const [commandsValidationErr] = validateCommands(commands, this.client, {
+      createError: options => new CommandValidationError(options),
+      group,
+    });
+    if (commandsValidationErr) {
+      return error(commandsValidationErr);
+    }
+
     const commandsBody: RESTPostAPIApplicationCommandsJSONBody[] = [];
     let totalCommands = 0;
     let slashCommands = 0;

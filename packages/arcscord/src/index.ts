@@ -323,6 +323,7 @@ export type { GuildTextFirstBasedChannel } from "./utils/discord/utils/util.type
 
 export {
   CommandError,
+  CommandValidationError,
   ComponentError,
   EventError,
   InteractionError,

@@ -20,6 +20,11 @@ function createMockClient() {
     },
     localeManager: {
       enabled: false,
+      availableLanguages: ["fr"],
+      i18n: {
+        getFixedT: vi.fn(() => (key: string) => key),
+      },
+      mapLanguage: vi.fn((locale: string) => locale),
       t: vi.fn((key: string) => key),
       detectLanguage: vi.fn(() => "en"),
     },
