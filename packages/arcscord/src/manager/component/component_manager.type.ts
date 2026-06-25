@@ -76,6 +76,11 @@ export type ComponentResultHandlerInfos = {
    * The context associated with the component.
    */
   context?: ComponentContext;
+
+  /**
+   * Detected i18next language used by this component execution.
+   */
+  locale: string;
 };
 
 /**

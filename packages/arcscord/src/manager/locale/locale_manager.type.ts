@@ -52,6 +52,15 @@ export type BaseLocaleManagerOptions = {
   availableLanguages?: Locale[] | Set<Locale>;
 };
 
+/**
+ * Fully resolved options used internally by {@link LocaleManager}.
+ */
+export type NormalizedLocaleManagerOptions = BaseLocaleManagerOptions & {
+  languageMap: Record<string, Locale | Locale[]>;
+  langDetector: LangDetector;
+  availableLanguages: Set<Locale>;
+};
+
 type WithCustomI18n = BaseLocaleManagerOptions & {
   /**
    * Custom i18n instance
@@ -84,4 +93,8 @@ export type LocaleManagerOptions = WithCustomI18n | WithI18nOptions | {
    */
   enabled?: false;
 };
+
+/**
+ * Translation callback used for Discord command metadata.
+ */
 export type LocaleCallback = (t: typeof i18next.t) => string;

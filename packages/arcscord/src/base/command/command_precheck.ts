@@ -32,6 +32,7 @@ export function preCheck(
   options: CommandOptions,
   client: ArcClient,
   interaction: CommandInteraction,
+  locale?: string,
 ): MaybePromise<Result<boolean, BaseError>> {
   const neededPermissions = options.neededPermissions || [];
   if (neededPermissions.length > 0 && interaction.inGuild()) {
@@ -41,7 +42,7 @@ export function preCheck(
     if (missingPermissions.length > 0) {
       return baseReply(
         interaction,
-        client.defaultMessages.missingPermissions(missingPermissions),
+        client.getMissingPermissionsMessage(missingPermissions, locale),
         false,
       );
     }

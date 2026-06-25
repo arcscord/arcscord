@@ -27,6 +27,7 @@ function createMockClient() {
       mapLanguage: vi.fn((locale: string) => locale),
       t: vi.fn((key: string) => key),
       detectLanguage: vi.fn(() => "en"),
+      ready: Promise.resolve(),
     },
     createLogger: () => ({
       trace: vi.fn(),

@@ -1,6 +1,6 @@
 import type { Result } from "@arcscord/error";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, PermissionsString } from "discord.js";
-import type { ArcClientOptions, HandlersList, MessageOptions } from "#/base/client/client.type";
+import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/component_handlers.type";
 import type { AnyEventHandler } from "#/base/event/event.type";
@@ -185,6 +185,7 @@ export class ArcClient extends DJSClient {
     group = "default",
     guild?: string,
   ): Promise<Result<true, InternalError>> {
+    await this.localeManager.ready;
     const [err, data] = this.commandManager.loadCommands(commands, group);
     if (err) {
       return error(err);
@@ -226,8 +227,8 @@ export class ArcClient extends DJSClient {
    * @param errorId - The ID of the error
    * @returns The error message
    */
-  getErrorMessage(errorId?: string): BaseMessageOptions {
-    return this.defaultMessages.error(errorId);
+  getErrorMessage(errorId?: string, locale?: string): BaseMessageOptions {
+    return this.defaultMessages.error(errorId, this.createMessageContext(locale));
   }
 
   /**
@@ -236,8 +237,19 @@ export class ArcClient extends DJSClient {
    * @param permissionsMissing - The permissions that are missing
    * @returns The message for missing permissions
    */
-  getMissingPermissionsMessage(permissionsMissing: PermissionsString[]): BaseMessageOptions {
-    return this.defaultMessages.missingPermissions(permissionsMissing);
+  getMissingPermissionsMessage(permissionsMissing: PermissionsString[], locale?: string): BaseMessageOptions {
+    return this.defaultMessages.missingPermissions(permissionsMissing, this.createMessageContext(locale));
+  }
+
+  createMessageContext(locale?: string): BaseMessageContext {
+    if (!locale || !this.localeManager.enabled) {
+      return { locale };
+    }
+
+    return {
+      locale,
+      t: this.localeManager.i18n.getFixedT(locale),
+    };
   }
 
   addIntents(intents: BitFieldResolvable<GatewayIntentsString, number>): void {

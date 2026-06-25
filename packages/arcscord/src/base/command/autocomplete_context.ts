@@ -137,6 +137,11 @@ export class AutocompleteContext<
   t: typeof i18next.t;
 
   /**
+   * Detected i18next language used by this autocomplete context.
+   */
+  locale: string;
+
+  /**
    * Constructs a new BaseAutocompleteContext.
    *
    * @param command - The command props.
@@ -153,6 +158,7 @@ export class AutocompleteContext<
     this.interaction = interaction;
     this.resolvedCommandName = options.resolvedName;
     this.client = options.client;
+    this.locale = options.locale;
     if (this.client.localeManager.enabled) {
       this.t = this.client.localeManager.i18n.getFixedT(options.locale);
     }

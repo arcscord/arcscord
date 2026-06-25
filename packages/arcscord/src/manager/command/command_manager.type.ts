@@ -24,6 +24,16 @@ export type CommandResultHandlerInfos = {
   command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
+   * The context associated with the command.
+   */
+  context: CommandContext;
+
+  /**
+   * Detected i18next language used by this command execution.
+   */
+  locale: string;
+
+  /**
    * Whether the response is deferred.
    */
   defer: boolean;
@@ -57,6 +67,11 @@ type BaseCommandErrorHandlerInfos = {
    * The context associated with the command.
    */
   context?: CommandContext;
+
+  /**
+   * Detected i18next language used by this command execution.
+   */
+  locale?: string;
 
   /**
    * Whether the error is internal in arcscord (true) or from the command code (false)

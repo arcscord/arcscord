@@ -269,6 +269,8 @@ export class ComponentManager extends BaseManager {
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
   ): Promise<void> {
+    await this.client.localeManager.ready;
+
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
       user: interaction.user,
@@ -410,6 +412,8 @@ export class ComponentManager extends BaseManager {
         result,
         component,
         interaction: context.interaction,
+        context,
+        locale: context.locale,
         defer: context.defer,
         start,
         end: Date.now(),
@@ -425,6 +429,8 @@ export class ComponentManager extends BaseManager {
         result: error(bError),
         component,
         interaction: context.interaction,
+        context,
+        locale: context.locale,
         defer: context.defer,
         start,
         end: Date.now(),
@@ -506,7 +512,7 @@ export class ComponentManager extends BaseManager {
       this.logger.logError(err);
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, err.id),
+        internalErrorEmbed(this.client, err.id, infos.locale),
         infos.defer,
       );
     }
@@ -525,7 +531,7 @@ export class ComponentManager extends BaseManager {
     if (!infos.internal) {
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, error.id),
+        internalErrorEmbed(this.client, error.id, infos.context?.locale),
         infos.context?.defer,
       );
     }

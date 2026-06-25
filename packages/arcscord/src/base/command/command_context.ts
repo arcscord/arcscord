@@ -112,6 +112,11 @@ export class BaseCommandContext<
   t: typeof i18next.t;
 
   /**
+   * Detected i18next language used by this command context.
+   */
+  locale: string;
+
+  /**
    * Construct a new BaseCommandContext
    */
   constructor(
@@ -135,6 +140,7 @@ export class BaseCommandContext<
 
     this.resolvedCommandName = options.resolvedName;
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
+    this.locale = options.locale;
 
     if (this.client.localeManager.enabled) {
       this.t = this.client.localeManager.i18n.getFixedT(options.locale);

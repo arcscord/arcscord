@@ -1,4 +1,5 @@
 import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
+import type i18next from "i18next";
 import type { EventManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
@@ -126,6 +127,21 @@ export type ManagersOptions = {
 };
 
 /**
+ * Context passed to user-visible Arcscord message builders.
+ */
+export type BaseMessageContext = {
+  /**
+   * Detected i18next language for the interaction when available.
+   */
+  locale?: string;
+
+  /**
+   * Fixed i18next translation function for `locale`.
+   */
+  t?: typeof i18next.t;
+};
+
+/**
  * List of base options
  */
 export type MessageOptions = {
@@ -133,7 +149,7 @@ export type MessageOptions = {
    * Message if an internal error happen
    * @param errId the error id
    */
-  error?: (errId?: string) => BaseMessageOptions;
+  error?: (errId?: string, context?: BaseMessageContext) => BaseMessageOptions;
   /**
    * Message if bot missing some perms for execute a command
    * @param permissionsMissing the missing permissions for the execute the command
@@ -141,6 +157,7 @@ export type MessageOptions = {
    */
   missingPermissions?: (
     permissionsMissing: PermissionsString[],
+    context?: BaseMessageContext,
   ) => BaseMessageOptions;
 };
 

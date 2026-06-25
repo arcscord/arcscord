@@ -1,6 +1,6 @@
 import type { i18n } from "i18next";
 import type { ArcClient } from "#/base";
-import type { BaseLocaleManagerOptions, LangDetector, LocaleManagerOptions } from "#/manager/locale/locale_manager.type";
+import type { BaseLocaleManagerOptions, LangDetector, LocaleManagerOptions, NormalizedLocaleManagerOptions } from "#/manager/locale/locale_manager.type";
 import type { Locale } from "#/utils";
 import { anyToError } from "@arcscord/error";
 import i18next from "i18next";
@@ -108,11 +108,6 @@ export class LocaleManager extends BaseManager {
   };
 
   /**
-   * represent the latest i18next instance created
-   */
-  static i18n = i18next;
-
-  /**
    * Enable or disable the locale manager
    */
   readonly enabled: boolean;
@@ -123,13 +118,18 @@ export class LocaleManager extends BaseManager {
   readonly options: LocaleManagerOptions;
 
   /**
+   * Options after applying Arcscord defaults.
+   */
+  readonly normalizedOptions: NormalizedLocaleManagerOptions;
+
+  /**
    * The i18n instance used for localization.
    */
   i18n: i18n;
 
   /**
    * The translation function provided by i18next.
-   * alias of LocaleManager.i18n.t
+   * alias of the manager i18n instance `t` function.
    */
   t: typeof i18next.t;
 
@@ -139,6 +139,11 @@ export class LocaleManager extends BaseManager {
   readonly detect: LangDetector;
 
   readonly availableLanguages: Set<Locale>;
+
+  /**
+   * Resolves when the i18next instance is ready to serve translations.
+   */
+  readonly ready: Promise<void>;
 
   /**
    * Constructs a new instance of the LocaleManager.
@@ -151,29 +156,58 @@ export class LocaleManager extends BaseManager {
 
     this.options = options;
     this.enabled = options.enabled ?? false;
-    this.i18n = i18next;
+    this.normalizedOptions = this.normalizeOptions(options);
+    this.i18n = i18next.createInstance();
 
     if (!options.enabled) {
-      this.i18n = i18next;
+      this.i18n = i18next.createInstance();
       this.t = this.i18n.t;
       this.detect = LocaleManager.defaultLangDetector;
-      this.availableLanguages = LocaleManager.localeSet;
+      this.availableLanguages = new Set(LocaleManager.localeSet);
+      this.ready = Promise.resolve();
       return;
     }
     else if ("customI18n" in options && options.customI18n) {
       this.i18n = options.customI18n;
+      this.ready = Promise.resolve();
     }
     else {
-      void i18next.init(options.i18nOptions);
-      this.i18n = i18next;
+      this.i18n = i18next.createInstance();
+      this.ready = this.i18n.init(options.i18nOptions).then(() => undefined);
     }
     this.t = this.i18n.t;
-    LocaleManager.i18n = this.i18n;
 
-    this.detect = options.langDetector ?? LocaleManager.defaultLangDetector;
-    this.availableLanguages = options.availableLanguages instanceof Set
-      ? options.availableLanguages
-      : new Set(options.availableLanguages ?? LocaleManager.localeSet);
+    this.detect = this.normalizedOptions.langDetector;
+    this.availableLanguages = this.normalizedOptions.availableLanguages;
+  }
+
+  private normalizeOptions(options: LocaleManagerOptions): NormalizedLocaleManagerOptions {
+    if (!options.enabled) {
+      return {
+        enabled: true,
+        languageMap: LocaleManager.defaultLanguageMap,
+        langDetector: LocaleManager.defaultLangDetector,
+        availableLanguages: new Set(LocaleManager.localeSet),
+      };
+    }
+
+    const languageMap: Record<string, Locale | Locale[]> = {
+      ...LocaleManager.defaultLanguageMap,
+    };
+    for (const [language, locales] of Object.entries(options.languageMap ?? {})) {
+      if (locales) {
+        languageMap[language] = locales;
+      }
+    }
+
+    return {
+      ...options,
+      languageMap,
+      langDetector: options.langDetector ?? LocaleManager.defaultLangDetector,
+      availableLanguages: options.availableLanguages instanceof Set
+        ? new Set(options.availableLanguages)
+        : new Set(options.availableLanguages ?? LocaleManager.localeSet),
+    };
   }
 
   /**
@@ -202,7 +236,7 @@ export class LocaleManager extends BaseManager {
       return lang;
     }
 
-    for (const [key, value] of Object.entries({ ...this.options.languageMap })) {
+    for (const [key, value] of Object.entries(this.normalizedOptions.languageMap)) {
       if (Array.isArray(value)) {
         if (value.includes(lang as Locale)) {
           return key;
@@ -225,6 +259,7 @@ export class LocaleManager extends BaseManager {
    */
   async detectLanguage(options: Parameters<LangDetector>[0]): Promise<string> {
     try {
+      await this.ready;
       const lang = await this.detect(options);
       return this.mapLanguage(lang || this.defaultLanguage());
     }

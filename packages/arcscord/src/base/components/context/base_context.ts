@@ -85,6 +85,11 @@ export class BaseComponentContext<
   t: typeof i18next.t;
 
   /**
+   * Detected i18next language used by this component context.
+   */
+  locale: string;
+
+  /**
    * Constructor for ComponentContext.
    * @param client The ArcClient instance.
    * @param interaction The interaction object.
@@ -101,6 +106,7 @@ export class BaseComponentContext<
     this.interaction = interaction;
 
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
+    this.locale = options.locale;
 
     if (this.client.localeManager.enabled) {
       this.t = this.client.localeManager.i18n.getFixedT(options.locale);

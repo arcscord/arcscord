@@ -667,6 +667,8 @@ export class CommandManager
   }
 
   private async handleInteraction(interaction: CommandInteraction): Promise<void> {
+    await this.client.localeManager.ready;
+
     /* INITIALIZATION */
     const [err, infos] = this.getCommand(interaction);
 
@@ -680,11 +682,20 @@ export class CommandManager
 
     const command = infos.cmd;
 
+    /* Locale */
+    const locale = await this.client.localeManager.detectLanguage({
+      interaction,
+      user: interaction.user,
+      guild: interaction.guild,
+      channel: interaction.channel,
+    });
+
     /* PRECHECK */
     const [err2, next] = await preCheck(
       command.options || {},
       this.client,
       interaction,
+      locale,
     );
     if (err2) {
       return this.handleError({
@@ -700,14 +711,6 @@ export class CommandManager
       );
       return;
     }
-
-    /* Locale */
-    const locale = await this.client.localeManager.detectLanguage({
-      interaction,
-      user: interaction.user,
-      guild: interaction.guild,
-      channel: interaction.channel,
-    });
 
     let context;
 
@@ -874,6 +877,8 @@ export class CommandManager
         result,
         interaction,
         command,
+        context: context as CommandContext,
+        locale,
         defer: context.defer,
         start,
         end: Date.now(),
@@ -899,6 +904,8 @@ export class CommandManager
   private async handleAutocomplete(
     interaction: AutocompleteInteraction,
   ): Promise<void> {
+    await this.client.localeManager.ready;
+
     /* INITIALIZATION */
     const [err, infos] = this.getCommand(interaction);
 
@@ -1057,7 +1064,7 @@ export class CommandManager
       this.logger.logError(err);
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, err.id),
+        internalErrorEmbed(this.client, err.id, infos.locale),
         infos.defer,
       );
     }
@@ -1072,7 +1079,7 @@ export class CommandManager
     if (!infos.autocomplete) {
       return this.sendInternalError(
         infos.interaction,
-        internalErrorEmbed(this.client, error.id),
+        internalErrorEmbed(this.client, error.id, infos.context?.locale),
         infos.context?.defer,
       );
     }
