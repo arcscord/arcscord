@@ -2,6 +2,7 @@ import type { ErrorOptions } from "@arcscord/better-error";
 import type { Result } from "@arcscord/error";
 import type { InternalError } from "#/utils/error/class/internal_error";
 import { error, ok } from "@arcscord/error";
+import { isDiscordLocale } from "#/utils/discord/type/locale.type";
 
 export type ValidationErrorFactory<Err extends InternalError = InternalError> = (options: ErrorOptions) => Err;
 
@@ -151,6 +152,7 @@ export function validateOrderedBounds<Err extends InternalError>(
 export function validateLocalizations<Err extends InternalError>(
   localizations: Record<string, string> | undefined,
   path: string,
+  context: ValidationContext<Err>,
   validate: (value: string, localePath: string) => Result<true, Err>,
 ): Result<true, Err> {
   if (!localizations) {
@@ -158,6 +160,13 @@ export function validateLocalizations<Err extends InternalError>(
   }
 
   for (const [locale, value] of Object.entries(localizations)) {
+    if (!isDiscordLocale(locale)) {
+      return validationError(context, `${path} localization "${locale}" is not a supported Discord locale`, {
+        path,
+        locale,
+      });
+    }
+
     const [err] = validate(value, `${path} localization "${locale}"`);
     if (err) {
       return error(err);

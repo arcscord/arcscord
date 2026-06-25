@@ -437,7 +437,7 @@ function validateName(
     }
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, (localeValue, localePath) => {
+  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
     const [localeLengthErr] = validateRequiredStringLength(localeValue, localePath, COMMAND_NAME_MAX_LENGTH, context);
     if (localeLengthErr) {
       return error(localeLengthErr);
@@ -463,7 +463,7 @@ function validateChoiceName(
     return error(lengthErr);
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, (localeValue, localePath) => {
+  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
     return validateRequiredStringLength(localeValue, localePath, COMMAND_CHOICE_NAME_MAX_LENGTH, context);
   });
 }
@@ -480,7 +480,7 @@ function validateDescription(
     return error(lengthErr);
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, (localeValue, localePath) => {
+  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
     return validateRequiredStringLength(localeValue, localePath, COMMAND_DESCRIPTION_MAX_LENGTH, context);
   });
 }

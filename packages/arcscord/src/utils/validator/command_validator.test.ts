@@ -136,6 +136,26 @@ describe("command validator", () => {
     expect(err?.message).toBe("slash command \"search\" name localization \"fr\" must be lowercase when letters have lowercase variants");
   });
 
+  it("rejects unsupported localization keys", () => {
+    const invalidCommand = createCommand({
+      build: {
+        slash: {
+          name: "search",
+          nameLocalizations: {
+            "xx-XX": "search",
+          } as never,
+          description: "Search anime",
+        },
+      },
+      run: ctx => ctx.ok(),
+    });
+
+    const [err] = validateTestCommands([invalidCommand]);
+
+    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err?.message).toBe("slash command \"search\" name localization \"xx-XX\" is not a supported Discord locale");
+  });
+
   it("rejects invalid description localizations", () => {
     const invalidCommand = createCommand({
       build: {
