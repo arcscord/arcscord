@@ -2,6 +2,7 @@ import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { resolveMessage } from "../utils";
 
 /**
  * Restricts a message component to the user who created the original interaction.
@@ -12,14 +13,14 @@ import { MessageFlags } from "discord.js";
 export class AuthorOnlyMiddleware extends ComponentMiddleware {
   name = "authorOnly" as const;
 
-  message: MessageOptions;
+  message: MessageOptions<undefined, ComponentContext>;
 
   /**
    * Creates an author-only component middleware.
    *
    * @param message Static Discord message sent when a different user tries to use the component.
    */
-  constructor(message: MessageOptions) {
+  constructor(message: MessageOptions<undefined, ComponentContext>) {
     super();
 
     this.message = message;
@@ -38,8 +39,8 @@ export class AuthorOnlyMiddleware extends ComponentMiddleware {
 
     if (ctx.message.interactionMetadata.user.id !== ctx.user.id) {
       return this.cancel(ctx.defer
-        ? ctx.editReply(this.message)
-        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
+        ? ctx.editReply(resolveMessage(this.message, ctx))
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...resolveMessage(this.message, ctx) }),
       );
     }
 

@@ -3,6 +3,7 @@ import type { PermissionsString, User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
 import { MessageFlags, PermissionsBitField } from "discord.js";
+import { resolveMessage } from "../utils";
 
 export type ComponentMemberPermissionMiddlewareNext = {
   allowed: true;
@@ -36,7 +37,7 @@ export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
 
   permissions: PermissionsString[];
 
-  message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions>;
+  message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions, ComponentContext>;
 
   /**
    * Creates a permission guard for component handlers.
@@ -49,7 +50,7 @@ export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
    */
   constructor(
     permissions: Iterable<PermissionsString>,
-    message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions>,
+    message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions, ComponentContext>,
   ) {
     super();
 
@@ -65,7 +66,7 @@ export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
     const missingPermissions = this.permissions.filter(permission => !memberPermissions.has(permission));
 
     if (missingPermissions.length > 0) {
-      const message = this.message({
+      const message = resolveMessage(this.message, ctx, {
         missingPermissions,
         permissions: this.permissions,
         user: ctx.user,

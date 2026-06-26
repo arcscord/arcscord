@@ -1,4 +1,5 @@
 import type { PermissionsString } from "discord.js";
+import type i18next from "i18next";
 import type { CommandRunResult, ComponentRunResult } from "#/base";
 import type { CommandContext } from "#/base/command/command_context";
 import type { ComponentContext } from "#/base/components/context";
@@ -12,8 +13,10 @@ import { createMockHandler } from "./mock_function";
 export type MockContextOptions = {
   defer?: boolean;
   hasReply?: boolean;
+  locale?: string;
   memberPermissions?: PermissionsString[];
   mockFunction?: MockFunctionFactory;
+  t?: typeof i18next.t;
   userId?: string;
 };
 
@@ -38,10 +41,12 @@ type MockBaseContext = {
   defer: boolean;
   editReply: MockContextEditReply;
   hasReply: boolean;
+  locale: string;
   member: {
     permissions: PermissionsBitField;
   } | null;
   reply: MockContextReply;
+  t: typeof i18next.t;
   user: {
     id: string;
   };
@@ -54,12 +59,14 @@ function createBaseContext(options: MockContextOptions = {}): MockBaseContext {
     defer: options.defer ?? false,
     editReply: createMockHandler(async () => ok(true as const), options.mockFunction),
     hasReply: options.hasReply ?? false,
+    locale: options.locale ?? "en",
     member: options.memberPermissions
       ? {
           permissions: new PermissionsBitField(options.memberPermissions),
         }
       : null,
     reply: createMockHandler(async () => ok(true as const), options.mockFunction),
+    t: options.t ?? ((key: string) => key) as typeof i18next.t,
     user: {
       id: userId,
     },

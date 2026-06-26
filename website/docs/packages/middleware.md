@@ -41,6 +41,34 @@ import {
 } from "@arcscord/middleware";
 ```
 
+## Localized Reusable Messages
+
+Middleware messages can be static Discord.js message objects or callbacks. A callback receives the middleware-specific data plus `ctx`, `locale`, and `t`, which lets you centralize localized messages instead of redefining them on every command.
+
+```ts
+import type { CooldownMessageOptions, MessageOptions } from "@arcscord/middleware";
+import type { CommandContext } from "arcscord";
+import { CooldownMiddleware } from "@arcscord/middleware";
+
+const cooldownMessage: MessageOptions<CooldownMessageOptions, CommandContext> = ({ cooldownRemaining, t }) => ({
+  content: t($ => $.middleware.cooldown, {
+    seconds: Math.ceil(cooldownRemaining / 1000),
+  }),
+});
+
+export const createCooldownMiddleware = (duration: number) => {
+  return new CooldownMiddleware(duration, cooldownMessage);
+};
+```
+
+Use the helper wherever you need the same behavior:
+
+```ts
+use: [
+  createCooldownMiddleware(10),
+];
+```
+
 ## CooldownMiddleware
 
 `CooldownMiddleware` prevents a user from running a command again before a configured duration expires.
@@ -86,6 +114,9 @@ The message callback receives:
 | `cooldownRemaining` | Remaining time in milliseconds. |
 | `cooldownEnd` | Date when the cooldown expires. |
 | `commandName` | Name of the command that triggered the cooldown. |
+| `ctx` | Arcscord command context. |
+| `locale` | Detected interaction locale. |
+| `t` | Fixed translation function for the detected locale. |
 
 ### Behavior
 
@@ -129,7 +160,7 @@ new CommandUserAllowListMiddleware(userIds, message);
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `userIds` | `Iterable<string>` | Discord user IDs allowed to run the command. Empty strings are ignored and IDs are trimmed. |
-| `message` | `BaseMessageOptions` | Message returned when the current user is not allowed. |
+| `message` | `BaseMessageOptions \| (options) => BaseMessageOptions` | Message returned when the current user is not allowed. Callback messages receive `ctx`, `locale`, and `t`. |
 
 ### Behavior
 
@@ -180,6 +211,9 @@ The message callback receives:
 | `missingPermissions` | Required permissions the bot does not have. |
 | `permissions` | Full required permissions list. |
 | `user` | The Discord user who triggered the command. |
+| `ctx` | Arcscord command context. |
+| `locale` | Detected interaction locale. |
+| `t` | Fixed translation function for the detected locale. |
 
 ### Behavior
 
@@ -219,7 +253,7 @@ new AuthorOnlyMiddleware(message);
 
 | Parameter | Type | Description |
 | --- | --- | --- |
-| `message` | `BaseMessageOptions` | Message returned when another user tries to use the component. |
+| `message` | `BaseMessageOptions \| (options) => BaseMessageOptions` | Message returned when another user tries to use the component. Callback messages receive `ctx`, `locale`, and `t`. |
 
 `AuthorOnlyMiddleware` returns one of these `next` values:
 
@@ -270,7 +304,7 @@ new ComponentUserAllowListMiddleware(userIds, message);
 | Parameter | Type | Description |
 | --- | --- | --- |
 | `userIds` | `Iterable<string>` | Discord user IDs allowed to run the component. Empty strings are ignored and IDs are trimmed. |
-| `message` | `BaseMessageOptions` | Message returned when the current user is not allowed. |
+| `message` | `BaseMessageOptions \| (options) => BaseMessageOptions` | Message returned when the current user is not allowed. Callback messages receive `ctx`, `locale`, and `t`. |
 
 ### Behavior
 
@@ -319,6 +353,9 @@ The message callback receives:
 | `missingPermissions` | Required permissions the current member does not have. |
 | `permissions` | Full required permissions list. |
 | `user` | The Discord user who triggered the component. |
+| `ctx` | Arcscord component context. |
+| `locale` | Detected interaction locale. |
+| `t` | Fixed translation function for the detected locale. |
 
 ### Behavior
 
@@ -368,6 +405,9 @@ The message callback receives:
 | `missingPermissions` | Required permissions the bot does not have. |
 | `permissions` | Full required permissions list. |
 | `user` | The Discord user who triggered the component. |
+| `ctx` | Arcscord component context. |
+| `locale` | Detected interaction locale. |
+| `t` | Fixed translation function for the detected locale. |
 
 ### Behavior
 

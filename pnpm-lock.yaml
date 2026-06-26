@@ -246,6 +246,9 @@ importers:
 
   test/test_bot:
     dependencies:
+      '@arcscord/middleware':
+        specifier: workspace:*
+        version: link:../../packages/middleware
       arcscord:
         specifier: workspace:*
         version: link:../../packages/arcscord

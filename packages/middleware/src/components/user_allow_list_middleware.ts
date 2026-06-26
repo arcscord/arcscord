@@ -2,7 +2,7 @@ import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
-import { normalizeUserIds } from "../utils";
+import { normalizeUserIds, resolveMessage } from "../utils";
 
 export type ComponentUserAllowListMiddlewareNext = {
   allowed: true;
@@ -19,7 +19,7 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
 
   userIds: Set<string>;
 
-  message: MessageOptions;
+  message: MessageOptions<undefined, ComponentContext>;
 
   /**
    * Creates a component allowlist middleware.
@@ -29,7 +29,7 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
    * @param userIds Discord user IDs allowed to use the component.
    * @param message Static Discord message sent when the current user is not in the allowlist.
    */
-  constructor(userIds: Iterable<string>, message: MessageOptions) {
+  constructor(userIds: Iterable<string>, message: MessageOptions<undefined, ComponentContext>) {
     super();
 
     this.userIds = normalizeUserIds(userIds);
@@ -39,8 +39,8 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
   run(ctx: ComponentContext): ComponentMiddlewareRun<ComponentUserAllowListMiddlewareNext> {
     if (!this.userIds.has(ctx.user.id)) {
       return this.cancel(ctx.defer
-        ? ctx.editReply(this.message)
-        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
+        ? ctx.editReply(resolveMessage(this.message, ctx))
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...resolveMessage(this.message, ctx) }),
       );
     }
 

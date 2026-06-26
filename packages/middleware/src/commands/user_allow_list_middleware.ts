@@ -2,7 +2,7 @@ import type { CommandContext, CommandMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
-import { normalizeUserIds } from "../utils";
+import { normalizeUserIds, resolveMessage } from "../utils";
 
 export type CommandUserAllowListMiddlewareNext = {
   allowed: true;
@@ -19,7 +19,7 @@ export class CommandUserAllowListMiddleware extends CommandMiddleware {
 
   userIds: Set<string>;
 
-  message: MessageOptions;
+  message: MessageOptions<undefined, CommandContext>;
 
   /**
    * Creates a command allowlist middleware.
@@ -29,7 +29,7 @@ export class CommandUserAllowListMiddleware extends CommandMiddleware {
    * @param userIds Discord user IDs allowed to run the command.
    * @param message Static Discord message sent when the current user is not in the allowlist.
    */
-  constructor(userIds: Iterable<string>, message: MessageOptions) {
+  constructor(userIds: Iterable<string>, message: MessageOptions<undefined, CommandContext>) {
     super();
 
     this.userIds = normalizeUserIds(userIds);
@@ -39,8 +39,8 @@ export class CommandUserAllowListMiddleware extends CommandMiddleware {
   run(ctx: CommandContext): CommandMiddlewareRun<CommandUserAllowListMiddlewareNext> {
     if (!this.userIds.has(ctx.user.id)) {
       return this.cancel(ctx.defer
-        ? ctx.editReply(this.message)
-        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
+        ? ctx.editReply(resolveMessage(this.message, ctx))
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...resolveMessage(this.message, ctx) }),
       );
     }
 

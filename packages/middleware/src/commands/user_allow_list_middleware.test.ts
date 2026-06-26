@@ -43,6 +43,27 @@ describe("commandUserAllowListMiddleware", () => {
     });
   });
 
+  it("supports localized callback messages", async () => {
+    const translate = vi.fn((key: string) => `translated:${key}`);
+    const middleware = new CommandUserAllowListMiddleware(["user_1"], ({ ctx, locale, t: fixedT }) => ({
+      content: `${locale}:${ctx.user.id}:${fixedT("middleware.not_allowed")}`,
+    }));
+    const ctx = createContext({
+      locale: "fr",
+      t: translate as never,
+      userId: "user_2",
+    });
+
+    const result = middleware.run(ctx);
+
+    expect(result.cancel).not.toBeNull();
+    await result.cancel;
+    expect(ctx.reply).toHaveBeenCalledWith({
+      content: "fr:user_2:translated:middleware.not_allowed",
+      flags: MessageFlags.Ephemeral,
+    });
+  });
+
   it("cancels with an edit reply when the interaction is deferred", async () => {
     const middleware = new CommandUserAllowListMiddleware(["user_1"], {
       content: "Not allowed",

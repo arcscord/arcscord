@@ -17,6 +17,34 @@ Documentation: https://arcscord.github.io/arcscord/
 pnpm add @arcscord/middleware
 ```
 
+## Localized Reusable Messages
+
+Every middleware message can be either a static `BaseMessageOptions` object or a callback. Message callbacks receive the middleware data plus `ctx`, `locale`, and `t`, so you can create one localized factory and reuse it instead of redefining the same message on every command.
+
+```ts
+import type { CooldownMessageOptions, MessageOptions } from "@arcscord/middleware";
+import type { CommandContext } from "arcscord";
+import { CooldownMiddleware } from "@arcscord/middleware";
+
+const cooldownMessage: MessageOptions<CooldownMessageOptions, CommandContext> = ({ cooldownRemaining, t }) => ({
+  content: t($ => $.middleware.cooldown, {
+    seconds: Math.ceil(cooldownRemaining / 1000),
+  }),
+});
+
+export function createCooldownMiddleware(duration: number) {
+  return new CooldownMiddleware(duration, cooldownMessage);
+}
+```
+
+Then reuse the factory wherever needed:
+
+```ts
+use: [
+  createCooldownMiddleware(10),
+];
+```
+
 ## Command Middleware
 
 ### CooldownMiddleware
@@ -232,7 +260,7 @@ import {
 
 - Middleware names must be unique in a single `use` array.
 - Static messages use Discord.js `BaseMessageOptions`.
-- Callback messages receive middleware-specific data and return `BaseMessageOptions`.
+- Callback messages receive middleware-specific data, `ctx`, `locale`, and `t`, then return `BaseMessageOptions`.
 - User IDs passed to allowlist middleware are trimmed, and empty values are ignored.
 
 ## License

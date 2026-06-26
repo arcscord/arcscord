@@ -3,6 +3,7 @@ import type { User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { resolveMessage } from "../utils";
 
 export type CooldownMessageOptions = {
   /**
@@ -44,7 +45,7 @@ export class CooldownMiddleware extends CommandMiddleware {
 
   users: Map<string, number> = new Map();
 
-  message: MessageOptions<CooldownMessageOptions>;
+  message: MessageOptions<CooldownMessageOptions, CommandContext>;
 
   /**
    * Creates a command cooldown middleware.
@@ -53,7 +54,7 @@ export class CooldownMiddleware extends CommandMiddleware {
    * @param message Callback called when the command is still on cooldown. It receives {@link CooldownMessageOptions} and returns the Discord message to send.
    * @param autoClear Cleanup interval in seconds, or `false` to disable automatic cleanup.
    */
-  constructor(duration: number, message: MessageOptions<CooldownMessageOptions>, autoClear: false | number = 3600) {
+  constructor(duration: number, message: MessageOptions<CooldownMessageOptions, CommandContext>, autoClear: false | number = 3600) {
     super();
     this.duration = duration;
     this.message = message;
@@ -78,7 +79,8 @@ export class CooldownMiddleware extends CommandMiddleware {
         cooldownEnd: new Date(cooldown),
         commandName: ctx.interaction.commandName,
       };
-      return this.cancel(ctx.defer ? ctx.editReply(this.message(cooldownInfos)) : ctx.reply({ ...this.message(cooldownInfos), flags: MessageFlags.Ephemeral }));
+      const message = resolveMessage(this.message, ctx, cooldownInfos);
+      return this.cancel(ctx.defer ? ctx.editReply(message) : ctx.reply({ ...message, flags: MessageFlags.Ephemeral }));
     }
 
     this.users.set(ctx.user.id, Date.now() + this.duration * 1000);

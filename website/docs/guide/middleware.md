@@ -263,6 +263,34 @@ return this.error(new ComponentError({
 }));
 ```
 
+## Reusable Localized Middleware Messages
+
+Middlewares from `@arcscord/middleware` accept message factories. These factories receive middleware data plus `ctx`, `locale`, and `t`, so you can define the user-facing message once and reuse it across commands.
+
+```ts
+import type { CooldownMessageOptions, MessageOptions } from "@arcscord/middleware";
+import type { CommandContext } from "arcscord";
+import { CooldownMiddleware } from "@arcscord/middleware";
+
+const cooldownMessage: MessageOptions<CooldownMessageOptions, CommandContext> = ({ cooldownRemaining, t }) => ({
+  content: t($ => $.middleware.cooldown, {
+    seconds: Math.ceil(cooldownRemaining / 1000),
+  }),
+});
+
+export const createCooldownMiddleware = (duration: number) => {
+  return new CooldownMiddleware(duration, cooldownMessage);
+};
+```
+
+Then each command only chooses the middleware configuration:
+
+```ts
+use: [
+  createCooldownMiddleware(10),
+];
+```
+
 ## Best Practices
 
 - Keep middleware focused on one responsibility.

@@ -3,6 +3,7 @@ import type { PermissionsString, User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
 import { MessageFlags, PermissionsBitField } from "discord.js";
+import { resolveMessage } from "../utils";
 
 export type CommandBotPermissionMiddlewareNext = {
   allowed: true;
@@ -36,7 +37,7 @@ export class CommandBotPermissionMiddleware extends CommandMiddleware {
 
   permissions: PermissionsString[];
 
-  message: MessageOptions<CommandBotPermissionMiddlewareMessageOptions>;
+  message: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext>;
 
   /**
    * Creates a bot permission guard for command handlers.
@@ -49,7 +50,7 @@ export class CommandBotPermissionMiddleware extends CommandMiddleware {
    */
   constructor(
     permissions: Iterable<PermissionsString>,
-    message: MessageOptions<CommandBotPermissionMiddlewareMessageOptions>,
+    message: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext>,
   ) {
     super();
 
@@ -66,7 +67,7 @@ export class CommandBotPermissionMiddleware extends CommandMiddleware {
     const missingPermissions = this.permissions.filter(permission => !botPermissions.has(permission));
 
     if (missingPermissions.length > 0) {
-      const message = this.message({
+      const message = resolveMessage(this.message, ctx, {
         missingPermissions,
         permissions: this.permissions,
         user: ctx.user,
