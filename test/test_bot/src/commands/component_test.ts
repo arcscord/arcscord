@@ -46,10 +46,6 @@ export const componentTestCommand = createCommand({
               value: "simple_button",
             },
             {
-              name: "string_select",
-              value: "string_select",
-            },
-            {
               name: "typed_string_select",
               value: "typed_string_select",
             },
@@ -58,20 +54,8 @@ export const componentTestCommand = createCommand({
               value: "typed_single_string_select",
             },
             {
-              name: "user_select",
-              value: "user_select",
-            },
-            {
-              name: "role_select",
-              value: "role_select",
-            },
-            {
-              name: "mentionable_select",
-              value: "mentionable_select",
-            },
-            {
-              name: "channel_select",
-              value: "channel_select",
+              name: "select",
+              value: "select",
             },
             {
               name: "modal_profile",
@@ -122,11 +106,6 @@ export const componentTestCommand = createCommand({
           components: [actionRow(simpleButton.build())],
           content: ctx.options.component,
         });
-      case "string_select":
-        return ctx.reply({
-          components: [stringSelectMenu.build("fun", "happy")],
-          content: ctx.options.component,
-        });
       case "typed_string_select":
         return ctx.reply({
           components: [typedStringSelectMenu.build()],
@@ -137,26 +116,23 @@ export const componentTestCommand = createCommand({
           components: [typedSingleStringSelectMenu.build()],
           content: ctx.options.component,
         });
-      case "user_select":
-        return ctx.reply({
-          components: [userSelectMenu.build()],
-          content: ctx.options.component,
-        });
-      case "role_select":
-        return ctx.reply({
-          components: [roleSelectMenu.build("Select a role")],
-          content: ctx.options.component,
-        });
-      case "mentionable_select":
-        return ctx.reply({
-          components: [mentionableSelectMenu.build()],
-          content: ctx.options.component,
-        });
-      case "channel_select":
-        return ctx.reply({
-          components: [channelSelectMenu.build()],
-          content: ctx.options.component,
-        });
+      case "select":
+        return ctx.reply(v2Message(
+          "# Select a value",
+          stringSelectMenu.build("fun", "happy", "arcscord"),
+          separator({ divider: false }),
+          "Select a user",
+          userSelectMenu.build(),
+          separator({ spacing: "small" }),
+          "# Select a role",
+          roleSelectMenu.build("Select a role"),
+          separator({ spacing: "large" }),
+          "# Select a mentionable",
+          mentionableSelectMenu.build(),
+          separator({ divider: true }),
+          "# Select a channel",
+          channelSelectMenu.build(),
+        ));
       case "modal_profile":
         return ctx.showModal(profileModal.build("Profile"));
       case "modal_feedback":
