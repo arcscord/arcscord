@@ -3,7 +3,21 @@
     "command": {
       "name": "i18n-en",
       "description": "test of i18n",
-      "run": "Reply in english !"
+      "run": "Reply in english for {{topic}} !"
+    },
+    "autocomplete": {
+      "option": {
+        "name": "topic",
+        "description": "Topic to test with localized autocomplete"
+      },
+      "choices": {
+        "command": "Command",
+        "component": "Component",
+        "autocomplete": "Autocomplete"
+      }
+    },
+    "component": {
+      "run": "Localized component reply in english !"
     }
   }
 }

@@ -5,6 +5,7 @@ import type { Locale } from "#/utils";
 import { anyToError } from "@arcscord/error";
 import i18next from "i18next";
 import { BaseManager } from "#/base";
+import { supportedDiscordLocales } from "#/utils";
 
 /**
  * Manages localization for the application.
@@ -16,40 +17,7 @@ export class LocaleManager extends BaseManager {
   /**
    * A set containing Locale keys
    */
-  static readonly localeSet: Set<Locale> = new Set([
-    "id",
-    "da",
-    "de",
-    "en-GB",
-    "en-US",
-    "es-ES",
-    "es-419",
-    "fr",
-    "hr",
-    "it",
-    "lt",
-    "hu",
-    "nl",
-    "no",
-    "pl",
-    "pt-BR",
-    "ro",
-    "fi",
-    "sv-SE",
-    "vi",
-    "tr",
-    "cs",
-    "el",
-    "bg",
-    "ru",
-    "uk",
-    "hi",
-    "th",
-    "zh-CN",
-    "ja",
-    "zh-TW",
-    "ko",
-  ]);
+  static readonly localeSet: Set<Locale> = new Set(supportedDiscordLocales);
 
   /**
    * Default language map defining the supported locales.

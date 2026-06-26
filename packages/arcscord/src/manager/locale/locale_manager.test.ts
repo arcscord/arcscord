@@ -35,6 +35,7 @@ describe("locale manager", () => {
           },
         },
         fallbackLng: "en",
+        enableSelector: "optimize",
       },
     });
 
@@ -58,6 +59,7 @@ describe("locale manager", () => {
           },
         },
         fallbackLng: "en",
+        enableSelector: "optimize",
       },
     });
     const second = new LocaleManager(createClient(), {
@@ -71,6 +73,7 @@ describe("locale manager", () => {
           },
         },
         fallbackLng: "en",
+        enableSelector: "optimize",
       },
     });
 
@@ -91,6 +94,7 @@ describe("locale manager", () => {
         },
       },
       fallbackLng: "fr",
+      enableSelector: "optimize",
     });
 
     const manager = new LocaleManager(createClient(), {
@@ -109,6 +113,7 @@ describe("locale manager", () => {
       enabled: true,
       i18nOptions: {
         fallbackLng: "fr",
+        enableSelector: "optimize",
       },
       langDetector: () => {
         throw new Error("boom");

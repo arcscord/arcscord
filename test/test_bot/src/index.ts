@@ -25,10 +25,12 @@ const client = new ArcClient(process.env.TOKEN as string, {
           fr: { test: fr },
         },
         defaultNS: "test",
+        enableSelector: "optimize",
       },
       enabled: true,
     },
   },
+  applicationId: process.env.APPLICATION_ID as string,
 });
 
 client.loadHandlers(handlers);

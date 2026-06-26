@@ -17,6 +17,7 @@ describe("arc client messages", () => {
               },
             },
             fallbackLng: "fr",
+            enableSelector: "optimize",
           },
         },
       },

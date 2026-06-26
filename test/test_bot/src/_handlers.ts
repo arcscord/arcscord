@@ -13,6 +13,7 @@ import { disableAllButton } from "./components/function_test/disable_all";
 import { disableComponentButton } from "./components/function_test/disableComponent";
 import { disableRowButton } from "./components/function_test/disableRow";
 import { editButton } from "./components/function_test/edit";
+import { i18nButton } from "./components/i18n_button";
 import { mentionableSelectMenu } from "./components/mentionable_select_menu";
 import { middleWareButton } from "./components/middleware";
 import { feedbackModal, profileModal, surveyModal } from "./components/modal";
@@ -48,6 +49,7 @@ export default {
     deferEditButton,
     middleWareButton,
     routeParamsButton,
+    i18nButton,
   ],
   commands: [
     avatarCommand,
