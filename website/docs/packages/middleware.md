@@ -32,7 +32,9 @@ pnpm add arcscord @arcscord/middleware
 ```ts
 import {
   AuthorOnlyMiddleware,
-  ComponentPermissionMiddleware,
+  CommandBotPermissionMiddleware,
+  ComponentBotPermissionMiddleware,
+  ComponentMemberPermissionMiddleware,
   CommandUserAllowListMiddleware,
   ComponentUserAllowListMiddleware,
   CooldownMiddleware,
@@ -135,6 +137,56 @@ new CommandUserAllowListMiddleware(userIds, message);
 - If the user is not allowed, the middleware replies or edits the deferred reply and cancels the command.
 - This middleware replaces the former core `developerCommand` option.
 
+## CommandBotPermissionMiddleware
+
+`CommandBotPermissionMiddleware` restricts a command to interactions where the bot has every required Discord permission.
+
+```ts
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
+import { createCommand } from "arcscord";
+
+export const pruneCommand = createCommand({
+  build: {
+    slash: {
+      name: "prune",
+      description: "Delete recent messages",
+      contexts: ["guild"],
+    },
+  },
+  use: [
+    new CommandBotPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+      content: `I am missing: ${missingPermissions.join(", ")}`,
+    })),
+  ],
+  run: ctx => ctx.reply("Messages pruned."),
+});
+```
+
+Constructor:
+
+```ts
+new CommandBotPermissionMiddleware(permissions, message);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `permissions` | `Iterable<PermissionsString>` | Discord permissions required by the bot. Duplicate entries are ignored. |
+| `message` | `(options) => BaseMessageOptions` | Message returned when the bot is missing permissions. |
+
+The message callback receives:
+
+| Field | Description |
+| --- | --- |
+| `missingPermissions` | Required permissions the bot does not have. |
+| `permissions` | Full required permissions list. |
+| `user` | The Discord user who triggered the command. |
+
+### Behavior
+
+- If the bot has every required permission, the middleware continues with `next({ allowed: true })`.
+- If the bot is missing at least one permission, the middleware replies or edits the deferred reply and cancels the command handler.
+- Outside guild interactions, the middleware continues without checking permissions.
+
 ## AuthorOnlyMiddleware
 
 `AuthorOnlyMiddleware` restricts a message component to the user who created the original interaction.
@@ -225,12 +277,12 @@ new ComponentUserAllowListMiddleware(userIds, message);
 - If `ctx.user.id` is in the allowlist, the middleware continues with `next({ allowed: true })`.
 - If the user is not allowed, the middleware replies or edits the deferred reply and cancels the component handler.
 
-## ComponentPermissionMiddleware
+## ComponentMemberPermissionMiddleware
 
-`ComponentPermissionMiddleware` restricts a component to members with every required Discord permission.
+`ComponentMemberPermissionMiddleware` restricts a component to members with every required Discord permission.
 
 ```ts
-import { ComponentPermissionMiddleware } from "@arcscord/middleware";
+import { ComponentMemberPermissionMiddleware } from "@arcscord/middleware";
 import { buildClickableButton, createButton } from "arcscord";
 
 export const deleteMessageButton = createButton({
@@ -241,7 +293,7 @@ export const deleteMessageButton = createButton({
     style: "danger",
   }),
   use: [
-    new ComponentPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+    new ComponentMemberPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `Missing permissions: ${missingPermissions.join(", ")}`,
     })),
   ],
@@ -252,7 +304,7 @@ export const deleteMessageButton = createButton({
 Constructor:
 
 ```ts
-new ComponentPermissionMiddleware(permissions, message);
+new ComponentMemberPermissionMiddleware(permissions, message);
 ```
 
 | Parameter | Type | Description |
@@ -273,6 +325,55 @@ The message callback receives:
 - If the member has every required permission, the middleware continues with `next({ allowed: true })`.
 - If the member is missing at least one permission, the middleware replies or edits the deferred reply and cancels the component handler.
 - If the component is used without a guild member, every configured permission is treated as missing.
+
+## ComponentBotPermissionMiddleware
+
+`ComponentBotPermissionMiddleware` restricts a component to interactions where the bot has every required Discord permission.
+
+```ts
+import { ComponentBotPermissionMiddleware } from "@arcscord/middleware";
+import { buildClickableButton, createButton } from "arcscord";
+
+export const publishButton = createButton({
+  route: "publish",
+  build: id => buildClickableButton({
+    customId: id(),
+    label: "Publish",
+    style: "primary",
+  }),
+  use: [
+    new ComponentBotPermissionMiddleware(["SendMessages"], ({ missingPermissions }) => ({
+      content: `I am missing: ${missingPermissions.join(", ")}`,
+    })),
+  ],
+  run: ctx => ctx.reply("Published."),
+});
+```
+
+Constructor:
+
+```ts
+new ComponentBotPermissionMiddleware(permissions, message);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `permissions` | `Iterable<PermissionsString>` | Discord permissions required by the bot. Duplicate entries are ignored. |
+| `message` | `(options) => BaseMessageOptions` | Message returned when the bot is missing permissions. |
+
+The message callback receives:
+
+| Field | Description |
+| --- | --- |
+| `missingPermissions` | Required permissions the bot does not have. |
+| `permissions` | Full required permissions list. |
+| `user` | The Discord user who triggered the component. |
+
+### Behavior
+
+- If the bot has every required permission, the middleware continues with `next({ allowed: true })`.
+- If the bot is missing at least one permission, the middleware replies or edits the deferred reply and cancels the component handler.
+- Outside guild interactions, the middleware continues without checking permissions.
 
 ## Combining With Custom Middleware
 

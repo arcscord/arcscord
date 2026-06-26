@@ -4,11 +4,11 @@ import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
 import { MessageFlags, PermissionsBitField } from "discord.js";
 
-export type ComponentPermissionMiddlewareNext = {
+export type ComponentMemberPermissionMiddlewareNext = {
   allowed: true;
 };
 
-export type ComponentPermissionMiddlewareMessageOptions = {
+export type ComponentMemberPermissionMiddlewareMessageOptions = {
   /**
    * Required permissions the current member does not have.
    */
@@ -31,12 +31,12 @@ export type ComponentPermissionMiddlewareMessageOptions = {
  * When the member is missing permissions, the middleware cancels the handler and
  * sends the configured message callback instead of continuing.
  */
-export class ComponentPermissionMiddleware extends ComponentMiddleware {
-  name = "componentPermission" as const;
+export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
+  name = "componentMemberPermission" as const;
 
   permissions: PermissionsString[];
 
-  message: MessageOptions<ComponentPermissionMiddlewareMessageOptions>;
+  message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions>;
 
   /**
    * Creates a permission guard for component handlers.
@@ -45,11 +45,11 @@ export class ComponentPermissionMiddleware extends ComponentMiddleware {
    * full required permission list and the permissions missing from the current member.
    *
    * @param permissions Discord permissions required to continue the component handler.
-   * @param message Callback called when the current member is missing permissions. It receives {@link ComponentPermissionMiddlewareMessageOptions} and returns the Discord message to send.
+   * @param message Callback called when the current member is missing permissions. It receives {@link ComponentMemberPermissionMiddlewareMessageOptions} and returns the Discord message to send.
    */
   constructor(
     permissions: Iterable<PermissionsString>,
-    message: MessageOptions<ComponentPermissionMiddlewareMessageOptions>,
+    message: MessageOptions<ComponentMemberPermissionMiddlewareMessageOptions>,
   ) {
     super();
 
@@ -57,7 +57,7 @@ export class ComponentPermissionMiddleware extends ComponentMiddleware {
     this.message = message;
   }
 
-  run(ctx: ComponentContext): ComponentMiddlewareRun<ComponentPermissionMiddlewareNext> {
+  run(ctx: ComponentContext): ComponentMiddlewareRun<ComponentMemberPermissionMiddlewareNext> {
     const permissions = ctx.member?.permissions;
     const memberPermissions = new PermissionsBitField(
       typeof permissions === "string" ? BigInt(permissions) : permissions ?? 0n,

@@ -3,37 +3,12 @@ import type {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import type { PermissionsString } from "discord.js";
 import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
 import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
 import type { CommandError } from "#/utils/error/class/command_error";
+import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
-
-/**
- * Options for a command.
- */
-export type CommandOptions = {
-  /**
-   * Required bot permissions for the command.
-   * @default []
-   */
-  neededPermissions?: PermissionsString[];
-
-  /**
-   * Whether to reply before executing the command.
-   * @default false
-   */
-  preReply?: boolean;
-
-  /**
-   * Whether to make the pre-reply ephemeral.
-   * if {@link CommandOptions.preReply} is false, do nothing
-   * @default false
-   */
-  preReplyEphemeral?: boolean;
-
-};
 
 /**
  * Result of running a command.
@@ -80,9 +55,14 @@ export type CommandHandler<
   build: Build;
 
   /**
-   * Options for the command.
+   * Whether to defer the interaction before executing middlewares and the command.
+   *
+   * Use `"ephemeral"` to make the deferred response visible only to the user
+   * who ran the command.
+   *
+   * @default false
    */
-  options?: CommandOptions;
+  preReply?: PreReplyMode;
 
   /**
    * Command execution function.
@@ -111,7 +91,7 @@ export type CommandHandler<
  */
 export type AnyCommandHandler = {
   build: FullCommandDefinition;
-  options?: CommandOptions;
+  preReply?: PreReplyMode;
   // Heterogeneous command collections store handlers with different context types.
   run: BivariantCommandCallback<any>;
   use?: CommandMiddleware[];
@@ -125,7 +105,7 @@ export type AnyCommandHandler = {
  */
 export type AnySubCommandHandler = {
   build: SubCommandDefinition;
-  options?: CommandOptions;
+  preReply?: PreReplyMode;
   // Heterogeneous subcommand collections store handlers with different option maps.
   run: BivariantCommandCallback<any>;
   use?: CommandMiddleware[];

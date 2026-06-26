@@ -25,7 +25,6 @@ export type {
   AnySubCommandHandler,
   AutocompleteCommand,
   CommandHandler,
-  CommandOptions,
   CommandRunResult,
 } from "./base/command/command.type";
 export {
@@ -360,6 +359,9 @@ export type {
   SerializedError,
 } from "./utils/logger";
 export { logLevels } from "./utils/logger/logger.enum";
+export type {
+  PreReplyMode,
+} from "./utils/type/pre_reply.type";
 export type {
   MaybePromise,
   OptionalProperties,

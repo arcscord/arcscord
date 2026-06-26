@@ -126,3 +126,5 @@ export const moderationCommand = buildCommandWithSubs({
 ```
 
 Use middleware or handler checks when different subcommands need different runtime rules.
+
+For bot permission checks performed at runtime, use `CommandBotPermissionMiddleware` from `@arcscord/middleware`.

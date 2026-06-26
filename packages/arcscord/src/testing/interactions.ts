@@ -2,8 +2,10 @@ import type {
   CommandInteraction,
   Message,
   MessageComponentInteraction,
+  PermissionsString,
   User,
 } from "discord.js";
+import { PermissionsBitField } from "discord.js";
 
 export type MockUserOptions = {
   id?: string;
@@ -13,6 +15,7 @@ export type MockUserOptions = {
 export type MockCommandInteractionKind = "chatInput" | "messageContextMenu" | "unknown" | "userContextMenu";
 
 export type MockCommandInteractionOptions = {
+  appPermissions?: PermissionsString[];
   channel?: CommandInteraction["channel"];
   commandId?: string;
   commandName?: string;
@@ -25,6 +28,7 @@ export type MockCommandInteractionOptions = {
 };
 
 export type MockComponentInteractionOptions = {
+  appPermissions?: PermissionsString[];
   channel?: MessageComponentInteraction["channel"];
   customId?: string;
   guild?: MessageComponentInteraction["guild"];
@@ -47,7 +51,9 @@ export function createMockCommandInteraction(
     channel: options.channel ?? null,
     commandId: options.commandId ?? "command_1",
     commandName: options.commandName ?? "test",
+    appPermissions: new PermissionsBitField(options.appPermissions ?? []),
     guild: options.guild ?? null,
+    inGuild: () => options.guild !== null && options.guild !== undefined,
     isChatInputCommand: () => kind === "chatInput",
     isMessageContextMenuCommand: () => kind === "messageContextMenu",
     isUserContextMenuCommand: () => kind === "userContextMenu",
@@ -63,8 +69,10 @@ export function createMockComponentInteraction(
 ): MessageComponentInteraction {
   return {
     channel: options.channel ?? null,
+    appPermissions: new PermissionsBitField(options.appPermissions ?? []),
     customId: options.customId ?? "test",
     guild: options.guild ?? null,
+    inGuild: () => options.guild !== null && options.guild !== undefined,
     user: createMockUser(options.user),
   } as unknown as MessageComponentInteraction;
 }

@@ -21,6 +21,7 @@ import type {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base/components/context/select_menu_context";
+import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 
 export type RouteComponentHandle<Route extends string> = {
   /**
@@ -57,14 +58,14 @@ export type BaseComponentHandler<
 > = {
 
   /**
-   * Whether to pre-reply.
+   * Whether to defer the interaction before executing middlewares and the component.
+   *
+   * Use `"ephemeral"` to make the deferred response visible only to the user
+   * who triggered the component.
+   *
+   * @default false
    */
-  preReply?: boolean;
-
-  /**
-   * Whether the pre-reply should be ephemeral.
-   */
-  ephemeralPreReply?: boolean;
+  preReply?: PreReplyMode;
 
   use?: Middlewares;
 } & RouteComponentHandle<Route>;

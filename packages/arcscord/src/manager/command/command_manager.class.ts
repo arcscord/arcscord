@@ -43,7 +43,6 @@ import {
   SlashCommandContext,
   UserCommandContext,
 } from "#/base/command";
-import { preCheck } from "#/base/command/command_precheck";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { BaseManager } from "#/base/manager/manager.class";
 import { CommandError, CommandValidationError, validateCommands } from "#/utils";
@@ -691,28 +690,6 @@ export class CommandManager
       channel: interaction.channel,
     });
 
-    /* PRECHECK */
-    const [err2, next] = await preCheck(
-      command.options || {},
-      this.client,
-      interaction,
-      locale,
-    );
-    if (err2) {
-      return this.handleError({
-        error: err2,
-        interaction,
-        internal: true,
-      });
-    }
-
-    if (!next) {
-      this.logger.trace(
-        `Command precheck blocked ${infos.resolvedName}`,
-      );
-      return;
-    }
-
     let context;
 
     /* Slash Commands */
@@ -837,9 +814,9 @@ export class CommandManager
       return;
     }
 
-    if (command.options?.preReply) {
+    if (command.preReply) {
       const [err3] = await context.deferReply({
-        flags: command.options.preReplyEphemeral ? MessageFlags.Ephemeral : undefined,
+        flags: command.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
 
       if (err3) {

@@ -1,7 +1,7 @@
 import { createMockComponentContext } from "arcscord/testing";
 import { MessageFlags } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
-import { ComponentPermissionMiddleware } from "./permission_middleware";
+import { ComponentMemberPermissionMiddleware } from "./member_permission_middleware";
 
 function createContext(options: Parameters<typeof createMockComponentContext>[0] = {}) {
   return createMockComponentContext({
@@ -10,9 +10,9 @@ function createContext(options: Parameters<typeof createMockComponentContext>[0]
   });
 }
 
-describe("componentPermissionMiddleware", () => {
+describe("componentMemberPermissionMiddleware", () => {
   it("continues when the member has every required permission", () => {
-    const middleware = new ComponentPermissionMiddleware(["ManageMessages", "BanMembers"], () => ({
+    const middleware = new ComponentMemberPermissionMiddleware(["ManageMessages", "BanMembers"], () => ({
       content: "Missing permissions",
     }));
     const ctx = createContext({
@@ -29,7 +29,7 @@ describe("componentPermissionMiddleware", () => {
   });
 
   it("cancels with a reply when permissions are missing", async () => {
-    const middleware = new ComponentPermissionMiddleware(["ManageMessages", "BanMembers"], ({ missingPermissions }) => ({
+    const middleware = new ComponentMemberPermissionMiddleware(["ManageMessages", "BanMembers"], ({ missingPermissions }) => ({
       content: `Missing: ${missingPermissions.join(", ")}`,
     }));
     const ctx = createContext({
@@ -49,7 +49,7 @@ describe("componentPermissionMiddleware", () => {
   });
 
   it("cancels with an edit reply when the interaction is deferred", async () => {
-    const middleware = new ComponentPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+    const middleware = new ComponentMemberPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `Missing: ${missingPermissions.join(", ")}`,
     }));
     const ctx = createContext({

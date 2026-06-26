@@ -77,3 +77,28 @@ Arcscord supports several Discord application command shapes:
 - slash commands with subcommands
 
 Read the dedicated command pages for complete examples of each shape.
+
+## Pre-reply
+
+Use `preReply` when a command may take longer than Discord's initial interaction response window.
+
+```ts
+export const reportCommand = createCommand({
+  build: {
+    slash: {
+      name: "report",
+      description: "Generate a report",
+    },
+  },
+  preReply: "ephemeral",
+  run: async (ctx) => {
+    const report = await generateReport();
+    await ctx.editReply(report);
+    return true;
+  },
+});
+```
+
+`preReply: true` defers a public response. `preReply: "ephemeral"` defers a response visible only to the user who ran the command. Because the interaction is already deferred, use `ctx.editReply()` for the final response.
+
+Use middleware for runtime checks such as bot permissions, member permissions, allowlists, or cooldowns.

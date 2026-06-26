@@ -18,6 +18,7 @@ import type {
 } from "#/base/components/component_handlers.type";
 import type { ComponentMiddleware } from "#/base/components/component_middleware";
 import type { StringSelectMenuContext } from "#/base/components/context/select_menu_context";
+import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import { ComponentType } from "discord-api-types/v10";
 import { buildStringSelectMenu } from "#/base/components/build_component.func";
 import { componentHandlerTypeEnum } from "#/base/components/component.enum";
@@ -41,8 +42,7 @@ type TypedStringMenuOptions<
   MaxValues extends number | undefined,
 > = {
   route: Route;
-  preReply?: boolean;
-  ephemeralPreReply?: boolean;
+  preReply?: PreReplyMode;
   use?: Middleware;
   build: (
     id: IdInitialiseFunction<Route>,

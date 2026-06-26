@@ -1,4 +1,4 @@
-import type { BaseMessageOptions, ClientOptions, PermissionsString } from "discord.js";
+import type { BaseMessageOptions, ClientOptions } from "discord.js";
 import type i18next from "i18next";
 import type { EventManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
@@ -150,15 +150,6 @@ export type MessageOptions = {
    * @param errId the error id
    */
   error?: (errId?: string, context?: BaseMessageContext) => BaseMessageOptions;
-  /**
-   * Message if bot missing some perms for execute a command
-   * @param permissionsMissing the missing permissions for the execute the command
-   * @see {@link CommandOptions.neededPermissions}
-   */
-  missingPermissions?: (
-    permissionsMissing: PermissionsString[],
-    context?: BaseMessageContext,
-  ) => BaseMessageOptions;
 };
 
 /**

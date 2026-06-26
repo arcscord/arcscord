@@ -276,7 +276,7 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
 
 ## Localize Arcscord base messages
 
-Messages sent by Arcscord itself, such as internal-error or missing-permission replies, receive the same locale context.
+Messages sent by Arcscord itself, such as internal-error replies, receive the same locale context.
 
 ```ts
 const client = new ArcClient(process.env.TOKEN ?? "", {
@@ -298,11 +298,6 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
   baseMessages: {
     error: (id, context) => ({
       content: context?.t?.($ => $.errors.internal, { id }) ?? `Internal error ${id}`,
-    }),
-    missingPermissions: (permissions, context) => ({
-      content: context?.t?.($ => $.errors.missingPermissions, {
-        permissions: permissions.join(", "),
-      }) ?? `Missing permissions: ${permissions.join(", ")}`,
     }),
   },
 });

@@ -382,7 +382,7 @@ export class ComponentManager extends BaseManager {
   private async handlePreReply(component: ComponentHandler, context: ComponentContext): Promise<Result<true, ComponentError>> {
     if (component.preReply) {
       const [err] = await context.deferReply({
-        flags: component.ephemeralPreReply ? MessageFlags.Ephemeral : undefined,
+        flags: component.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
       if (err) {
         return error(new ComponentError({

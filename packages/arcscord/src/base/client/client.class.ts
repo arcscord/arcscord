@@ -1,5 +1,5 @@
 import type { Result } from "@arcscord/error";
-import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString, PermissionsString } from "discord.js";
+import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString } from "discord.js";
 import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/component_handlers.type";
@@ -98,18 +98,6 @@ export class ArcClient extends DJSClient {
                 .setDescription(
                   `A internal error happen, error id ${errId}, please contact bot owner if error repeat`,
                 ),
-            ],
-          };
-        },
-        missingPermissions: (permissionsMissing: PermissionsString[]) => {
-          return {
-            embeds: [
-              new EmbedBuilder()
-                .setTitle("Bot missing permissions")
-                .setDescription(
-                  `The bot missing permissions : \`${permissionsMissing.join("`, `")}\``,
-                )
-                .setColor("Orange"),
             ],
           };
         },
@@ -229,16 +217,6 @@ export class ArcClient extends DJSClient {
    */
   getErrorMessage(errorId?: string, locale?: string): BaseMessageOptions {
     return this.defaultMessages.error(errorId, this.createMessageContext(locale));
-  }
-
-  /**
-   * Gets a message for missing permissions
-   *
-   * @param permissionsMissing - The permissions that are missing
-   * @returns The message for missing permissions
-   */
-  getMissingPermissionsMessage(permissionsMissing: PermissionsString[], locale?: string): BaseMessageOptions {
-    return this.defaultMessages.missingPermissions(permissionsMissing, this.createMessageContext(locale));
   }
 
   createMessageContext(locale?: string): BaseMessageContext {

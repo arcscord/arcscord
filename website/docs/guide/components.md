@@ -13,14 +13,17 @@ import { buildClickableButton, createButton } from "arcscord";
 
 export const simpleButton = createButton({
   route: "simple_button",
+  preReply: "ephemeral",
   build: id => buildClickableButton({
     label: "Simple Button",
     style: "secondary",
     customId: id(),
   }),
-  run: ctx => ctx.reply("Clicked !"),
+  run: ctx => ctx.editReply("Clicked !"),
 });
 ```
+
+`preReply: true` defers a public response before component middlewares and the handler run. `preReply: "ephemeral"` defers an ephemeral response.
 
 ## Modal
 

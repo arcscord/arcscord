@@ -71,6 +71,32 @@ export const adminCommand = createCommand({
 });
 ```
 
+### CommandBotPermissionMiddleware
+
+Restricts a command to interactions where the bot has every required Discord permission.
+Outside guild interactions, the middleware continues without checking permissions.
+
+```ts
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
+import { createCommand } from "arcscord";
+
+export const pruneCommand = createCommand({
+  build: {
+    slash: {
+      name: "prune",
+      description: "Delete recent messages.",
+      contexts: ["guild"],
+    },
+  },
+  use: [
+    new CommandBotPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+      content: `I am missing: ${missingPermissions.join(", ")}`,
+    })),
+  ],
+  run: ctx => ctx.reply("Messages pruned."),
+});
+```
+
 ## Component Middleware
 
 ### AuthorOnlyMiddleware
@@ -100,12 +126,12 @@ export const confirmButton = createButton({
 
 When the original interaction author cannot be detected, this middleware continues with `ctx.additional.authorOnly.status` set to `"ignore"`.
 
-### ComponentPermissionMiddleware
+### ComponentMemberPermissionMiddleware
 
 Restricts a component handler to members that have every required Discord permission.
 
 ```ts
-import { ComponentPermissionMiddleware } from "@arcscord/middleware";
+import { ComponentMemberPermissionMiddleware } from "@arcscord/middleware";
 import { buildClickableButton, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
@@ -117,11 +143,41 @@ export const moderateButton = createButton({
     style: "red",
   }),
   use: [
-    new ComponentPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+    new ComponentMemberPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `Missing permissions: ${missingPermissions.join(", ")}`,
     })),
   ],
-  run: ctx => ctx.reply(`Allowed: ${ctx.additional.componentPermission.allowed}`, {
+  run: ctx => ctx.reply(`Allowed: ${ctx.additional.componentMemberPermission.allowed}`, {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+```
+
+`ComponentMemberPermissionMiddleware` checks permissions held by the member who triggered the component.
+
+### ComponentBotPermissionMiddleware
+
+Restricts a component to interactions where the bot has every required Discord permission.
+Outside guild interactions, the middleware continues without checking permissions.
+
+```ts
+import { ComponentBotPermissionMiddleware } from "@arcscord/middleware";
+import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
+
+export const publishButton = createButton({
+  route: "publish",
+  build: id => buildClickableButton({
+    customId: id(),
+    label: "Publish",
+    style: "primary",
+  }),
+  use: [
+    new ComponentBotPermissionMiddleware(["SendMessages"], ({ missingPermissions }) => ({
+      content: `I am missing: ${missingPermissions.join(", ")}`,
+    })),
+  ],
+  run: ctx => ctx.reply("Published.", {
     flags: MessageFlags.Ephemeral,
   }),
 });
@@ -160,13 +216,17 @@ export const privateButton = createButton({
 import type { MessageOptions } from "@arcscord/middleware";
 import {
   AuthorOnlyMiddleware,
+  CommandBotPermissionMiddleware,
   CommandUserAllowListMiddleware,
-  ComponentPermissionMiddleware,
+  ComponentBotPermissionMiddleware,
+  ComponentMemberPermissionMiddleware,
   ComponentUserAllowListMiddleware,
   CooldownMiddleware
 
 } from "@arcscord/middleware";
 ```
+
+`CommandBotPermissionMiddleware` and `ComponentBotPermissionMiddleware` check permissions held by the bot for the current interaction. `ComponentMemberPermissionMiddleware` checks permissions held by the member who triggered the component.
 
 ## Notes
 
