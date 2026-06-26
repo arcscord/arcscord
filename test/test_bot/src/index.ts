@@ -4,7 +4,6 @@ import { Partials } from "discord.js";
 import handlers from "./_handlers";
 import en from "./locale/en.json";
 import fr from "./locale/fr.json";
-import "dotenv/config";
 
 const client = new ArcClient(process.env.TOKEN as string, {
   intents: [

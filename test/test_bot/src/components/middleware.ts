@@ -14,10 +14,9 @@ import {
   componentMemberPermissionMessage,
 } from "../utils/middleware_messages";
 
-const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
+const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS as string ?? "0")
   .split(",")
-  .map(userId => userId.trim())
-  .filter(Boolean);
+  .map(userId => userId.trim());
 
 export const middlewareAuthorOnlyButton = createButton({
   route: "middleware_author_only",

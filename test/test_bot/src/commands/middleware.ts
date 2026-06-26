@@ -14,9 +14,7 @@ import {
 
 const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
   .split(",")
-  .map(userId => userId.trim())
-  .filter(Boolean);
-
+  .map(userId => userId.trim());
 export const middlewareCooldownCommand = createCommand({
   build: {
     slash: {
