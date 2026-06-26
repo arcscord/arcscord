@@ -8,6 +8,10 @@ Autocomplete lets Discord request suggestions while a user is typing a slash com
 
 Discord only supports autocomplete for `string`, `integer`, and `number` options.
 
+:::warning
+Autocomplete is only partially typed. TypeScript may still accept missing handlers, handlers for options that do not exist, or handlers for options without `autocomplete: true`. Arcscord validates these rules when commands are loaded, so invalid autocomplete definitions fail during bot startup before command registration.
+:::
+
 ## Basic usage
 
 Set `autocomplete: true` on the option, then add a handler with the same option name in the command `autocomplete` object.
@@ -113,7 +117,7 @@ export const searchCommand = createCommand({
 });
 ```
 
-The handler key must match an option with `autocomplete: true`. Arcscord types `ctx.sendChoices()` from that option:
+The handler key must match an option with `autocomplete: true`. Arcscord partially types `ctx.sendChoices()` from that option when it can infer the focused option:
 
 ```ts
 autocomplete: {
@@ -136,7 +140,7 @@ Autocomplete follows these rules:
 4. An option cannot use both `choices` and `autocomplete: true`.
 5. `ctx.value` is the raw typed string from Discord, and `ctx.sendChoices()` is typed from the focused option.
 
-Arcscord validates these handler rules when commands are loaded. Invalid autocomplete definitions fail before command registration.
+Arcscord validates these handler rules when commands are loaded. Invalid autocomplete definitions fail before command registration, even when TypeScript accepts them.
 
 ## Choice limit
 
