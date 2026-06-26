@@ -19,5 +19,20 @@
     "component": {
       "run": "Localized component reply in english !"
     }
+  },
+  "middleware": {
+    "cooldown": "Wait {{seconds}}s before using this command again.",
+    "command": {
+      "allowList": "You are not allowed to use this command.",
+      "botPermission": "I am missing command permissions: {{permissions}}.",
+      "ok": "Command middleware passed."
+    },
+    "component": {
+      "allowList": "You are not allowed to use this component.",
+      "authorOnly": "Only the original user can use this component.",
+      "botPermission": "I am missing component permissions: {{permissions}}.",
+      "memberPermission": "You are missing component permissions: {{permissions}}.",
+      "ok": "Component middleware passed."
+    }
   }
 }

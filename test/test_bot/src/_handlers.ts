@@ -5,7 +5,11 @@ import { componentTestCommand } from "./commands/component_test";
 import { disableComponentCommand } from "./commands/disable_component";
 import { i18nCommand } from "./commands/i18n";
 import { messageInfosCommand } from "./commands/message_infos";
-import { testMiddlewareCommand } from "./commands/middleware";
+import {
+  middlewareAllowListCommand,
+  middlewareBotPermissionCommand,
+  middlewareCooldownCommand,
+} from "./commands/middleware";
 import { subCommand } from "./commands/sub/def";
 import { channelSelectMenu } from "./components/channel_select_menu";
 import { deferEditButton } from "./components/function_test/defer_edit";
@@ -15,7 +19,12 @@ import { disableRowButton } from "./components/function_test/disableRow";
 import { editButton } from "./components/function_test/edit";
 import { i18nButton } from "./components/i18n_button";
 import { mentionableSelectMenu } from "./components/mentionable_select_menu";
-import { middleWareButton } from "./components/middleware";
+import {
+  middlewareAuthorOnlyButton,
+  middlewareBotPermissionButton,
+  middlewareMemberPermissionButton,
+  middlewareUserAllowListButton,
+} from "./components/middleware";
 import { feedbackModal, profileModal, surveyModal } from "./components/modal";
 import { roleSelectMenu } from "./components/role_select_menu";
 import { routeParamsButton } from "./components/route_params_button";
@@ -47,7 +56,10 @@ export default {
     disableComponentButton,
     editButton,
     deferEditButton,
-    middleWareButton,
+    middlewareAuthorOnlyButton,
+    middlewareUserAllowListButton,
+    middlewareBotPermissionButton,
+    middlewareMemberPermissionButton,
     routeParamsButton,
     i18nButton,
   ],
@@ -57,7 +69,9 @@ export default {
     componentTestCommand,
     autocompleteCommand,
     disableComponentCommand,
-    testMiddlewareCommand,
+    middlewareCooldownCommand,
+    middlewareAllowListCommand,
+    middlewareBotPermissionCommand,
     subCommand,
     i18nCommand,
   ],

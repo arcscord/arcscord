@@ -1,37 +1,64 @@
-import type { CommandContext, CommandMiddlewareRun } from "arcscord";
-import { CommandMiddleware, createCommand } from "arcscord";
+import process from "node:process";
+import {
+  CommandBotPermissionMiddleware,
+  CommandUserAllowListMiddleware,
+  CooldownMiddleware,
+} from "@arcscord/middleware";
+import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
+import {
+  commandAllowListMessage,
+  commandBotPermissionMessage,
+  commandCooldownMessage,
+} from "../utils/middleware_messages";
 
-export class TestMiddleware extends CommandMiddleware {
-  name = "test" as const;
+const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
+  .split(",")
+  .map(userId => userId.trim())
+  .filter(Boolean);
 
-  async run(ctx: CommandContext): Promise<
-    CommandMiddlewareRun<{
-      dev: boolean;
-    }>
-  > {
-    if (!ctx.inGuild()) {
-      return this.cancel(ctx.reply("No work in mp"));
-    }
-
-    const flags = await ctx.user.fetchFlags();
-
-    return this.next({
-      dev: flags.has("ActiveDeveloper"),
-    });
-  }
-}
-
-export const testMiddlewareCommand = createCommand({
+export const middlewareCooldownCommand = createCommand({
   build: {
     slash: {
-      name: "test-middleware",
-      description: "test",
+      name: "middleware-cooldown",
+      description: "Test CooldownMiddleware",
     },
   },
-  use: [new TestMiddleware()],
-  run: (ctx) => {
-    return ctx.reply(
-      `You have a active dev badge ? ${ctx.additional.test.dev}`,
-    );
+  use: [
+    new CooldownMiddleware(10, commandCooldownMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.command.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+
+export const middlewareAllowListCommand = createCommand({
+  build: {
+    slash: {
+      name: "middleware-allow-list",
+      description: "Test CommandUserAllowListMiddleware",
+    },
   },
+  use: [
+    new CommandUserAllowListMiddleware(allowedUserIds, commandAllowListMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.command.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+
+export const middlewareBotPermissionCommand = createCommand({
+  build: {
+    slash: {
+      name: "middleware-bot-permission",
+      description: "Test CommandBotPermissionMiddleware",
+      contexts: ["guild"],
+    },
+  },
+  use: [
+    new CommandBotPermissionMiddleware(["ManageMessages"], commandBotPermissionMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.command.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
 });

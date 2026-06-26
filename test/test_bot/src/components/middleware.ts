@@ -1,36 +1,80 @@
-import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
-import { buildClickableButton, ComponentMiddleware, createButton } from "arcscord";
+import process from "node:process";
+import {
+  AuthorOnlyMiddleware,
+  ComponentBotPermissionMiddleware,
+  ComponentMemberPermissionMiddleware,
+  ComponentUserAllowListMiddleware,
+} from "@arcscord/middleware";
+import { buildClickableButton, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
+import {
+  componentAllowListMessage,
+  componentAuthorOnlyMessage,
+  componentBotPermissionMessage,
+  componentMemberPermissionMessage,
+} from "../utils/middleware_messages";
 
-class Middleware extends ComponentMiddleware {
-  readonly name = "authorOnly" as const;
+const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
+  .split(",")
+  .map(userId => userId.trim())
+  .filter(Boolean);
 
-  async run(ctx: ComponentContext): Promise<ComponentMiddlewareRun<NonNullable<unknown>>> {
-    if (!ctx.isMessageComponentContext() || !ctx.message.interactionMetadata) {
-      return this.next({});
-    }
-
-    if (ctx.message.interactionMetadata.user.id !== ctx.user.id) {
-      return this.cancel<NonNullable<unknown>>(await ctx.reply("Author only", {
-        flags: MessageFlags.Ephemeral,
-      }));
-    }
-
-    return this.next({});
-  }
-}
-
-export const middleWareButton = createButton({
-  route: "middleware",
+export const middlewareAuthorOnlyButton = createButton({
+  route: "middleware_author_only",
   build: id => buildClickableButton({
-    label: "Click",
+    label: "Author only",
     style: "green",
     customId: id(),
   }),
-  use: [new Middleware()],
-  run: (ctx) => {
-    return ctx.reply("Clicked", {
-      flags: MessageFlags.Ephemeral,
-    });
-  },
+  use: [
+    new AuthorOnlyMiddleware(componentAuthorOnlyMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+
+export const middlewareUserAllowListButton = createButton({
+  route: "middleware_user_allow_list",
+  build: id => buildClickableButton({
+    label: "User allowlist",
+    style: "secondary",
+    customId: id(),
+  }),
+  use: [
+    new ComponentUserAllowListMiddleware(allowedUserIds, componentAllowListMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+
+export const middlewareBotPermissionButton = createButton({
+  route: "middleware_bot_permission",
+  build: id => buildClickableButton({
+    label: "Bot permission",
+    style: "primary",
+    customId: id(),
+  }),
+  use: [
+    new ComponentBotPermissionMiddleware(["ManageMessages"], componentBotPermissionMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
+});
+
+export const middlewareMemberPermissionButton = createButton({
+  route: "middleware_member_permission",
+  build: id => buildClickableButton({
+    label: "Member permission",
+    style: "red",
+    customId: id(),
+  }),
+  use: [
+    new ComponentMemberPermissionMiddleware(["ManageMessages"], componentMemberPermissionMessage),
+  ],
+  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+    flags: MessageFlags.Ephemeral,
+  }),
 });

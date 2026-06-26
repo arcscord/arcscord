@@ -19,5 +19,20 @@
     "component": {
       "run": "Réponse de composant localisée en français !"
     }
+  },
+  "middleware": {
+    "cooldown": "Attends {{seconds}}s avant de réutiliser cette commande.",
+    "command": {
+      "allowList": "Tu n'es pas autorisé à utiliser cette commande.",
+      "botPermission": "Il me manque les permissions de commande : {{permissions}}.",
+      "ok": "Le middleware de commande est passé."
+    },
+    "component": {
+      "allowList": "Tu n'es pas autorisé à utiliser ce composant.",
+      "authorOnly": "Seul l'utilisateur d'origine peut utiliser ce composant.",
+      "botPermission": "Il me manque les permissions de composant : {{permissions}}.",
+      "memberPermission": "Il te manque les permissions de composant : {{permissions}}.",
+      "ok": "Le middleware de composant est passé."
+    }
   }
 }

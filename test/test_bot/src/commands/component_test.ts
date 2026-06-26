@@ -12,7 +12,12 @@ import {
 import { ComponentType, MessageFlags } from "discord.js";
 import { channelSelectMenu } from "../components/channel_select_menu";
 import { mentionableSelectMenu } from "../components/mentionable_select_menu";
-import { middleWareButton } from "../components/middleware";
+import {
+  middlewareAuthorOnlyButton,
+  middlewareBotPermissionButton,
+  middlewareMemberPermissionButton,
+  middlewareUserAllowListButton,
+} from "../components/middleware";
 import { feedbackModal, profileModal, surveyModal } from "../components/modal";
 import { roleSelectMenu } from "../components/role_select_menu";
 import { routeParamsButton } from "../components/route_params_button";
@@ -289,7 +294,14 @@ export const componentTestCommand = createCommand({
         });
       case "middleware":
         return ctx.reply({
-          components: [buildButtonActionRow(middleWareButton.build())],
+          components: [
+            buildButtonActionRow(
+              middlewareAuthorOnlyButton.build(),
+              middlewareUserAllowListButton.build(),
+              middlewareBotPermissionButton.build(),
+              middlewareMemberPermissionButton.build(),
+            ),
+          ],
           content: ctx.options.component,
         });
       case "route_params":

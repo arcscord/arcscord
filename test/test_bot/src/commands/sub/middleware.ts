@@ -1,5 +1,7 @@
+import { CooldownMiddleware } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
-import { TestMiddleware } from "../middleware";
+import { MessageFlags } from "discord.js";
+import { commandCooldownMessage } from "../../utils/middleware_messages";
 
 export const testMiddlewareSubCommand = createCommand({
   build: {
@@ -7,10 +9,10 @@ export const testMiddlewareSubCommand = createCommand({
     description: "test",
 
   },
-  use: [new TestMiddleware()],
+  use: [new CooldownMiddleware(10, commandCooldownMessage)],
   run: (ctx) => {
-    return ctx.reply(
-      `You have a active dev badge ? ${ctx.additional.test.dev}`,
-    );
+    return ctx.reply(ctx.t($ => $.middleware.command.ok), {
+      flags: MessageFlags.Ephemeral,
+    });
   },
 });
