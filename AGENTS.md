@@ -47,6 +47,7 @@ Important notes:
 
 * `pnpm lint` runs ESLint with `--fix` by default.
 * Use `pnpm lint --fix=false` for validation-only checks.
+* Use `pnpm lint` to automatically fix formatting, import order, unused imports, and other autofixable style issues.
 * Use `pnpm clean` before release-style builds or when generated artifacts may be stale.
 * Use filtered workspace commands for targeted work, for example:
 
@@ -85,13 +86,36 @@ Internal imports in `packages/arcscord` commonly use the `#/` alias for source-r
 
 The project uses `@antfu/eslint-config` with TypeScript enabled.
 
-Style expectations:
+Formatting and style are automated. Do not spend time manually fixing lint-only issues.
+
+Do not manually:
+
+* Reorder imports.
+* Remove unused imports.
+* Reformat whitespace.
+* Change quotes only for style.
+* Add or remove semicolons only for style.
+* Reorder object keys only for style.
+* Perform formatting-only edits.
+* Touch generated or ignored files only to satisfy formatting.
+
+ESLint is responsible for autofixable issues, including import order, unused imports, spacing, quotes, semicolons, and other mechanical style rules.
+
+When editing code:
+
+* Focus on semantic correctness, API behavior, type safety, tests, and documentation.
+* Preserve the existing style roughly, but do not optimize formatting by hand.
+* Allow `pnpm lint` to apply automatic fixes after the functional change is complete.
+* Use `pnpm lint --fix=false` only when validating without modifying files.
+* Do not manually reformat generated files.
+* Avoid changing files ignored by ESLint unless the task explicitly targets them.
+
+Style expectations after linting:
 
 * Use double quotes.
 * Use semicolons.
-* Prefer the existing file’s import ordering and naming conventions.
-* Do not manually reformat generated files.
-* Avoid changing files ignored by ESLint unless the task explicitly targets them.
+* Follow the repository’s automated import ordering.
+* Keep LF line endings.
 
 ESLint ignores generated documentation and CLI templates, including:
 
@@ -195,7 +219,7 @@ When adding errors:
 
 ## CLI-specific guidance
 
-`packages/cli` is an ESM package and exposes the `arcscord` binary from `dist/index.js`.
+`packages/cli` is currently secondary until the `arcscord` library reaches v1.
 
 When editing CLI code:
 
@@ -203,6 +227,7 @@ When editing CLI code:
 * Keep generated templates compatible with the rest of the monorepo.
 * Be cautious around Babel parser/traverse/generator usage.
 * Keep the existing post-build `fix:babel` behavior unless replacing it with a tested equivalent.
+* Avoid broad CLI refactors unless the task explicitly targets the CLI.
 
 ## Documentation
 
@@ -235,6 +260,17 @@ pnpm test
 pnpm build
 pnpm lint --fix=false
 ```
+
+Recommended local workflow:
+
+```sh
+pnpm typecheck
+pnpm test
+pnpm lint
+pnpm lint --fix=false
+```
+
+Use `pnpm lint` before final validation when autofixable style changes are expected.
 
 For release-sensitive package changes, also run:
 
@@ -296,7 +332,32 @@ When working in this repository:
 4. Preserve public API compatibility unless the task explicitly requests a breaking change.
 5. Add or update tests for behavior changes.
 6. Run targeted checks first, then root checks when the change crosses package boundaries.
-7. Update documentation when public behavior changes.
-8. Summarize changed files, validation commands, and any remaining risks.
+7. Run `pnpm lint` to let ESLint autofix mechanical issues.
+8. Run `pnpm lint --fix=false` for final lint validation.
+9. Update documentation when public behavior changes.
+10. Summarize changed files, validation commands, and any remaining risks.
 
-Do not perform broad rewrites, dependency upgrades, formatting-only churn, or generated-file updates unless explicitly requested.
+Do not perform broad rewrites, dependency upgrades, formatting-only churn, generated-file updates, or manual lint-only cleanup unless explicitly requested.
+
+## Agent efficiency rules
+
+Avoid wasting time and tokens on work handled by tooling.
+
+Prefer:
+
+* Semantic code changes.
+* Type-safe fixes.
+* Tests.
+* API compatibility checks.
+* Targeted documentation updates.
+
+Avoid:
+
+* Manual import sorting.
+* Manual formatting passes.
+* Manual unused import cleanup.
+* Formatting-only diffs.
+* Refactoring unrelated code.
+* Changing generated files without explicit instruction.
+
+Assume ESLint autofix will run after edits. If lint produces remaining non-autofixable errors, fix only those errors directly.
