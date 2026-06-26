@@ -2,7 +2,7 @@ import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { PermissionsString, User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
-import { PermissionsBitField } from "discord.js";
+import { MessageFlags, PermissionsBitField } from "discord.js";
 
 export type ComponentPermissionMiddlewareNext = {
   allowed: true;
@@ -73,7 +73,7 @@ export class ComponentPermissionMiddleware extends ComponentMiddleware {
 
       return this.cancel(ctx.defer
         ? ctx.editReply(message)
-        : ctx.reply({ ephemeral: true, ...message }),
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...message }),
       );
     }
 

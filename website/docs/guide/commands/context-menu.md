@@ -12,6 +12,7 @@ User commands receive a `UserCommandContext`. The selected user is available as 
 
 ```ts
 import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const inspectUserCommand = createCommand({
   build: {
@@ -39,7 +40,7 @@ export const quoteMessageCommand = createCommand({
   run: (ctx) => {
     return ctx.reply({
       content: `> ${ctx.targetMessage.content}`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

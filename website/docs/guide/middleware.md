@@ -49,6 +49,7 @@ Create command middleware by extending `CommandMiddleware`.
 ```ts
 import type { CommandContext, CommandMiddlewareRun } from "arcscord";
 import { CommandMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 const allowedUserIds = new Set(["123456789"]);
 
@@ -63,7 +64,7 @@ class AllowedUsersMiddleware extends CommandMiddleware {
     if (!allowedUserIds.has(ctx.user.id)) {
       return this.cancel(ctx.reply({
         content: "You cannot use this command.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }));
     }
 
@@ -124,6 +125,7 @@ Create component middleware by extending `ComponentMiddleware`.
 ```ts
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import { ComponentMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 type AuthorState = {
   status: "author" | "ignored";
@@ -144,7 +146,7 @@ class SameAuthorMiddleware extends ComponentMiddleware {
     if (ctx.message.interactionMetadata.user.id !== ctx.user.id) {
       return this.cancel(ctx.reply({
         content: "Only the original author can use this component.",
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }));
     }
 
@@ -248,7 +250,7 @@ Use `cancel` when the middleware handled the interaction and the handler should 
 ```ts
 return this.cancel(ctx.reply({
   content: "You cannot use this.",
-  ephemeral: true,
+  flags: MessageFlags.Ephemeral,
 }));
 ```
 

@@ -33,6 +33,7 @@ replace that behavior with `managers.event.resultHandler`:
 
 ```ts
 import { ArcClient } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   intents: ["Guilds", "GuildMessages"],
@@ -141,7 +142,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
           else {
             await interaction.reply({
               ...message,
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -172,6 +173,8 @@ handler. This includes thrown command errors, autocomplete errors, middleware
 errors, and framework validation errors.
 
 ```ts
+import { MessageFlags } from "discord.js";
+
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   intents: ["Guilds"],
   managers: {
@@ -189,7 +192,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
           content: internal
             ? `Internal command error: ${err.id}`
             : `Command failed: ${err.id}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       },
     },
@@ -207,6 +210,8 @@ failed results, sends the configured internal-error message to the component
 interaction, and logs successful component execution at debug level.
 
 ```ts
+import { MessageFlags } from "discord.js";
+
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   intents: ["Guilds"],
   managers: {
@@ -226,7 +231,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
           else {
             await interaction.reply({
               ...message,
-              ephemeral: true,
+              flags: MessageFlags.Ephemeral,
             });
           }
 
@@ -256,6 +261,8 @@ The component result handler receives:
 component routes, middleware errors, and other component dispatch failures.
 
 ```ts
+import { MessageFlags } from "discord.js";
+
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   intents: ["Guilds"],
   managers: {
@@ -279,7 +286,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
           content: internal
             ? `Internal component error: ${err.id}`
             : `Component failed: ${err.id}`,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       },
     },

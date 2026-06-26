@@ -80,6 +80,7 @@ Restricts a message component to the user who created the original interaction.
 ```ts
 import { AuthorOnlyMiddleware } from "@arcscord/middleware";
 import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const confirmButton = createButton({
   route: "confirm",
@@ -93,7 +94,7 @@ export const confirmButton = createButton({
       content: "Only the original user can use this component.",
     }),
   ],
-  run: ctx => ctx.reply("Confirmed.", { ephemeral: true }),
+  run: ctx => ctx.reply("Confirmed.", { flags: MessageFlags.Ephemeral }),
 });
 ```
 
@@ -106,6 +107,7 @@ Restricts a component handler to members that have every required Discord permis
 ```ts
 import { ComponentPermissionMiddleware } from "@arcscord/middleware";
 import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const moderateButton = createButton({
   route: "moderate",
@@ -120,7 +122,7 @@ export const moderateButton = createButton({
     })),
   ],
   run: ctx => ctx.reply(`Allowed: ${ctx.additional.componentPermission.allowed}`, {
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   }),
 });
 ```
@@ -132,6 +134,7 @@ Restricts a component handler to a fixed list of Discord user IDs.
 ```ts
 import { ComponentUserAllowListMiddleware } from "@arcscord/middleware";
 import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const privateButton = createButton({
   route: "private",
@@ -146,7 +149,7 @@ export const privateButton = createButton({
     }),
   ],
   run: ctx => ctx.reply(`Allowed: ${ctx.additional.userAllowList.allowed}`, {
-    ephemeral: true,
+    flags: MessageFlags.Ephemeral,
   }),
 });
 ```

@@ -29,6 +29,7 @@ import type {
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandType, Routes } from "discord-api-types/v10";
+import { MessageFlags } from "discord.js";
 import {
   AutocompleteContext,
   commandInteractionToString,
@@ -838,7 +839,7 @@ export class CommandManager
 
     if (command.options?.preReply) {
       const [err3] = await context.deferReply({
-        ephemeral: command.options?.preReplyEphemeral,
+        flags: command.options.preReplyEphemeral ? MessageFlags.Ephemeral : undefined,
       });
 
       if (err3) {
@@ -1046,7 +1047,7 @@ export class CommandManager
       else {
         await interaction.reply({
           ...message,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         });
       }
     }

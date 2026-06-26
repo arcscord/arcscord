@@ -1,4 +1,5 @@
 import { buildButtonActionRow, createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 import { i18nButton } from "../components/i18n_button";
 
 export const i18nCommand = createCommand({
@@ -26,7 +27,7 @@ export const i18nCommand = createCommand({
       content: ctx.t($ => $.i18n.command.run, {
         topic: ctx.options.topic,
       }),
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
   autocomplete: {

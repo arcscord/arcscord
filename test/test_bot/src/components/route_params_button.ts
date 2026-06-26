@@ -1,4 +1,5 @@
 import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const routeParamsButton = createButton({
   route: "route_params/{userId}/{filter}",
@@ -11,7 +12,7 @@ export const routeParamsButton = createButton({
   run: (ctx) => {
     return ctx.reply({
       content: `Route params: user=${ctx.params.userId}, filter=${ctx.params.filter}`,
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

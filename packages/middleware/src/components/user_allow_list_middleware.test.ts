@@ -1,4 +1,5 @@
 import { createMockComponentContext } from "arcscord/testing";
+import { MessageFlags } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { ComponentUserAllowListMiddleware } from "./user_allow_list_middleware";
 
@@ -38,7 +39,7 @@ describe("componentUserAllowListMiddleware", () => {
     await result.cancel;
     expect(ctx.reply).toHaveBeenCalledWith({
       content: "Not allowed",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   });
 

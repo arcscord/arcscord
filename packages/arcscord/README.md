@@ -29,7 +29,7 @@ or `npm install arcscord`
 ```ts
 // Command declaration
 import { createCommand } from "arcscord";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 
 export const avatarCommand = createCommand({
   build: {
@@ -72,7 +72,7 @@ export const avatarCommand = createCommand({
             size: ctx.isSlashCommand ? ctx.options.size || 1024 : 1024,
           }) || user.defaultAvatarURL),
       ],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });
@@ -217,6 +217,7 @@ client.loadEvents([messageEvent]);
 full guide soon
 ```ts
 import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const i18nCommand = createCommand({
   build: {
@@ -229,7 +230,7 @@ export const i18nCommand = createCommand({
   },
   run: (ctx) => {
     return ctx.reply(ctx.t("test:i18n.command.run"), {
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

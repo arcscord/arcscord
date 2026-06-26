@@ -1,4 +1,5 @@
 import { buildClickableButton, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const disableRowButton = createButton({
   route: "disableRow/{id}",
@@ -14,7 +15,7 @@ export const disableRowButton = createButton({
       return ctx.error(err);
     }
     return ctx.reply("Successfully disabled action row", {
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

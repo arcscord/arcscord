@@ -1,4 +1,5 @@
 import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const messageInfosCommand = createCommand({
   build: {
@@ -28,7 +29,7 @@ export const messageInfosCommand = createCommand({
     }
 
     return ctx.reply(Array.from(infos.values()).join("\n"), {
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

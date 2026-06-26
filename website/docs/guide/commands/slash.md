@@ -10,6 +10,7 @@ Slash commands are declared in `build.slash`. Arcscord infers the handler contex
 
 ```ts
 import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const pingCommand = createCommand({
   build: {
@@ -60,7 +61,7 @@ export const avatarCommand = createCommand({
 
     return ctx.reply({
       content: user.displayAvatarURL({ size }),
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

@@ -2,6 +2,7 @@ import type { CommandContext, CommandMiddlewareRun, MaybePromise } from "arcscor
 import type { User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export type CooldownMessageOptions = {
   /**
@@ -77,7 +78,7 @@ export class CooldownMiddleware extends CommandMiddleware {
         cooldownEnd: new Date(cooldown),
         commandName: ctx.interaction.commandName,
       };
-      return this.cancel(ctx.defer ? ctx.editReply(this.message(cooldownInfos)) : ctx.reply({ ...this.message(cooldownInfos), ephemeral: true }));
+      return this.cancel(ctx.defer ? ctx.editReply(this.message(cooldownInfos)) : ctx.reply({ ...this.message(cooldownInfos), flags: MessageFlags.Ephemeral }));
     }
 
     this.users.set(ctx.user.id, Date.now() + this.duration * 1000);

@@ -202,6 +202,7 @@ Component handlers also receive `ctx.t(...)` and `ctx.locale`.
 
 ```ts
 import { buildButtonActionRow, buildClickableButton, createButton, createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 export const languageButton = createButton({
   route: "language_button",
@@ -213,7 +214,7 @@ export const languageButton = createButton({
     }),
   run: (ctx) => {
     return ctx.reply(ctx.t($ => $.components.language.clicked), {
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });
@@ -229,7 +230,7 @@ export const componentCommand = createCommand({
     return ctx.reply({
       content: ctx.t($ => $.components.language.prompt),
       components: [buildButtonActionRow(languageButton.build())],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

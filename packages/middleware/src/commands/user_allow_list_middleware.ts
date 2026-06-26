@@ -1,6 +1,7 @@
 import type { CommandContext, CommandMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { CommandMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 import { normalizeUserIds } from "../utils";
 
 export type CommandUserAllowListMiddlewareNext = {
@@ -39,7 +40,7 @@ export class CommandUserAllowListMiddleware extends CommandMiddleware {
     if (!this.userIds.has(ctx.user.id)) {
       return this.cancel(ctx.defer
         ? ctx.editReply(this.message)
-        : ctx.reply({ ephemeral: true, ...this.message }),
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
       );
     }
 

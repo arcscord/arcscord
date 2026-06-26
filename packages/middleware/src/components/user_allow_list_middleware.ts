@@ -1,6 +1,7 @@
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 import { normalizeUserIds } from "../utils";
 
 export type ComponentUserAllowListMiddlewareNext = {
@@ -39,7 +40,7 @@ export class ComponentUserAllowListMiddleware extends ComponentMiddleware {
     if (!this.userIds.has(ctx.user.id)) {
       return this.cancel(ctx.defer
         ? ctx.editReply(this.message)
-        : ctx.reply({ ephemeral: true, ...this.message }),
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
       );
     }
 

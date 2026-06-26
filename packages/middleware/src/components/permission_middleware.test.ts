@@ -1,4 +1,5 @@
 import { createMockComponentContext } from "arcscord/testing";
+import { MessageFlags } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { ComponentPermissionMiddleware } from "./permission_middleware";
 
@@ -43,7 +44,7 @@ describe("componentPermissionMiddleware", () => {
     await result.cancel;
     expect(ctx.reply).toHaveBeenCalledWith({
       content: "Missing: BanMembers",
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   });
 

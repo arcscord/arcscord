@@ -1,4 +1,5 @@
 import { createCommand } from "arcscord";
+import { MessageFlags } from "discord.js";
 import { animeList } from "../utils/test_values";
 
 export const autocompleteCommand = createCommand({
@@ -18,7 +19,7 @@ export const autocompleteCommand = createCommand({
   },
   run: (ctx) => {
     return ctx.reply({
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
       content: `You choice ${ctx.options.anime}`,
     });
   },

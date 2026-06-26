@@ -1,6 +1,7 @@
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 /**
  * Restricts a message component to the user who created the original interaction.
@@ -38,7 +39,7 @@ export class AuthorOnlyMiddleware extends ComponentMiddleware {
     if (ctx.message.interactionMetadata.user.id !== ctx.user.id) {
       return this.cancel(ctx.defer
         ? ctx.editReply(this.message)
-        : ctx.reply({ ephemeral: true, ...this.message }),
+        : ctx.reply({ flags: MessageFlags.Ephemeral, ...this.message }),
       );
     }
 

@@ -1,5 +1,5 @@
 import { createCommand } from "arcscord";
-import { EmbedBuilder } from "discord.js";
+import { EmbedBuilder, MessageFlags } from "discord.js";
 
 export const avatarCommand = createCommand({
   build: {
@@ -47,7 +47,7 @@ export const avatarCommand = createCommand({
           }) || user.defaultAvatarURL,
         ),
       ],
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });

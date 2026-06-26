@@ -18,6 +18,7 @@ import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
+import { MessageFlags } from "discord.js";
 import { ButtonContext, componentHandlerTypeEnum } from "#/base/components";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/component_route.util";
 import { ModalContext } from "#/base/components/context/modal_context";
@@ -381,7 +382,7 @@ export class ComponentManager extends BaseManager {
   private async handlePreReply(component: ComponentHandler, context: ComponentContext): Promise<Result<true, ComponentError>> {
     if (component.preReply) {
       const [err] = await context.deferReply({
-        ephemeral: component.ephemeralPreReply,
+        flags: component.ephemeralPreReply ? MessageFlags.Ephemeral : undefined,
       });
       if (err) {
         return error(new ComponentError({
@@ -495,7 +496,7 @@ export class ComponentManager extends BaseManager {
       ? await interaction.editReply(message).then(ok).catch(error)
       : await interaction.reply({
           ...message,
-          ephemeral: true,
+          flags: MessageFlags.Ephemeral,
         }).then(ok).catch(error);
 
     if (!replyResult[1]) {

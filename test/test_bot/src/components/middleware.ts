@@ -1,5 +1,6 @@
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import { buildClickableButton, ComponentMiddleware, createButton } from "arcscord";
+import { MessageFlags } from "discord.js";
 
 class Middleware extends ComponentMiddleware {
   readonly name = "authorOnly" as const;
@@ -11,7 +12,7 @@ class Middleware extends ComponentMiddleware {
 
     if (ctx.message.interactionMetadata.user.id !== ctx.user.id) {
       return this.cancel<NonNullable<unknown>>(await ctx.reply("Author only", {
-        ephemeral: true,
+        flags: MessageFlags.Ephemeral,
       }));
     }
 
@@ -29,7 +30,7 @@ export const middleWareButton = createButton({
   use: [new Middleware()],
   run: (ctx) => {
     return ctx.reply("Clicked", {
-      ephemeral: true,
+      flags: MessageFlags.Ephemeral,
     });
   },
 });
