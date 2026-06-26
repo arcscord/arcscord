@@ -1,4 +1,4 @@
-import type { IdInitialiseFunction } from "#/base/components/component_handlers.type";
+import type { IdInitialiseFunction, RouteVariablesObject } from "./component_route.type";
 import { BaseError } from "@arcscord/better-error";
 
 export type RoutePart = {
@@ -170,16 +170,19 @@ export function matchComponentRoute(compiledRoute: CompiledComponentRoute, custo
   return params;
 }
 
-export function createRouteId<Route extends string>(route: Route): IdInitialiseFunction<Route> {
+export function createRouteId<Route extends string>(
+  route: Route,
+  options?: RouteVariablesObject<Route>,
+): IdInitialiseFunction {
   const compiledRoute = compileComponentRoute(route);
 
-  return ((options?: Record<string, string>) => {
+  return () => {
     const customId = compiledRoute.parts.map((part) => {
       if (part.type === "static") {
         return part.value;
       }
 
-      const value = options?.[part.name];
+      const value = options?.[part.name as keyof RouteVariablesObject<Route>];
       if (value === undefined) {
         throw new Error(`Missing route parameter ${part.name}`);
       }
@@ -192,5 +195,9 @@ export function createRouteId<Route extends string>(route: Route): IdInitialiseF
     }
 
     return customId;
-  }) as IdInitialiseFunction<Route>;
+  };
+}
+
+export function hasComponentRouteParams(route: string): boolean {
+  return readRouteParts(route).some(part => part.type === "param");
 }

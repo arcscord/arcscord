@@ -3,11 +3,11 @@ import { MessageFlags } from "discord.js";
 
 export const disableRowButton = createButton({
   route: "disableRow/{id}",
-  build: (id, value) =>
+  build: id =>
     buildClickableButton({
       style: "red",
       label: "Disable Row",
-      customId: id({ id: value }),
+      customId: id(),
     }),
   run: async (ctx) => {
     const [err] = await ctx.disableComponent("actionRow", true);

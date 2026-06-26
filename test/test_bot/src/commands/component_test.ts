@@ -306,7 +306,7 @@ export const componentTestCommand = createCommand({
         });
       case "route_params":
         return ctx.reply({
-          components: [buildButtonActionRow(routeParamsButton.build(ctx.user.id, "all/active"))],
+          components: [buildButtonActionRow(routeParamsButton.build({ userId: ctx.user.id, filter: "all/active" }))],
           content: ctx.options.component,
         });
       default:

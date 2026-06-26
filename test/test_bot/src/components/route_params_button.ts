@@ -3,11 +3,11 @@ import { MessageFlags } from "discord.js";
 
 export const routeParamsButton = createButton({
   route: "route_params/{userId}/{filter}",
-  build: (id, userId, filter) =>
+  build: id =>
     buildClickableButton({
       label: "Route Params",
       style: "primary",
-      customId: id({ userId, filter }),
+      customId: id(),
     }),
   run: (ctx) => {
     return ctx.reply({

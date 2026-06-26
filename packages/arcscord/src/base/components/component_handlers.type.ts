@@ -22,6 +22,7 @@ import type {
   UserSelectMenuContext,
 } from "#/base/components/context/select_menu_context";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
+import type { ComponentBuildArgs } from "./route";
 
 export type RouteComponentHandle<Route extends string> = {
   /**
@@ -39,16 +40,12 @@ export type RouteComponentHandle<Route extends string> = {
   route: Route;
 };
 
-export type RouteVariables<T extends string>
-  = T extends `${string}/{${infer Var}}/${infer Rest}` ? Var | RouteVariables<`/${Rest}`>
-    : T extends `${string}/{${infer Var}}` ? Var
-      : never;
-
-export type RouteVariablesObject<T extends string> = {
-  [K in RouteVariables<T>]: string;
-};
-
-export type IdInitialiseFunction<T extends string> = T extends `${string}/{${string}}${string}` ? (options: RouteVariablesObject<T>) => string : () => string;
+export type {
+  ComponentBuildArgs,
+  IdInitialiseFunction,
+  RouteVariables,
+  RouteVariablesObject,
+} from "./route";
 /**
  * Base properties for all component types.
  */
@@ -109,7 +106,7 @@ export type ButtonComponentHandler<
   /**
    * Function to build the button.
    */
-  build: (...args: Options) => Button;
+  build: (...args: ComponentBuildArgs<Route, Options>) => Button;
 
   /**
    * Function to run when the button is clicked.
@@ -133,7 +130,7 @@ export type StringSelectMenuComponentHandler<
   /**
    * Function to build the string select menu.
    */
-  build: (...args: Options) => ActionRowData<StringSelectMenuComponentData>;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ActionRowData<StringSelectMenuComponentData>;
 
   /**
    * Function to run when the select menu is used.
@@ -164,7 +161,7 @@ export type TypedStringSelectSnapshot<
 export type AnyStringSelectMenuComponentHandler = BaseComponentHandler<ComponentMiddleware[], string> & {
   handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.StringSelect;
-  build: (...args: string[]) => ActionRowData<StringSelectMenuComponentData>;
+  build: (...args: any[]) => ActionRowData<StringSelectMenuComponentData>;
   typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot>;
   run: (ctx: StringSelectMenuContext<ComponentMiddleware[], never, string>) => Promise<ComponentRunResult>;
 };
@@ -183,7 +180,7 @@ export type UserSelectMenuComponentHandler<
   /**
    * Function to build the user select menu.
    */
-  build: (...args: Options) => ActionRowData<UserSelectMenuComponentData>;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ActionRowData<UserSelectMenuComponentData>;
 
   /**
    * Function to run when the select menu is used.
@@ -205,7 +202,7 @@ export type RoleSelectMenuComponentHandler<
   /**
    * Function to build the role select menu.
    */
-  build: (...args: Options) => ActionRowData<RoleSelectMenuComponentData>;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ActionRowData<RoleSelectMenuComponentData>;
 
   /**
    * Function to run when the select menu is used.
@@ -227,7 +224,7 @@ export type MentionableSelectMenuComponentHandler<
   /**
    * Function to build the mentionable select menu.
    */
-  build: (...args: Options) => ActionRowData<MentionableSelectMenuComponentData>;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ActionRowData<MentionableSelectMenuComponentData>;
 
   /**
    * Function to run when the select menu is used.
@@ -249,7 +246,7 @@ export type ChannelSelectMenuComponentHandler<
   /**
    * Function to build the channel select menu.
    */
-  build: (...args: Options) => ActionRowData<ChannelSelectMenuComponentData>;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ActionRowData<ChannelSelectMenuComponentData>;
 
   /**
    * Function to run when the select menu is used.
@@ -270,7 +267,7 @@ export type ModalComponentHandler<
   /**
    * Function to build the modal.
    */
-  build: (...args: Options) => ModalComponentData;
+  build: (...args: ComponentBuildArgs<Route, Options>) => ModalComponentData;
 
   /**
    * Function to run when the modal is submitted.
@@ -295,7 +292,7 @@ export type SelectMenuComponentHandler<
  * Union type for all component properties.
  */
 export type ComponentHandler
-  = | ButtonComponentHandler
+  = | ButtonComponentHandler<any[], ComponentMiddleware[], any>
     | AnyStringSelectMenuComponentHandler
-    | Exclude<SelectMenuComponentHandler, StringSelectMenuComponentHandler>
-    | ModalComponentHandler;
+    | Exclude<SelectMenuComponentHandler<any[], ComponentMiddleware[], any>, StringSelectMenuComponentHandler<any[], ComponentMiddleware[], any>>
+    | ModalComponentHandler<any[], ComponentMiddleware[], any>;

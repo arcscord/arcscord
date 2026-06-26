@@ -2,11 +2,11 @@ import { buildClickableButton, createButton } from "arcscord";
 
 export const disableAllButton = createButton({
   route: "disableAll/{id}",
-  build: (id, value) =>
+  build: id =>
     buildClickableButton({
       style: "red",
       label: "Disable All",
-      customId: id({ id: value }),
+      customId: id(),
     }),
   run: (ctx) => {
     return ctx.disableComponent();

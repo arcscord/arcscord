@@ -20,12 +20,12 @@ export const disableComponentCommand = createCommand({
       content: "Components:",
       components: [
         buildButtonActionRow(
-          disableAllButton.build(""),
-          disableRowButton.build(""),
-          disableComponentButton.build(""),
+          disableAllButton.build({ id: "" }),
+          disableRowButton.build({ id: "" }),
+          disableComponentButton.build({ id: "" }),
         ),
         buildButtonActionRow(
-          disableRowButton.build("a"),
+          disableRowButton.build({ id: "a" }),
           buildLinkButton({
             url: "https://acz.sh/arcscord",
             label: "Github Link",

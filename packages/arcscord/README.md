@@ -90,7 +90,7 @@ if (err) {
 
 ```ts
 // declaration button
-import { buildClickableButton, createButton } from "arcscord";
+import { buildButtonActionRow, buildClickableButton, createButton } from "arcscord";
 
 export const simpleButton = createButton({
   route: "simple_button",
@@ -107,6 +107,21 @@ export const simpleButton = createButton({
 // usage
 message.reply({
   components: [buildButtonActionRow(simpleButton.build())]
+});
+
+// dynamic route params are passed to build
+export const closeTicketButton = createButton({
+  route: "ticket/close/{ticketId}",
+  build: (id, label) => buildClickableButton({
+    label,
+    style: "danger",
+    customId: id(),
+  }),
+  run: ctx => ctx.reply(`Closing ticket ${ctx.params.ticketId}`),
+});
+
+message.reply({
+  components: [buildButtonActionRow(closeTicketButton.build({ ticketId: "42" }, "Close ticket"))]
 });
 
 // register

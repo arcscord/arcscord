@@ -198,13 +198,10 @@ export type {
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
   ComponentHandler,
-  IdInitialiseFunction,
   MentionableSelectMenuComponentHandler,
   ModalComponentHandler,
   RoleSelectMenuComponentHandler,
   RouteComponentHandle,
-  RouteVariables,
-  RouteVariablesObject,
   SelectMenuComponentHandler,
   StringSelectMenuComponentHandler,
   UserSelectMenuComponentHandler,
@@ -240,6 +237,12 @@ export type {
   StringSelectMenuContextOptions,
   UserSelectMenuContextOptions,
 } from "./base/components/context";
+export type {
+  ComponentBuildArgs,
+  IdInitialiseFunction,
+  RouteVariables,
+  RouteVariablesObject,
+} from "./base/components/route";
 
 export { createEvent } from "./base/event/event.func";
 export type {

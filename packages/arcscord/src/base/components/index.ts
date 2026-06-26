@@ -6,3 +6,4 @@ export * from "./component_handler.func";
 export * from "./component_handlers.type";
 export * from "./component_middleware";
 export * from "./context";
+export * from "./route";

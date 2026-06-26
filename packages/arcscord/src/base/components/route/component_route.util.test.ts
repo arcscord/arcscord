@@ -77,21 +77,21 @@ describe("component route utils", () => {
   });
 
   it("creates custom IDs with encoded dynamic values", () => {
-    const id = createRouteId("test/info/{userId}/{filter}");
+    const id = createRouteId("test/info/{userId}/{filter}", { userId: "82882", filter: "all/active + pinned" });
 
-    expect(id({ userId: "82882", filter: "all/active + pinned" })).toBe("test/info/$82882/$all%2Factive%20%2B%20pinned");
+    expect(id()).toBe("test/info/$82882/$all%2Factive%20%2B%20pinned");
   });
 
   it("throws when a generated custom ID exceeds the Discord custom ID limit", () => {
-    const id = createRouteId("test/{value}");
+    const id = createRouteId("test/{value}", { value: "a".repeat(96) });
 
-    expect(() => id({ value: "a".repeat(96) })).toThrow("exceeds 100 characters");
+    expect(() => id()).toThrow("exceeds 100 characters");
   });
 
   it("throws when a dynamic route parameter is missing", () => {
     const id = createRouteId("test/info/{userId}/{filter}");
 
-    expect(() => id({ userId: "82882" } as { userId: string; filter: string })).toThrow("Missing route parameter filter");
+    expect(() => id()).toThrow("Missing route parameter userId");
   });
 
   it("matches routes and decodes params", () => {

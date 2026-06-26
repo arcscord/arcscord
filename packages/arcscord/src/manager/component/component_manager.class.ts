@@ -13,14 +13,13 @@ import type {
 import type { ArcClient, ComponentContext } from "#/base";
 import type { TypedSelectMenuOptions } from "#/base/components/component_definer.type";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/component_handlers.type";
-import type { CompiledComponentRoute } from "#/base/components/component_route.util";
+import type { CompiledComponentRoute } from "#/base/components/route";
 import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
 import { ButtonContext, componentHandlerTypeEnum } from "#/base/components";
-import { compileComponentRoute, matchComponentRoute } from "#/base/components/component_route.util";
 import { ModalContext } from "#/base/components/context/modal_context";
 import {
   ChannelSelectMenuContext,
@@ -29,6 +28,7 @@ import {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base/components/context/select_menu_context";
+import { compileComponentRoute, matchComponentRoute } from "#/base/components/route";
 import { BaseManager } from "#/base/manager/manager.class";
 import { ComponentError, internalErrorEmbed } from "#/utils";
 
