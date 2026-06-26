@@ -1,15 +1,18 @@
 # @arcscord/error
 
-A error handling package, inspired of golang error handling.
+An error handling package inspired by Go error handling.
 
-## Exemple
+Documentation: https://arcscord.github.io/arcscord/
+
+## Example
 
 ```ts
-import { error, ok, Result } from "@arscord/error";
+import type { Result } from "@arcscord/error";
+import { error, ok } from "@arcscord/error";
 
 function foo(num: number): Result<boolean, Error> {
   if (num <= 0) {
-    return error(new Error("Get negative number"));
+    return error(new Error("Expected a positive number"));
   }
   return ok(num % 2 === 0);
 }

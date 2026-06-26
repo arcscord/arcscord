@@ -30,7 +30,11 @@ Load commands after the client is ready:
 
 ```ts
 await client.waitReady();
-await client.loadCommands([pingCommand]);
+const [err] = await client.loadCommands([pingCommand]);
+
+if (err) {
+  client.logger.logError(err);
+}
 ```
 
 You can also register commands before the ready event by passing your Discord application id to `ArcClient`.
@@ -58,8 +62,10 @@ await client.loadHandlers({
   commands: [pingCommand],
   components: [confirmButton],
   events: [readyEvent],
-}, true);
+}, true /* info logs */);
 ```
+
+`loadHandlers` logs and forwards command registration errors through the client logger. Use `loadCommands` directly when you need to inspect the returned `Result`.
 
 ## Command types
 

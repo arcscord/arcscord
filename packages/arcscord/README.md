@@ -5,8 +5,9 @@
 
 ## About
 
-Arcscord is a project for simplify creating discord bot with typescript and also some utility package used by core
-package !
+Arcscord simplifies building Discord bots with TypeScript.
+
+Documentation: https://arcscord.github.io/arcscord/
 
 ## Install
 
@@ -77,7 +78,12 @@ export const avatarCommand = createCommand({
 });
 
 // Command register
-await client.loadCommands([avatarCommand]); // need be ready
+await client.waitReady();
+const [err] = await client.loadCommands([avatarCommand]);
+
+if (err) {
+  client.logger.logError(err);
+}
 ```
 
 ## Button
@@ -198,7 +204,7 @@ export const messageEvent = createEvent({
   event: "messageCreate", // Djs event
   name: "messageCreate", // OPTIONAL name for logs and debug if you want custom name
   run: (ctx, msg) => {
-    ctx.client.logger.info(`message send by ${msg.author.username}!`);
+    ctx.client.logger.info(`message sent by ${msg.author.username}!`);
     return ctx.ok(true);
   },
 });

@@ -123,7 +123,7 @@ export type EventManagerOptions = {
 
   /**
    * Set a custom result handler
-   * @default {@link EventManager.resultHandler}
+   * @default {@link EventManager.handleResult}
    */
   resultHandler?: EventResultHandler;
 };

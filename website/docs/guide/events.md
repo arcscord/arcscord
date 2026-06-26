@@ -7,6 +7,7 @@ sidebar_position: 5
 Events are declared with `createEvent` and map to Discord.js event names.
 Arcscord does not add gateway intents automatically. Instead, the event manager
 can warn or throw when a loaded event is not covered by the client intents.
+Discord documents gateway intents in the [Gateway intents reference](https://discord.com/developers/docs/events/gateway#gateway-intents), and discord.js documents client setup in its [guide](https://discordjs.guide/).
 
 ```ts
 import { ArcClient, createEvent } from "arcscord";
@@ -69,7 +70,7 @@ handler list, use `client.loadHandlers`:
 ```ts
 import handlers from "./_handlers";
 
-await client.loadHandlers(handlers, true);
+await client.loadHandlers(handlers, true /* info logs */);
 ```
 
 `loadHandlers` loads events first, then components, then waits for the client to

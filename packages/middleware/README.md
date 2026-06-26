@@ -9,6 +9,8 @@ Reusable middleware for [Arcscord](https://www.npmjs.com/package/arcscord) comma
 
 This package provides common guards for cooldowns, user allowlists, component authors, and Discord permissions. Middleware can cancel the handler with a Discord response or continue and expose typed data through `ctx.additional`.
 
+Documentation: https://arcscord.github.io/arcscord/
+
 ## Install
 
 ```sh

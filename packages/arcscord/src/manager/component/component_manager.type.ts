@@ -133,13 +133,13 @@ export type ComponentErrorHandler = (
 export type ComponentManagerOptions = {
   /**
    * Set a custom result handler
-   * @default {@link ComponentManager.resultHandler}
+   * @default {@link ComponentManager.handleResult}
    */
   resultHandler?: ComponentResultHandler;
 
   /**
    * Set a custom error handler
-   * @default {@link ComponentManager.errorHandler}
+   * @default {@link ComponentManager.handleError}
    */
   errorHandler?: ComponentErrorHandler;
 };

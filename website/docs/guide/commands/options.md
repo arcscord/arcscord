@@ -232,20 +232,22 @@ export const searchCommand = createCommand({
       },
     },
   },
-  autocomplete: async (ctx) => {
-    return ctx.sendChoices([
-      {
-        name: "TypeScript",
-        value: "typescript",
-      },
-      {
-        name: "Discord.js",
-        value: "discordjs",
-      },
-    ]);
+  autocomplete: {
+    tag: (ctx) => {
+      return ctx.sendChoices([
+        {
+          name: "TypeScript",
+          value: "typescript",
+        },
+        {
+          name: "Discord.js",
+          value: "discordjs",
+        },
+      ]);
+    },
   },
   run: ctx => ctx.reply(`Searching ${ctx.options.tag}`),
 });
 ```
 
-Arcscord only runs `autocomplete` for commands that have at least one option with `autocomplete: true`.
+The `autocomplete` object must contain one handler for each option with `autocomplete: true`. Read the [command autocomplete](./autocomplete.md) page for validation rules, multiple-option examples, and choice limits.

@@ -30,7 +30,12 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 Load application features after the client is ready:
 
 ```ts
-await client.loadCommands([avatarCommand]);
+const [err] = await client.loadCommands([avatarCommand]);
+
+if (err) {
+  client.logger.logError(err);
+}
+
 client.loadComponents([simpleButton]);
 await client.loadEvents([messageEvent]);
 ```

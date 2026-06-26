@@ -9,6 +9,8 @@ Arcscord is a TypeScript-first toolkit for building Discord bots. The monorepo c
 
 Use the guide for workflows and examples. Use the API reference for generated signatures from source comments.
 
+Project documentation is available at [https://arcscord.github.io/arcscord/](https://arcscord.github.io/arcscord/).
+
 ## Packages
 
 - `arcscord`: core Discord bot framework.

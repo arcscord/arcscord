@@ -5,6 +5,7 @@ sidebar_position: 4
 # Command registration
 
 Arcscord registers Discord application commands with `client.loadCommands` or `client.loadHandlers`.
+Discord documents the registration model in the [application command docs](https://discord.com/developers/docs/interactions/application-commands). Guild commands update quickly and are best for development; global commands are the production default but can take longer to propagate.
 
 ## Global commands
 
@@ -12,7 +13,11 @@ Register commands with `client.loadCommands`. Without extra options, Discord.js 
 
 ```ts
 await client.waitReady();
-await client.loadCommands([pingCommand, avatarCommand]);
+const [err] = await client.loadCommands([pingCommand, avatarCommand]);
+
+if (err) {
+  client.logger.logError(err);
+}
 ```
 
 You can also register commands before the ready event by passing your Discord application id to `ArcClient`.
@@ -25,7 +30,12 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   applicationId: process.env.DISCORD_APPLICATION_ID!,
 });
 
-await client.loadCommands([pingCommand, avatarCommand]);
+const [err] = await client.loadCommands([pingCommand, avatarCommand]);
+
+if (err) {
+  client.logger.logError(err);
+}
+
 await client.login(process.env.DISCORD_TOKEN!);
 ```
 
@@ -52,7 +62,7 @@ await client.loadHandlers({
   commands: [pingCommand, avatarCommand],
   components: [confirmButton],
   events: [readyEvent],
-}, true);
+}, true /* info logs */);
 ```
 
 ## Groups
@@ -62,6 +72,8 @@ The second `loadCommands` argument is a group label used internally for tracing 
 ```ts
 await client.loadCommands([adminCommand], "admin");
 ```
+
+`loadCommands` returns a `Result<true, InternalError>`. The first tuple item is `null` on success and an error on failure. `loadHandlers` handles this internally by calling `client.logger.fatalError(err)`.
 
 ## Error handling
 

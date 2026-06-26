@@ -8,6 +8,13 @@ sidebar_position: 3
 
 This package does not define the middleware system itself. The core middleware API, execution flow, `next`, `cancel`, `error`, and custom middleware examples are documented in the [middleware guide](/guide/middleware).
 
+Links:
+
+- [Documentation](https://arcscord.github.io/arcscord/)
+- [API reference](/api?package=middleware)
+- [npm package](https://www.npmjs.com/package/@arcscord/middleware)
+- [Source](https://github.com/arcscord/arcscord/tree/main/packages/middleware)
+
 ## Install
 
 ```bash

@@ -5,8 +5,9 @@ sidebar_position: 7
 # Result handlers
 
 Managers call a result handler after a command, component, or event handler
-returns a result. This page documents the event result handler first. Command
-and component result handlers follow the same idea and will be documented later.
+returns a result. Commands and components also have error handlers for failures
+that happen outside the regular handler result path, such as thrown errors,
+validation failures, or missing handlers.
 
 ## Event result handler
 
@@ -111,3 +112,181 @@ async handleResult(infos) {
 ```
 
 Successful event results are ignored by default.
+
+## Command result handler
+
+Command handlers return a `CommandRunResult`. By default, Arcscord logs failed
+results, sends the configured internal-error message to the interaction, and
+logs successful command execution at debug level.
+
+```ts
+import { ArcClient } from "arcscord";
+
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    command: {
+      resultHandler: async ({ result, interaction, command, defer, locale }) => {
+        const [err, value] = result;
+
+        if (err) {
+          err.generateId();
+          client.logger.logError(err);
+
+          const message = client.getErrorMessage(err.id, locale);
+
+          if (defer) {
+            await interaction.editReply(message);
+          }
+          else {
+            await interaction.reply({
+              ...message,
+              ephemeral: true,
+            });
+          }
+
+          return;
+        }
+
+        client.logger.debug(`Command ${command.build.slash?.name ?? "context"} returned ${String(value)}`);
+      },
+    },
+  },
+});
+```
+
+The command result handler receives:
+
+- `result`: the result returned by the command `run` function.
+- `interaction`: the Discord.js command interaction.
+- `command`: the loaded command handler.
+- `context`: the Arcscord command context.
+- `locale`: the detected i18next language.
+- `defer`: whether the command reply was deferred.
+- `start` and `end`: execution timestamps.
+
+## Command error handler
+
+`managers.command.errorHandler` handles errors that bypass the command result
+handler. This includes thrown command errors, autocomplete errors, middleware
+errors, and framework validation errors.
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    command: {
+      errorHandler: ({ error, interaction, autocomplete, context, internal }) => {
+        const err = error.generateId();
+
+        client.logger.logError(err);
+
+        if (autocomplete) {
+          return;
+        }
+
+        return interaction.reply({
+          content: internal
+            ? `Internal command error: ${err.id}`
+            : `Command failed: ${err.id}`,
+          ephemeral: true,
+        });
+      },
+    },
+  },
+});
+```
+
+Autocomplete interactions cannot receive normal message replies. If
+`autocomplete` is `true`, log the error and return without replying.
+
+## Component result handler
+
+Component handlers return a `ComponentRunResult`. By default, Arcscord logs
+failed results, sends the configured internal-error message to the component
+interaction, and logs successful component execution at debug level.
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    component: {
+      resultHandler: async ({ result, interaction, component, defer, locale }) => {
+        const [err] = result;
+
+        if (err) {
+          err.generateId();
+          client.logger.logError(err);
+
+          const message = client.getErrorMessage(err.id, locale);
+
+          if (defer) {
+            await interaction.editReply(message);
+          }
+          else {
+            await interaction.reply({
+              ...message,
+              ephemeral: true,
+            });
+          }
+
+          return;
+        }
+
+        client.logger.debug(`Component executed: ${component.route}`);
+      },
+    },
+  },
+});
+```
+
+The component result handler receives:
+
+- `result`: the result returned by the component `run` function.
+- `component`: the loaded component handler.
+- `interaction`: the Discord.js component or modal interaction.
+- `context`: the Arcscord component context when one was created.
+- `locale`: the detected i18next language.
+- `defer`: whether the component reply was deferred.
+- `start` and `end`: execution timestamps.
+
+## Component error handler
+
+`managers.component.errorHandler` handles thrown component errors, missing
+component routes, middleware errors, and other component dispatch failures.
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    component: {
+      errorHandler: ({ error, interaction, context, internal }) => {
+        const err = error.generateId();
+
+        client.logger.logError(err);
+
+        if (!interaction) {
+          return;
+        }
+
+        if (context?.defer) {
+          return interaction.editReply({
+            content: `Component failed: ${err.id}`,
+          });
+        }
+
+        return interaction.reply({
+          content: internal
+            ? `Internal component error: ${err.id}`
+            : `Component failed: ${err.id}`,
+          ephemeral: true,
+        });
+      },
+    },
+  },
+});
+```
+
+Use a custom result or error handler when you need centralized metrics,
+structured logging, custom user-facing error messages, or different handling
+for expected application errors.

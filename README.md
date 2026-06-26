@@ -8,6 +8,8 @@
 
 **Arcscord simplifies creating Discord bots with TypeScript and provides utility packages.**
 
+[Documentation](https://arcscord.github.io/arcscord/)
+
 </div>
 
 ## Packages 📦

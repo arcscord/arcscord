@@ -49,6 +49,44 @@ const packages = [
   },
 ];
 
+const arcscordTypedocOptions = {
+  externalSymbolLinkMappings: {
+    "discord.js": {
+      "Client.fetchStickerPacks": "#",
+    },
+  },
+  intentionallyNotExported: [
+    "AnyStringSelectMenuComponentHandler",
+    "AutocompleteChoicesFor",
+    "AutocompleteErrorHandlerInfos",
+    "AutocompleteOptionsDef",
+    "AutocompleteValueFor",
+    "BaseAutocompleteOptions",
+    "BaseMessageContext",
+    "CommandErrorContext",
+    "CommandErrorOptions",
+    "ComponentBuilderOptions",
+    "ComponentErrorOptions",
+    "ContextOptionsDef",
+    "EventErrorOptions",
+    "HandlerOptions",
+    "InteractionErrorOptions",
+    "InternalError",
+    "MiddlewaresResults",
+    "ModalTopLevelComponentInput",
+    "NormalizedEventManagerOptions",
+    "NormalizedLocaleManagerOptions",
+    "RegularCommandErrorHandlerInfos",
+    "SelectMenuUsageOptions",
+    "StoredCommandHandler",
+    "TypedStringMenuOptions",
+    "TypedStringSelectSnapshot",
+    "WithCustomI18n",
+    "WithI18nOptions",
+    "ButtonList",
+  ],
+};
+
 const apiRoot = join(outputRoot, "website/static/api");
 const typedocConfigRoot = join(outputRoot, "website/.typedoc");
 mkdirSync(apiRoot, { recursive: true });
@@ -91,6 +129,7 @@ for (const pkg of packages) {
       entryPoints: [join(sourceRoot, pkg.dir, "src/index.ts")],
       entryPointStrategy: "resolve",
       excludeInternal: true,
+      ...(pkg.slug === "arcscord" ? arcscordTypedocOptions : {}),
       includeVersion: true,
       json: outFile,
       name: packageJson.name,

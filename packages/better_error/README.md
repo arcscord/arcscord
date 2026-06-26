@@ -7,6 +7,8 @@
 
 A package that extends Error class, with more functions like debugs
 
+Documentation: https://arcscord.github.io/arcscord/
+
 ## Install
 
 `pnpm add @arcscord/better-error`<br>
@@ -18,7 +20,7 @@ or `npm install @arcscord/better-error`
 import { BaseError } from "@arcscord/better-error";
 
 const error = new BaseError({
-  message: "A error happen",
+  message: "An error happened",
   debugs: {
     when: "now",
   }
