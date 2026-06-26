@@ -275,7 +275,7 @@ export class ArcClient extends DJSClient {
       }
     }
     if (handlers.components && handlers.components.length > 0) {
-      await this.componentManager.loadComponents(handlers.components);
+      this.componentManager.loadComponents(handlers.components);
       if (logs) {
         this.componentManager.logger.info(`Loaded ${handlers.components.length} components`);
       }
