@@ -11,8 +11,6 @@ const sidebars: SidebarsConfig = {
         "guide/client",
         "guide/commands",
         "guide/events",
-        "guide/localization",
-        "guide/logger",
       ],
     },
     {
@@ -26,8 +24,6 @@ const sidebars: SidebarsConfig = {
         "guide/commands/subcommands",
         "guide/commands/permissions-contexts",
         "guide/commands/registration",
-        "guide/middleware",
-        "guide/result-handler",
       ],
     },
     {
@@ -35,6 +31,16 @@ const sidebars: SidebarsConfig = {
       label: "Components",
       items: [
         "guide/components",
+      ],
+    },
+    {
+      type: "category",
+      label: "Additional features",
+      items: [
+        "guide/localization",
+        "guide/logger",
+        "guide/middleware",
+        "guide/result-handler",
       ],
     },
     {
