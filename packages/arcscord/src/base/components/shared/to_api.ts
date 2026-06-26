@@ -44,16 +44,17 @@ import type {
   SelectOptions,
   Separator,
   TextDisplay,
+  TextDisplayInput,
   TextInput,
   Thumbnail,
   TypedSelectMenuOptions,
-} from "#/base/components/component_definer.type";
+} from "#/base/components/shared/component_definer.type";
 import { ComponentType } from "discord-api-types/v10";
 import {
   buttonTypeEnum,
   separatorSpacingSizeEnum,
   textInputStyleEnum,
-} from "#/base/components/component.enum";
+} from "#/base/components/shared/component.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 
 export type DiscordSelectMenuBuilder
@@ -315,7 +316,14 @@ export function textInputToAPI(textInput: TextInput | TextInputComponentData): T
   } as TextInputComponentData;
 }
 
-export function textDisplayToAPI(textDisplay: TextDisplay): TextDisplayComponentData {
+export function textDisplayToAPI(textDisplay: TextDisplayInput): TextDisplayComponentData {
+  if (typeof textDisplay === "string") {
+    return {
+      type: ComponentType.TextDisplay,
+      content: textDisplay,
+    };
+  }
+
   return {
     type: ComponentType.TextDisplay,
     id: textDisplay.id,
@@ -373,6 +381,10 @@ export function separatorToAPI(separator: Separator): SeparatorComponentData {
 }
 
 export function componentInContainerToAPI(component: ComponentInContainer): ContainerComponentData["components"][number] {
+  if (typeof component === "string") {
+    return textDisplayToAPI(component);
+  }
+
   switch (component.type) {
     case ComponentType.ActionRow:
       return component as ContainerComponentData["components"][number];

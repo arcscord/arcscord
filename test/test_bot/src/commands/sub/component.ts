@@ -1,4 +1,4 @@
-import { buildButtonActionRow, createCommand } from "arcscord";
+import { actionRow, createCommand } from "arcscord";
 import { modal } from "../../components/modal";
 import { simpleButton } from "../../components/simple_button";
 import { stringSelectMenu } from "../../components/string_select_menu";
@@ -10,7 +10,7 @@ export const buttonComponentSubCommand = createCommand({
   },
   run: (ctx) => {
     return ctx.reply("Button :", {
-      components: [buildButtonActionRow(simpleButton.build())],
+      components: [actionRow(simpleButton.build())],
     });
   },
 });

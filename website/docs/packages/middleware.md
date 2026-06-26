@@ -227,11 +227,11 @@ The message callback receives:
 
 ```ts
 import { AuthorOnlyMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const authorButton = createButton({
   route: "author_button",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Only me",
     style: "primary",
@@ -275,13 +275,13 @@ new AuthorOnlyMiddleware(message);
 
 ```ts
 import { ComponentUserAllowListMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 const moderatorIds = ["123456789"];
 
 export const moderationButton = createButton({
   route: "moderation_button",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Moderate",
     style: "danger",
@@ -317,11 +317,11 @@ new ComponentUserAllowListMiddleware(userIds, message);
 
 ```ts
 import { ComponentMemberPermissionMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const deleteMessageButton = createButton({
   route: "delete_message",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Delete",
     style: "danger",
@@ -369,11 +369,11 @@ The message callback receives:
 
 ```ts
 import { ComponentBotPermissionMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const publishButton = createButton({
   route: "publish",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Publish",
     style: "primary",

@@ -133,12 +133,12 @@ Restricts a message component to the user who created the original interaction.
 
 ```ts
 import { AuthorOnlyMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const confirmButton = createButton({
   route: "confirm",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Confirm",
     style: "green",
@@ -160,12 +160,12 @@ Restricts a component handler to members that have every required Discord permis
 
 ```ts
 import { ComponentMemberPermissionMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const moderateButton = createButton({
   route: "moderate",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Moderate",
     style: "red",
@@ -190,12 +190,12 @@ Outside guild interactions, the middleware continues without checking permission
 
 ```ts
 import { ComponentBotPermissionMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const publishButton = createButton({
   route: "publish",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Publish",
     style: "primary",
@@ -217,12 +217,12 @@ Restricts a component handler to a fixed list of Discord user IDs.
 
 ```ts
 import { ComponentUserAllowListMiddleware } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const privateButton = createButton({
   route: "private",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Private",
     style: "secondary",

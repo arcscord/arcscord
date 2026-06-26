@@ -3,8 +3,8 @@ import type { ComponentContext } from "./context";
 import { ok } from "@arcscord/error";
 import { describe, expect, it, vi } from "vitest";
 import { createMockComponentContext } from "#/testing";
-import { ComponentManager } from "../../manager/component/component_manager.class";
-import { ComponentError } from "../../utils/error/class/component_error";
+import { ComponentManager } from "../../../manager/component/component_manager.class";
+import { ComponentError } from "../../../utils/error/class/component_error";
 import { ComponentMiddleware } from "./component_middleware";
 
 class TestComponentMiddleware extends ComponentMiddleware {

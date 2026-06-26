@@ -9,12 +9,12 @@ Arcscord provides helpers for Discord buttons, select menus, and modals.
 ## Button
 
 ```ts
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const simpleButton = createButton({
   route: "simple_button",
   preReply: "ephemeral",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "Simple Button",
     style: "secondary",
     customId: id(),
@@ -31,11 +31,11 @@ Use dynamic route segments with `{name}` when a component needs values encoded
 in its custom ID. Pass those values as the first argument to `build`.
 
 ```ts
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const closeTicketButton = createButton({
   route: "ticket/close/{ticketId}",
-  build: (id, label) => buildClickableButton({
+  build: (id, label) => button({
     label,
     style: "danger",
     customId: id(),
@@ -57,17 +57,17 @@ roleSelectMenu.build("Select a role");
 ## Modal
 
 ```ts
-import { buildLabel, buildModal, buildTextInput, createModal } from "arcscord";
+import { label, modal, textInput, createModal } from "arcscord";
 
 export const modal = createModal({
   route: "modal",
   build: (id, title) =>
-    buildModal(
+    modal(
       title,
       id(),
-      buildLabel({
+      label({
         label: "Name",
-        component: buildTextInput({
+        component: textInput({
           customId: "name",
           style: "short",
           required: true,

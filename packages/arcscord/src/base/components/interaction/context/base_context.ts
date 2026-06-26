@@ -19,8 +19,8 @@ import type {
   UserSelectMenuContext,
 } from "#/base";
 import type { ComponentRunResult, SelectMenuContext } from "#/base/components";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { RouteVariablesObject } from "#/base/components/route";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import type { RouteVariablesObject } from "#/base/components/interaction/route";
 import type { ContextDocs } from "#/base/utils";
 import type { ComponentErrorOptions } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";

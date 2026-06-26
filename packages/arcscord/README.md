@@ -90,11 +90,11 @@ if (err) {
 
 ```ts
 // declaration button
-import { buildButtonActionRow, buildClickableButton, createButton } from "arcscord";
+import { actionRow, button, createButton } from "arcscord";
 
 export const simpleButton = createButton({
   route: "simple_button",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "Simple Button",
     style: "secondary",
     customId: id(),
@@ -106,13 +106,13 @@ export const simpleButton = createButton({
 
 // usage
 message.reply({
-  components: [buildButtonActionRow(simpleButton.build())]
+  components: [actionRow(simpleButton.build())]
 });
 
 // dynamic route params are passed to build
 export const closeTicketButton = createButton({
   route: "ticket/close/{ticketId}",
-  build: (id, label) => buildClickableButton({
+  build: (id, label) => button({
     label,
     style: "danger",
     customId: id(),
@@ -121,7 +121,7 @@ export const closeTicketButton = createButton({
 });
 
 message.reply({
-  components: [buildButtonActionRow(closeTicketButton.build({ ticketId: "42" }, "Close ticket"))]
+  components: [actionRow(closeTicketButton.build({ ticketId: "42" }, "Close ticket"))]
 });
 
 // register
@@ -132,14 +132,14 @@ client.loadComponents([simpleButton]);
 
 ```ts
 // declaration
-import { buildRoleSelectMenu, createSelectMenu } from "arcscord";
+import { createSelectMenu, roleSelectMenu } from "arcscord";
 import { ComponentType } from "discord-api-types/v10";
 import { EmbedBuilder } from "discord.js";
 
 export const roleSelectMenu = createSelectMenu({
   type: ComponentType.RoleSelect,
   route: "role_select_menu",
-  build: (id, placeHolder) => buildRoleSelectMenu({
+  build: (id, placeHolder) => roleSelectMenu({
     placeholder: placeHolder,
     customId: id(),
     maxValues: 1,
@@ -172,25 +172,25 @@ client.loadComponents([roleSelectMenu]);
 
 ```ts
 // declaration
-import { buildLabel, buildModal, buildTextInput, createModal } from "arcscord";
+import { createModal, label, modal, textInput } from "arcscord";
 
 export const modal = createModal({
   route: "modal",
   build: (id, title) =>
-    buildModal(
+    modal(
       title,
       id(),
-      buildLabel({
+      label({
         label: "Name",
-        component: buildTextInput({
+        component: textInput({
           customId: "name",
           style: "short",
           required: true,
         }),
       }),
-      buildLabel({
+      label({
         label: "Age",
-        component: buildTextInput({
+        component: textInput({
           customId: "age",
           style: "short",
           required: true,

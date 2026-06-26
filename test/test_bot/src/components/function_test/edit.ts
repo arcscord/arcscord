@@ -1,9 +1,9 @@
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const editButton = createButton({
   route: "edit",
   build: id =>
-    buildClickableButton({
+    button({
       style: "primary",
       label: "Edit",
       customId: id(),

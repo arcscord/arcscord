@@ -5,7 +5,7 @@ import {
   ComponentMemberPermissionMiddleware,
   ComponentUserAllowListMiddleware,
 } from "@arcscord/middleware";
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 import {
   componentAllowListMessage,
@@ -20,7 +20,7 @@ const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
 
 export const middlewareAuthorOnlyButton = createButton({
   route: "middleware_author_only",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "Author only",
     style: "green",
     customId: id(),
@@ -35,7 +35,7 @@ export const middlewareAuthorOnlyButton = createButton({
 
 export const middlewareUserAllowListButton = createButton({
   route: "middleware_user_allow_list",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "User allowlist",
     style: "secondary",
     customId: id(),
@@ -50,7 +50,7 @@ export const middlewareUserAllowListButton = createButton({
 
 export const middlewareBotPermissionButton = createButton({
   route: "middleware_bot_permission",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "Bot permission",
     style: "primary",
     customId: id(),
@@ -65,7 +65,7 @@ export const middlewareBotPermissionButton = createButton({
 
 export const middlewareMemberPermissionButton = createButton({
   route: "middleware_member_permission",
-  build: id => buildClickableButton({
+  build: id => button({
     label: "Member permission",
     style: "red",
     customId: id(),

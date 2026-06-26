@@ -1,4 +1,4 @@
-import { buildButtonActionRow, buildLinkButton, createCommand } from "arcscord";
+import { actionRow, createCommand, linkButton } from "arcscord";
 import { deferEditButton } from "../components/function_test/defer_edit";
 import { disableAllButton } from "../components/function_test/disable_all";
 import { disableComponentButton } from "../components/function_test/disableComponent";
@@ -19,14 +19,14 @@ export const disableComponentCommand = createCommand({
     return ctx.reply({
       content: "Components:",
       components: [
-        buildButtonActionRow(
+        actionRow(
           disableAllButton.build({ id: "" }),
           disableRowButton.build({ id: "" }),
           disableComponentButton.build({ id: "" }),
         ),
-        buildButtonActionRow(
+        actionRow(
           disableRowButton.build({ id: "a" }),
-          buildLinkButton({
+          linkButton({
             url: "https://acz.sh/arcscord",
             label: "Github Link",
           }),

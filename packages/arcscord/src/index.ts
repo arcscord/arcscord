@@ -91,35 +91,120 @@ export type {
 } from "./base/command/option.type";
 
 export {
-  buildButtonActionRow,
-  buildChannelSelectMenu,
-  buildChannelSelectModalComponent,
-  buildCheckbox,
-  buildCheckboxGroup,
-  buildClickableButton,
-  buildContainer,
-  buildFile,
-  buildFileUpload,
-  buildLabel,
-  buildLinkButton,
-  buildMediaGallery,
-  buildMentionableSelectMenu,
-  buildMentionableSelectModalComponent,
-  buildModal,
-  buildPremiumButton,
-  buildRadioGroup,
-  buildRoleSelectMenu,
-  buildRoleSelectModalComponent,
-  buildSection,
-  buildSeparator,
-  buildStringSelectMenu,
-  buildStringSelectModalComponent,
-  buildTextDisplay,
-  buildTextInput,
-  buildThumbnail,
-  buildUserSelectMenu,
-  buildUserSelectModalComponent,
-} from "./base/components/build_component.func";
+  accessory,
+  actionRow,
+  container,
+  file,
+  mediaGallery,
+  section,
+  separator,
+  text,
+  thumbnail,
+  v2Message,
+} from "./base/components/display";
+export type {
+  ButtonActionRow,
+  ContainerChild,
+  ContainerOptions,
+  DisplayButton,
+  FileOptions,
+  MediaGalleryOptions,
+  MessageV2Child,
+  MessageV2Component,
+  MessageV2Options,
+  MessageV2ReplyOptions,
+  SectionAccessory,
+  SectionAccessoryValue,
+  SectionInput,
+  SectionOptions,
+  SectionTextInput,
+  SeparatorOptions,
+  TextDisplayOptions,
+  ThumbnailOptions,
+} from "./base/components/display";
+export type { ComponentRunResult } from "./base/components/interaction/component.type";
+export {
+  createButton,
+  createModal,
+  createSelectMenu,
+  createTypedStringMenu,
+} from "./base/components/interaction/component_handler.func";
+export type {
+  BaseComponentHandler,
+  BaseMessageComponentHandler,
+  BaseModalSubmitHandler,
+  ButtonComponentHandler,
+  ChannelSelectMenuComponentHandler,
+  ComponentHandler,
+  MentionableSelectMenuComponentHandler,
+  ModalComponentHandler,
+  RoleSelectMenuComponentHandler,
+  RouteComponentHandle,
+  SelectMenuComponentHandler,
+  StringSelectMenuComponentHandler,
+  UserSelectMenuComponentHandler,
+} from "./base/components/interaction/component_handlers.type";
+export {
+  ComponentMiddleware,
+} from "./base/components/interaction/component_middleware";
+export type {
+  CancelComponentMiddleware,
+  ComponentMiddlewareRun,
+  ErrorComponentMiddleware,
+  NextComponentMiddleware,
+} from "./base/components/interaction/component_middleware";
+export {
+  BaseComponentContext,
+  ButtonContext,
+  ChannelSelectMenuContext,
+  MentionableSelectMenuContext,
+  MessageComponentContext,
+  ModalContext,
+  RoleSelectMenuContext,
+  SelectMenuContext,
+  StringSelectMenuContext,
+  UserSelectMenuContext,
+} from "./base/components/interaction/context";
+export type {
+  BaseComponentContextOptions,
+  ChannelSelectMenuContextOptions,
+  ComponentContext,
+  MentionableSelectMenuContextOptions,
+  ModalContextValue,
+  RoleSelectMenuContextOptions,
+  StringSelectMenuContextOptions,
+  UserSelectMenuContextOptions,
+} from "./base/components/interaction/context";
+export type {
+  ComponentBuildArgs,
+  IdInitialiseFunction,
+  RouteVariables,
+  RouteVariablesObject,
+} from "./base/components/interaction/route";
+export {
+  channelSelectModalComponent,
+  checkbox,
+  checkboxGroup,
+  fileUpload,
+  label,
+  mentionableSelectModalComponent,
+  modal,
+  radioGroup,
+  roleSelectModalComponent,
+  stringSelectModalComponent,
+  textInput,
+  userSelectModalComponent,
+} from "./base/components/modal";
+export {
+  button,
+  channelSelectMenu,
+  linkButton,
+  mentionableSelectMenu,
+  premiumButton,
+  roleSelectMenu,
+  stringSelectMenu,
+  userSelectMenu,
+} from "./base/components/shared/builders";
 export {
   buttonColorEnum,
   buttonStyleEnum,
@@ -128,8 +213,7 @@ export {
   componentTypesEnum,
   separatorSpacingSizeEnum,
   textInputStyleEnum,
-} from "./base/components/component.enum";
-export type { ComponentRunResult } from "./base/components/component.type";
+} from "./base/components/shared/component.enum";
 export type {
   AnyMessageTopLevelComponentData,
   AnyModalComponentData,
@@ -178,71 +262,14 @@ export type {
   StringSelectMenuValues,
   StringSeparatorSpacingSize,
   TextDisplay,
+  TextDisplayInput,
   TextInput,
   TextInputStyle,
   Thumbnail,
   TypedSelectMenuOptions,
   TypedTextInput,
   UserSelectMenu,
-} from "./base/components/component_definer.type";
-export {
-  createButton,
-  createModal,
-  createSelectMenu,
-  createTypedStringMenu,
-} from "./base/components/component_handler.func";
-export type {
-  BaseComponentHandler,
-  BaseMessageComponentHandler,
-  BaseModalSubmitHandler,
-  ButtonComponentHandler,
-  ChannelSelectMenuComponentHandler,
-  ComponentHandler,
-  MentionableSelectMenuComponentHandler,
-  ModalComponentHandler,
-  RoleSelectMenuComponentHandler,
-  RouteComponentHandle,
-  SelectMenuComponentHandler,
-  StringSelectMenuComponentHandler,
-  UserSelectMenuComponentHandler,
-} from "./base/components/component_handlers.type";
-export {
-  ComponentMiddleware,
-} from "./base/components/component_middleware";
-export type {
-  CancelComponentMiddleware,
-  ComponentMiddlewareRun,
-  ErrorComponentMiddleware,
-  NextComponentMiddleware,
-} from "./base/components/component_middleware";
-export {
-  BaseComponentContext,
-  ButtonContext,
-  ChannelSelectMenuContext,
-  MentionableSelectMenuContext,
-  MessageComponentContext,
-  ModalContext,
-  RoleSelectMenuContext,
-  SelectMenuContext,
-  StringSelectMenuContext,
-  UserSelectMenuContext,
-} from "./base/components/context";
-export type {
-  BaseComponentContextOptions,
-  ChannelSelectMenuContextOptions,
-  ComponentContext,
-  MentionableSelectMenuContextOptions,
-  ModalContextValue,
-  RoleSelectMenuContextOptions,
-  StringSelectMenuContextOptions,
-  UserSelectMenuContextOptions,
-} from "./base/components/context";
-export type {
-  ComponentBuildArgs,
-  IdInitialiseFunction,
-  RouteVariables,
-  RouteVariablesObject,
-} from "./base/components/route";
+} from "./base/components/shared/component_definer.type";
 
 export { createEvent } from "./base/event/event.func";
 export type {

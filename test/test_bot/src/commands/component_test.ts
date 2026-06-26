@@ -1,16 +1,19 @@
 import { Buffer } from "node:buffer";
 import {
-  buildButtonActionRow,
-  buildContainer,
-  buildFile,
-  buildMediaGallery,
-  buildSection,
-  buildSeparator,
-  buildTextDisplay,
+  accessory,
+  actionRow,
+  container,
   createCommand,
+  file,
+  mediaGallery,
+  section,
+  separator,
+  text,
+  thumbnail,
+  v2Message,
 } from "arcscord";
-import { ComponentType, MessageFlags } from "discord.js";
 import { channelSelectMenu } from "../components/channel_select_menu";
+import { i18nButton } from "../components/i18n_button";
 import { mentionableSelectMenu } from "../components/mentionable_select_menu";
 import {
   middlewareAuthorOnlyButton,
@@ -95,6 +98,14 @@ export const componentTestCommand = createCommand({
               value: "components_v2_complete",
             },
             {
+              name: "components_v2_practical",
+              value: "components_v2_practical",
+            },
+            {
+              name: "components_v2_i18n",
+              value: "components_v2_i18n",
+            },
+            {
               name: "route_params",
               value: "route_params",
             },
@@ -108,7 +119,7 @@ export const componentTestCommand = createCommand({
     switch (ctx.options.component) {
       case "simple_button":
         return ctx.reply({
-          components: [buildButtonActionRow(simpleButton.build())],
+          components: [actionRow(simpleButton.build())],
           content: ctx.options.component,
         });
       case "string_select":
@@ -153,149 +164,130 @@ export const componentTestCommand = createCommand({
       case "modal_survey":
         return ctx.showModal(surveyModal.build("Survey"));
       case "components_v2_layout":
-        return ctx.reply({
-          flags: MessageFlags.IsComponentsV2,
-          components: [
-            buildTextDisplay({
-              content: "## Components v2 - layout\nText display, container, section, thumbnail, separator, and action row.",
-            }),
-            buildSection({
-              components: [
-                {
-                  type: ComponentType.TextDisplay,
-                  content: "Top-level section with a thumbnail accessory.",
-                },
-              ],
-              accessory: {
-                type: ComponentType.Thumbnail,
+        return ctx.reply(
+          v2Message(
+            text("## Components v2 - layout\nText display, container, section, thumbnail, separator, and action row."),
+            section({
+              id: 1,
+            }, "Top-level section with a thumbnail accessory.", accessory(
+              thumbnail({
                 media: { url: "https://cdn.discordapp.com/embed/avatars/0.png" },
                 description: "Default Discord avatar",
-              },
-            }),
-            buildSeparator({
+              }),
+            )),
+            separator({
               divider: true,
               spacing: "large",
             }),
-            buildContainer({
-              accentColor: 0x5865F2,
-              components: [
-                {
-                  type: ComponentType.TextDisplay,
-                  content: "Container content can group text, sections, separators, and action rows.",
-                },
-                {
-                  type: ComponentType.Section,
-                  components: [
-                    {
-                      type: ComponentType.TextDisplay,
-                      content: "A section can place text next to an accessory.",
-                    },
-                  ],
-                  accessory: {
-                    type: ComponentType.Thumbnail,
+            container(
+              { accentColor: 0x5865F2 },
+              "Container content can group text, sections, separators, and action rows.",
+              section(
+                "A section can place text next to an accessory.",
+                accessory(
+                  thumbnail({
                     media: { url: "https://cdn.discordapp.com/embed/avatars/0.png" },
                     description: "Default Discord avatar",
-                  },
-                },
-                {
-                  type: ComponentType.Separator,
-                  divider: true,
-                  spacing: "large",
-                },
-                buildButtonActionRow(simpleButton.build()),
-              ],
-            }),
-          ],
-        });
+                  }),
+                ),
+              ),
+              separator({ divider: true, spacing: "large" }),
+              actionRow(simpleButton.build()),
+            ),
+          ),
+        );
       case "components_v2_media":
-        return ctx.reply({
-          flags: MessageFlags.IsComponentsV2,
+        return ctx.reply(v2Message({
           files: [
             {
               attachment: Buffer.from("This file is rendered by a Components v2 File component.\n"),
               name: "components-v2-note.txt",
             },
           ],
-          components: [
-            buildTextDisplay({
-              content: "## Components v2 - media\nMedia gallery and file component with an uploaded attachment.",
-            }),
-            buildMediaGallery({
-              items: [
-                {
-                  media: { url: "https://cdn.discordapp.com/embed/avatars/1.png" },
-                  description: "Gallery image 1",
-                },
-                {
-                  media: { url: "https://cdn.discordapp.com/embed/avatars/2.png" },
-                  description: "Gallery image 2",
-                  spoiler: true,
-                },
-              ],
-            }),
-            buildFile({
-              file: { url: "attachment://components-v2-note.txt" },
-            }),
+        }, text("## Components v2 - media\nMedia gallery and file component with an uploaded attachment."), mediaGallery({
+          items: [
+            {
+              media: { url: "https://cdn.discordapp.com/embed/avatars/1.png" },
+              description: "Gallery image 1",
+            },
+            {
+              media: { url: "https://cdn.discordapp.com/embed/avatars/2.png" },
+              description: "Gallery image 2",
+              spoiler: true,
+            },
           ],
-        });
+        }), file({
+          file: { url: "attachment://components-v2-note.txt" },
+        })));
       case "components_v2_complete":
-        return ctx.reply({
-          flags: MessageFlags.IsComponentsV2,
+        return ctx.reply(v2Message({
           files: [
             {
               attachment: Buffer.from("Complete Components v2 example attachment.\n"),
               name: "components-v2-complete.txt",
             },
           ],
-          components: [
-            buildTextDisplay({
-              content: "## Components v2 - complete\nA denser payload that combines every message-only v2 component shape.",
-            }),
-            buildContainer({
-              accentColor: 0x57F287,
-              spoiler: false,
-              components: [
-                {
-                  type: ComponentType.TextDisplay,
-                  content: "Inside a container: text display, section, gallery, file, separator, and action row.",
-                },
-                {
-                  type: ComponentType.Section,
-                  components: [
-                    {
-                      type: ComponentType.TextDisplay,
-                      content: "Section accessory can also be an interactive button.",
-                    },
-                  ],
-                  accessory: simpleButton.build(),
-                },
-                {
-                  type: ComponentType.MediaGallery,
-                  items: [
-                    {
-                      media: { url: "https://cdn.discordapp.com/embed/avatars/3.png" },
-                      description: "Nested gallery image",
-                    },
-                  ],
-                },
-                {
-                  type: ComponentType.File,
-                  file: { url: "attachment://components-v2-complete.txt" },
-                },
-                {
-                  type: ComponentType.Separator,
-                  divider: false,
-                  spacing: "small",
-                },
-                buildButtonActionRow(redSimpleButton.build()),
-              ],
-            }),
-          ],
-        });
+        }, text("## Components v2 - complete\nA denser payload that combines every message-only v2 component shape."), container(
+          { accentColor: 0x57F287, spoiler: false },
+          "Inside a container: text display, section, gallery, file, separator, and action row.",
+          section(
+            "Section accessory can also be an interactive button.",
+            accessory(simpleButton.build()),
+          ),
+          mediaGallery({
+            items: [
+              {
+                media: { url: "https://cdn.discordapp.com/embed/avatars/3.png" },
+                description: "Nested gallery image",
+              },
+            ],
+          }),
+          file({
+            file: { url: "attachment://components-v2-complete.txt" },
+          }),
+          separator({ divider: false, spacing: "small" }),
+          actionRow(redSimpleButton.build()),
+        )));
+      case "components_v2_practical":
+        return ctx.reply(
+          v2Message(
+            container(
+              section(
+                "Support",
+                "Click to open a support ticket.",
+                accessory(simpleButton.build()),
+              ),
+              separator({ spacing: "large" }),
+              section(
+                "Bug",
+                "Report a bug to the team.",
+                accessory(redSimpleButton.build()),
+              ),
+            ),
+          ),
+        );
+      case "components_v2_i18n":
+        return ctx.reply(
+          v2Message(
+            container(
+              section(
+                ctx.t($ => $.componentsV2.i18n.support.title),
+                ctx.t($ => $.componentsV2.i18n.support.description),
+                accessory(i18nButton.build()),
+              ),
+              separator({ spacing: "large" }),
+              section(
+                ctx.t($ => $.componentsV2.i18n.bug.title),
+                ctx.t($ => $.componentsV2.i18n.bug.description),
+                accessory(redSimpleButton.build()),
+              ),
+            ),
+          ),
+        );
       case "middleware":
         return ctx.reply({
           components: [
-            buildButtonActionRow(
+            actionRow(
               middlewareAuthorOnlyButton.build(),
               middlewareUserAllowListButton.build(),
               middlewareBotPermissionButton.build(),
@@ -306,7 +298,7 @@ export const componentTestCommand = createCommand({
         });
       case "route_params":
         return ctx.reply({
-          components: [buildButtonActionRow(routeParamsButton.build({ userId: ctx.user.id, filter: "all/active" }))],
+          components: [actionRow(routeParamsButton.build({ userId: ctx.user.id, filter: "all/active" }))],
           content: ctx.options.component,
         });
       default:

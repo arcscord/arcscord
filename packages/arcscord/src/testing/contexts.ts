@@ -2,7 +2,7 @@ import type { PermissionsString } from "discord.js";
 import type i18next from "i18next";
 import type { CommandRunResult, ComponentRunResult } from "#/base";
 import type { CommandContext } from "#/base/command/command_context";
-import type { ComponentContext } from "#/base/components/context";
+import type { ComponentContext } from "#/base/components/interaction/context";
 import type { MockCommandInteractionOptions, MockComponentInteractionOptions } from "./interactions";
 import type { MockFunctionFactory } from "./mock_function";
 import { ok } from "@arcscord/error";

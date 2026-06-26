@@ -12,8 +12,8 @@ import type {
 } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { StringSelectMenuValues, TypedSelectMenuOptions } from "#/base/components";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import { MessageComponentContext } from "#/base/components/context/message_component_context";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import { MessageComponentContext } from "#/base/components/interaction/context/message_component_context";
 
 /**
  * Base context for select menu interactions.

@@ -158,11 +158,11 @@ class SameAuthorMiddleware extends ComponentMiddleware {
 Use it on a component:
 
 ```ts
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const secureButton = createButton({
   route: "secure_button",
-  build: id => buildClickableButton({
+  build: id => button({
     customId: id(),
     label: "Confirm",
     style: "success",

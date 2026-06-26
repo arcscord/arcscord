@@ -3,36 +3,43 @@ import {
   ButtonBuilder,
   ChannelSelectMenuBuilder,
   MentionableSelectMenuBuilder,
+  MessageFlags,
   RoleSelectMenuBuilder,
   StringSelectMenuBuilder,
   UserSelectMenuBuilder,
 } from "discord.js";
 import { describe, expect, it } from "vitest";
 import {
-  buildButtonActionRow,
-  buildChannelSelectMenu,
-  buildCheckbox,
-  buildCheckboxGroup,
-  buildClickableButton,
-  buildContainer,
-  buildFile,
-  buildFileUpload,
-  buildLabel,
-  buildLinkButton,
-  buildMediaGallery,
-  buildMentionableSelectMenu,
-  buildModal,
-  buildPremiumButton,
-  buildRadioGroup,
-  buildRoleSelectMenu,
-  buildSection,
-  buildSeparator,
-  buildStringSelectMenu,
-  buildTextDisplay,
-  buildTextInput,
-  buildThumbnail,
-  buildUserSelectMenu,
-} from "./build_component.func";
+  accessory,
+  actionRow,
+  container as displayContainer,
+  section as displaySection,
+  separator as displaySeparator,
+  file,
+  mediaGallery,
+  text,
+  thumbnail,
+  v2Message,
+} from "../display";
+import {
+  checkbox,
+  checkboxGroup,
+  fileUpload,
+  label,
+  modal,
+  radioGroup,
+  textInput,
+} from "../modal";
+import {
+  button,
+  channelSelectMenu,
+  linkButton,
+  mentionableSelectMenu,
+  premiumButton,
+  roleSelectMenu,
+  stringSelectMenu,
+  userSelectMenu,
+} from "./builders";
 import {
   buttonToAPI,
   componentInContainerToAPI,
@@ -40,25 +47,25 @@ import {
   selectMenuOptionsToAPI,
   selectMenuToAPI,
   textInputToAPI,
-} from "./build_component.util";
+} from "./to_api";
 
 describe("component builders", () => {
   it("builds link, premium, and clickable buttons", () => {
-    expect(buildLinkButton({ url: "https://example.com", label: "Docs" })).toEqual({
+    expect(linkButton({ url: "https://example.com", label: "Docs" })).toEqual({
       type: ComponentType.Button,
       style: ButtonStyle.Link,
       url: "https://example.com",
       label: "Docs",
     });
 
-    expect(buildPremiumButton({ skuId: "sku_1", disabled: true } as any)).toEqual({
+    expect(premiumButton({ skuId: "sku_1", disabled: true } as any)).toEqual({
       type: ComponentType.Button,
       style: ButtonStyle.Premium,
       skuId: "sku_1",
       disabled: true,
     });
 
-    expect(buildClickableButton({ customId: "confirm", style: "success", label: "Confirm" })).toEqual({
+    expect(button({ customId: "confirm", style: "success", label: "Confirm" })).toEqual({
       type: ComponentType.Button,
       customId: "confirm",
       style: "success",
@@ -92,9 +99,9 @@ describe("component builders", () => {
   });
 
   it("builds button action rows with converted button API data", () => {
-    expect(buildButtonActionRow(
-      buildClickableButton({ customId: "ok", style: "success", label: "OK" }),
-      buildLinkButton({ url: "https://example.com", label: "Open" }),
+    expect(actionRow(
+      button({ customId: "ok", style: "success", label: "OK" }),
+      linkButton({ url: "https://example.com", label: "Open" }),
     )).toEqual({
       type: ComponentType.ActionRow,
       components: [
@@ -111,7 +118,7 @@ describe("component builders", () => {
       .setStyle(ButtonStyle.Success)
       .setDisabled(true);
 
-    expect(buildButtonActionRow(button)).toEqual({
+    expect(actionRow(button)).toEqual({
       type: ComponentType.ActionRow,
       components: [
         {
@@ -144,7 +151,7 @@ describe("component builders", () => {
   });
 
   it("builds string and channel select menus", () => {
-    expect(buildStringSelectMenu({
+    expect(stringSelectMenu({
       customId: "status",
       placeholder: "Status",
       options: ["open", "closed"],
@@ -166,7 +173,7 @@ describe("component builders", () => {
       ],
     });
 
-    expect(buildChannelSelectMenu({
+    expect(channelSelectMenu({
       customId: "channel",
       channelTypes: ["guildText", "guildForum"],
     })).toEqual({
@@ -192,7 +199,7 @@ describe("component builders", () => {
         { label: "Closed", value: "closed" },
       );
 
-    expect(buildStringSelectMenu(stringSelect)).toEqual({
+    expect(stringSelectMenu(stringSelect)).toEqual({
       type: ComponentType.ActionRow,
       components: [
         {
@@ -211,19 +218,19 @@ describe("component builders", () => {
       ],
     });
 
-    expect(buildUserSelectMenu(new UserSelectMenuBuilder().setCustomId("user"))).toMatchObject({
+    expect(userSelectMenu(new UserSelectMenuBuilder().setCustomId("user"))).toMatchObject({
       type: ComponentType.ActionRow,
       components: [{ type: ComponentType.UserSelect, customId: "user" }],
     });
-    expect(buildRoleSelectMenu(new RoleSelectMenuBuilder().setCustomId("role"))).toMatchObject({
+    expect(roleSelectMenu(new RoleSelectMenuBuilder().setCustomId("role"))).toMatchObject({
       type: ComponentType.ActionRow,
       components: [{ type: ComponentType.RoleSelect, customId: "role" }],
     });
-    expect(buildMentionableSelectMenu(new MentionableSelectMenuBuilder().setCustomId("mention"))).toMatchObject({
+    expect(mentionableSelectMenu(new MentionableSelectMenuBuilder().setCustomId("mention"))).toMatchObject({
       type: ComponentType.ActionRow,
       components: [{ type: ComponentType.MentionableSelect, customId: "mention" }],
     });
-    expect(buildChannelSelectMenu(new ChannelSelectMenuBuilder().setCustomId("channel"))).toMatchObject({
+    expect(channelSelectMenu(new ChannelSelectMenuBuilder().setCustomId("channel"))).toMatchObject({
       type: ComponentType.ActionRow,
       components: [{ type: ComponentType.ChannelSelect, customId: "channel" }],
     });
@@ -270,26 +277,26 @@ describe("component builders", () => {
       placeholder: "Explain",
     });
 
-    expect(buildTextDisplay({ id: 7, content: "Hello" })).toEqual({
+    expect(text("Hello", { id: 7 })).toEqual({
       type: ComponentType.TextDisplay,
       id: 7,
       content: "Hello",
     });
-    expect(buildThumbnail({ media: { url: "attachment://thumb.png" }, spoiler: true })).toMatchObject({
+    expect(thumbnail({ media: { url: "attachment://thumb.png" }, spoiler: true })).toMatchObject({
       type: ComponentType.Thumbnail,
       media: { url: "attachment://thumb.png" },
       spoiler: true,
     });
-    expect(buildMediaGallery({ items: [{ media: { url: "attachment://image.png" } }] })).toMatchObject({
+    expect(mediaGallery({ items: [{ media: { url: "attachment://image.png" } }] })).toMatchObject({
       type: ComponentType.MediaGallery,
       items: [{ media: { url: "attachment://image.png" } }],
     });
-    expect(buildFile({ file: { url: "attachment://file.txt" }, spoiler: false })).toMatchObject({
+    expect(file({ file: { url: "attachment://file.txt" }, spoiler: false })).toMatchObject({
       type: ComponentType.File,
       file: { url: "attachment://file.txt" },
       spoiler: false,
     });
-    expect(buildSeparator({ spacing: "large", divider: true })).toMatchObject({
+    expect(displaySeparator({ spacing: "large", divider: true })).toMatchObject({
       type: ComponentType.Separator,
       spacing: 2,
       divider: true,
@@ -297,26 +304,26 @@ describe("component builders", () => {
   });
 
   it("builds sections, containers, labels, and modal input components", () => {
-    const section = buildSection({
-      components: [{ type: ComponentType.TextDisplay, content: "Profile" }],
-      accessory: buildClickableButton({ customId: "open", style: "primary", label: "Open" }),
-    });
+    const sectionComponent = displaySection(
+      "Profile",
+      accessory(button({ customId: "open", style: "primary", label: "Open" })),
+    );
 
-    expect(section).toMatchObject({
+    expect(sectionComponent).toMatchObject({
       type: ComponentType.Section,
       components: [{ type: ComponentType.TextDisplay, content: "Profile" }],
       accessory: { type: ComponentType.Button, customId: "open", style: ButtonStyle.Primary },
     });
 
-    expect(buildContainer({
-      accentColor: 0xFFAA00,
-      spoiler: true,
-      components: [
-        buildTextDisplay({ content: "Details" }),
-        buildFile({ file: { url: "attachment://report.txt" } }),
-        section,
-      ] as any,
-    })).toMatchObject({
+    expect(displayContainer(
+      {
+        accentColor: 0xFFAA00,
+        spoiler: true,
+      },
+      "Details",
+      file({ file: { url: "attachment://report.txt" } }),
+      sectionComponent,
+    )).toMatchObject({
       type: ComponentType.Container,
       accentColor: 0xFFAA00,
       spoiler: true,
@@ -327,7 +334,7 @@ describe("component builders", () => {
       ],
     });
 
-    expect(buildFileUpload({ customId: "upload", minValues: 1, maxValues: 2, required: true })).toEqual({
+    expect(fileUpload({ customId: "upload", minValues: 1, maxValues: 2, required: true })).toEqual({
       type: ComponentType.FileUpload,
       id: undefined,
       customId: "upload",
@@ -335,29 +342,29 @@ describe("component builders", () => {
       maxValues: 2,
       required: true,
     });
-    expect(buildRadioGroup({ customId: "choice", options: [{ label: "A", value: "a" }], required: true })).toMatchObject({
+    expect(radioGroup({ customId: "choice", options: [{ label: "A", value: "a" }], required: true })).toMatchObject({
       type: ComponentType.RadioGroup,
       customId: "choice",
       options: [{ label: "A", value: "a" }],
       required: true,
     });
-    expect(buildCheckboxGroup({ customId: "checks", options: [{ label: "A", value: "a" }], minValues: 0, maxValues: 1 })).toMatchObject({
+    expect(checkboxGroup({ customId: "checks", options: [{ label: "A", value: "a" }], minValues: 0, maxValues: 1 })).toMatchObject({
       type: ComponentType.CheckboxGroup,
       customId: "checks",
       minValues: 0,
       maxValues: 1,
     });
-    expect(buildCheckbox({ customId: "accept", default: true })).toEqual({
+    expect(checkbox({ customId: "accept", default: true })).toEqual({
       type: ComponentType.Checkbox,
       id: undefined,
       customId: "accept",
       default: true,
     });
 
-    expect(labelToAPI(buildLabel({
+    expect(labelToAPI(label({
       label: "Upload",
       description: "Attach a file",
-      component: buildFileUpload({ customId: "file" }),
+      component: fileUpload({ customId: "file" }),
     }) as any)).toMatchObject({
       type: ComponentType.Label,
       label: "Upload",
@@ -369,17 +376,56 @@ describe("component builders", () => {
     });
   });
 
+  it("builds composable components v2 messages with typed section accessories", () => {
+    const message = v2Message(
+      displayContainer(
+        displaySection(
+          "Support",
+          "Open a ticket.",
+          accessory(button({ customId: "support", style: "primary", label: "Open" })),
+        ),
+        displaySeparator(),
+        text("Footer"),
+      ),
+    );
+
+    expect(message).toMatchObject({
+      flags: MessageFlags.IsComponentsV2,
+      components: [
+        {
+          type: ComponentType.Container,
+          components: [
+            {
+              type: ComponentType.Section,
+              components: [
+                { type: ComponentType.TextDisplay, content: "Support" },
+                { type: ComponentType.TextDisplay, content: "Open a ticket." },
+              ],
+              accessory: {
+                type: ComponentType.Button,
+                customId: "support",
+                style: ButtonStyle.Primary,
+              },
+            },
+            { type: ComponentType.Separator },
+            { type: ComponentType.TextDisplay, content: "Footer" },
+          ],
+        },
+      ],
+    });
+  });
+
   it("builds modals from v2 top-level components and legacy text inputs", () => {
-    const label = buildLabel({
+    const labelComponent = label({
       label: "Reason",
-      component: buildTextInput({
+      component: textInput({
         customId: "reason",
         style: "short",
         required: true,
       }),
     });
 
-    expect(buildModal("Report", "report", label, buildTextDisplay({ content: "Details" }))).toEqual({
+    expect(modal("Report", "report", labelComponent, "Details")).toEqual({
       title: "Report",
       customId: "report",
       components: [
@@ -397,7 +443,7 @@ describe("component builders", () => {
       ],
     });
 
-    expect(buildModal("Legacy", "legacy", {
+    expect(modal("Legacy", "legacy", {
       label: "Name",
       customId: "name",
       style: "short",
@@ -414,7 +460,7 @@ describe("component builders", () => {
       ],
     });
 
-    expect(buildModal("Typed", "typed", {
+    expect(modal("Typed", "typed", {
       name: { label: "Name", style: "short" },
       bio: { label: "Bio", style: "paragraph" },
     } as any)).toEqual({

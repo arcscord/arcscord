@@ -1,13 +1,13 @@
 import {
-  buildCheckbox,
-  buildCheckboxGroup,
-  buildLabel,
-  buildModal,
-  buildRadioGroup,
-  buildStringSelectModalComponent,
-  buildTextDisplay,
-  buildTextInput,
+  checkbox,
+  checkboxGroup,
   createModal,
+  label,
+  modal as modalComponent,
+  radioGroup,
+  stringSelectModalComponent,
+  text,
+  textInput,
 } from "arcscord";
 
 function formatValue(value: unknown): string {
@@ -25,20 +25,20 @@ function formatValue(value: unknown): string {
 export const profileModal = createModal({
   route: "modal/profile",
   build: (id, title) =>
-    buildModal(
+    modalComponent(
       title,
       id(),
-      buildLabel({
+      label({
         label: "Name",
-        component: buildTextInput({
+        component: textInput({
           customId: "name",
           style: "short",
           required: true,
         }),
       }),
-      buildLabel({
+      label({
         label: "Age",
-        component: buildTextInput({
+        component: textInput({
           customId: "age",
           style: "short",
           required: true,
@@ -55,16 +55,14 @@ export const profileModal = createModal({
 export const feedbackModal = createModal({
   route: "modal/feedback",
   build: (id, title) =>
-    buildModal(
+    modalComponent(
       title,
       id(),
-      buildTextDisplay({
-        content: "Use the fields below to send structured feedback.",
-      }),
-      buildLabel({
+      text("Use the fields below to send structured feedback."),
+      label({
         label: "Category",
         description: "Choose the topic closest to your feedback.",
-        component: buildStringSelectModalComponent({
+        component: stringSelectModalComponent({
           customId: "category",
           required: true,
           options: [
@@ -74,9 +72,9 @@ export const feedbackModal = createModal({
           ],
         }),
       }),
-      buildLabel({
+      label({
         label: "Message",
-        component: buildTextInput({
+        component: textInput({
           customId: "message",
           style: "paragraph",
           required: true,
@@ -94,12 +92,12 @@ export const feedbackModal = createModal({
 export const surveyModal = createModal({
   route: "modal/survey",
   build: (id, title) =>
-    buildModal(
+    modalComponent(
       title,
       id(),
-      buildLabel({
+      label({
         label: "Mood",
-        component: buildRadioGroup({
+        component: radioGroup({
           customId: "mood",
           required: true,
           options: [
@@ -109,10 +107,10 @@ export const surveyModal = createModal({
           ],
         }),
       }),
-      buildLabel({
+      label({
         label: "Features used",
         description: "Pick every component family you tested.",
-        component: buildCheckboxGroup({
+        component: checkboxGroup({
           customId: "features",
           required: false,
           minValues: 0,
@@ -124,9 +122,9 @@ export const surveyModal = createModal({
           ],
         }),
       }),
-      buildLabel({
+      label({
         label: "Subscribe to updates",
-        component: buildCheckbox({
+        component: checkbox({
           customId: "subscribe",
           default: true,
         }),

@@ -7,8 +7,8 @@ import type {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base";
-import type { TypedSelectMenuOptions } from "#/base/components/component_definer.type";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import type { TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
 
 export * from "./base_context";
 export * from "./button_context";

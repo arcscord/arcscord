@@ -1,10 +1,10 @@
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const i18nButton = createButton({
   route: "i18n_button",
   build: id =>
-    buildClickableButton({
+    button({
       customId: id(),
       label: "i18n",
       style: "primary",

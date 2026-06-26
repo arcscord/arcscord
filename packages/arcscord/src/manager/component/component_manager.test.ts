@@ -1,9 +1,9 @@
 import type { Result } from "@arcscord/error";
 import type { StringSelectMenuInteraction } from "discord.js";
-import type { ComponentHandler } from "../../base/components/component_handlers.type";
+import type { ComponentHandler } from "../../base/components/interaction/component_handlers.type";
 import { ComponentType } from "discord-api-types/v10";
 import { describe, expect, it } from "vitest";
-import { buildStringSelectMenu, createSelectMenu, createTypedStringMenu } from "../../base/components";
+import { createSelectMenu, createTypedStringMenu, stringSelectMenu } from "../../base/components";
 import { ComponentError } from "../../utils/error/class/component_error";
 import { ComponentManager } from "./component_manager.class";
 
@@ -116,7 +116,7 @@ describe("component manager", () => {
     const untypedStringSelectMenu = createSelectMenu({
       type: ComponentType.StringSelect,
       route: "untyped_string_select",
-      build: id => buildStringSelectMenu({
+      build: id => stringSelectMenu({
         customId: id(),
         options: ["fun"],
       }),

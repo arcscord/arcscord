@@ -1,9 +1,9 @@
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 
 export const disableComponentButton = createButton({
   route: "disableComponent/{id}",
   build: id =>
-    buildClickableButton({
+    button({
       style: "red",
       label: "Disable button",
       customId: id(),

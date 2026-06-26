@@ -1,4 +1,4 @@
-import { buildButtonActionRow, createCommand } from "arcscord";
+import { actionRow, createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 import { i18nButton } from "../components/i18n_button";
 
@@ -23,7 +23,7 @@ export const i18nCommand = createCommand({
   },
   run: (ctx) => {
     return ctx.reply({
-      components: [buildButtonActionRow(i18nButton.build())],
+      components: [actionRow(i18nButton.build())],
       content: ctx.t($ => $.i18n.command.run, {
         topic: ctx.options.topic,
       }),

@@ -8,19 +8,19 @@ import type {
   StringSelectMenuComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
-import type { componentHandlerTypeEnum } from "#/base/components/component.enum";
-import type { ComponentRunResult } from "#/base/components/component.type";
-import type { Button, MessageComponentType, TypedSelectMenuOptions } from "#/base/components/component_definer.type";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { ButtonContext } from "#/base/components/context/button_context";
-import type { ModalContext } from "#/base/components/context/modal_context";
+import type { ComponentRunResult } from "#/base/components/interaction/component.type";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import type { ButtonContext } from "#/base/components/interaction/context/button_context";
+import type { ModalContext } from "#/base/components/interaction/context/modal_context";
 import type {
   ChannelSelectMenuContext,
   MentionableSelectMenuContext,
   RoleSelectMenuContext,
   StringSelectMenuContext,
   UserSelectMenuContext,
-} from "#/base/components/context/select_menu_context";
+} from "#/base/components/interaction/context/select_menu_context";
+import type { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
+import type { Button, MessageComponentType, TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { ComponentBuildArgs } from "./route";
 

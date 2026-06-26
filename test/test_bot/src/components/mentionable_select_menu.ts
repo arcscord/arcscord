@@ -1,11 +1,11 @@
-import { buildMentionableSelectMenu, createSelectMenu } from "arcscord";
+import { createSelectMenu, mentionableSelectMenu as mentionableSelectMenuComponent } from "arcscord";
 import { ComponentType, User } from "discord.js";
 
 export const mentionableSelectMenu = createSelectMenu({
   type: ComponentType.MentionableSelect,
   route: "mentionable_select_menu",
   build: id =>
-    buildMentionableSelectMenu({
+    mentionableSelectMenuComponent({
       customId: id(),
     }),
   run: (ctx) => {

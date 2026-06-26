@@ -1,11 +1,11 @@
-import { buildStringSelectMenu, createSelectMenu } from "arcscord";
+import { createSelectMenu, stringSelectMenu as stringSelectMenuComponent } from "arcscord";
 import { ComponentType } from "discord.js";
 
 export const stringSelectMenu = createSelectMenu({
   type: ComponentType.StringSelect,
   route: "string_select_menu",
   build: (id, ...options) =>
-    buildStringSelectMenu({
+    stringSelectMenuComponent({
       options,
       customId: id(),
     }),

@@ -1,11 +1,11 @@
-import { buildChannelSelectMenu, createSelectMenu } from "arcscord";
+import { channelSelectMenu as channelSelectMenuComponent, createSelectMenu } from "arcscord";
 import { ComponentType } from "discord.js";
 
 export const channelSelectMenu = createSelectMenu({
   type: ComponentType.ChannelSelect,
   route: "channel_select_menu",
   build: id =>
-    buildChannelSelectMenu({
+    channelSelectMenuComponent({
       customId: id(),
       placeholder: "Select a channel",
     }),

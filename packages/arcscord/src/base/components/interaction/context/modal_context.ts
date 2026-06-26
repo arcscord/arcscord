@@ -1,7 +1,7 @@
 import type { ModalSubmitInteraction } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import { BaseComponentContext } from "#/base/components/context/base_context";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
 
 export type ModalContextValue = string | readonly string[] | boolean | null;
 

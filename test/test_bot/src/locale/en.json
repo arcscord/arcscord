@@ -20,6 +20,18 @@
       "run": "Localized component reply in english !"
     }
   },
+  "componentsV2": {
+    "i18n": {
+      "support": {
+        "title": "Support",
+        "description": "Open a localized support ticket."
+      },
+      "bug": {
+        "title": "Bug",
+        "description": "Report a localized bug."
+      }
+    }
+  },
   "middleware": {
     "cooldown": "Wait {{seconds}}s before using this command again.",
     "command": {

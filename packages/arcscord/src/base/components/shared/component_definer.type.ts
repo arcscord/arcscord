@@ -31,7 +31,7 @@ import type {
   componentTypesEnum,
   separatorSpacingSizeEnum,
   textInputStyleEnum,
-} from "#/base/components/component.enum";
+} from "#/base/components/shared/component.enum";
 import type { ChannelType } from "#/utils/discord/type/channel.type";
 
 /**
@@ -296,6 +296,11 @@ export type TextDisplay = BaseComponent & {
 };
 
 /**
+ * Text display input accepted by Arcscord builders.
+ */
+export type TextDisplayInput = string | TextDisplay | TextDisplayComponentData;
+
+/**
  * Type for a thumbnail component.
  */
 export type Thumbnail = BaseComponent & {
@@ -310,7 +315,7 @@ export type Thumbnail = BaseComponent & {
  */
 export type Section = BaseComponent & {
   readonly type: ComponentType.Section;
-  readonly components: TextDisplay[];
+  readonly components: TextDisplayInput[];
   readonly accessory: Button | Thumbnail;
 };
 
@@ -344,7 +349,8 @@ export type Separator = BaseComponent & {
  * Components allowed inside a container.
  */
 export type ComponentInContainer
-  = | ReturnType<typeof import("#/base/components/build_component.func").buildButtonActionRow>
+  = | string
+    | ReturnType<typeof import("#/base/components/display/builders").actionRow>
     | File
     | MediaGallery
     | Section
@@ -458,13 +464,14 @@ export type Label = BaseComponent & {
 /**
  * Components allowed at the top level of a modal.
  */
-export type ModalTopLevelComponent = Label | TextDisplay;
+export type ModalTopLevelComponent = Label | TextDisplayInput;
 
 /**
  * Components allowed at the top level of a message using components v2.
  */
 export type MessageTopLevelComponent
-  = | ReturnType<typeof import("#/base/components/build_component.func").buildButtonActionRow>
+  = | string
+    | ReturnType<typeof import("#/base/components/display/builders").actionRow>
     | Container
     | File
     | MediaGallery

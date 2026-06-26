@@ -1,11 +1,11 @@
-import { buildRoleSelectMenu, createSelectMenu } from "arcscord";
+import { createSelectMenu, roleSelectMenu as roleSelectMenuComponent } from "arcscord";
 import { ComponentType, EmbedBuilder } from "discord.js";
 
 export const roleSelectMenu = createSelectMenu({
   type: ComponentType.RoleSelect,
   route: "role_select_menu",
   build: (id, placeHolder) =>
-    buildRoleSelectMenu({
+    roleSelectMenuComponent({
       placeholder: placeHolder,
       customId: id(),
       maxValues: 1,

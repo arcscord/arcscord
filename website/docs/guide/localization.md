@@ -201,13 +201,13 @@ Autocomplete choice localization is runtime localization. It does not use the co
 Component handlers also receive `ctx.t(...)` and `ctx.locale`.
 
 ```ts
-import { buildButtonActionRow, buildClickableButton, createButton, createCommand } from "arcscord";
+import { actionRow, button, createButton, createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const languageButton = createButton({
   route: "language_button",
   build: id =>
-    buildClickableButton({
+    button({
       customId: id(),
       label: "i18n",
       style: "primary",
@@ -229,7 +229,7 @@ export const componentCommand = createCommand({
   run: (ctx) => {
     return ctx.reply({
       content: ctx.t($ => $.components.language.prompt),
-      components: [buildButtonActionRow(languageButton.build())],
+      components: [actionRow(languageButton.build())],
       flags: MessageFlags.Ephemeral,
     });
   },

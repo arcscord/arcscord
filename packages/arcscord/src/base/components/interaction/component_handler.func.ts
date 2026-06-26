@@ -1,9 +1,5 @@
 import type { ActionRowData, StringSelectMenuComponentData } from "discord.js";
-import type { ComponentRunResult } from "#/base/components/component.type";
-import type {
-  StringSelectMenu,
-  TypedSelectMenuOptions,
-} from "#/base/components/component_definer.type";
+import type { ComponentRunResult } from "#/base/components/interaction/component.type";
 import type {
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
@@ -16,15 +12,19 @@ import type {
   StringSelectMenuComponentHandler,
   TypedStringSelectSnapshot,
   UserSelectMenuComponentHandler,
-} from "#/base/components/component_handlers.type";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
-import type { StringSelectMenuContext } from "#/base/components/context/select_menu_context";
-import type { RouteVariablesObject } from "#/base/components/route";
+} from "#/base/components/interaction/component_handlers.type";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import type { StringSelectMenuContext } from "#/base/components/interaction/context/select_menu_context";
+import type { RouteVariablesObject } from "#/base/components/interaction/route";
+import type {
+  StringSelectMenu,
+  TypedSelectMenuOptions,
+} from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import { ComponentType } from "discord-api-types/v10";
-import { buildStringSelectMenu } from "#/base/components/build_component.func";
-import { componentHandlerTypeEnum } from "#/base/components/component.enum";
-import { createRouteId, hasComponentRouteParams } from "#/base/components/route";
+import { createRouteId, hasComponentRouteParams } from "#/base/components/interaction/route";
+import { stringSelectMenu } from "#/base/components/shared/builders";
+import { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
 
 type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
 
@@ -88,7 +88,7 @@ type TypedStringMenuOptions<
  * const selectMenu = createSelectMenu({
  *   type: "userSelect",
  *   route: "selectMenu",
- *   build: id => buildUserSelectMenu({
+ *   build: id => userSelectMenu({
  *     customId: id(),
  *     maxValues: 10,
  *     minValues: 1,
@@ -196,7 +196,7 @@ export function createTypedStringMenu<
         values: menu.values,
         maxValues: menu.maxValues,
       });
-      return buildStringSelectMenu({
+      return stringSelectMenu({
         ...menu,
         options: menu.values,
       });
@@ -222,7 +222,7 @@ export function createTypedStringMenu<
  * ```ts
  * const button = createButton({
  *   route: "button",
- *   build: id => buildClickableButton({
+ *   build: id => button({
  *     style: "success",
  *     customId: id(),
  *     label: "Click Here",
@@ -259,12 +259,12 @@ export function createButton<
  * ```ts
  * const myFamousModal = createModal({
  *   route: "famousModal",
- *   build: (id, title) => buildModal(
+ *   build: (id, title) => modal(
  *     title,
  *     id(),
- *     buildLabel({
+ *     label({
  *       label: "Entry",
- *       component: buildTextInput({
+ *       component: textInput({
  *         customId: "entry",
  *         style: "short",
  *       }),

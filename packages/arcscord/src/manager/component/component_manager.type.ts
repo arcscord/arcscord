@@ -11,8 +11,8 @@ import type {
   RoleSelectMenuComponentHandler,
   StringSelectMenuComponentHandler,
   UserSelectMenuComponentHandler,
-} from "#/base/components/component_handlers.type";
-import type { ComponentContext } from "#/base/components/context";
+} from "#/base/components/interaction/component_handlers.type";
+import type { ComponentContext } from "#/base/components/interaction/context";
 import type { ComponentError } from "#/utils";
 
 /**

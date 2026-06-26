@@ -8,10 +8,10 @@ import type {
 } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentRunResult } from "#/base/components";
-import type { ComponentMiddleware } from "#/base/components/component_middleware";
+import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
-import { BaseComponentContext } from "#/base/components/context/base_context";
+import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
 import { ComponentError } from "#/utils";
 
 /**

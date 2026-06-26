@@ -1,10 +1,10 @@
-import { buildClickableButton, createButton } from "arcscord";
+import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const disableRowButton = createButton({
   route: "disableRow/{id}",
   build: id =>
-    buildClickableButton({
+    button({
       style: "red",
       label: "Disable Row",
       customId: id(),
