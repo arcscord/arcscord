@@ -14,7 +14,7 @@ import {
   componentMemberPermissionMessage,
 } from "../utils/middleware_messages";
 
-const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS as string ?? "0")
+const allowedUserIds = (process.env.MIDDLEWARE_ALLOWED_USER_IDS ?? "0")
   .split(",")
   .map(userId => userId.trim());
 
