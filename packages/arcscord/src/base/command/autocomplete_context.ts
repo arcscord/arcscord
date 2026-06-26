@@ -37,10 +37,6 @@ type BaseAutocompleteOptions = {
   locale: string;
 };
 
-type AutocompleteOption = (BaseStringOption | BaseIntegerOption | BaseNumberOption) & {
-  autocomplete: true;
-};
-
 type AutocompleteOptionsDef<
   T extends FullCommandDefinition | SubCommandDefinition,
 > = T extends PartialCommandDefinitionForSlash
@@ -54,13 +50,13 @@ type AutocompleteOptionsDef<
     : never;
 
 export type AutocompleteOptionName<T extends OptionsList> = {
-  [K in keyof T]: T[K] extends AutocompleteOption ? K : never;
+  [K in keyof T]: T[K] extends { autocomplete: true } ? K : never;
 }[keyof T] & string;
 
 type AutocompleteOptionByName<
   T extends OptionsList,
   Name extends AutocompleteOptionName<T>,
-> = T[Name] extends AutocompleteOption ? T[Name] : never;
+> = T[Name] extends { autocomplete: true } ? T[Name] : never;
 
 type AutocompleteValue<T extends Option>
   = T extends BaseStringOption | BaseIntegerOption | BaseNumberOption
@@ -86,18 +82,9 @@ export type AutocompleteHandler<
 export type AutocompleteHandlers<
   Build extends FullCommandDefinition | SubCommandDefinition,
 > = {
-  [Name in AutocompleteOptionName<AutocompleteOptionsDef<Build>>]: AutocompleteHandler<Build, Name>;
+  [Name in AutocompleteOptionName<AutocompleteOptionsDef<Build>>]:
+  Name extends never ? never : AutocompleteHandler<Build, Name>;
 };
-
-export type AutocompleteCommandPart<
-  Build extends FullCommandDefinition | SubCommandDefinition,
-> = [AutocompleteOptionName<AutocompleteOptionsDef<Build>>] extends [never]
-  ? {
-      autocomplete?: never;
-    }
-  : {
-      autocomplete: AutocompleteHandlers<Build>;
-    };
 
 type AutocompleteChoicesFor<
   Build extends FullCommandDefinition | SubCommandDefinition,

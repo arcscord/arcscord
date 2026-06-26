@@ -5,7 +5,7 @@ import type {
 } from "discord-api-types/v10";
 import type { PermissionsString } from "discord.js";
 import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
-import type { AutocompleteCommandPart, AutocompleteContext } from "#/base/command/autocomplete_context";
+import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
 import type { CommandError } from "#/utils/error/class/command_error";
 import type { MaybePromise } from "#/utils/type/util.type";
@@ -100,7 +100,9 @@ export type CommandHandler<
    */
   use?: Middlewares;
 
-} & AutocompleteCommandPart<Build>;
+  autocomplete?: AutocompleteHandlers<Build>;
+
+};
 
 /**
  * Broad command handler shape used when storing heterogeneous commands.

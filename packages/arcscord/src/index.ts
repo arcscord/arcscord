@@ -11,7 +11,6 @@ export {
   AutocompleteContext,
 } from "./base/command/autocomplete_context";
 export type {
-  AutocompleteCommandPart,
   AutocompleteHandler,
   AutocompleteHandlers,
   AutocompleteOptionName,
