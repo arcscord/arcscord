@@ -209,6 +209,27 @@ options: {
 }
 ```
 
+### Typed choices with `as const`
+
+Adding `as const` to the choices array narrows `ctx.options` to the exact union of values instead of the broader type (`string`, `number`):
+
+```ts
+options: {
+  action: {
+    type: "string",
+    description: "Action to perform",
+    required: true,
+    choices: [
+      { name: "Ban", value: "ban" },
+      { name: "Kick", value: "kick" },
+      "warn",
+    ] as const,
+  },
+}
+
+// ctx.options.action is "ban" | "kick" | "warn"  (not just string)
+```
+
 Choices and autocomplete are mutually exclusive for the same option.
 
 ## Autocomplete

@@ -22,7 +22,11 @@ export const profileModal = createModal({
   build: (id, fields) => buildModal({
     title: "Edit profile",
     customId: id(),
-    components: [fields.name.label(), fields.bio.label()],
+    components: [
+      "Fill in your profile details below.", // equivalent to text()
+      fields.name.label(),
+      fields.bio.label(),
+    ],
   }),
   run: (ctx) => {
     const name: string = ctx.values.name;
@@ -105,15 +109,17 @@ Use `modalRadioGroup` for single-choice selection displayed as radio buttons:
 ```ts
 import { modalRadioGroup } from "arcscord";
 
-mood: modalRadioGroup({
-  label: "Mood",
-  required: true,
-  options: [
-    { label: "Great", value: "great" },
-    { label: "Okay", value: "okay" },
-    { label: "Blocked", value: "blocked" },
-  ],
-})
+fields: {
+  mood: modalRadioGroup({
+    label: "Mood",
+    required: true,
+    options: [
+      { label: "Great", value: "great" },
+      { label: "Okay", value: "okay" },
+      { label: "Blocked", value: "blocked" },
+    ],
+  }),
+}
 ```
 
 `ctx.values.mood` is typed as `"great" | "okay" | "blocked"`.
@@ -125,18 +131,20 @@ mood: modalRadioGroup({
 ```ts
 import { modalCheckboxGroup } from "arcscord";
 
-features: modalCheckboxGroup({
-  label: "Features used",
-  description: "Pick every component family you tested.",
-  required: false,
-  minValues: 0,
-  maxValues: 3,
-  options: [
-    { label: "Commands", value: "commands" },
-    { label: "Components", value: "components" },
-    { label: "Events", value: "events" },
-  ],
-})
+fields: {
+  features: modalCheckboxGroup({
+    label: "Features used",
+    description: "Pick every component family you tested.",
+    required: false,
+    minValues: 0,
+    maxValues: 3,
+    options: [
+      { label: "Commands", value: "commands" },
+      { label: "Components", value: "components" },
+      { label: "Events", value: "events" },
+    ],
+  }),
+}
 ```
 
 `ctx.values.features` is typed as `Array<"commands" | "components" | "events">`.
@@ -148,10 +156,12 @@ features: modalCheckboxGroup({
 ```ts
 import { modalCheckbox } from "arcscord";
 
-subscribe: modalCheckbox({
-  label: "Subscribe to updates",
-  default: false,
-})
+fields: {
+  subscribe: modalCheckbox({
+    label: "Subscribe to updates",
+    default: false,
+  }),
+}
 ```
 
 `ctx.values.subscribe` is `boolean`.

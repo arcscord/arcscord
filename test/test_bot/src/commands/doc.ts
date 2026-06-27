@@ -41,7 +41,11 @@ const docModalBasic = createModal({
   build: (id, fields) => buildModal({
     title: "Edit profile",
     customId: id(),
-    components: [fields.name.label(), fields.bio.label()],
+    components: [
+      "Fill in your profile details below.",
+      fields.name.label(),
+      fields.bio.label(),
+    ],
   }),
   run: ctx => ctx.reply(`Name: ${ctx.values.name}, bio: ${ctx.values.bio ?? "—"}`),
 });

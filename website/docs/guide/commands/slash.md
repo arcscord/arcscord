@@ -96,7 +96,7 @@ export const sayCommand = createCommand({
 
 ## Choices
 
-String, integer, and number options can provide choices.
+String, integer, and number options can provide choices. Add `as const` to the array to narrow `ctx.options.color` to the exact literal union (`"red" | "green" | "blue"`) instead of plain `string`:
 
 ```ts
 import { createCommand } from "arcscord";
@@ -118,12 +118,13 @@ export const colorCommand = createCommand({
               name: "Deep blue",
               value: "blue",
             },
-          ],
+          ] as const,
         },
       },
     },
   },
   run: ctx => ctx.reply(`Selected ${ctx.options.color}`),
+  // ctx.options.color is "red" | "green" | "blue"
 });
 ```
 

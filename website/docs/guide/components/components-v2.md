@@ -13,10 +13,10 @@ Components v2 is Discord's layout-first message format. A v2 message is built en
 Entry point for a v2 message. Wraps layout components and optional message-level options.
 
 ```ts
-import { v2Message, text } from "arcscord";
+import { v2Message } from "arcscord";
 
 ctx.reply(v2Message(
-  text("Hello from Components v2!"),
+  "Hello from Components v2!", // plain string — equivalent to text()
 ));
 ```
 
@@ -25,48 +25,51 @@ ctx.reply(v2Message(
 Pass an options object as the **first argument** (before layout children) to set message-level flags:
 
 ```ts
+import { MessageFlags } from "discord.js";
+
 ctx.reply(v2Message(
-  { files: [{ attachment: buffer, name: "output.txt" }], ephemeral: true },
-  text("See the attached file."),
+  { files: [{ attachment: buffer, name: "output.txt" }], flags: MessageFlags.Ephemeral },
+  "See the attached file.",
 ))
 ```
 
 | Option | Type | Description |
 |---|---|---|
 | `files` | `AttachmentData[]` | File attachments. Reference them in `file()` via `attachment://filename`. |
-| `ephemeral` | `boolean` | Only the invoking user sees the message. |
+| `flags` | `MessageFlags` | Message flags. Use `MessageFlags.Ephemeral` to make the message visible only to the user who triggered it. `IS_COMPONENTS_V2` is always added automatically. |
 | `tts` | `boolean` | Text-to-speech. |
 | `allowedMentions` | `AllowedMentions` | Control which mentions trigger notifications. |
-| `flags` | `MessageFlags` | Additional message flags. `IS_COMPONENTS_V2` is always added automatically. |
 
 ### Allowed top-level children
 
-`v2Message` accepts these component types directly:
+`v2Message` and `container()` accept these component types as children:
 
 | Type | Description |
 |---|---|
-| `string` / `text()` | Text display block |
+| `string` / `text()` | Text display block. A plain string is always equivalent to `text()`. |
 | `container()` | Styled group of components |
 | `section()` | Text + accessory side by side |
 | `separator()` | Vertical spacing / divider |
 | `mediaGallery()` | Image grid |
 | `file()` | Uploaded file display |
-| `actionRow()` | Row of interactive buttons |
+| `actionRow(button1, button2, ...)` | Row of up to 5 buttons (buttons only) |
+| arcscord select menu `ActionRowData` | The return value of `stringSelectMenu()`, `userSelectMenu()`, etc. — they already include their own action row |
 
 ---
 
 ## `text(content, options?)`
 
-Renders a block of Markdown text.
+Renders a block of Markdown text. A plain string is accepted everywhere `text()` is — they are fully equivalent.
 
 ```ts
 text("## Title\nBody paragraph with **bold** and `code`.")
+"## Title\nBody paragraph with **bold** and `code`." // same result
 ```
 
 | Option | Type | Required | Description |
 |---|---|---|---|
 | `content` | `string` | Yes | Markdown content. Supports Discord's Markdown subset. |
-| `id` | `number` | No | Internal component ID for tracking. Rarely needed. |
+| `id` | `number` | No | Internal component ID. Only needed when targeting a specific component in a later edit. |
 
 ---
 
@@ -258,7 +261,7 @@ ctx.reply(v2Message(
 
 ## `actionRow(...buttons)`
 
-An interactive row of buttons. Works identically to classic message action rows.
+A row of up to 5 **buttons**. Used for interactive buttons inside v2 messages.
 
 ```ts
 import { actionRow } from "arcscord";
@@ -266,7 +269,19 @@ import { actionRow } from "arcscord";
 actionRow(confirmButton.build(), cancelButton.build())
 ```
 
-Up to 5 buttons per row. Select menus are not supported inside v2 messages — use them in classic action rows.
+`actionRow` only accepts buttons. Select menus built with arcscord helpers (`stringSelectMenu()`, `userSelectMenu()`, etc.) already return an `ActionRowData` — pass their result directly to `v2Message()` or `container()` without wrapping:
+
+```ts
+import { stringSelectMenu, userSelectMenu } from "arcscord";
+
+ctx.reply(v2Message(
+  "Pick a value",
+  stringSelectMenu({ customId: "...", options: ["a", "b"] }),
+  "Pick a user",
+  userSelectMenu({ customId: "..." }),
+  actionRow(confirmButton.build()),
+))
+```
 
 ---
 
@@ -274,11 +289,10 @@ Up to 5 buttons per row. Select menus are not supported inside v2 messages — u
 
 | Parent | Allowed children |
 |---|---|
-| `v2Message()` | `text`, `section`, `separator`, `container`, `mediaGallery`, `file`, `actionRow` |
-| `container()` | `text`, `section`, `separator`, `mediaGallery`, `file`, `actionRow` |
+| `v2Message()` / `container()` | `string` / `text()`, `section()`, `separator()`, `mediaGallery()`, `file()`, `actionRow()` (buttons), select menu `ActionRowData` |
 | `section()` | Text strings / `text()` + exactly one `accessory()` |
 | `accessory()` | `thumbnail()` or a single `button()` |
-| `actionRow()` | Up to 5 buttons |
+| `actionRow()` | Up to 5 buttons only |
 
 ---
 

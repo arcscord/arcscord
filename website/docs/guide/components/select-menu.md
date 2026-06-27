@@ -128,28 +128,28 @@ Or pass a plain `string` as the value — it becomes the label.
 ```ts
 import { createTypedStringMenu } from "arcscord";
 
-const moodOptions = {
-  great: { label: "Great 🎉", description: "Feeling awesome" },
-  okay:  { label: "Okay 😐" },
-  bad:   { label: "Bad 😞", description: "Having a rough day" },
-} as const;
-
 export const moodMenu = createTypedStringMenu({
   route: "mood_menu",
   build: id => ({
     customId: id(),
-    values: moodOptions,
+    values: {
+      great: { label: "Great 🎉", description: "Feeling awesome" },
+      okay:  { label: "Okay 😐" },
+      bad:   { label: "Bad 😞", description: "Having a rough day" },
+    } as const,  // as const is required for TypeScript to infer the key union
     placeholder: "How are you feeling?",
     maxValues: 1,
   }),
   run: (ctx) => {
-    const mood: keyof typeof moodOptions = ctx.value; // "great" | "okay" | "bad"
+    const mood = ctx.values; // typed as "great" | "okay" | "bad"
     return ctx.reply(`Mood: ${mood}`);
   },
 });
 ```
 
-When `maxValues` is `1` (or omitted), use `ctx.value` (singular). When `maxValues > 1`, use `ctx.values` (array).
+`as const` on the inline `values` object is what makes TypeScript narrow the type. Without it, `ctx.values` falls back to `string`.
+
+When `maxValues` is `1`, `ctx.values` is the single selected key (a string). When `maxValues > 1`, `ctx.values` is an array of keys.
 
 ## User select
 

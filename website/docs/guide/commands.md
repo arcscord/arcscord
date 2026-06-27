@@ -71,12 +71,40 @@ await client.loadHandlers({
 
 Arcscord supports several Discord application command shapes:
 
-- slash commands
-- user context menu commands
-- message context menu commands
-- slash commands with subcommands
+- Slash commands — use `createCommand` with `build.slash`
+- User context menu commands — use `createCommand` with `build.user`
+- Message context menu commands — use `createCommand` with `build.message`
+- Subcommands — use `buildCommandWithSubs`, **not** `createCommand`
 
-Read the dedicated command pages for complete examples of each shape.
+For subcommands, each subcommand is created with `createCommand` using a flat `build` (no `slash` wrapper), and the group is assembled with `buildCommandWithSubs`:
+
+```ts
+import { buildCommandWithSubs, createCommand } from "arcscord";
+
+const banSubCommand = createCommand({
+  build: {
+    name: "ban",          // no "slash" wrapper for subcommands
+    description: "Ban a member",
+  },
+  run: ctx => ctx.reply("Banned!"),
+});
+
+export const modCommand = buildCommandWithSubs({
+  name: "mod",
+  description: "Moderation tools",
+  subCommands: [banSubCommand],
+});
+```
+
+## Detailed pages
+
+- [Slash commands](./commands/slash)
+- [Command options](./commands/options)
+- [Autocomplete](./commands/autocomplete)
+- [Context menu commands](./commands/context-menu)
+- [Subcommands](./commands/subcommands)
+- [Permissions and contexts](./commands/permissions-contexts)
+- [Registration](./commands/registration)
 
 ## Pre-reply
 
