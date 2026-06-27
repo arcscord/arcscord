@@ -5,9 +5,25 @@ import type { MaybePromise } from "#/utils";
 import type { EventError } from "#/utils/error/class/event_error";
 
 /**
- * Represents the result of an event handler.
+ * Normalized internal result of an event handler.
+ * Used by the manager after normalizing the raw return value of `run()`.
  */
 export type EventHandleResult = Result<string | true, EventError>;
+
+/**
+ * All values an event `run()` function may return.
+ *
+ * The manager normalizes these to an {@link EventHandleResult} before calling
+ * the result handler:
+ * - `void` / `undefined` → `ok(true)`
+ * - `string` or `true` → `ok(value)`
+ * - `Result<string | true, EventError>` → returned as-is
+ */
+export type EventHandleReturn
+  = | void
+    | string
+    | true
+    | EventHandleResult;
 
 /**
  * Controls how an event received before {@link ArcClient.waitReady} completes
@@ -61,14 +77,17 @@ export type EventHandler<E extends keyof ClientEvents> = {
   /**
    * The function to run when the event is triggered.
    *
+   * May return `void`, a plain `string`, `true`, or a full
+   * `Result<string | true, EventError>`. The manager normalizes all forms
+   * before calling the result handler.
+   *
    * @param ctx - The event context.
    * @param args - The arguments for the event.
-   * @returns A result indicating success or error.
    */
   run: (
     ctx: EventContext<E>,
     ...args: ClientEvents[E]
-  ) => MaybePromise<EventHandleResult>;
+  ) => MaybePromise<EventHandleReturn>;
 };
 
 /**
@@ -93,5 +112,5 @@ export type EventHandlerForRegistry = {
   run: (
     ctx: EventContext,
     ...args: unknown[]
-  ) => MaybePromise<EventHandleResult>;
+  ) => MaybePromise<EventHandleReturn>;
 };

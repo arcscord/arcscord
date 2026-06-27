@@ -8,7 +8,7 @@ import type {
   StringSelectMenuComponentData,
   UserSelectMenuComponentData,
 } from "discord.js";
-import type { ComponentRunResult } from "#/base/components/interaction/component.type";
+import type { ComponentRunReturn } from "#/base/components/interaction/component.type";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import type { ButtonContext } from "#/base/components/interaction/context/button_context";
 import type { ModalContext, ModalContextValue } from "#/base/components/interaction/context/modal_context";
@@ -22,6 +22,7 @@ import type {
 import type { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
 import type { Button, MessageComponentType, ModalFields, ModalFieldValues, TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
+import type { MaybePromise } from "#/utils/type/util.type";
 import type { ComponentBuildArgs, IdInitialiseFunction } from "./route";
 
 export type RouteComponentHandle<Route extends string> = {
@@ -134,7 +135,7 @@ export type ButtonComponentHandler<
   /**
    * Function to run when the button is clicked.
    */
-  run: (ctx: ButtonContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: ButtonContext<Middleware, Route>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -158,7 +159,7 @@ export type StringSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: StringSelectMenuContext<Middleware, Typed, Route, MaxValues>) => Promise<ComponentRunResult>;
+  run: (ctx: StringSelectMenuContext<Middleware, Typed, Route, MaxValues>) => MaybePromise<ComponentRunReturn>;
 } & (Typed extends TypedSelectMenuOptions
   ? { typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot<Typed, MaxValues>> }
   : NonNullable<unknown>);
@@ -186,7 +187,7 @@ export type AnyStringSelectMenuComponentHandler = BaseComponentHandler<Component
   type: ComponentType.StringSelect;
   build: (...args: any[]) => ActionRowData<StringSelectMenuComponentData>;
   typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot>;
-  run: (ctx: StringSelectMenuContext<ComponentMiddleware[], never, string>) => Promise<ComponentRunResult>;
+  run: (ctx: StringSelectMenuContext<ComponentMiddleware[], never, string>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -208,7 +209,7 @@ export type UserSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: UserSelectMenuContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: UserSelectMenuContext<Middleware, Route>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -230,7 +231,7 @@ export type RoleSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: RoleSelectMenuContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: RoleSelectMenuContext<Middleware, Route>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -252,7 +253,7 @@ export type MentionableSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: MentionableSelectMenuContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: MentionableSelectMenuContext<Middleware, Route>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -274,7 +275,7 @@ export type ChannelSelectMenuComponentHandler<
   /**
    * Function to run when the select menu is used.
    */
-  run: (ctx: ChannelSelectMenuContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: ChannelSelectMenuContext<Middleware, Route>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -301,7 +302,7 @@ export type ModalComponentHandler<
     Middleware,
     Route,
     Fields extends ModalFields ? ModalFieldValues<Fields> : Record<string, ModalContextValue>
-  >) => Promise<ComponentRunResult>;
+  >) => MaybePromise<ComponentRunReturn>;
 };
 
 /**
@@ -313,7 +314,7 @@ export type AnyModalComponentHandler = BaseComponentHandler<ComponentMiddleware[
   fields?: ModalFields;
   handlerType: typeof componentHandlerTypeEnum.modal;
   build: (...args: any[]) => ModalComponentData;
-  run: (ctx: ModalContext<ComponentMiddleware[], string, any>) => Promise<ComponentRunResult>;
+  run: (ctx: ModalContext<ComponentMiddleware[], string, any>) => MaybePromise<ComponentRunReturn>;
 };
 
 /**

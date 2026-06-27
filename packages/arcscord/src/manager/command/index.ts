@@ -1,3 +1,10 @@
 export { CommandManager } from "./command_manager.class";
 export type { ApplicationCommandRegistration } from "./command_manager.class";
-export type { CommandResultHandler, CommandResultHandlerImplementer, CommandResultHandlerInfos } from "./command_manager.type";
+export type {
+  CommandManagerOptions,
+  CommandResultHandler,
+  CommandResultHandlerImplementer,
+  CommandResultHandlerInfos,
+  CommandReturnedHandlerInfos,
+  CommandThrownHandlerInfos,
+} from "./command_manager.type";

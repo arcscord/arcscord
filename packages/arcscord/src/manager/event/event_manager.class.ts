@@ -9,11 +9,12 @@ import type {
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
 } from "./event_manager.type";
-import { anyToError, error } from "@arcscord/error";
+import { anyToError } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
 import { EventError } from "#/utils";
+import { normalizeRunReturn } from "#/utils/error/run_normalize";
 
 type EventRegistration = {
   event: EventHandlerForRegistry;
@@ -127,7 +128,21 @@ export class EventManager extends BaseManager {
     return true;
   }
 
+  /**
+   * Default result handler. Logs errors; successful runs are silent.
+   */
   async handleResult(infos: EventResultHandlerInfos): Promise<void> {
+    if (infos.status === "thrown") {
+      const err = new EventError({
+        message: `failed to run event handler: ${anyToError(infos.thrownValue).message}`,
+        handler: infos.event,
+        originalError: anyToError(infos.thrownValue),
+      });
+      err.generateId();
+      this.logger.logError(err);
+      return;
+    }
+
     const [err] = infos.result;
     if (err !== null) {
       err.generateId();
@@ -141,21 +156,19 @@ export class EventManager extends BaseManager {
   ): Promise<void> {
     try {
       const context = new EventContext(this.client, event);
-      const result = await event.run(context, ...args);
+      const rawResult = await event.run(context, ...args);
       this.logger.debug(`Event handled: ${event.name}`);
       await this.options.resultHandler({
-        result,
+        status: "returned",
+        result: normalizeRunReturn(rawResult),
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
       });
     }
     catch (e) {
       await this.options.resultHandler({
-        result: error(new EventError({
-          message: `failed to run event handler : ${anyToError(e).message}`,
-          handler: event as unknown as AnyEventHandler,
-          originalError: anyToError(e),
-        })),
+        status: "thrown",
+        thrownValue: e,
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
       });

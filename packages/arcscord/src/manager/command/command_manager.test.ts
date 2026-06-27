@@ -1,6 +1,7 @@
+import type { CommandInteraction } from "discord.js";
 import type { ArcClient } from "#/base";
 import type { Command } from "#/base/command/command_definition.type";
-import { ApplicationCommandOptionType, ApplicationCommandType, Routes } from "discord-api-types/v10";
+import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, Routes } from "discord-api-types/v10";
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { buildCommandWithSubs, createCommand } from "#/base/command/command_func";
 import { CommandManager } from "./command_manager.class";
@@ -26,9 +27,11 @@ function createMockClient() {
       },
       mapLanguage: vi.fn((locale: string) => locale),
       t: vi.fn((key: string) => key),
-      detectLanguage: vi.fn(() => "en"),
+      detectLanguage: vi.fn(async () => "en"),
       ready: Promise.resolve(),
     },
+    getErrorMessage: vi.fn(() => ({ content: "An error occurred." })),
+    createMessageContext: vi.fn(() => ({ t: (key: string) => key })),
     createLogger: () => ({
       trace: vi.fn(),
       debug: vi.fn(),
@@ -48,6 +51,43 @@ function createMockClient() {
     manager: new CommandManager(client),
   };
 }
+
+function createMockSlashInteraction(overrides: Partial<CommandInteraction> = {}): CommandInteraction {
+  return {
+    command: {
+      id: "cmd_1",
+      name: "ping",
+      type: ApplicationCommandType.ChatInput,
+      guildId: null,
+      toJSON: () => ({}),
+    },
+    commandName: "ping",
+    user: { id: "user_1" },
+    guild: null,
+    guildId: null,
+    member: null,
+    channel: null,
+    channelId: null,
+    context: InteractionContextType.Guild,
+    authorizingIntegrationOwners: {},
+    locale: "en-US",
+    isChatInputCommand: () => true,
+    isUserContextMenuCommand: () => false,
+    isMessageContextMenuCommand: () => false,
+    isRepliable: () => true,
+    reply: vi.fn(),
+    toJSON: () => ({}),
+    options: {
+      data: [],
+      getSubcommand: () => null,
+      getSubcommandGroup: () => null,
+    },
+    ...overrides,
+  } as unknown as CommandInteraction;
+}
+
+type HandleInteractionFn = (interaction: CommandInteraction) => Promise<void>;
+type ExposedHandleInteraction = { handleInteraction: HandleInteractionFn };
 
 describe("command manager", () => {
   it("registers global commands through REST when applicationId is available before ready", async () => {
@@ -368,5 +408,110 @@ describe("command manager", () => {
       },
       run: ctx => ctx.ok(),
     });
+  });
+
+  it("passes status returned when run() returns ok", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClient();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const command = createCommand({
+      build: { slash: { name: "ping", description: "Ping" } },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockSlashInteraction(),
+    );
+
+    expect(resultHandler).toHaveBeenCalledOnce();
+    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+  });
+
+  it("passes status thrown and preserves the raw thrown value", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClient();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const thrown = new Error("boom");
+    const command = createCommand({
+      build: { slash: { name: "ping", description: "Ping" } },
+      run: () => {
+        throw thrown;
+      },
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockSlashInteraction(),
+    );
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("thrown");
+    expect(infos.thrownValue).toBe(thrown);
+    expect("result" in infos).toBe(false);
+  });
+
+  it("normalizes void run() return to ok(true) in resultHandler", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClient();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const command = createCommand({
+      build: { slash: { name: "ping", description: "Ping" } },
+      run: () => {},
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockSlashInteraction(),
+    );
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("returned");
+    expect(infos.result[0]).toBeNull();
+    expect(infos.result[1]).toBe(true);
+  });
+
+  it("normalizes string run() return to ok(string) in resultHandler", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClient();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const command = createCommand({
+      build: { slash: { name: "ping", description: "Ping" } },
+      run: () => "pong!",
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockSlashInteraction(),
+    );
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("returned");
+    expect(infos.result[0]).toBeNull();
+    expect(infos.result[1]).toBe("pong!");
+  });
+
+  it("applies dispatch diagnostics level for commandNotFound", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClient();
+    const managerWithOptions = new CommandManager(client, {
+      resultHandler,
+      dispatchDiagnostics: {
+        commandNotFound: { level: "warn", reply: false },
+      },
+    });
+
+    const interaction = createMockSlashInteraction();
+    (interaction as unknown as Record<string, unknown>).command = null;
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
+
+    expect(resultHandler).not.toHaveBeenCalled();
+    expect(managerWithOptions.logger.warning).toHaveBeenCalled();
   });
 });

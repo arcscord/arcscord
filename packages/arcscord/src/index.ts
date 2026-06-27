@@ -26,6 +26,7 @@ export type {
   AutocompleteCommand,
   CommandHandler,
   CommandRunResult,
+  CommandRunReturn,
 } from "./base/command/command.type";
 export {
   BaseCommandContext,
@@ -122,7 +123,7 @@ export type {
   TextDisplayOptions,
   ThumbnailOptions,
 } from "./base/components/display";
-export type { ComponentRunResult } from "./base/components/interaction/component.type";
+export type { ComponentRunResult, ComponentRunReturn } from "./base/components/interaction/component.type";
 export {
   createButton,
   createModal,
@@ -292,6 +293,7 @@ export type {
   EventBeforeReadyMode,
   EventHandler,
   EventHandleResult,
+  EventHandleReturn,
   EventHandlerOptions,
 } from "./base/event/event.type";
 export { EventContext } from "./base/event/event_context";
@@ -319,20 +321,20 @@ export type {
   ApplicationCommandRegistration,
 } from "./manager";
 export type {
-  CommandErrorHandler,
-  CommandErrorHandlerInfos,
   CommandManagerOptions,
   CommandResultHandler,
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
+  CommandReturnedHandlerInfos,
+  CommandThrownHandlerInfos,
 } from "./manager/command/command_manager.type";
 export type {
-  ComponentErrorHandler,
-  ComponentErrorHandlerInfos,
   ComponentList,
   ComponentManagerOptions,
   ComponentResultHandler,
   ComponentResultHandlerInfos,
+  ComponentReturnedHandlerInfos,
+  ComponentThrownHandlerInfos,
 } from "./manager/component/component_manager.type";
 
 export type {
@@ -344,6 +346,8 @@ export type {
   EventManagerOptions,
   EventResultHandler,
   EventResultHandlerInfos,
+  EventReturnedHandlerInfos,
+  EventThrownHandlerInfos,
 } from "./manager/event/event_manager.type";
 export type {
   EventIntentAlternatives,
@@ -372,6 +376,14 @@ export {
   InteractionError,
 } from "./utils/error/class";
 export type {
+  CommandDispatchDiagnostics,
+  ComponentDispatchDiagnostics,
+  DiagnosticLevel,
+  DispatchErrorConfig,
+  DispatchMessageContext,
+  DispatchReplyFn,
+} from "./utils/error/dispatch.type";
+export type {
   DebugValues,
   DebugValueString,
 } from "./utils/error/error.type";
@@ -379,6 +391,10 @@ export {
   stringifyDebugValue,
   stringifyDebugValues,
 } from "./utils/error/error.util";
+export {
+  isArcscordResult,
+  normalizeRunReturn,
+} from "./utils/error/run_normalize";
 
 export {
   ArcLogger,

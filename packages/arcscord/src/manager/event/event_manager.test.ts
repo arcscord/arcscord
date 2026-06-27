@@ -265,7 +265,86 @@ describe("event manager", () => {
     await client.emitMock("messageCreate", { id: "message_1" });
 
     expect(resultHandler).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeInstanceOf(EventError);
+    expect(resultHandler.mock.calls[0]?.[0].status).toBe("thrown");
+    expect(resultHandler.mock.calls[0]?.[0].thrownValue).toBeInstanceOf(Error);
+  });
+
+  it("sets status to returned when run() returns ok", async () => {
+    const resultHandler = vi.fn();
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => ok(true),
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+    expect(resultHandler.mock.calls[0]?.[0].result[1]).toBe(true);
+  });
+
+  it("sets status to thrown and preserves the raw thrown value", async () => {
+    const resultHandler = vi.fn();
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+
+    const thrown = new Error("boom");
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => {
+        throw thrown;
+      },
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("thrown");
+    expect(infos.thrownValue).toBe(thrown);
+    expect("result" in infos).toBe(false);
+  });
+
+  it("normalizes void run() return to ok(true)", async () => {
+    const resultHandler = vi.fn();
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => {},
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("returned");
+    expect(infos.result[0]).toBeNull();
+    expect(infos.result[1]).toBe(true);
+  });
+
+  it("normalizes string run() return to ok(string)", async () => {
+    const resultHandler = vi.fn();
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => "message sent",
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    const infos = resultHandler.mock.calls[0]?.[0];
+    expect(infos.status).toBe("returned");
+    expect(infos.result[0]).toBeNull();
+    expect(infos.result[1]).toBe("message sent");
   });
 
   it("warns when an all intent requirement is missing", async () => {

@@ -41,6 +41,7 @@ const sidebars: SidebarsConfig = {
         "guide/logger",
         "guide/middleware",
         "guide/result-handler",
+        "guide/error-handling",
       ],
     },
     {

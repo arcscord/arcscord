@@ -1,151 +1,130 @@
-import type { BaseError } from "@arcscord/better-error";
-import type { Result } from "@arcscord/error";
-import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
-import type { AnyCommandHandler, AnySubCommandHandler, CommandContext } from "#/base";
-import type { CommandError } from "#/utils";
+import type { CommandInteraction } from "discord.js";
+import type { AnyCommandHandler, AnySubCommandHandler, CommandContext, CommandRunResult } from "#/base";
+import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
 
 /**
- * all infos that you have aces to handle a command result
+ * Shared fields present in all command result handler payloads.
  */
-export type CommandResultHandlerInfos = {
+type BaseCommandResultHandlerInfos = {
   /**
-   * The result of the command execution.
-   */
-  result: Result<string | true, CommandError>;
-
-  /**
-   * The DJS interaction object
+   * The Discord.js interaction.
    */
   interaction: CommandInteraction;
 
   /**
-   * The command properties
+   * The resolved command or subcommand handler.
    */
   command: AnyCommandHandler | AnySubCommandHandler;
 
   /**
-   * The context associated with the command.
+   * The Arcscord command context for this execution.
    */
   context: CommandContext;
 
   /**
-   * Detected i18next language used by this command execution.
+   * Detected i18next language for this interaction.
    */
   locale: string;
 
   /**
-   * Whether the response is deferred.
+   * Whether the reply was deferred before `run()` was called.
    */
   defer: boolean;
 
   /**
-   * The start time of the command execution.
+   * Unix timestamp (ms) when the command started running.
    */
   start: number;
 
   /**
-   * The end time of the command execution.
+   * Unix timestamp (ms) when the command finished running.
    */
   end: number;
 };
 
 /**
- * Base information required for handling command errors.
+ * Payload delivered to `resultHandler` when `run()` returned normally
+ * (with a `Result`, a raw value, or `void`).
  */
-type BaseCommandErrorHandlerInfos = {
+export type CommandReturnedHandlerInfos = BaseCommandResultHandlerInfos & {
+  status: "returned";
   /**
-   * The error that occurred.
+   * The normalized result of `run()`. May be `ok` or `error` — the author
+   * explicitly returned an error `Result`.
    */
-  error: CommandError | BaseError;
-
-  /**
-   * The command properties associated with the command.
-   */
-  command?: AnyCommandHandler | AnySubCommandHandler;
-
-  /**
-   * The context associated with the command.
-   */
-  context?: CommandContext;
-
-  /**
-   * Detected i18next language used by this command execution.
-   */
-  locale?: string;
-
-  /**
-   * Whether the error is internal in arcscord (true) or from the command code (false)
-   */
-  internal: boolean;
+  result: CommandRunResult;
 };
 
 /**
- * Information required for handling autocomplete command errors.
+ * Payload delivered to `resultHandler` when `run()` threw an unhandled
+ * exception or a middleware threw.
+ *
+ * There is no `result` field here — the thrown value has not been normalized.
+ * Use `thrownValue` directly and construct whatever error type you need.
+ * The default handler wraps it in a `CommandError`.
  */
-type AutocompleteErrorHandlerInfos = BaseCommandErrorHandlerInfos & {
+export type CommandThrownHandlerInfos = BaseCommandResultHandlerInfos & {
+  status: "thrown";
   /**
-   * The interaction associated with the command.
+   * The raw value that was thrown by `run()` or middleware.
+   * May be any type — a `CommandError`, a plain `Error`, a string, etc.
    */
-  interaction: AutocompleteInteraction;
-  autocomplete: true;
+  thrownValue: unknown;
 };
 
 /**
- * Information required for handling regular command errors.
+ * Payload received by `resultHandler` after every `run()` execution.
+ *
+ * Use the `status` discriminant to branch between the two cases:
+ * ```ts
+ * resultHandler: (infos) => {
+ *   if (infos.status === "thrown") {
+ *     // infos.thrownValue is the raw thrown value (not wrapped)
+ *     return;
+ *   }
+ *   const [err, value] = infos.result;
+ * }
+ * ```
  */
-type RegularCommandErrorHandlerInfos = BaseCommandErrorHandlerInfos & {
-  /**
-   * The interaction associated with the command.
-   */
-  interaction: CommandInteraction;
-  autocomplete?: false;
-};
+export type CommandResultHandlerInfos
+  = | CommandReturnedHandlerInfos
+    | CommandThrownHandlerInfos;
 
 /**
- * Information required for handling command errors.
- */
-export type CommandErrorHandlerInfos
-  = | AutocompleteErrorHandlerInfos
-    | RegularCommandErrorHandlerInfos;
-
-/**
- * Type for handling command results.
+ * Handler called after every command `run()` execution, whether it returned
+ * normally or threw.
  */
 export type CommandResultHandler = (
   infos: CommandResultHandlerInfos,
 ) => void | Promise<void>;
 
 /**
- * Type for handling command errors.
- */
-export type CommandErrorHandler = (
-  infos: CommandErrorHandlerInfos,
-) => void | Promise<void>;
-
-/**
- * Interface for implementing command result handler.
+ * @internal
  */
 export type CommandResultHandlerImplementer = {
-  /**
-   * Handles the result of a command.
-   * @param infos - The information required to handle the command result.
-   */
   resultHandler: CommandResultHandler;
 };
 
 /**
- * Defines command manager options
+ * Options for configuring the command manager.
  */
 export type CommandManagerOptions = {
   /**
-   * Set a custom result handler
-   * @default {@link CommandManager.resultHandler}
+   * Custom result handler called after every `run()` execution.
+   *
+   * Receives a normalized `Result` regardless of whether `run()` returned or
+   * threw. Check `infos.status` to distinguish between the two cases.
+   *
+   * @default logs errors and sends `client.getErrorMessage(...)` to the user
    */
   resultHandler?: CommandResultHandler;
 
   /**
-   * Set a custom error handler
-   * @default {@link CommandManager.errorHandler}
+   * Per-case configuration for dispatch errors that occur before `run()` is
+   * invoked (command not found, option parsing failure, defer failure, etc.).
+   *
+   * Each key accepts a {@link DispatchErrorConfig} that controls the log level
+   * and optional user-facing reply independently.
    */
-  errorHandler?: CommandErrorHandler;
+  dispatchDiagnostics?: CommandDispatchDiagnostics;
 };

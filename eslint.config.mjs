@@ -14,6 +14,8 @@ export default antfu(
       ".vscode/settings.json",
       "packages/cli/templates/**",
       ".local/*",
+      "CLAUDE.md",
+      "AGENTS.md",
     ],
   },
   {

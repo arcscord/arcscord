@@ -11,9 +11,25 @@ import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
 
 /**
- * Result of running a command.
+ * Normalized internal result of running a command.
+ * Used by the manager after normalizing the raw return value of `run()`.
  */
 export type CommandRunResult = Result<string | true, CommandError>;
+
+/**
+ * All values a `run()` function may return.
+ *
+ * The manager normalizes these to a {@link CommandRunResult} before calling
+ * the result handler:
+ * - `void` / `undefined` → `ok(true)`
+ * - `string` or `true` → `ok(value)`
+ * - `Result<string | true, CommandError>` → returned as-is
+ */
+export type CommandRunReturn
+  = | void
+    | string
+    | true
+    | CommandRunResult;
 
 /**
  * @internal
@@ -34,7 +50,7 @@ export type AutocompleteCommand = {
 type BivariantCommandCallback<Ctx> = {
   bivarianceHack: (
     ctx: Ctx,
-  ) => MaybePromise<CommandRunResult>;
+  ) => MaybePromise<CommandRunReturn>;
 }["bivarianceHack"];
 
 /**
@@ -66,13 +82,17 @@ export type CommandHandler<
 
   /**
    * Command execution function.
+   *
+   * May return `void`, a plain `string`, `true`, or a full
+   * `Result<string | true, CommandError>`. The manager normalizes all forms
+   * before calling the result handler.
+   *
    * @param ctx - The command context.
-   * @returns A result of the command execution.
    */
   run: {
     bivarianceHack: (
       ctx: CommandContext<Build, Middlewares>,
-    ) => MaybePromise<CommandRunResult>;
+    ) => MaybePromise<CommandRunReturn>;
   }["bivarianceHack"];
 
   /**
@@ -95,7 +115,7 @@ export type AnyCommandHandler = {
   // Heterogeneous command collections store handlers with different context types.
   run: BivariantCommandCallback<any>;
   use?: CommandMiddleware[];
-  autocomplete?: Record<string, BivariantCommandCallback<any>>;
+  autocomplete?: Record<string, (ctx: AutocompleteContext<any, any, any>) => MaybePromise<CommandRunResult>>;
 };
 
 /**
@@ -109,5 +129,5 @@ export type AnySubCommandHandler = {
   // Heterogeneous subcommand collections store handlers with different option maps.
   run: BivariantCommandCallback<any>;
   use?: CommandMiddleware[];
-  autocomplete?: Record<string, BivariantCommandCallback<any>>;
+  autocomplete?: Record<string, (ctx: AutocompleteContext<any, any, any>) => MaybePromise<CommandRunResult>>;
 };

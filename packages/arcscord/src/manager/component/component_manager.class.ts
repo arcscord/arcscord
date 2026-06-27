@@ -1,6 +1,5 @@
 import type { Result } from "@arcscord/error";
 import type {
-  BaseMessageOptions,
   ButtonInteraction,
   ChannelSelectMenuInteraction,
   MentionableSelectMenuInteraction,
@@ -14,7 +13,7 @@ import type { ArcClient, ComponentContext } from "#/base";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
 import type { TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
-import type { ComponentErrorHandlerInfos, ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import type { ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
@@ -30,7 +29,8 @@ import {
 } from "#/base/components/interaction/context/select_menu_context";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { BaseManager } from "#/base/manager/manager.class";
-import { ComponentError, internalErrorEmbed } from "#/utils";
+import { ComponentError } from "#/utils";
+import { normalizeRunReturn } from "#/utils/error/run_normalize";
 
 type MatchedComponent = {
   component: ComponentHandler;
@@ -68,7 +68,7 @@ export class ComponentManager extends BaseManager {
 
     this.options = {
       resultHandler: this.handleResult.bind(this),
-      errorHandler: this.handleError.bind(this),
+      dispatchDiagnostics: {},
       ...options,
     };
     client.on("interactionCreate", (interaction) => {
@@ -292,67 +292,66 @@ export class ComponentManager extends BaseManager {
       channel: interaction.channel,
     });
 
-    const [err, components] = this.findMatchingComponents(interaction, type);
-    if (err) {
-      return this.options.errorHandler({
-        error: err,
-        component: undefined,
-        context: undefined,
-        internal: true,
+    /* Route matching */
+    const [matchErr, matchedComponents] = this.findMatchingComponents(interaction, type);
+    if (matchErr) {
+      /* findMatchingComponents returns an error for both "not found" and "multiple matches" */
+      const isMultiple = matchErr.message.includes("more than one");
+      return this.sendDispatchError(
+        isMultiple
+          ? this.options.dispatchDiagnostics.multipleMatches
+          : this.options.dispatchDiagnostics.componentNotFound,
+        "error",
+        matchErr,
+        { interaction, locale },
+      );
+    }
+
+    const matched = matchedComponents[0];
+
+    /* Context creation */
+    const [ctxErr, context] = this.createContext(interaction, type, locale, matched.params, matched.component);
+    if (ctxErr) {
+      return this.sendDispatchError(
+        this.options.dispatchDiagnostics.contextCreationFailed,
+        "error",
+        ctxErr,
+        { interaction, locale },
+      );
+    }
+
+    /* Defer */
+    const [deferErr] = await this.handlePreReply(matched.component, context);
+    if (deferErr) {
+      return this.sendDispatchError(
+        this.options.dispatchDiagnostics.deferFailed,
+        "warn",
+        deferErr,
+        undefined, // interaction state unknown after failed defer
+      );
+    }
+
+    /* Middlewares */
+    const start = Date.now();
+    const [middlewareErr, middlewareResult] = await this.runMiddleware(matched.component, context);
+    if (middlewareErr) {
+      return this.options.resultHandler({
+        status: "thrown",
+        thrownValue: middlewareErr,
+        component: matched.component,
         interaction,
-      });
-    }
-
-    if (components.length < 1) {
-      return this.options.errorHandler({
-        interaction,
-        error: new BaseError(`No found components with custom id match with ${interaction.customId}`),
-        internal: false,
-      });
-    }
-
-    if (components.length > 1) {
-      return this.options.errorHandler({
-        interaction,
-        internal: false,
-        error: new BaseError(`Find multiple match with custom id ${interaction.customId}`),
-      });
-    }
-
-    const component = components[0];
-
-    const [err2, context] = this.createContext(interaction, type, locale, component.params, component.component);
-    if (err2) {
-      return this.options.errorHandler({
-        error: err2,
-        internal: true,
-      });
-    }
-
-    const [err3] = await this.handlePreReply(component.component, context);
-    if (err3) {
-      return this.options.errorHandler({
-        error: err3,
-        component: component.component,
         context,
-        internal: true,
-      });
-    }
-
-    const [err4, middlewareResult] = await this.runMiddleware(component.component, context);
-    if (err4) {
-      return this.options.errorHandler({
-        error: err4,
-        component: component.component,
-        context,
-        internal: false,
+        locale,
+        defer: context.defer,
+        start,
+        end: Date.now(),
       });
     }
     if (!this.handleMiddlewareResult(middlewareResult, context)) {
       return;
     }
 
-    await this.executeComponent(component.component, context);
+    await this.executeComponent(matched.component, context, start);
   }
 
   private findMatchingComponents(
@@ -417,13 +416,13 @@ export class ComponentManager extends BaseManager {
     return true;
   }
 
-  private async executeComponent(component: ComponentHandler, context: ComponentContext): Promise<void> {
-    const start = Date.now();
+  private async executeComponent(component: ComponentHandler, context: ComponentContext, start: number): Promise<void> {
     try {
       // @ts-expect-error fix error with others context types
-      const result = await component.run(context);
+      const rawResult = await component.run(context);
       return this.options.resultHandler({
-        result,
+        status: "returned",
+        result: normalizeRunReturn(rawResult),
         component,
         interaction: context.interaction,
         context,
@@ -434,13 +433,9 @@ export class ComponentManager extends BaseManager {
       });
     }
     catch (e) {
-      const bError = new ComponentError({
-        interaction: context.interaction,
-        message: `failed to run component with route ${component.route}`,
-        originalError: anyToError(e),
-      });
       return this.options.resultHandler({
-        result: error(bError),
+        status: "thrown",
+        thrownValue: e,
         component,
         interaction: context.interaction,
         context,
@@ -500,54 +495,49 @@ export class ComponentManager extends BaseManager {
     return ok(additional);
   }
 
-  async sendInternalError(
-    interaction: MessageComponentInteraction | ModalSubmitInteraction,
-    message: BaseMessageOptions,
-    defer: boolean = false,
-  ): Promise<void> {
-    const replyResult = defer
-      ? await interaction.editReply(message).then(ok).catch(error)
-      : await interaction.reply({
-          ...message,
-          flags: MessageFlags.Ephemeral,
-        }).then(ok).catch(error);
-
-    if (!replyResult[1]) {
-      this.logger.error("failed to send error message", {
-        baseError: replyResult[0].message,
+  /**
+   * Sends an error reply to a component interaction, respecting the defer state.
+   * Used by the default `handleResult`.
+   */
+  private async sendInternalError(err: ComponentError, infos: ComponentResultHandlerInfos): Promise<void> {
+    const message = this.client.getErrorMessage(err.id, infos.locale);
+    try {
+      if (infos.defer) {
+        await infos.interaction.editReply(message);
+      }
+      else {
+        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
+      }
+    }
+    catch (e) {
+      this.logger.error("failed to send internal error message", {
+        baseError: anyToError(e).message,
       });
     }
   }
 
+  /**
+   * Default result handler.
+   * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
+   */
   async handleResult(infos: ComponentResultHandlerInfos): Promise<void> {
+    if (infos.status === "thrown") {
+      const err = new ComponentError({
+        message: `failed to run component with route ${infos.component.route} : ${anyToError(infos.thrownValue).message}`,
+        interaction: infos.interaction,
+        originalError: anyToError(infos.thrownValue),
+      });
+      err.generateId();
+      this.logger.logError(err);
+      return this.sendInternalError(err, infos);
+    }
+
     const [err] = infos.result;
     if (err !== null) {
       err.generateId();
       this.logger.logError(err);
-      return this.sendInternalError(
-        infos.interaction,
-        internalErrorEmbed(this.client, err.id, infos.locale),
-        infos.defer,
-      );
+      return this.sendInternalError(err, infos);
     }
-
     this.logger.debug(`Component executed: ${infos.component.route}`);
-  }
-
-  async handleError(infos: ComponentErrorHandlerInfos): Promise<void> {
-    const error = infos.error.generateId();
-    this.logger.logError(error);
-
-    if (!infos.interaction) {
-      return;
-    }
-
-    if (!infos.internal) {
-      return this.sendInternalError(
-        infos.interaction,
-        internalErrorEmbed(this.client, error.id, infos.context?.locale),
-        infos.context?.defer,
-      );
-    }
   }
 }

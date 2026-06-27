@@ -7,7 +7,6 @@ import type {
   ApplicationCommand,
   ApplicationCommandDataResolvable,
   AutocompleteInteraction,
-  BaseMessageOptions,
   CommandInteraction,
 } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
@@ -19,8 +18,6 @@ import type {
 } from "#/base/command/command_definition.type";
 import type { Option, OptionsList } from "#/base/command/option.type";
 import type {
-  CommandErrorHandler,
-  CommandErrorHandlerInfos,
   CommandManagerOptions,
   CommandResultHandler,
   CommandResultHandlerImplementer,
@@ -46,8 +43,8 @@ import {
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { BaseManager } from "#/base/manager/manager.class";
 import { CommandError, CommandValidationError, validateCommands } from "#/utils";
-import { internalErrorEmbed } from "#/utils/discord/embed/embed.const";
 import { InternalError } from "#/utils/error/class/internal_error";
+import { applyDiagnosticLevel, normalizeRunReturn } from "#/utils/error/run_normalize";
 
 export type ApplicationCommandRegistration = Pick<ApplicationCommand, "id" | "name" | "type"> & {
   guildId: string | null;
@@ -68,7 +65,7 @@ export class CommandManager
 
     this.options = {
       resultHandler: this.resultHandler.bind(this),
-      errorHandler: this.errorHandler.bind(this),
+      dispatchDiagnostics: {},
       ...options,
     };
 
@@ -84,10 +81,6 @@ export class CommandManager
 
   get handleResult(): CommandResultHandler {
     return this.options.resultHandler;
-  }
-
-  get handleError(): CommandErrorHandler {
-    return this.options.errorHandler;
   }
 
   /**
@@ -669,20 +662,7 @@ export class CommandManager
   private async handleInteraction(interaction: CommandInteraction): Promise<void> {
     await this.client.localeManager.ready;
 
-    /* INITIALIZATION */
-    const [err, infos] = this.getCommand(interaction);
-
-    if (err) {
-      return this.handleError({
-        error: err,
-        interaction,
-        internal: true,
-      });
-    }
-
-    const command = infos.cmd;
-
-    /* Locale */
+    /* Locale — resolved first so dispatch error replies are translated */
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
       user: interaction.user,
@@ -690,24 +670,34 @@ export class CommandManager
       channel: interaction.channel,
     });
 
+    /* Resolve command from registry */
+    const [cmdErr, infos] = this.getCommand(interaction);
+    if (cmdErr) {
+      return this.sendDispatchError(
+        this.options.dispatchDiagnostics.commandNotFound,
+        "error",
+        cmdErr,
+        { interaction, locale },
+      );
+    }
+
+    const command = infos.cmd;
     let context;
 
-    /* Slash Commands */
+    /* Build typed context */
     if (interaction.isChatInputCommand()) {
       if ("name" in command.build) {
-        const [err, options] = command.build.options
-          ? await parseOptions<typeof command.build.options>(
-              interaction,
-              command.build.options,
-            )
+        const [optErr, options] = command.build.options
+          ? await parseOptions<typeof command.build.options>(interaction, command.build.options)
           : [null, null];
 
-        if (err) {
-          return this.handleError({
-            error: err,
-            interaction,
-            internal: true,
-          });
+        if (optErr) {
+          return this.sendDispatchError(
+            this.options.dispatchDiagnostics.optionParsingFailed,
+            "error",
+            optErr,
+            { interaction, locale },
+          );
         }
 
         context = new SlashCommandContext(command, interaction, {
@@ -719,19 +709,17 @@ export class CommandManager
         });
       }
       else if (command.build.slash) {
-        const [err, options] = command.build.slash.options
-          ? await parseOptions<typeof command.build.slash.options>(
-              interaction,
-              command.build.slash.options,
-            )
+        const [optErr, options] = command.build.slash.options
+          ? await parseOptions<typeof command.build.slash.options>(interaction, command.build.slash.options)
           : [null, null];
 
-        if (err) {
-          return this.handleError({
-            error: err,
-            interaction,
-            internal: true,
-          });
+        if (optErr) {
+          return this.sendDispatchError(
+            this.options.dispatchDiagnostics.optionParsingFailed,
+            "error",
+            optErr,
+            { interaction, locale },
+          );
         }
 
         context = new SlashCommandContext(command, interaction, {
@@ -743,17 +731,13 @@ export class CommandManager
         });
       }
       else {
-        const bError = new BaseError({
-          message: `invalid command, get slash command interaction for command ${infos.resolvedName}`,
-        });
-        return this.handleError({
-          error: bError,
-          interaction,
-          internal: true,
-        });
+        return this.sendDispatchError(
+          this.options.dispatchDiagnostics.contextCreationFailed,
+          "error",
+          new BaseError({ message: `invalid command, get slash command interaction for command ${infos.resolvedName}` }),
+          { interaction, locale },
+        );
       }
-
-      /* User Context Menu Command */
     }
     else if (interaction.isUserContextMenuCommand()) {
       if ("user" in command.build) {
@@ -766,17 +750,13 @@ export class CommandManager
         });
       }
       else {
-        const bError = new BaseError({
-          message: `invalid command, get user command interaction for command ${infos.resolvedName}`,
-        });
-        return this.handleError({
-          error: bError,
-          interaction,
-          internal: true,
-        });
+        return this.sendDispatchError(
+          this.options.dispatchDiagnostics.contextCreationFailed,
+          "error",
+          new BaseError({ message: `invalid command, got user command interaction for command ${infos.resolvedName}` }),
+          { interaction, locale },
+        );
       }
-
-      /* Message Context Menu Command */
     }
     else if (interaction.isMessageContextMenuCommand()) {
       if ("message" in command.build) {
@@ -788,57 +768,58 @@ export class CommandManager
         });
       }
       else {
-        const bError = new BaseError({
-          message: `invalid command, get user command interaction for command ${infos.resolvedName}`,
-        });
-        return this.handleError({
-          error: bError,
-          interaction,
-          internal: true,
-        });
+        return this.sendDispatchError(
+          this.options.dispatchDiagnostics.contextCreationFailed,
+          "error",
+          new BaseError({ message: `invalid command, got message command interaction for command ${infos.resolvedName}` }),
+          { interaction, locale },
+        );
       }
     }
     else {
-      const bError = new BaseError({
-        message: `invalid interaction type: ${interaction.type}`,
-      });
-      return this.handleError({
-        error: bError,
-        interaction,
-        internal: true,
-      });
+      return this.sendDispatchError(
+        this.options.dispatchDiagnostics.contextCreationFailed,
+        "error",
+        new BaseError({ message: `invalid interaction type: ${interaction.type}` }),
+        { interaction, locale },
+      );
     }
 
-    /* Command Defer */
     if (!context) {
       return;
     }
 
+    /* Defer */
     if (command.preReply) {
-      const [err3] = await context.deferReply({
+      const [deferErr] = await context.deferReply({
         flags: command.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
 
-      if (err3) {
-        return this.handleError({
-          error: err3,
-          interaction,
-          internal: true,
-        });
+      if (deferErr) {
+        return this.sendDispatchError(
+          this.options.dispatchDiagnostics.deferFailed,
+          "warn",
+          deferErr,
+          undefined, // interaction state unknown after failed defer
+        );
       }
     }
 
     const start = Date.now();
-    /* Middlewares */
 
-    const [err4, middlewareResult] = await this.runMiddleware(command, context as CommandContext);
-    if (err4) {
-      return this.handleError({
-        error: err4,
+    /* Middlewares */
+    const [middlewareErr, middlewareResult] = await this.runMiddleware(command, context as CommandContext);
+    if (middlewareErr) {
+      return this.handleResult({
+        status: "thrown",
+        thrownValue: middlewareErr,
         interaction,
         command,
         context: context as CommandContext,
-        internal: false,
+        locale,
+        defer: context.defer,
+        start,
+        end: Date.now(),
       });
     }
     if (!middlewareResult) {
@@ -847,12 +828,12 @@ export class CommandManager
     context.additional = middlewareResult as typeof context.additional;
 
     /* Command Run */
-
     try {
       const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
-      const result = await run(context as CommandContext);
-      const infos: CommandResultHandlerInfos = {
-        result,
+      const rawResult = await run(context as CommandContext);
+      return this.handleResult({
+        status: "returned",
+        result: normalizeRunReturn(rawResult),
         interaction,
         command,
         context: context as CommandContext,
@@ -860,68 +841,53 @@ export class CommandManager
         defer: context.defer,
         start,
         end: Date.now(),
-      };
-
-      return this.handleResult(infos);
+      });
     }
     catch (e) {
-      return this.handleError({
-        error: new CommandError({
-          message: `failed to run command : ${anyToError(e).message}`,
-          ctx: context,
-          originalError: anyToError(e),
-        }),
+      return this.handleResult({
+        status: "thrown",
+        thrownValue: e,
         interaction,
         command,
         context: context as CommandContext,
-        internal: false,
+        locale,
+        defer: context.defer,
+        start,
+        end: Date.now(),
       });
     }
   }
 
-  private async handleAutocomplete(
-    interaction: AutocompleteInteraction,
-  ): Promise<void> {
+  private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
     await this.client.localeManager.ready;
 
-    /* INITIALIZATION */
-    const [err, infos] = this.getCommand(interaction);
-
-    if (err) {
-      return this.handleError({
-        error: err,
-        interaction,
-        internal: true,
-        autocomplete: true,
-      });
+    const [cmdErr, infos] = this.getCommand(interaction);
+    if (cmdErr) {
+      const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
+      cmdErr.generateId();
+      applyDiagnosticLevel(this.logger, level, cmdErr);
+      return;
     }
 
     const command = infos.cmd;
     const focused = interaction.options.getFocused(true);
 
     if (!hasAutocomplete(command)) {
-      return this.logger.warning(
-        `Get autocomplete for command without autocomplete function : ${infos.resolvedName}`,
-      );
+      this.logger.warning(`Got autocomplete for command without autocomplete handler: ${infos.resolvedName}`);
+      return;
     }
 
     const handler = command.autocomplete[focused.name];
     if (!handler) {
-      return this.handleError({
-        error: new BaseError({
-          message: `no autocomplete handler found for option ${focused.name} in command ${infos.resolvedName}`,
-          debugs: {
-            focused,
-            handlers: Object.keys(command.autocomplete),
-          },
-        }),
-        interaction,
-        internal: true,
-        autocomplete: true,
+      const err = new BaseError({
+        message: `no autocomplete handler found for option "${focused.name}" in command "${infos.resolvedName}"`,
+        debugs: { focused, handlers: Object.keys(command.autocomplete) },
       });
+      const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
+      applyDiagnosticLevel(this.logger, level, err);
+      return;
     }
 
-    /* Locale */
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
       user: interaction.user,
@@ -936,35 +902,28 @@ export class CommandManager
     });
 
     try {
-      const [err2] = await handler(context);
-      if (err2) {
-        return this.handleError({
-          error: err2,
-          interaction,
-          internal: true,
-          autocomplete: true,
-        });
+      const [acErr] = await handler(context);
+      if (acErr) {
+        const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
+        applyDiagnosticLevel(this.logger, level, acErr);
+        return;
       }
-
-      this.trace(
-        `Autocomplete handled for command ${infos.resolvedName}`,
-      );
+      this.trace(`Autocomplete handled for command ${infos.resolvedName}`);
     }
     catch (e) {
-      return this.handleError({
-        error: new CommandError({
-          message: anyToError(e).message,
-          ctx: context,
-          originalError: anyToError(e),
-        }),
-        interaction,
-        internal: false,
-        autocomplete: true,
+      const err = new BaseError({
+        message: `autocomplete threw: ${anyToError(e).message}`,
+        originalError: anyToError(e),
       });
+      err.generateId();
+      this.logger.logError(err);
     }
   }
 
-  private async runMiddleware(command: AnyCommandHandler | AnySubCommandHandler, context: CommandContext): Promise<Result<object | false, CommandError>> {
+  private async runMiddleware(
+    command: AnyCommandHandler | AnySubCommandHandler,
+    context: CommandContext,
+  ): Promise<Result<object | false, CommandError>> {
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!command.use || command.use.length === 0) {
       return ok({});
@@ -975,9 +934,7 @@ export class CommandManager
         return error(new CommandError({
           message: `duplicate middleware name "${middleware.name}"`,
           ctx: context,
-          debugs: {
-            middlewareName: middleware.name,
-          },
+          debugs: { middlewareName: middleware.name },
         }));
       }
       middlewareNames.add(middleware.name);
@@ -988,7 +945,6 @@ export class CommandManager
         if (result.error) {
           return error(await result.error);
         }
-
         if (result.cancel) {
           const [err] = await result.cancel;
           if (err) {
@@ -1003,29 +959,28 @@ export class CommandManager
           message: `failed to run middleware : ${anyToError(e).message}`,
           ctx: context,
           originalError: anyToError(e),
-          debugs: {
-            middlewareName: middleware.name,
-          },
+          debugs: { middlewareName: middleware.name },
         }));
       }
     }
     return ok(additional);
   }
 
-  async sendInternalError(
-    interaction: CommandInteraction,
-    message: BaseMessageOptions,
-    defer: boolean = false,
+  /**
+   * Sends an error reply to a command interaction, respecting the defer state.
+   * Used by the default `resultHandler`.
+   */
+  private async sendInternalError(
+    err: CommandError,
+    infos: CommandResultHandlerInfos,
   ): Promise<void> {
+    const message = this.client.getErrorMessage(err.id, infos.locale);
     try {
-      if (defer) {
-        await interaction.editReply(message);
+      if (infos.defer) {
+        await infos.interaction.editReply(message);
       }
       else {
-        await interaction.reply({
-          ...message,
-          flags: MessageFlags.Ephemeral,
-        });
+        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
       }
     }
     catch (e) {
@@ -1035,31 +990,28 @@ export class CommandManager
     }
   }
 
+  /**
+   * Default result handler.
+   * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
+   */
   async resultHandler(infos: CommandResultHandlerInfos): Promise<void> {
+    if (infos.status === "thrown") {
+      const err = new CommandError({
+        message: `failed to run command : ${anyToError(infos.thrownValue).message}`,
+        ctx: infos.context,
+        originalError: anyToError(infos.thrownValue),
+      });
+      err.generateId();
+      this.logger.logError(err);
+      return this.sendInternalError(err, infos);
+    }
+
     const [err] = infos.result;
     if (err !== null) {
       err.generateId();
       this.logger.logError(err);
-      return this.sendInternalError(
-        infos.interaction,
-        internalErrorEmbed(this.client, err.id, infos.locale),
-        infos.defer,
-      );
+      return this.sendInternalError(err, infos);
     }
-
     this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`);
-  }
-
-  async errorHandler(infos: CommandErrorHandlerInfos): Promise<void> {
-    const error = infos.error.generateId();
-    this.logger.logError(error);
-
-    if (!infos.autocomplete) {
-      return this.sendInternalError(
-        infos.interaction,
-        internalErrorEmbed(this.client, error.id, infos.context?.locale),
-        infos.context?.defer,
-      );
-    }
   }
 }

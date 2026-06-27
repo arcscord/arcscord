@@ -4,296 +4,233 @@ sidebar_position: 7
 
 # Result handlers
 
-Managers call a result handler after a command, component, or event handler
-returns a result. Commands and components also have error handlers for failures
-that happen outside the regular handler result path, such as thrown errors,
-validation failures, or missing handlers.
+Every manager calls a result handler after a command, component, or event
+handler finishes — whether it returned normally or threw. A single callback
+covers both cases, distinguished by the `status` field.
+
+## Run return types
+
+Arcscord normalizes whatever your `run()` function returns into a `Result`
+before passing it to the result handler. You can return any of:
+
+| Return value | Normalized to |
+|---|---|
+| `void` / nothing | `ok(true)` |
+| `string` | `ok(string)` |
+| `true` | `ok(true)` |
+| `ok(...)` / `error(...)` | passed through unchanged |
+
+This means you can keep your handler simple without sacrificing observability:
+
+```ts
+export const ping = createCommand({
+  build: { slash: { name: "ping", description: "Ping!" } },
+  run: async (ctx) => {
+    await ctx.reply({ content: "Pong!" });
+    // return nothing — normalized to ok(true)
+  },
+});
+```
+
+## The `status` discriminant
+
+Every result handler receives an object with a `status` field:
+
+- `"returned"` — `run()` returned normally. `result` holds the normalized
+  `Result` — it may be `ok` or `error` depending on what the handler returned.
+- `"thrown"` — `run()` threw an unhandled exception. Only `thrownValue` is
+  present; there is no `result` field. The thrown value is not pre-wrapped —
+  you decide how to handle it.
+
+```ts
+managers: {
+  command: {
+    resultHandler: (infos) => {
+      if (infos.status === "thrown") {
+        // infos.thrownValue is the raw thrown value — could be anything
+        const err = anyToError(infos.thrownValue);
+        client.logger.error(`Command threw: ${err.message}`);
+        return;
+      }
+
+      // infos.status === "returned" — infos.result is available here
+      const [err, value] = infos.result;
+      if (err) {
+        err.generateId();
+        client.logger.logError(err);
+        return;
+      }
+
+      client.logger.debug(`Command "${infos.command.build.slash?.name}" returned ${String(value)}`);
+    },
+  },
+},
+```
 
 ## Event result handler
 
-Event handlers return an `EventHandleResult`:
+Event handlers may return `void`, `string`, `true`, or a full `EventHandleResult`.
 
 ```ts
-import { createEvent } from "arcscord";
-
 export const messageEvent = createEvent({
   event: "messageCreate",
   run: (ctx, message) => {
     if (message.author.bot) {
-      return ctx.ok("ignored bot message");
+      return "ignored bot message";
     }
-
-    return ctx.ok(true);
+    // void is fine too
   },
 });
 ```
 
-By default, Arcscord logs event errors through the event manager logger. You can
-replace that behavior with `managers.event.resultHandler`:
+Configure the result handler via `managers.event.resultHandler`:
 
 ```ts
-import { ArcClient } from "arcscord";
-import { MessageFlags } from "discord.js";
+managers: {
+  event: {
+    resultHandler: (infos) => {
+      if (infos.status === "thrown") {
+        client.logger.error(`Event ${infos.event.name} threw`, {
+          thrownValue: infos.thrownValue,
+        });
+        return;
+      }
 
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds", "GuildMessages"],
-  managers: {
-    event: {
-      resultHandler: async ({ result, event, eventName }) => {
-        const [err, value] = result;
+      const [err, value] = infos.result;
+      if (err) {
+        err.generateId();
+        client.logger.logError(err);
+        return;
+      }
 
-        if (err) {
-          err.generateId();
-          client.logger.logError(err);
-          return;
-        }
-
-        client.logger.debug(
-          `Event ${event.name} handled ${String(eventName)} with ${String(value)}`,
-        );
-      },
+      client.logger.debug(`${infos.event.name} → ${String(value)}`);
     },
   },
-});
+},
 ```
 
 The event result handler receives:
 
-- `result`: the result returned by the event `run` function.
-- `event`: the loaded event handler.
-- `eventName`: the Discord.js event name.
-
-The result handler may be async. Arcscord awaits it before finishing the event
-execution path.
-
-## Handling thrown errors
-
-If an event handler throws, Arcscord converts the thrown value to an
-`EventError` and passes it to the result handler as an error result:
-
-```ts
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds", "GuildMessages"],
-  managers: {
-    event: {
-      resultHandler: ({ result, event }) => {
-        const [err] = result;
-
-        if (!err) {
-          return;
-        }
-
-        err.generateId();
-        client.logger.error(`Event ${event.name} failed`, {
-          errorId: err.id,
-          event: event.event,
-        });
-      },
-    },
-  },
-});
-```
-
-Prefer returning `ctx.error(...)` for expected event failures and throwing only
-for unexpected failures.
-
-## Default behavior
-
-The default event result handler checks the result and logs errors:
-
-```ts
-async handleResult(infos) {
-  const [err] = infos.result;
-
-  if (err !== null) {
-    err.generateId();
-    this.logger.logError(err);
-  }
-}
-```
-
-Successful event results are ignored by default.
+| Field | `"returned"` | `"thrown"` |
+|---|---|---|
+| `status` | `"returned"` | `"thrown"` |
+| `result` | normalized `EventHandleResult` | — (not present) |
+| `thrownValue` | — (not present) | the raw thrown value |
+| `event` | the loaded event handler | same |
+| `eventName` | the Discord.js event name | same |
 
 ## Command result handler
 
-Command handlers return a `CommandRunResult`. By default, Arcscord logs failed
-results, sends the configured internal-error message to the interaction, and
-logs successful command execution at debug level.
+Configure via `managers.command.resultHandler`:
 
 ```ts
-import { ArcClient } from "arcscord";
+import { MessageFlags } from "discord.js";
+import { anyToError } from "@arcscord/error";
 
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds"],
-  managers: {
-    command: {
-      resultHandler: async ({ result, interaction, command, defer, locale }) => {
-        const [err, value] = result;
+managers: {
+  command: {
+    resultHandler: async (infos) => {
+      if (infos.status === "thrown") {
+        const err = anyToError(infos.thrownValue);
+        client.logger.error(`Command threw: ${err.message}`);
+        await infos.interaction.reply({
+          content: "An unexpected error occurred.",
+          flags: MessageFlags.Ephemeral,
+        });
+        return;
+      }
 
-        if (err) {
-          err.generateId();
-          client.logger.logError(err);
-
-          const message = client.getErrorMessage(err.id, locale);
-
-          if (defer) {
-            await interaction.editReply(message);
-          }
-          else {
-            await interaction.reply({
-              ...message,
-              flags: MessageFlags.Ephemeral,
-            });
-          }
-
-          return;
+      const [err, value] = infos.result;
+      if (err) {
+        err.generateId();
+        client.logger.logError(err);
+        const message = client.getErrorMessage(err.id, infos.locale);
+        if (infos.defer) {
+          await infos.interaction.editReply(message);
+        } else {
+          await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
         }
+        return;
+      }
 
-        client.logger.debug(`Command ${command.build.slash?.name ?? "context"} returned ${String(value)}`);
-      },
+      client.logger.debug(`Command ${infos.command.build.slash?.name ?? "context"} succeeded`);
     },
   },
-});
+},
 ```
 
 The command result handler receives:
 
-- `result`: the result returned by the command `run` function.
-- `interaction`: the Discord.js command interaction.
-- `command`: the loaded command handler.
-- `context`: the Arcscord command context.
-- `locale`: the detected i18next language.
-- `defer`: whether the command reply was deferred.
-- `start` and `end`: execution timestamps.
-
-## Command error handler
-
-`managers.command.errorHandler` handles errors that bypass the command result
-handler. This includes thrown command errors, autocomplete errors, middleware
-errors, and framework validation errors.
-
-```ts
-import { MessageFlags } from "discord.js";
-
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds"],
-  managers: {
-    command: {
-      errorHandler: ({ error, interaction, autocomplete, context, internal }) => {
-        const err = error.generateId();
-
-        client.logger.logError(err);
-
-        if (autocomplete) {
-          return;
-        }
-
-        return interaction.reply({
-          content: internal
-            ? `Internal command error: ${err.id}`
-            : `Command failed: ${err.id}`,
-          flags: MessageFlags.Ephemeral,
-        });
-      },
-    },
-  },
-});
-```
-
-Autocomplete interactions cannot receive normal message replies. If
-`autocomplete` is `true`, log the error and return without replying.
+| Field | `"returned"` | `"thrown"` |
+|---|---|---|
+| `status` | `"returned"` | `"thrown"` |
+| `result` | normalized `CommandRunResult` | — (not present) |
+| `thrownValue` | — (not present) | the raw thrown value |
+| `interaction` | Discord.js command interaction | same |
+| `command` | the loaded command handler | same |
+| `context` | the Arcscord command context | same |
+| `locale` | detected i18next language key | same |
+| `defer` | whether the reply was deferred | same |
+| `start` / `end` | execution timestamps (ms) | same |
 
 ## Component result handler
 
-Component handlers return a `ComponentRunResult`. By default, Arcscord logs
-failed results, sends the configured internal-error message to the component
-interaction, and logs successful component execution at debug level.
+Configure via `managers.component.resultHandler`:
 
 ```ts
 import { MessageFlags } from "discord.js";
+import { anyToError } from "@arcscord/error";
 
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds"],
-  managers: {
-    component: {
-      resultHandler: async ({ result, interaction, component, defer, locale }) => {
-        const [err] = result;
-
-        if (err) {
-          err.generateId();
-          client.logger.logError(err);
-
-          const message = client.getErrorMessage(err.id, locale);
-
-          if (defer) {
-            await interaction.editReply(message);
-          }
-          else {
-            await interaction.reply({
-              ...message,
-              flags: MessageFlags.Ephemeral,
-            });
-          }
-
-          return;
-        }
-
-        client.logger.debug(`Component executed: ${component.route}`);
-      },
-    },
-  },
-});
-```
-
-The component result handler receives:
-
-- `result`: the result returned by the component `run` function.
-- `component`: the loaded component handler.
-- `interaction`: the Discord.js component or modal interaction.
-- `context`: the Arcscord component context when one was created.
-- `locale`: the detected i18next language.
-- `defer`: whether the component reply was deferred.
-- `start` and `end`: execution timestamps.
-
-## Component error handler
-
-`managers.component.errorHandler` handles thrown component errors, missing
-component routes, middleware errors, and other component dispatch failures.
-
-```ts
-import { MessageFlags } from "discord.js";
-
-const client = new ArcClient(process.env.DISCORD_TOKEN!, {
-  intents: ["Guilds"],
-  managers: {
-    component: {
-      errorHandler: ({ error, interaction, context, internal }) => {
-        const err = error.generateId();
-
-        client.logger.logError(err);
-
-        if (!interaction) {
-          return;
-        }
-
-        if (context?.defer) {
-          return interaction.editReply({
-            content: `Component failed: ${err.id}`,
-          });
-        }
-
-        return interaction.reply({
-          content: internal
-            ? `Internal component error: ${err.id}`
-            : `Component failed: ${err.id}`,
+managers: {
+  component: {
+    resultHandler: async (infos) => {
+      if (infos.status === "thrown") {
+        const err = anyToError(infos.thrownValue);
+        client.logger.error(`Component ${infos.component.route} threw: ${err.message}`);
+        await infos.interaction.reply({
+          content: "An unexpected error occurred.",
           flags: MessageFlags.Ephemeral,
         });
-      },
+        return;
+      }
+
+      const [err] = infos.result;
+      if (err) {
+        err.generateId();
+        client.logger.logError(err);
+        const message = client.getErrorMessage(err.id, infos.locale);
+        if (infos.defer) {
+          await infos.interaction.editReply(message);
+        } else {
+          await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
+        }
+        return;
+      }
+
+      client.logger.debug(`Component ${infos.component.route} succeeded`);
     },
   },
-});
+},
 ```
 
-Use a custom result or error handler when you need centralized metrics,
-structured logging, custom user-facing error messages, or different handling
-for expected application errors.
+The component result handler receives the same fields as the command result
+handler, with `component` in place of `command`.
+
+## Default behavior
+
+The default result handlers for all three managers:
+
+- **`status === "thrown"`** — wrap `thrownValue` in a framework error
+  (`CommandError`, `ComponentError`, or `EventError`), generate an error ID,
+  log it with `logError`, and send an ephemeral error reply to the user
+  (command and component only).
+- **`status === "returned"`, error result** — generate an error ID, log it,
+  and send an ephemeral error reply to the user (command and component only).
+- **`status === "returned"`, ok result** — log at debug level.
+
+The error reply message comes from `client.getErrorMessage(id, locale)`. You
+can customize it via `arcOptions.getErrorMessage` on the client.
+
+For more on pre-run failures (command not found, option parsing errors, etc.)
+and how to configure their logging level and user reply, see
+[Error handling](./error-handling.md).

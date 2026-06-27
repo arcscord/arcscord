@@ -1,7 +1,6 @@
-import type { BaseError } from "@arcscord/better-error";
-import type { Result } from "@arcscord/error";
 import type { ComponentType } from "discord-api-types/v10";
 import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
+import type { ComponentRunResult } from "#/base/components/interaction/component.type";
 import type {
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
@@ -13,7 +12,7 @@ import type {
   UserSelectMenuComponentHandler,
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentContext } from "#/base/components/interaction/context";
-import type { ComponentError } from "#/utils";
+import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
 
 /**
  * @internal
@@ -39,107 +38,121 @@ export type ComponentList = {
 };
 
 /**
- * all infos that you have aces to handle a component result
+ * Shared fields present in all component result handler payloads.
  */
-export type ComponentResultHandlerInfos = {
+type BaseComponentResultHandlerInfos = {
   /**
-   * The result of the component execution.
-   */
-  result: Result<string | true, ComponentError>;
-
-  /**
-   * The component handler object
+   * The loaded component handler.
    */
   component: ComponentHandler;
 
   /**
-   * The DJS interaction object
+   * The Discord.js interaction.
    */
   interaction: MessageComponentInteraction | ModalSubmitInteraction;
 
   /**
-   * Whether the response is deferred.
+   * The Arcscord component context for this execution.
+   */
+  context: ComponentContext;
+
+  /**
+   * Whether the reply was deferred before `run()` was called.
    */
   defer: boolean;
 
   /**
-   * The start time of the component execution.
+   * Unix timestamp (ms) when the component started running.
    */
   start: number;
 
   /**
-   * The end time of the component execution.
+   * Unix timestamp (ms) when the component finished running.
    */
   end: number;
 
   /**
-   * The context associated with the component.
-   */
-  context?: ComponentContext;
-
-  /**
-   * Detected i18next language used by this component execution.
+   * Detected i18next language for this interaction.
    */
   locale: string;
 };
 
 /**
- * all infos that you have aces to handle a component error
+ * Payload delivered to `resultHandler` when `run()` returned normally
+ * (with a `Result`, a raw value, or `void`).
  */
-export type ComponentErrorHandlerInfos = {
+export type ComponentReturnedHandlerInfos = BaseComponentResultHandlerInfos & {
+  status: "returned";
   /**
-   * The error that occurred.
+   * The normalized result of `run()`. May be `ok` or `error` — the author
+   * explicitly returned an error `Result`.
    */
-  error: BaseError | ComponentError;
-
-  /**
-   * The component handler object
-   */
-  component?: ComponentHandler;
-
-  /**
-   * The DJS interaction object
-   */
-  interaction?: MessageComponentInteraction | ModalSubmitInteraction;
-
-  /**
-   * Whether the error is internal in arcscord (true) or from the component code (false)
-   */
-  internal: boolean;
-
-  /**
-   * The context associated with the component.
-   */
-  context?: ComponentContext;
+  result: ComponentRunResult;
 };
 
 /**
- * Type for handling component results.
+ * Payload delivered to `resultHandler` when `run()` threw an unhandled
+ * exception or a middleware threw.
+ *
+ * There is no `result` field here — the thrown value has not been normalized.
+ * Use `thrownValue` directly and construct whatever error type you need.
+ * The default handler wraps it in a `ComponentError`.
+ */
+export type ComponentThrownHandlerInfos = BaseComponentResultHandlerInfos & {
+  status: "thrown";
+  /**
+   * The raw value that was thrown by `run()` or middleware.
+   * May be any type — a `ComponentError`, a plain `Error`, a string, etc.
+   */
+  thrownValue: unknown;
+};
+
+/**
+ * Payload received by `resultHandler` after every component `run()` execution.
+ *
+ * Use the `status` discriminant to branch between the two cases:
+ * ```ts
+ * resultHandler: (infos) => {
+ *   if (infos.status === "thrown") {
+ *     // infos.thrownValue is the raw thrown value (not wrapped)
+ *     return;
+ *   }
+ *   const [err, value] = infos.result;
+ * }
+ * ```
+ */
+export type ComponentResultHandlerInfos
+  = | ComponentReturnedHandlerInfos
+    | ComponentThrownHandlerInfos;
+
+/**
+ * Handler called after every component `run()` execution, whether it returned
+ * normally or threw.
  */
 export type ComponentResultHandler = (
   infos: ComponentResultHandlerInfos,
 ) => void | Promise<void>;
 
 /**
- * Type for handling component errors.
- */
-export type ComponentErrorHandler = (
-  infos: ComponentErrorHandlerInfos,
-) => void | Promise<void>;
-
-/**
- * Defines component manager options
+ * Options for configuring the component manager.
  */
 export type ComponentManagerOptions = {
   /**
-   * Set a custom result handler
-   * @default {@link ComponentManager.handleResult}
+   * Custom result handler called after every component `run()` execution.
+   *
+   * Receives a normalized `Result` regardless of whether `run()` returned or
+   * threw. Check `infos.status` to distinguish between the two cases.
+   *
+   * @default logs errors and sends `client.getErrorMessage(...)` to the user
    */
   resultHandler?: ComponentResultHandler;
 
   /**
-   * Set a custom error handler
-   * @default {@link ComponentManager.handleError}
+   * Per-case configuration for dispatch errors that occur before `run()` is
+   * invoked (component not found, multiple matches, defer failure, etc.).
+   *
+   * Each key accepts a {@link DispatchErrorConfig} that controls the log level
+   * and optional user-facing reply independently.
    */
-  errorHandler?: ComponentErrorHandler;
+  dispatchDiagnostics?: ComponentDispatchDiagnostics;
 };
