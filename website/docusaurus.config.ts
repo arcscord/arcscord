@@ -48,28 +48,9 @@ const config: Config = {
       items: [
         { type: "docSidebar", sidebarId: "guideSidebar", position: "left", label: "Guide" },
         { to: "/api", label: "API", position: "left" },
+        { href: "https://discord.gg/4geBanVWGR", label: "Discord", position: "right" },
         { href: "https://github.com/arcscord/arcscord", label: "GitHub", position: "right" },
       ],
-    },
-    footer: {
-      style: "dark",
-      links: [
-        {
-          title: "Docs",
-          items: [
-            { label: "Guide", to: "/" },
-            { label: "API Reference", to: "/api" },
-          ],
-        },
-        {
-          title: "Community",
-          items: [
-            { label: "Discord", href: "https://discord.gg/4geBanVWGR" },
-            { label: "GitHub", href: "https://github.com/arcscord/arcscord" },
-          ],
-        },
-      ],
-      copyright: `Copyright © ${new Date().getFullYear()} Arcscord.`,
     },
     prism: {
       theme: themes.github,

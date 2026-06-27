@@ -14,7 +14,6 @@
   --arcscord-bow: #8a4b22;
   --arcscord-ink: #172033;
   --ifm-navbar-background-color: #f8fbff;
-  --ifm-footer-background-color: #172033;
 }
 
 [data-theme="dark"] {
@@ -27,7 +26,38 @@
   --ifm-color-primary-lightest: #dbe3ff;
   --ifm-background-color: #0f1522;
   --ifm-navbar-background-color: #121a2a;
-  --ifm-footer-background-color: #080c14;
+}
+
+/* ===== Sidebar — fixed, full height, no horizontal scroll ===== */
+@media (min-width: 997px) {
+  [class*="docSidebarContainer"] {
+    position: fixed !important;
+    top: var(--ifm-navbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--doc-sidebar-width, 300px);
+    margin-top: 0 !important;
+    height: auto !important;
+    z-index: 200;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: var(--ifm-background-color);
+  }
+
+  /* The inner div (sidebar_*) has padding-top: navbar-height designed for
+     sticky positioning. Cancel it — the container is already at top: navbar-height. */
+  [class*="docSidebarContainer"] [class*="sidebar_"] {
+    padding-top: 0 !important;
+  }
+
+  /* Compensate for fixed sidebar: push content right */
+  [class*="docRoot"] {
+    padding-left: var(--doc-sidebar-width, 300px);
+  }
+
+  [class*="docMainContainer"] {
+    max-width: 100% !important;
+  }
 }
 
 .navbar__logo {

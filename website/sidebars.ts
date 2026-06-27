@@ -11,6 +11,7 @@ const sidebars: SidebarsConfig = {
         "guide/client",
         "guide/commands",
         "guide/events",
+        "guide/components",
       ],
     },
     {
@@ -30,7 +31,10 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Components",
       items: [
-        "guide/components",
+        "guide/components/button",
+        "guide/components/select-menu",
+        "guide/components/modal",
+        "guide/components/components-v2",
       ],
     },
     {
