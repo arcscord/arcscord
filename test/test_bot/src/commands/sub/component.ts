@@ -21,7 +21,7 @@ export const modalComponentSubCommand = createCommand({
     description: "show a modal",
   },
   run: (ctx) => {
-    return ctx.showModal(modal.build("Sub command"));
+    return ctx.showModal(modal.build());
   },
 });
 

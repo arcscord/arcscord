@@ -1,9 +1,52 @@
 import type { ModalSubmitInteraction } from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
+import type { ModalFields, ModalFieldValues } from "#/base/components/shared/component_definer.type";
 import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
 
-export type ModalContextValue = string | readonly string[] | boolean | null;
+export type ModalContextValue = string | readonly unknown[] | boolean | null | undefined;
+
+export type ModalContextOptions<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+  Fields extends ModalFields | undefined = ModalFields | undefined,
+> = BaseComponentContextOptions<M, Route> & {
+  fields?: Fields;
+};
+
+export function readModalRawValues(interaction: ModalSubmitInteraction): Map<string, ModalContextValue> {
+  const values: [string, ModalContextValue][] = [];
+  for (const field of interaction.fields.fields.values()) {
+    if ("value" in field) {
+      values.push([field.customId, field.value]);
+    }
+    else if ("values" in field) {
+      values.push([field.customId, field.values]);
+    }
+  }
+
+  return new Map<string, ModalContextValue>(values);
+}
+
+export function readModalRawFields(interaction: ModalSubmitInteraction): Map<string, unknown> {
+  return new Map(
+    [...interaction.fields.fields.entries()].map(([customId, field]) => [customId, field as unknown]),
+  );
+}
+
+export function parseModalFieldValues<Fields extends ModalFields>(
+  fields: Fields,
+  rawValues: Map<string, ModalContextValue>,
+  rawFields: Map<string, unknown>,
+): ModalFieldValues<Fields> {
+  return Object.fromEntries(
+    Object.entries(fields).map(([key, field]) => [key, field.parse({
+      customId: key,
+      field: rawFields.get(key),
+      value: rawValues.get(key),
+    })]),
+  ) as ModalFieldValues<Fields>;
+}
 
 /**
  * `DmModalContext` is a class representing the context of a modal interaction within a direct message (DM).
@@ -11,13 +54,24 @@ export type ModalContextValue = string | readonly string[] | boolean | null;
 export class ModalContext<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
+  Values = Record<string, ModalContextValue>,
 > extends BaseComponentContext<M, Route> {
   interaction: ModalSubmitInteraction;
 
   /**
-   * Map of field custom IDs to their submitted values.
+   * Parsed values by field name.
    */
-  values: Map<string, ModalContextValue>;
+  values: Values;
+
+  /**
+   * Raw map of Discord field custom IDs to submitted values.
+   */
+  rawValues: Map<string, ModalContextValue>;
+
+  /**
+   * Raw Discord modal data by custom ID.
+   */
+  rawFields: Map<string, unknown>;
 
   /**
    * Constructs a DM modal context.
@@ -25,25 +79,23 @@ export class ModalContext<
    * @param interaction - The modal submit interaction.
    * @param options
    */
-  constructor(client: ArcClient, interaction: ModalSubmitInteraction, options: BaseComponentContextOptions<M, Route>) {
+  constructor(
+    client: ArcClient,
+    interaction: ModalSubmitInteraction,
+    options: ModalContextOptions<M, Route>,
+  ) {
     super(client, interaction, options);
 
     this.interaction = interaction;
+    this.rawFields = readModalRawFields(interaction);
+    this.rawValues = readModalRawValues(interaction);
 
-    const values: [string, ModalContextValue][] = [];
-    for (const field of interaction.fields.fields.values()) {
-      if ("value" in field) {
-        values.push([field.customId, field.value]);
-      }
-      else if ("values" in field) {
-        values.push([field.customId, field.values]);
-      }
-    }
-
-    this.values = new Map<string, ModalContextValue>(values);
+    this.values = (options.fields
+      ? parseModalFieldValues(options.fields, this.rawValues, this.rawFields)
+      : Object.fromEntries(this.rawValues.entries())) as Values;
   }
 
-  isModalContext(): this is ModalContext<M, Route> {
+  isModalContext(): this is ModalContext<M, Route, Values> {
     return true;
   }
 }

@@ -11,7 +11,7 @@ import type {
 import type { ComponentRunResult } from "#/base/components/interaction/component.type";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import type { ButtonContext } from "#/base/components/interaction/context/button_context";
-import type { ModalContext } from "#/base/components/interaction/context/modal_context";
+import type { ModalContext, ModalContextValue } from "#/base/components/interaction/context/modal_context";
 import type {
   ChannelSelectMenuContext,
   MentionableSelectMenuContext,
@@ -20,9 +20,9 @@ import type {
   UserSelectMenuContext,
 } from "#/base/components/interaction/context/select_menu_context";
 import type { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
-import type { Button, MessageComponentType, TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
+import type { Button, MessageComponentType, ModalFields, ModalFieldValues, TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
-import type { ComponentBuildArgs } from "./route";
+import type { ComponentBuildArgs, IdInitialiseFunction } from "./route";
 
 export type RouteComponentHandle<Route extends string> = {
   /**
@@ -46,6 +46,29 @@ export type {
   RouteVariables,
   RouteVariablesObject,
 } from "./route";
+
+/**
+ * Options accepted by component factory functions before route arguments are resolved.
+ */
+export type ComponentBuilderOptions<
+  Handler extends { build: (...args: any[]) => unknown },
+  Options extends string[],
+> = Omit<Handler, "build"> & {
+  build: (id: IdInitialiseFunction, ...args: Options) => ReturnType<Handler["build"]>;
+};
+
+/**
+ * Options accepted by the typed modal factory before route arguments are resolved.
+ */
+export type ModalComponentBuilderOptions<
+  Handler extends { build: (...args: any[]) => unknown },
+  Options extends string[],
+  Fields extends ModalFields,
+> = Omit<Handler, "build" | "fields"> & {
+  fields: Fields;
+  build: (id: IdInitialiseFunction, fields: Fields, ...args: Options) => ReturnType<Handler["build"]>;
+};
+
 /**
  * Base properties for all component types.
  */
@@ -261,8 +284,10 @@ export type ModalComponentHandler<
   Options extends string[] = string[],
   Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
+  Fields extends ModalFields | undefined = ModalFields | undefined,
 > = BaseComponentHandler<Middleware, Route> & {
   handlerType: typeof componentHandlerTypeEnum.modal;
+  fields?: Fields;
 
   /**
    * Function to build the modal.
@@ -272,7 +297,23 @@ export type ModalComponentHandler<
   /**
    * Function to run when the modal is submitted.
    */
-  run: (ctx: ModalContext<Middleware, Route>) => Promise<ComponentRunResult>;
+  run: (ctx: ModalContext<
+    Middleware,
+    Route,
+    Fields extends ModalFields ? ModalFieldValues<Fields> : Record<string, ModalContextValue>
+  >) => Promise<ComponentRunResult>;
+};
+
+/**
+ * Storage-compatible modal handler shape.
+ *
+ * @internal
+ */
+export type AnyModalComponentHandler = BaseComponentHandler<ComponentMiddleware[], string> & {
+  fields?: ModalFields;
+  handlerType: typeof componentHandlerTypeEnum.modal;
+  build: (...args: any[]) => ModalComponentData;
+  run: (ctx: ModalContext<ComponentMiddleware[], string, any>) => Promise<ComponentRunResult>;
 };
 
 /**
@@ -295,4 +336,4 @@ export type ComponentHandler
   = | ButtonComponentHandler<any[], ComponentMiddleware[], any>
     | AnyStringSelectMenuComponentHandler
     | Exclude<SelectMenuComponentHandler<any[], ComponentMiddleware[], any>, StringSelectMenuComponentHandler<any[], ComponentMiddleware[], any>>
-    | ModalComponentHandler<any[], ComponentMiddleware[], any>;
+    | AnyModalComponentHandler;

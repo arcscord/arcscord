@@ -4,8 +4,10 @@ import type {
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
   ComponentBuildArgs,
+  ComponentBuilderOptions,
   IdInitialiseFunction,
   MentionableSelectMenuComponentHandler,
+  ModalComponentBuilderOptions,
   ModalComponentHandler,
   RoleSelectMenuComponentHandler,
   SelectMenuComponentHandler,
@@ -17,23 +19,18 @@ import type { ComponentMiddleware } from "#/base/components/interaction/componen
 import type { StringSelectMenuContext } from "#/base/components/interaction/context/select_menu_context";
 import type { RouteVariablesObject } from "#/base/components/interaction/route";
 import type {
+  ModalFields,
   StringSelectMenu,
   TypedSelectMenuOptions,
 } from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import { ComponentType } from "discord-api-types/v10";
 import { createRouteId, hasComponentRouteParams } from "#/base/components/interaction/route";
+import { withModalFieldIds } from "#/base/components/modal/builders";
 import { stringSelectMenu } from "#/base/components/shared/builders";
 import { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
 
 type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
-
-type ComponentBuilderOptions<
-  Handler extends { build: (...args: any[]) => unknown },
-  Options extends string[],
-> = Omit<Handler, "build"> & {
-  build: (id: IdInitialiseFunction, ...args: Options) => ReturnType<Handler["build"]>;
-};
 
 function createRouteBuildResolver<Route extends string, Options extends string[]>(
   route: Route,
@@ -259,19 +256,19 @@ export function createButton<
  * ```ts
  * const myFamousModal = createModal({
  *   route: "famousModal",
- *   build: (id, title) => modal(
- *     title,
- *     id(),
- *     label({
+ *   fields: {
+ *     entry: modalTextInput({
  *       label: "Entry",
- *       component: textInput({
- *         customId: "entry",
- *         style: "short",
- *       }),
+ *       style: "short",
  *     }),
- *   ),
+ *   },
+ *   build: (id, fields) => buildModal({
+ *     title: "Famous modal",
+ *     customId: id(),
+ *     components: [fields.entry.label()],
+ *   }),
  *   run: (ctx) => {
- *     return ctx.reply(`You reply with ${ctx.values.get("entry") || "nothing"}`);
+ *     return ctx.reply(`You reply with ${ctx.values.entry || "nothing"}`);
  *   },
  * });
  * ```
@@ -281,14 +278,40 @@ export function createModal<
   Options extends string[],
   Middleware extends ComponentMiddleware[] = [],
   Route extends string = string,
->(options: Omit<ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route>, Options>, "handlerType">): ModalComponentHandler<Options, Middleware, Route> {
+  const Fields extends ModalFields = ModalFields,
+>(options: Omit<ModalComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, Fields>, Options, Fields>, "handlerType">): ModalComponentHandler<Options, Middleware, Route, Fields>;
+export function createModal<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = [],
+  Route extends string = string,
+>(options: Omit<ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, undefined>, Options>, "fields" | "handlerType">): ModalComponentHandler<Options, Middleware, Route, undefined>;
+export function createModal<
+  Options extends string[],
+  Middleware extends ComponentMiddleware[] = [],
+  Route extends string = string,
+  const Fields extends ModalFields = ModalFields,
+>(
+  options:
+    | Omit<ModalComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, Fields>, Options, Fields>, "handlerType">
+    | Omit<ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, undefined>, Options>, "fields" | "handlerType">,
+): ModalComponentHandler<Options, Middleware, Route, Fields | undefined> {
   const resolveRouteBuild = createRouteBuildResolver<Route, Options>(options.route);
+  const fields = "fields" in options ? withModalFieldIds(options.fields) : undefined;
   return {
     ...options,
+    fields,
     build: (...args: ComponentBuildArgs<Route, Options>) => {
       const [buildId, buildArgs] = resolveRouteBuild(...args);
-      return options.build(buildId, ...buildArgs);
+      if (fields) {
+        return (
+          options as ModalComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, Fields>, Options, Fields>
+        ).build(buildId, fields, ...buildArgs);
+      }
+
+      return (
+        options as ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, undefined>, Options>
+      ).build(buildId, ...buildArgs);
     },
     handlerType: componentHandlerTypeEnum.modal,
-  };
+  } as ModalComponentHandler<Options, Middleware, Route, Fields | undefined>;
 }

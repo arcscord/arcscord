@@ -207,7 +207,20 @@ export class ComponentManager extends BaseManager {
           values: (interaction as ChannelSelectMenuInteraction).channels.map(c => c),
         }));
       case "modal":
-        return ok(new ModalContext(this.client, interaction as ModalSubmitInteraction, { locale, params }));
+        try {
+          return ok(new ModalContext(this.client, interaction as ModalSubmitInteraction, {
+            fields: (component as ModalComponentHandler).fields,
+            locale,
+            params,
+          }));
+        }
+        catch (e) {
+          return error(new ComponentError({
+            message: `failed to parse modal values for ${component.route}`,
+            interaction,
+            originalError: anyToError(e),
+          }));
+        }
       default:
         return error(new ComponentError({
           message: `Unknown component type: ${type}`,

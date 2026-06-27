@@ -251,7 +251,7 @@ export class BaseComponentContext<
    * Checks if the current context is a modal context.
    * @returns True if it is a modal context, false otherwise.
    */
-  isModalContext(): this is ModalContext<M, Route> {
+  isModalContext(): this is ModalContext<M, Route, any> {
     return false;
   }
 

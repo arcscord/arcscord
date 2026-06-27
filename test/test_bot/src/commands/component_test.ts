@@ -21,7 +21,7 @@ import {
   middlewareMemberPermissionButton,
   middlewareUserAllowListButton,
 } from "../components/middleware";
-import { feedbackModal, profileModal, surveyModal } from "../components/modal";
+import { feedbackModal, profileModal, selectModal, surveyModal, uploadModal } from "../components/modal";
 import { roleSelectMenu } from "../components/role_select_menu";
 import { routeParamsButton } from "../components/route_params_button";
 import { redSimpleButton, simpleButton } from "../components/simple_button";
@@ -68,6 +68,14 @@ export const componentTestCommand = createCommand({
             {
               name: "modal_survey",
               value: "modal_survey",
+            },
+            {
+              name: "modal_upload",
+              value: "modal_upload",
+            },
+            {
+              name: "modal_selects",
+              value: "modal_selects",
             },
             {
               name: "components_v2_layout",
@@ -134,11 +142,15 @@ export const componentTestCommand = createCommand({
           channelSelectMenu.build(),
         ));
       case "modal_profile":
-        return ctx.showModal(profileModal.build("Profile"));
+        return ctx.showModal(profileModal.build());
       case "modal_feedback":
-        return ctx.showModal(feedbackModal.build("Feedback"));
+        return ctx.showModal(feedbackModal.build());
       case "modal_survey":
-        return ctx.showModal(surveyModal.build("Survey"));
+        return ctx.showModal(surveyModal.build());
+      case "modal_upload":
+        return ctx.showModal(uploadModal.build());
+      case "modal_selects":
+        return ctx.showModal(selectModal.build());
       case "components_v2_layout":
         return ctx.reply(
           v2Message(

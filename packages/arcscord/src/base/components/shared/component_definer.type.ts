@@ -1,5 +1,6 @@
 import type { ButtonStyle, ComponentType, SeparatorSpacingSize } from "discord-api-types/v10";
 import type {
+  Attachment,
   ChannelSelectMenuComponentData,
   CheckboxComponentData,
   CheckboxGroupComponentData,
@@ -9,12 +10,14 @@ import type {
   ContainerComponentData,
   FileComponentData,
   FileUploadComponentData,
+  GuildBasedChannel,
   LabelComponentData,
   MediaGalleryComponentData,
   MediaGalleryItemData,
   MentionableSelectMenuComponentData,
   RadioGroupComponentData,
   RadioGroupOption,
+  Role,
   RoleSelectMenuComponentData,
   SectionComponentData,
   SeparatorComponentData,
@@ -22,6 +25,7 @@ import type {
   TextDisplayComponentData,
   TextInputComponentData,
   UnfurledMediaItemData,
+  User,
   UserSelectMenuComponentData,
 } from "discord.js";
 import type {
@@ -512,3 +516,97 @@ export type ModalValues<T extends TypedTextInput> = {
     ? string
     : string | undefined;
 };
+
+/**
+ * Runtime input provided to modal field parsers.
+ */
+export type ModalFieldParseInput = {
+  readonly customId: string;
+  readonly field: unknown;
+  readonly value: unknown;
+};
+
+/**
+ * Field definition used by typed modal handlers.
+ */
+export type ModalFieldDefinition<Value = unknown> = {
+  readonly __modalField: true;
+  readonly label: () => LabelComponentData;
+  readonly parse: (input: ModalFieldParseInput) => Value;
+  readonly withCustomId: (customId: string) => ModalFieldDefinition<Value>;
+};
+
+/**
+ * Modal field definition map.
+ */
+export type ModalFields = Record<string, ModalFieldDefinition>;
+
+/**
+ * Values inferred from a modal field definition map.
+ */
+export type ModalFieldValues<Fields extends ModalFields> = {
+  readonly [K in keyof Fields]: Fields[K] extends ModalFieldDefinition<infer Value>
+    ? Value
+    : never;
+};
+
+/**
+ * Value inferred from a modal string select.
+ */
+export type ModalStringSelectValue<
+  Options extends readonly string[],
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = MaxValues extends 1 | undefined
+  ? Required extends false
+    ? Options[number] | undefined
+    : Options[number]
+  : Required extends false
+    ? Options[number][] | undefined
+    : Options[number][];
+
+export type ModalSelectableValue<
+  Value,
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = MaxValues extends 1 | undefined
+  ? Required extends false
+    ? Value | undefined
+    : Value
+  : Required extends false
+    ? Value[] | undefined
+    : Value[];
+
+export type ModalUserSelectValue<
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = ModalSelectableValue<User, MaxValues, Required>;
+
+export type ModalRoleSelectValue<
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = ModalSelectableValue<Role, MaxValues, Required>;
+
+export type ModalMentionableSelectValue<
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = ModalSelectableValue<User | Role, MaxValues, Required>;
+
+export type ModalChannelSelectValue<
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = ModalSelectableValue<GuildBasedChannel, MaxValues, Required>;
+
+export type ModalFileUploadValue<
+  MaxValues extends number | undefined,
+  Required extends boolean | undefined,
+> = ModalSelectableValue<Attachment, MaxValues, Required>;
+
+export type ModalRadioGroupValue<
+  Options extends readonly { value: string }[],
+  Required extends boolean | undefined,
+> = Required extends false ? Options[number]["value"] | undefined : Options[number]["value"];
+
+export type ModalCheckboxGroupValue<
+  Options extends readonly { value: string }[],
+> = Array<Options[number]["value"]>;

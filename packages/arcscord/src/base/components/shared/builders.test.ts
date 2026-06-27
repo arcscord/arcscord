@@ -22,13 +22,13 @@ import {
   v2Message,
 } from "../display";
 import {
-  checkbox,
-  checkboxGroup,
-  fileUpload,
-  label,
-  modal,
-  radioGroup,
-  textInput,
+  buildModal,
+  modalCheckbox,
+  modalCheckboxGroup,
+  modalFileUpload,
+  modalLabel,
+  modalRadioGroup,
+  modalTextInput,
 } from "../modal";
 import {
   button,
@@ -43,7 +43,6 @@ import {
 import {
   buttonToAPI,
   componentInContainerToAPI,
-  labelToAPI,
   selectMenuOptionsToAPI,
   selectMenuToAPI,
   textInputToAPI,
@@ -334,38 +333,52 @@ describe("component builders", () => {
       ],
     });
 
-    expect(fileUpload({ customId: "upload", minValues: 1, maxValues: 2, required: true })).toEqual({
-      type: ComponentType.FileUpload,
-      id: undefined,
-      customId: "upload",
-      minValues: 1,
-      maxValues: 2,
-      required: true,
+    expect(modalFileUpload({ label: "Upload", minValues: 1, maxValues: 2, required: true }).label()).toMatchObject({
+      component: {
+        type: ComponentType.FileUpload,
+        customId: "",
+        minValues: 1,
+        maxValues: 2,
+        required: true,
+      },
+      label: "Upload",
+      type: ComponentType.Label,
     });
-    expect(radioGroup({ customId: "choice", options: [{ label: "A", value: "a" }], required: true })).toMatchObject({
-      type: ComponentType.RadioGroup,
-      customId: "choice",
-      options: [{ label: "A", value: "a" }],
-      required: true,
+    expect(modalRadioGroup({ label: "Choice", options: [{ label: "A", value: "a" }], required: true }).label()).toMatchObject({
+      component: {
+        type: ComponentType.RadioGroup,
+        customId: "",
+        options: [{ label: "A", value: "a" }],
+        required: true,
+      },
+      label: "Choice",
     });
-    expect(checkboxGroup({ customId: "checks", options: [{ label: "A", value: "a" }], minValues: 0, maxValues: 1 })).toMatchObject({
-      type: ComponentType.CheckboxGroup,
-      customId: "checks",
-      minValues: 0,
-      maxValues: 1,
+    expect(modalCheckboxGroup({ label: "Checks", options: [{ label: "A", value: "a" }], minValues: 0, maxValues: 1 }).label()).toMatchObject({
+      component: {
+        type: ComponentType.CheckboxGroup,
+        customId: "",
+        minValues: 0,
+        maxValues: 1,
+      },
+      label: "Checks",
     });
-    expect(checkbox({ customId: "accept", default: true })).toEqual({
-      type: ComponentType.Checkbox,
-      id: undefined,
-      customId: "accept",
-      default: true,
+    expect(modalCheckbox({ label: "Accept", default: true }).label()).toMatchObject({
+      component: {
+        type: ComponentType.Checkbox,
+        customId: "",
+        default: true,
+      },
+      label: "Accept",
     });
 
-    expect(labelToAPI(label({
+    expect(modalLabel({
       label: "Upload",
       description: "Attach a file",
-      component: fileUpload({ customId: "file" }),
-    }) as any)).toMatchObject({
+      component: {
+        type: ComponentType.FileUpload,
+        customId: "file",
+      },
+    }) as any).toMatchObject({
       type: ComponentType.Label,
       label: "Upload",
       description: "Attach a file",
@@ -373,6 +386,45 @@ describe("component builders", () => {
         type: ComponentType.FileUpload,
         customId: "file",
       },
+    });
+  });
+
+  it("builds modals from typed fields and v2 top-level components", () => {
+    const labelComponent = modalTextInput({
+      label: "Reason",
+      required: true,
+      style: "short",
+    }).withCustomId("reason").label();
+
+    expect(buildModal({
+      title: "Report",
+      customId: "report",
+      components: [labelComponent, "Details"],
+    })).toEqual({
+      title: "Report",
+      customId: "report",
+      components: [
+        expect.objectContaining({
+          type: ComponentType.Label,
+          label: "Reason",
+          component: expect.objectContaining({
+            type: ComponentType.TextInput,
+            customId: "reason",
+            style: 1,
+            required: true,
+          }),
+        }),
+        { type: ComponentType.TextDisplay, id: undefined, content: "Details" },
+      ],
+    });
+    expect(buildModal({
+      title: "Report",
+      customId: "report",
+      components: [labelComponent],
+    }).components[0]).toMatchObject({
+      component: expect.not.objectContaining({
+        label: "Reason",
+      }),
     });
   });
 
@@ -411,64 +463,6 @@ describe("component builders", () => {
             { type: ComponentType.TextDisplay, content: "Footer" },
           ],
         },
-      ],
-    });
-  });
-
-  it("builds modals from v2 top-level components and legacy text inputs", () => {
-    const labelComponent = label({
-      label: "Reason",
-      component: textInput({
-        customId: "reason",
-        style: "short",
-        required: true,
-      }),
-    });
-
-    expect(modal("Report", "report", labelComponent, "Details")).toEqual({
-      title: "Report",
-      customId: "report",
-      components: [
-        expect.objectContaining({
-          type: ComponentType.Label,
-          label: "Reason",
-          component: expect.objectContaining({
-            type: ComponentType.TextInput,
-            customId: "reason",
-            style: 1,
-            required: true,
-          }),
-        }),
-        { type: ComponentType.TextDisplay, id: undefined, content: "Details" },
-      ],
-    });
-
-    expect(modal("Legacy", "legacy", {
-      label: "Name",
-      customId: "name",
-      style: "short",
-    } as any, {
-      label: "Bio",
-      customId: "bio",
-      style: "paragraph",
-    } as any)).toEqual({
-      title: "Legacy",
-      customId: "legacy",
-      components: [
-        { type: ComponentType.ActionRow, components: [expect.objectContaining({ customId: "name", style: 1 })] },
-        { type: ComponentType.ActionRow, components: [expect.objectContaining({ customId: "bio", style: 2 })] },
-      ],
-    });
-
-    expect(modal("Typed", "typed", {
-      name: { label: "Name", style: "short" },
-      bio: { label: "Bio", style: "paragraph" },
-    } as any)).toEqual({
-      title: "Typed",
-      customId: "typed",
-      components: [
-        { type: ComponentType.ActionRow, components: [expect.objectContaining({ customId: "name", style: 1 })] },
-        { type: ComponentType.ActionRow, components: [expect.objectContaining({ customId: "bio", style: 2 })] },
       ],
     });
   });

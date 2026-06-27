@@ -1,19 +1,23 @@
 export type { ComponentRunResult } from "./component.type";
 export {
   createButton,
+  createModal,
   createSelectMenu,
   createTypedStringMenu,
 } from "./component_handler.func";
 export type {
+  AnyModalComponentHandler,
   AnyStringSelectMenuComponentHandler,
   BaseComponentHandler,
   BaseMessageComponentHandler,
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
   ComponentBuildArgs,
+  ComponentBuilderOptions,
   ComponentHandler,
   IdInitialiseFunction,
   MentionableSelectMenuComponentHandler,
+  ModalComponentBuilderOptions,
   ModalComponentHandler,
   RoleSelectMenuComponentHandler,
   RouteComponentHandle,

@@ -25,7 +25,7 @@ import {
   middlewareMemberPermissionButton,
   middlewareUserAllowListButton,
 } from "./components/middleware";
-import { feedbackModal, profileModal, surveyModal } from "./components/modal";
+import { feedbackModal, profileModal, selectModal, surveyModal, uploadModal } from "./components/modal";
 import { roleSelectMenu } from "./components/role_select_menu";
 import { routeParamsButton } from "./components/route_params_button";
 import { redSimpleButton, simpleButton } from "./components/simple_button";
@@ -51,6 +51,8 @@ export default {
     profileModal,
     feedbackModal,
     surveyModal,
+    uploadModal,
+    selectModal,
     disableAllButton,
     disableRowButton,
     disableComponentButton,

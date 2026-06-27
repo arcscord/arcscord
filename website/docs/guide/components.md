@@ -57,23 +57,23 @@ roleSelectMenu.build("Select a role");
 ## Modal
 
 ```ts
-import { label, modal, textInput, createModal } from "arcscord";
+import { buildModal, createModal, modalTextInput } from "arcscord";
 
 export const modal = createModal({
   route: "modal",
-  build: (id, title) =>
-    modal(
-      title,
-      id(),
-      label({
-        label: "Name",
-        component: textInput({
-          customId: "name",
-          style: "short",
-          required: true,
-        }),
-      }),
-    ),
-  run: ctx => ctx.reply(`Your name is ${ctx.values.get("name")}`),
+  fields: {
+    name: modalTextInput({
+      label: "Name",
+      style: "short",
+      required: true,
+    }),
+  },
+  build: (id, fields) =>
+    buildModal({
+      title: "Profile",
+      customId: id(),
+      components: [fields.name.label()],
+    }),
+  run: ctx => ctx.reply(`Your name is ${ctx.values.name}`),
 });
 ```
