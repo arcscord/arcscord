@@ -3,6 +3,7 @@ import { autocompleteCommand } from "./commands/autocomplete";
 import { avatarCommand } from "./commands/avatar";
 import { componentTestCommand } from "./commands/component_test";
 import { disableComponentCommand } from "./commands/disable_component";
+import { docCommand, docModals } from "./commands/doc";
 import { i18nCommand } from "./commands/i18n";
 import { messageInfosCommand } from "./commands/message_infos";
 import {
@@ -39,6 +40,7 @@ import { messageEvent } from "./event/message";
 export default {
   events: [messageEvent, inviteEvent],
   components: [
+    ...docModals,
     simpleButton,
     redSimpleButton,
     stringSelectMenu,
@@ -66,6 +68,7 @@ export default {
     i18nButton,
   ],
   commands: [
+    docCommand,
     avatarCommand,
     messageInfosCommand,
     componentTestCommand,

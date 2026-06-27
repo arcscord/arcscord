@@ -28,6 +28,103 @@
   --ifm-navbar-background-color: #121a2a;
 }
 
+/* ===== Discord screenshot container ===== */
+.discord-screenshot {
+  display: inline-block;
+  max-width: 480px;
+  border-radius: 6px;
+  overflow: hidden;
+  margin: 0.75rem 0 1.25rem;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="dark"] .discord-screenshot {
+  border-color: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
+}
+
+.discord-screenshot img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0;
+}
+
+/* ===== Discord component previews ===== */
+.discord-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 16px;
+  background: #313338;
+  border-radius: 8px;
+  margin: 1rem 0;
+  align-items: center;
+}
+
+.discord-preview-col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px;
+  background: #313338;
+  border-radius: 8px;
+  margin: 1rem 0;
+}
+
+.discord-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border: none;
+  border-radius: 3px;
+  padding: 2px 16px;
+  height: 32px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: default;
+  color: white;
+  min-width: 60px;
+  white-space: nowrap;
+  font-family: inherit;
+}
+
+.discord-btn--primary   { background: #5865f2; }
+.discord-btn--secondary { background: #4e5058; }
+.discord-btn--success   { background: #248046; }
+.discord-btn--danger    { background: #da373c; }
+.discord-btn--link      { background: #4e5058; color: #00b0f4; }
+.discord-btn--disabled  { background: #4e5058; color: #80848e; opacity: 0.5; }
+
+.discord-select {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1e1f22;
+  border: 1px solid #3f4147;
+  border-radius: 4px;
+  padding: 0 12px;
+  height: 40px;
+  color: #b5bac1;
+  font-size: 14px;
+  min-width: 220px;
+  max-width: 440px;
+}
+
+.discord-select-placeholder { color: #80848e; }
+.discord-select-arrow { color: #b5bac1; font-size: 10px; margin-left: 8px; }
+
+.discord-label {
+  color: #b5bac1;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 6px;
+}
+
 /* ===== Sidebar — fixed, full height, no horizontal scroll ===== */
 @media (min-width: 997px) {
   [class*="docSidebarContainer"] {

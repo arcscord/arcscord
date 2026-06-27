@@ -31,4 +31,10 @@ export default antfu(
       "prefer-promise-reject-errors": "off",
     },
   },
+  {
+    files: ["**/*.tsx"],
+    rules: {
+      "ts/explicit-function-return-type": "off",
+    },
+  },
 );

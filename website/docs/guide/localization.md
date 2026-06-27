@@ -20,8 +20,8 @@ import { ArcClient } from "arcscord";
 import en from "../locale/en.json";
 import fr from "../locale/fr.json";
 
-const client = new ArcClient(process.env.TOKEN ?? "", {
-  intents: [],
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
   managers: {
     locale: {
       enabled: true,
@@ -37,6 +37,10 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
     },
   },
 });
+
+// load your handlers here...
+
+void client.login();
 ```
 
 Arcscord passes `i18nOptions` directly to `i18next.init(...)`. See the i18next docs for [configuration options](https://www.i18next.com/overview/configuration-options), especially `resources`, `defaultNS`, `fallbackLng`, `supportedLngs`, `preload`, and `enableSelector`.
