@@ -361,7 +361,6 @@ export type {
   LocaleManagerOptions,
 } from "./manager/locale/locale_manager.type";
 
-export { internalErrorEmbed } from "./utils/discord/embed/embed.const";
 export { channelTypeEnum } from "./utils/discord/type/channel.enum";
 export type { ChannelType } from "./utils/discord/type/channel.type";
 export type { Locale, LocaleMap } from "./utils/discord/type/locale.type";
