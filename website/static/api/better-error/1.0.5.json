@@ -1,0 +1,2601 @@
+{
+  "schemaVersion": "2.0",
+  "id": 0,
+  "name": "@arcscord/better-error",
+  "variant": "project",
+  "kind": 1,
+  "flags": {},
+  "children": [
+    {
+      "id": 19,
+      "name": "BaseError",
+      "variant": "declaration",
+      "kind": 128,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "A custom error class"
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": 32,
+          "name": "constructor",
+          "variant": "declaration",
+          "kind": 512,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 22,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L22"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 33,
+              "name": "BaseError",
+              "variant": "signature",
+              "kind": 16384,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Creates a new instance of the error class."
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 22,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L22"
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 34,
+                  "name": "opt",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {},
+                  "comment": {
+                    "summary": [
+                      {
+                        "kind": "text",
+                        "text": "The options for creating the error."
+                      }
+                    ]
+                  },
+                  "type": {
+                    "type": "union",
+                    "types": [
+                      {
+                        "type": "intrinsic",
+                        "name": "string"
+                      },
+                      {
+                        "type": "reference",
+                        "target": 3,
+                        "name": "ErrorOptions",
+                        "package": "@arcscord/better-error"
+                      }
+                    ]
+                  }
+                }
+              ],
+              "type": {
+                "type": "reference",
+                "target": 19,
+                "name": "BaseError",
+                "package": "@arcscord/better-error"
+              },
+              "overwrites": {
+                "type": "reference",
+                "target": -1,
+                "name": "Error.constructor",
+                "package": "typescript"
+              }
+            }
+          ],
+          "overwrites": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.constructor",
+            "package": "typescript"
+          }
+        },
+        {
+          "id": 36,
+          "name": "_debugs",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isProtected": true
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 13,
+              "character": 12,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L13"
+            }
+          ],
+          "type": {
+            "type": "reference",
+            "target": {
+              "packageName": "typescript",
+              "packagePath": "lib/lib.es2015.collection.d.ts",
+              "qualifiedName": "Map"
+            },
+            "typeArguments": [
+              {
+                "type": "intrinsic",
+                "name": "string"
+              },
+              {
+                "type": "intrinsic",
+                "name": "unknown"
+              }
+            ],
+            "name": "Map",
+            "package": "typescript"
+          },
+          "defaultValue": "..."
+        },
+        {
+          "id": 38,
+          "name": "_id",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isProtected": true,
+            "isOptional": true
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 15,
+              "character": 12,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L15"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        },
+        {
+          "id": 37,
+          "name": "_originalError",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isProtected": true,
+            "isOptional": true
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 14,
+              "character": 12,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L14"
+            }
+          ],
+          "type": {
+            "type": "union",
+            "types": [
+              {
+                "type": "reference",
+                "target": 19,
+                "name": "BaseError",
+                "package": "@arcscord/better-error"
+              },
+              {
+                "type": "reference",
+                "target": {
+                  "packageName": "typescript",
+                  "packagePath": "lib/lib.es5.d.ts",
+                  "qualifiedName": "Error"
+                },
+                "name": "Error",
+                "package": "typescript"
+              }
+            ]
+          }
+        },
+        {
+          "id": 73,
+          "name": "cause",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isExternal": true,
+            "isOptional": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/lib.es2022.error.d.ts",
+              "line": 24,
+              "character": 4
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "unknown"
+          },
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.cause"
+          }
+        },
+        {
+          "id": 71,
+          "name": "message",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isExternal": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/lib.es5.d.ts",
+              "line": 1075,
+              "character": 4
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          },
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.message"
+          }
+        },
+        {
+          "id": 35,
+          "name": "name",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {},
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "The name of the error"
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 11,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L11"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          },
+          "defaultValue": "\"baseError\"",
+          "overwrites": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.name"
+          }
+        },
+        {
+          "id": 72,
+          "name": "stack",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isExternal": true,
+            "isOptional": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/lib.es5.d.ts",
+              "line": 1076,
+              "character": 4
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          },
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.stack"
+          }
+        },
+        {
+          "id": 31,
+          "name": "stackTraceLimit",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isStatic": true,
+            "isExternal": true,
+            "isInherited": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "The "
+              },
+              {
+                "kind": "code",
+                "text": "`Error.stackTraceLimit`"
+              },
+              {
+                "kind": "text",
+                "text": " property specifies the number of stack frames\ncollected by a stack trace (whether generated by "
+              },
+              {
+                "kind": "code",
+                "text": "`new Error().stack`"
+              },
+              {
+                "kind": "text",
+                "text": " or\n"
+              },
+              {
+                "kind": "code",
+                "text": "`Error.captureStackTrace(obj)`"
+              },
+              {
+                "kind": "text",
+                "text": ").\n\nThe default value is "
+              },
+              {
+                "kind": "code",
+                "text": "`10`"
+              },
+              {
+                "kind": "text",
+                "text": " but may be set to any valid JavaScript number. Changes\nwill affect any stack trace captured _after_ the value has been changed.\n\nIf set to a non-number value, or set to a negative number, stack traces will\nnot capture any frames."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/@types+node@26.0.0/node_modules/@types/node/globals.d.ts",
+              "line": 67,
+              "character": 4
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "number"
+          },
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.stackTraceLimit"
+          }
+        },
+        {
+          "id": 44,
+          "name": "id",
+          "variant": "declaration",
+          "kind": 262144,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 60,
+              "character": 6,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L60"
+            },
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 69,
+              "character": 6,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L69"
+            }
+          ],
+          "getSignature": {
+            "id": 45,
+            "name": "id",
+            "variant": "signature",
+            "kind": 524288,
+            "flags": {},
+            "comment": {
+              "summary": [
+                {
+                  "kind": "text",
+                  "text": "Retrieves the error id"
+                }
+              ],
+              "blockTags": [
+                {
+                  "tag": "@returns",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "The id of the error, or undefined if it does not have an id."
+                    }
+                  ]
+                }
+              ]
+            },
+            "sources": [
+              {
+                "fileName": "packages/better_error/src/base_error.ts",
+                "line": 60,
+                "character": 6,
+                "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L60"
+              }
+            ],
+            "type": {
+              "type": "union",
+              "types": [
+                {
+                  "type": "intrinsic",
+                  "name": "string"
+                },
+                {
+                  "type": "intrinsic",
+                  "name": "undefined"
+                }
+              ]
+            }
+          },
+          "setSignature": {
+            "id": 46,
+            "name": "id",
+            "variant": "signature",
+            "kind": 1048576,
+            "flags": {},
+            "comment": {
+              "summary": [
+                {
+                  "kind": "text",
+                  "text": "Sets the error id value."
+                }
+              ]
+            },
+            "sources": [
+              {
+                "fileName": "packages/better_error/src/base_error.ts",
+                "line": 69,
+                "character": 6,
+                "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L69"
+              }
+            ],
+            "parameters": [
+              {
+                "id": 47,
+                "name": "value",
+                "variant": "param",
+                "kind": 32768,
+                "flags": {},
+                "comment": {
+                  "summary": [
+                    {
+                      "kind": "text",
+                      "text": "The ID value to be set."
+                    }
+                  ]
+                },
+                "type": {
+                  "type": "intrinsic",
+                  "name": "string"
+                }
+              }
+            ],
+            "type": {
+              "type": "intrinsic",
+              "name": "void"
+            }
+          }
+        },
+        {
+          "id": 42,
+          "name": "originalError",
+          "variant": "declaration",
+          "kind": 262144,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 51,
+              "character": 6,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L51"
+            }
+          ],
+          "getSignature": {
+            "id": 43,
+            "name": "originalError",
+            "variant": "signature",
+            "kind": 524288,
+            "flags": {},
+            "comment": {
+              "summary": [
+                {
+                  "kind": "text",
+                  "text": "Returns the original error associated with this error."
+                }
+              ],
+              "blockTags": [
+                {
+                  "tag": "@returns",
+                  "content": [
+                    {
+                      "kind": "text",
+                      "text": "The original error, if available; otherwise, undefined."
+                    }
+                  ]
+                }
+              ]
+            },
+            "sources": [
+              {
+                "fileName": "packages/better_error/src/base_error.ts",
+                "line": 51,
+                "character": 6,
+                "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L51"
+              }
+            ],
+            "type": {
+              "type": "union",
+              "types": [
+                {
+                  "type": "reference",
+                  "target": 19,
+                  "name": "BaseError",
+                  "package": "@arcscord/better-error"
+                },
+                {
+                  "type": "reference",
+                  "target": {
+                    "packageName": "typescript",
+                    "packagePath": "lib/lib.es5.d.ts",
+                    "qualifiedName": "Error"
+                  },
+                  "name": "Error",
+                  "package": "typescript"
+                },
+                {
+                  "type": "intrinsic",
+                  "name": "undefined"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "id": 67,
+          "name": "defaultGetDebugOptions",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 200,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L200"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 68,
+              "name": "defaultGetDebugOptions",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Returns the default debug options for a debug session."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "The default debug options as an object"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 200,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L200"
+                }
+              ],
+              "type": {
+                "type": "reference",
+                "target": {
+                  "packageName": "typescript",
+                  "packagePath": "lib/lib.es5.d.ts",
+                  "qualifiedName": "Required"
+                },
+                "typeArguments": [
+                  {
+                    "type": "reference",
+                    "target": 11,
+                    "name": "GetDebugOptions",
+                    "package": "@arcscord/better-error"
+                  }
+                ],
+                "name": "Required",
+                "package": "typescript"
+              }
+            }
+          ]
+        },
+        {
+          "id": 69,
+          "name": "fullMessage",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 216,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L216"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 70,
+              "name": "fullMessage",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Returns the full message, which includes the name of the object concatenated with the message.\nThe message is returned as a string."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "The full message, combining the name and the message."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 216,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L216"
+                }
+              ],
+              "type": {
+                "type": "intrinsic",
+                "name": "string"
+              }
+            }
+          ]
+        },
+        {
+          "id": 48,
+          "name": "generateId",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 78,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L78"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 49,
+              "name": "generateId",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Generates a unique identifier for an object."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "The current object with the generated identifier."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 78,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L78"
+                }
+              ],
+              "type": {
+                "type": "intrinsic",
+                "name": "this"
+              }
+            }
+          ]
+        },
+        {
+          "id": 50,
+          "name": "getDebugsObject",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 89,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L89"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 51,
+              "name": "getDebugsObject",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Retrieves the debug information as an object."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "The debugs object with the retrieved debug information."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 89,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L89"
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 52,
+                  "name": "options",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {},
+                  "comment": {
+                    "summary": [
+                      {
+                        "kind": "text",
+                        "text": "An optional parameter to customize the debug object."
+                      }
+                    ]
+                  },
+                  "type": {
+                    "type": "reference",
+                    "target": 11,
+                    "name": "GetDebugOptions",
+                    "package": "@arcscord/better-error"
+                  },
+                  "defaultValue": "{}"
+                }
+              ],
+              "type": {
+                "type": "reference",
+                "target": 1,
+                "name": "Debugs",
+                "package": "@arcscord/better-error"
+              }
+            }
+          ]
+        },
+        {
+          "id": 60,
+          "name": "getDebugString",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 161,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L161"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 61,
+              "name": "getDebugString",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Returns a string representation of the debug information for the current object."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "An object containing stringified debug information."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 161,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L161"
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 62,
+                  "name": "options",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {},
+                  "comment": {
+                    "summary": [
+                      {
+                        "kind": "text",
+                        "text": "Optional configuration object for fetching specific debug information."
+                      }
+                    ]
+                  },
+                  "type": {
+                    "type": "reference",
+                    "target": 11,
+                    "name": "GetDebugOptions",
+                    "package": "@arcscord/better-error"
+                  },
+                  "defaultValue": "{}"
+                }
+              ],
+              "type": {
+                "type": "reference",
+                "target": 2,
+                "name": "DebugStringObject",
+                "package": "@arcscord/better-error"
+              }
+            }
+          ]
+        },
+        {
+          "id": 63,
+          "name": "getStack",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {},
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/base_error.ts",
+              "line": 180,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L180"
+            }
+          ],
+          "signatures": [
+            {
+              "id": 64,
+              "name": "getStack",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Retrieves the stack information in the specified format."
+                  }
+                ],
+                "blockTags": [
+                  {
+                    "tag": "@returns",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "The stack information in the defined format."
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "packages/better_error/src/base_error.ts",
+                  "line": 180,
+                  "character": 2,
+                  "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L180"
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 65,
+                  "name": "stackFormat",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {},
+                  "comment": {
+                    "summary": [
+                      {
+                        "kind": "text",
+                        "text": "The format of the stack information. Defaults to \"split\"."
+                      }
+                    ]
+                  },
+                  "type": {
+                    "type": "reference",
+                    "target": 18,
+                    "name": "StackFormat",
+                    "package": "@arcscord/better-error"
+                  },
+                  "defaultValue": "\"split\""
+                },
+                {
+                  "id": 66,
+                  "name": "stacks",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isOptional": true
+                  },
+                  "comment": {
+                    "summary": [
+                      {
+                        "kind": "text",
+                        "text": "The stack information to be retrieved. If not provided, it will use the stack information of the current instance."
+                      }
+                    ]
+                  },
+                  "type": {
+                    "type": "intrinsic",
+                    "name": "string"
+                  }
+                }
+              ],
+              "type": {
+                "type": "reference",
+                "target": 2,
+                "name": "DebugStringObject",
+                "package": "@arcscord/better-error"
+              }
+            }
+          ]
+        },
+        {
+          "id": 23,
+          "name": "captureStackTrace",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {
+            "isStatic": true,
+            "isExternal": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/@types+node@26.0.0/node_modules/@types/node/globals.d.ts",
+              "line": 51,
+              "character": 4
+            }
+          ],
+          "signatures": [
+            {
+              "id": 24,
+              "name": "captureStackTrace",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {
+                "isExternal": true,
+                "isInherited": true
+              },
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Creates a "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`.stack`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": " property on "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`targetObject`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": ", which when accessed returns\na string representing the location in the code at which\n"
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`Error.captureStackTrace()`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": " was called.\n\n"
+                  },
+                  {
+                    "kind": "code",
+                    "text": "```js\nconst myObject = {};\nError.captureStackTrace(myObject);\nmyObject.stack;  // Similar to `new Error().stack`\n```"
+                  },
+                  {
+                    "kind": "text",
+                    "text": "\n\nThe first line of the trace will be prefixed with\n"
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`${myObject.name}: ${myObject.message}`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": ".\n\nThe optional "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`constructorOpt`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": " argument accepts a function. If given, all frames\nabove "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`constructorOpt`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": ", including "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`constructorOpt`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": ", will be omitted from the\ngenerated stack trace.\n\nThe "
+                  },
+                  {
+                    "kind": "code",
+                    "text": "`constructorOpt`"
+                  },
+                  {
+                    "kind": "text",
+                    "text": " argument is useful for hiding implementation\ndetails of error generation from the user. For instance:\n\n"
+                  },
+                  {
+                    "kind": "code",
+                    "text": "```js\nfunction a() {\n  b();\n}\n\nfunction b() {\n  c();\n}\n\nfunction c() {\n  // Create an error without stack trace to avoid calculating the stack trace twice.\n  const { stackTraceLimit } = Error;\n  Error.stackTraceLimit = 0;\n  const error = new Error();\n  Error.stackTraceLimit = stackTraceLimit;\n\n  // Capture the stack trace above function b\n  Error.captureStackTrace(error, b); // Neither function c, nor b is included in the stack trace\n  throw error;\n}\n\na();\n```"
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "node_modules/.pnpm/@types+node@26.0.0/node_modules/@types/node/globals.d.ts",
+                  "line": 51,
+                  "character": 4
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 25,
+                  "name": "targetObject",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isExternal": true
+                  },
+                  "type": {
+                    "type": "intrinsic",
+                    "name": "object"
+                  }
+                },
+                {
+                  "id": 26,
+                  "name": "constructorOpt",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isExternal": true,
+                    "isOptional": true
+                  },
+                  "type": {
+                    "type": "reference",
+                    "target": {
+                      "packageName": "typescript",
+                      "packagePath": "lib/lib.es5.d.ts",
+                      "qualifiedName": "Function"
+                    },
+                    "name": "Function",
+                    "package": "typescript"
+                  }
+                }
+              ],
+              "type": {
+                "type": "intrinsic",
+                "name": "void"
+              },
+              "inheritedFrom": {
+                "type": "reference",
+                "target": -1,
+                "name": "Error.captureStackTrace"
+              }
+            }
+          ],
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.captureStackTrace"
+          }
+        },
+        {
+          "id": 20,
+          "name": "isError",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {
+            "isStatic": true,
+            "isExternal": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/lib.esnext.error.d.ts",
+              "line": 21,
+              "character": 4
+            }
+          ],
+          "signatures": [
+            {
+              "id": 21,
+              "name": "isError",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {
+                "isExternal": true,
+                "isInherited": true
+              },
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "Indicates whether the argument provided is a built-in Error instance or not."
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "node_modules/.pnpm/typescript@6.0.3/node_modules/typescript/lib/lib.esnext.error.d.ts",
+                  "line": 21,
+                  "character": 4
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 22,
+                  "name": "error",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isExternal": true
+                  },
+                  "type": {
+                    "type": "intrinsic",
+                    "name": "unknown"
+                  }
+                }
+              ],
+              "type": {
+                "type": "predicate",
+                "name": "error",
+                "asserts": false,
+                "targetType": {
+                  "type": "reference",
+                  "target": {
+                    "packageName": "typescript",
+                    "packagePath": "lib/lib.es5.d.ts",
+                    "qualifiedName": "Error"
+                  },
+                  "name": "Error",
+                  "package": "typescript"
+                }
+              },
+              "inheritedFrom": {
+                "type": "reference",
+                "target": -1,
+                "name": "Error.isError"
+              }
+            }
+          ],
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.isError"
+          }
+        },
+        {
+          "id": 27,
+          "name": "prepareStackTrace",
+          "variant": "declaration",
+          "kind": 2048,
+          "flags": {
+            "isStatic": true,
+            "isExternal": true,
+            "isInherited": true
+          },
+          "sources": [
+            {
+              "fileName": "node_modules/.pnpm/@types+node@26.0.0/node_modules/@types/node/globals.d.ts",
+              "line": 55,
+              "character": 4
+            }
+          ],
+          "signatures": [
+            {
+              "id": 28,
+              "name": "prepareStackTrace",
+              "variant": "signature",
+              "kind": 4096,
+              "flags": {
+                "isExternal": true,
+                "isInherited": true
+              },
+              "comment": {
+                "summary": [],
+                "blockTags": [
+                  {
+                    "tag": "@see",
+                    "content": [
+                      {
+                        "kind": "text",
+                        "text": "https://v8.dev/docs/stack-trace-api#customizing-stack-traces"
+                      }
+                    ]
+                  }
+                ]
+              },
+              "sources": [
+                {
+                  "fileName": "node_modules/.pnpm/@types+node@26.0.0/node_modules/@types/node/globals.d.ts",
+                  "line": 55,
+                  "character": 4
+                }
+              ],
+              "parameters": [
+                {
+                  "id": 29,
+                  "name": "err",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isExternal": true
+                  },
+                  "type": {
+                    "type": "reference",
+                    "target": {
+                      "packageName": "typescript",
+                      "packagePath": "lib/lib.es5.d.ts",
+                      "qualifiedName": "Error"
+                    },
+                    "name": "Error",
+                    "package": "typescript"
+                  }
+                },
+                {
+                  "id": 30,
+                  "name": "stackTraces",
+                  "variant": "param",
+                  "kind": 32768,
+                  "flags": {
+                    "isExternal": true
+                  },
+                  "type": {
+                    "type": "array",
+                    "elementType": {
+                      "type": "reference",
+                      "target": {
+                        "packageName": "@types/node",
+                        "packagePath": "globals.d.ts",
+                        "qualifiedName": "NodeJS.CallSite"
+                      },
+                      "name": "CallSite",
+                      "package": "@types/node",
+                      "qualifiedName": "NodeJS.CallSite"
+                    }
+                  }
+                }
+              ],
+              "type": {
+                "type": "intrinsic",
+                "name": "any"
+              },
+              "inheritedFrom": {
+                "type": "reference",
+                "target": -1,
+                "name": "Error.prepareStackTrace"
+              }
+            }
+          ],
+          "inheritedFrom": {
+            "type": "reference",
+            "target": -1,
+            "name": "Error.prepareStackTrace"
+          }
+        }
+      ],
+      "groups": [
+        {
+          "title": "Constructors",
+          "children": [
+            32
+          ]
+        },
+        {
+          "title": "Properties",
+          "children": [
+            36,
+            38,
+            37,
+            73,
+            71,
+            35,
+            72,
+            31
+          ]
+        },
+        {
+          "title": "Accessors",
+          "children": [
+            44,
+            42
+          ]
+        },
+        {
+          "title": "Methods",
+          "children": [
+            67,
+            69,
+            48,
+            50,
+            60,
+            63,
+            23,
+            20,
+            27
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/base_error.ts",
+          "line": 7,
+          "character": 13,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/base_error.ts#L7"
+        }
+      ],
+      "extendedTypes": [
+        {
+          "type": "reference",
+          "target": {
+            "packageName": "typescript",
+            "packagePath": "lib/lib.es5.d.ts",
+            "qualifiedName": "Error"
+          },
+          "name": "Error",
+          "package": "typescript"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "Debugs",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "A collection of debug values."
+          }
+        ]
+      },
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/type.ts",
+          "line": 6,
+          "character": 12,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L6"
+        }
+      ],
+      "type": {
+        "type": "reference",
+        "target": {
+          "packageName": "typescript",
+          "packagePath": "lib/lib.es5.d.ts",
+          "qualifiedName": "Record"
+        },
+        "typeArguments": [
+          {
+            "type": "intrinsic",
+            "name": "string"
+          },
+          {
+            "type": "intrinsic",
+            "name": "unknown"
+          }
+        ],
+        "name": "Record",
+        "package": "typescript"
+      }
+    },
+    {
+      "id": 2,
+      "name": "DebugStringObject",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "A debug object with string values."
+          }
+        ]
+      },
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/type.ts",
+          "line": 11,
+          "character": 12,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L11"
+        }
+      ],
+      "type": {
+        "type": "reference",
+        "target": {
+          "packageName": "typescript",
+          "packagePath": "lib/lib.es5.d.ts",
+          "qualifiedName": "Record"
+        },
+        "typeArguments": [
+          {
+            "type": "intrinsic",
+            "name": "string"
+          },
+          {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        ],
+        "name": "Record",
+        "package": "typescript"
+      }
+    },
+    {
+      "id": 3,
+      "name": "ErrorOptions",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Options for creating an error."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": 9,
+          "name": "autoGenerateId",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Automatically generate a UUID v4 ID (ignored if customId is provided)."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\nfalse\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 42,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L42"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "boolean"
+          }
+        },
+        {
+          "id": 10,
+          "name": "customId",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Custom ID for the error."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 47,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L47"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        },
+        {
+          "id": 8,
+          "name": "debugs",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Debugging information for the error."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 36,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L36"
+            }
+          ],
+          "type": {
+            "type": "reference",
+            "target": 1,
+            "name": "Debugs",
+            "package": "@arcscord/better-error"
+          }
+        },
+        {
+          "id": 5,
+          "name": "message",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {},
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "The error message."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 20,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L20"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        },
+        {
+          "id": 6,
+          "name": "name",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Custom name for the error."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\n\"baseError\"\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 26,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L26"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        },
+        {
+          "id": 7,
+          "name": "originalError",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "The original error associated with this error."
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 31,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L31"
+            }
+          ],
+          "type": {
+            "type": "union",
+            "types": [
+              {
+                "type": "reference",
+                "target": 19,
+                "name": "BaseError",
+                "package": "@arcscord/better-error"
+              },
+              {
+                "type": "reference",
+                "target": {
+                  "packageName": "typescript",
+                  "packagePath": "lib/lib.es5.d.ts",
+                  "qualifiedName": "Error"
+                },
+                "name": "Error",
+                "package": "typescript"
+              }
+            ]
+          }
+        }
+      ],
+      "groups": [
+        {
+          "title": "Properties",
+          "children": [
+            9,
+            10,
+            8,
+            5,
+            6,
+            7
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/type.ts",
+          "line": 16,
+          "character": 12,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L16"
+        }
+      ]
+    },
+    {
+      "id": 11,
+      "name": "GetDebugOptions",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Options to customize the output of getDebugs."
+          }
+        ]
+      },
+      "children": [
+        {
+          "id": 13,
+          "name": "id",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Include the ID in the debug object."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\ntrue\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 58,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L58"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "boolean"
+          }
+        },
+        {
+          "id": 14,
+          "name": "originalErrorDebugs",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Include debugs from original errors in the debug object."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\ntrue\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 64,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L64"
+            }
+          ],
+          "type": {
+            "type": "union",
+            "types": [
+              {
+                "type": "intrinsic",
+                "name": "boolean"
+              },
+              {
+                "type": "reference",
+                "target": 11,
+                "name": "GetDebugOptions",
+                "package": "@arcscord/better-error"
+              }
+            ]
+          }
+        },
+        {
+          "id": 17,
+          "name": "originalErrorStack",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Include the stack trace of the original error (works with Error and BaseError)."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\ntrue\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 87,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L87"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "boolean"
+          }
+        },
+        {
+          "id": 15,
+          "name": "stack",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Include the stack trace in the debug."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\ntrue\n```"
+                  }
+                ]
+              },
+              {
+                "tag": "@see",
+                "content": []
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 71,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L71"
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "boolean"
+          }
+        },
+        {
+          "id": 16,
+          "name": "stackFormat",
+          "variant": "declaration",
+          "kind": 1024,
+          "flags": {
+            "isOptional": true
+          },
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Format of the stack output.\n\n- "
+              },
+              {
+                "kind": "code",
+                "text": "`default`"
+              },
+              {
+                "kind": "text",
+                "text": ": A single string.\n- "
+              },
+              {
+                "kind": "code",
+                "text": "`split`"
+              },
+              {
+                "kind": "text",
+                "text": ": An array of strings, each representing a line of the stack trace."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@defaultValue",
+                "content": [
+                  {
+                    "kind": "code",
+                    "text": "```ts\n\"split\"\n```"
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/type.ts",
+              "line": 81,
+              "character": 2,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L81"
+            }
+          ],
+          "type": {
+            "type": "reference",
+            "target": 18,
+            "name": "StackFormat",
+            "package": "@arcscord/better-error"
+          }
+        }
+      ],
+      "groups": [
+        {
+          "title": "Properties",
+          "children": [
+            13,
+            14,
+            17,
+            15,
+            16
+          ]
+        }
+      ],
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/type.ts",
+          "line": 53,
+          "character": 12,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L53"
+        }
+      ]
+    },
+    {
+      "id": 18,
+      "name": "StackFormat",
+      "variant": "declaration",
+      "kind": 2097152,
+      "flags": {},
+      "comment": {
+        "summary": [
+          {
+            "kind": "text",
+            "text": "Format options for stack output.\n\n- "
+          },
+          {
+            "kind": "code",
+            "text": "`default`"
+          },
+          {
+            "kind": "text",
+            "text": ": A single string.\n- "
+          },
+          {
+            "kind": "code",
+            "text": "`split`"
+          },
+          {
+            "kind": "text",
+            "text": ": An array of strings, each representing a line of the stack trace."
+          }
+        ]
+      },
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/type.ts",
+          "line": 96,
+          "character": 12,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/type.ts#L96"
+        }
+      ],
+      "type": {
+        "type": "union",
+        "types": [
+          {
+            "type": "literal",
+            "value": "default"
+          },
+          {
+            "type": "literal",
+            "value": "split"
+          }
+        ]
+      }
+    },
+    {
+      "id": 74,
+      "name": "stringifyUnknown",
+      "variant": "declaration",
+      "kind": 64,
+      "flags": {},
+      "sources": [
+        {
+          "fileName": "packages/better_error/src/util.ts",
+          "line": 10,
+          "character": 16,
+          "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/util.ts#L10"
+        }
+      ],
+      "signatures": [
+        {
+          "id": 75,
+          "name": "stringifyUnknown",
+          "variant": "signature",
+          "kind": 4096,
+          "flags": {},
+          "comment": {
+            "summary": [
+              {
+                "kind": "text",
+                "text": "Converts an unknown value to a string representation.\nHandles various data types and provides a fallback for unknown types."
+              }
+            ],
+            "blockTags": [
+              {
+                "tag": "@returns",
+                "content": [
+                  {
+                    "kind": "text",
+                    "text": "A string representation of the value."
+                  }
+                ]
+              }
+            ]
+          },
+          "sources": [
+            {
+              "fileName": "packages/better_error/src/util.ts",
+              "line": 10,
+              "character": 16,
+              "url": "https://github.com/arcscord/arcscord/blob/d708d75b3ea52a90d3eb467bed649c286e087802/packages/better_error/src/util.ts#L10"
+            }
+          ],
+          "parameters": [
+            {
+              "id": 76,
+              "name": "value",
+              "variant": "param",
+              "kind": 32768,
+              "flags": {},
+              "comment": {
+                "summary": [
+                  {
+                    "kind": "text",
+                    "text": "The value to be converted to a string."
+                  }
+                ]
+              },
+              "type": {
+                "type": "intrinsic",
+                "name": "unknown"
+              }
+            }
+          ],
+          "type": {
+            "type": "intrinsic",
+            "name": "string"
+          }
+        }
+      ]
+    }
+  ],
+  "groups": [
+    {
+      "title": "Classes",
+      "children": [
+        19
+      ]
+    },
+    {
+      "title": "Type Aliases",
+      "children": [
+        1,
+        2,
+        3,
+        11,
+        18
+      ]
+    },
+    {
+      "title": "Functions",
+      "children": [
+        74
+      ]
+    }
+  ],
+  "packageName": "@arcscord/better-error",
+  "packageVersion": "1.0.5",
+  "readme": [
+    {
+      "kind": "text",
+      "text": "# @arcscord/better-error\n\n[![npm version](https://badge.fury.io/js/@arcscord%2Fbetter-error.svg)](https://www.npmjs.com/package/@arcscord/better-error)\n[![Discord](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)\n\nA lightweight extension of the native "
+    },
+    {
+      "kind": "code",
+      "text": "`Error`"
+    },
+    {
+      "kind": "text",
+      "text": " class that adds structured debug context. When something goes wrong deep in a call stack, it is often useful to attach extra information — the file that was being processed, the value that caused the issue, the step that failed — without having to encode everything into the error message string.\n\n"
+    },
+    {
+      "kind": "code",
+      "text": "`BaseError`"
+    },
+    {
+      "kind": "text",
+      "text": " accepts a "
+    },
+    {
+      "kind": "code",
+      "text": "`debugs`"
+    },
+    {
+      "kind": "text",
+      "text": " object alongside the message, keeping diagnostic data structured and inspectable rather than buried in a formatted string. It is used throughout the arcscord ecosystem as the base class for all framework errors.\n\n## Install\n\n"
+    },
+    {
+      "kind": "code",
+      "text": "```sh\npnpm add @arcscord/better-error\n```"
+    },
+    {
+      "kind": "text",
+      "text": "\n\n## Example\n\n"
+    },
+    {
+      "kind": "code",
+      "text": "```ts\nimport { BaseError } from \"@arcscord/better-error\";\n\nconst error = new BaseError({\n  message: \"Failed to load config\",\n  debugs: {\n    path: \"/etc/bot/config.json\",\n    reason: \"file not found\",\n  },\n});\n\nconsole.error(error.message); // \"Failed to load config\"\nconsole.error(error.debugs); // { path: \"...\", reason: \"...\" }\n```"
+    },
+    {
+      "kind": "text",
+      "text": "\n\n## Links\n\n- [Documentation](https://arcscord.dev/packages/better-error)\n- [API reference](https://arcscord.dev/api?package=better-error)\n\n## License\n\nMIT"
+    }
+  ],
+  "symbolIdMap": {
+    "0": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/index.ts",
+      "qualifiedName": ""
+    },
+    "1": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "Debugs"
+    },
+    "2": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "DebugStringObject"
+    },
+    "3": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "ErrorOptions"
+    },
+    "5": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.message"
+    },
+    "6": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.name"
+    },
+    "7": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.originalError"
+    },
+    "8": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.debugs"
+    },
+    "9": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.autoGenerateId"
+    },
+    "10": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.customId"
+    },
+    "11": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "GetDebugOptions"
+    },
+    "13": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.id"
+    },
+    "14": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.originalErrorDebugs"
+    },
+    "15": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.stack"
+    },
+    "16": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.stackFormat"
+    },
+    "17": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "__type.originalErrorStack"
+    },
+    "18": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/type.ts",
+      "qualifiedName": "StackFormat"
+    },
+    "19": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError"
+    },
+    "20": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.esnext.error.d.ts",
+      "qualifiedName": "ErrorConstructor.isError"
+    },
+    "21": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.esnext.error.d.ts",
+      "qualifiedName": "ErrorConstructor.isError"
+    },
+    "22": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.esnext.error.d.ts",
+      "qualifiedName": "error"
+    },
+    "23": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "ErrorConstructor.captureStackTrace"
+    },
+    "24": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "ErrorConstructor.captureStackTrace"
+    },
+    "25": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "targetObject"
+    },
+    "26": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "constructorOpt"
+    },
+    "27": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "ErrorConstructor.prepareStackTrace"
+    },
+    "28": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "ErrorConstructor.prepareStackTrace"
+    },
+    "29": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "err"
+    },
+    "30": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "stackTraces"
+    },
+    "31": {
+      "packageName": "@types/node",
+      "packagePath": "globals.d.ts",
+      "qualifiedName": "ErrorConstructor.stackTraceLimit"
+    },
+    "32": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.__constructor"
+    },
+    "33": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError"
+    },
+    "34": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "opt"
+    },
+    "35": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.name"
+    },
+    "36": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError._debugs"
+    },
+    "37": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError._originalError"
+    },
+    "38": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError._id"
+    },
+    "42": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.originalError"
+    },
+    "43": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.originalError"
+    },
+    "44": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.id"
+    },
+    "45": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.id"
+    },
+    "46": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.id"
+    },
+    "47": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "value"
+    },
+    "48": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.generateId"
+    },
+    "49": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.generateId"
+    },
+    "50": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getDebugsObject"
+    },
+    "51": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getDebugsObject"
+    },
+    "52": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "options"
+    },
+    "60": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getDebugString"
+    },
+    "61": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getDebugString"
+    },
+    "62": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "options"
+    },
+    "63": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getStack"
+    },
+    "64": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.getStack"
+    },
+    "65": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "stackFormat"
+    },
+    "66": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "stacks"
+    },
+    "67": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.defaultGetDebugOptions"
+    },
+    "68": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.defaultGetDebugOptions"
+    },
+    "69": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.fullMessage"
+    },
+    "70": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/base_error.ts",
+      "qualifiedName": "BaseError.fullMessage"
+    },
+    "71": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.es5.d.ts",
+      "qualifiedName": "Error.message"
+    },
+    "72": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.es5.d.ts",
+      "qualifiedName": "Error.stack"
+    },
+    "73": {
+      "packageName": "typescript",
+      "packagePath": "lib/lib.es2022.error.d.ts",
+      "qualifiedName": "Error.cause"
+    },
+    "74": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/util.ts",
+      "qualifiedName": "stringifyUnknown"
+    },
+    "75": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/util.ts",
+      "qualifiedName": "stringifyUnknown"
+    },
+    "76": {
+      "packageName": "@arcscord/better-error",
+      "packagePath": "src/util.ts",
+      "qualifiedName": "value"
+    }
+  },
+  "files": {
+    "entries": {
+      "1": "packages/better_error/src/index.ts",
+      "2": "packages/better_error/README.md",
+      "3": "packages/better_error"
+    },
+    "reflections": {
+      "1": 0,
+      "2": 0,
+      "3": 0
+    }
+  }
+}
