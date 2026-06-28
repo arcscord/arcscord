@@ -70,5 +70,10 @@ jobs:
           cache: pnpm
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Build code
+        run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        timeout-minutes: 15
       - name: Run unit tests
         run: pnpm test
