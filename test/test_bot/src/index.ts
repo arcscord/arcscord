@@ -2,8 +2,8 @@ import process from "node:process";
 import { ArcClient } from "arcscord";
 import { Partials } from "discord.js";
 import handlers from "./handlers";
-import en from "./locale/en.json";
-import fr from "./locale/fr.json";
+import en from "./locales/en.json";
+import fr from "./locales/fr.json";
 
 const client = new ArcClient(process.env.TOKEN as string, {
   intents: [

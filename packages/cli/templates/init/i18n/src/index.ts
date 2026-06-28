@@ -1,6 +1,6 @@
 import * as process from "node:process";
 import { ArcClient } from "arcscord";
-import en from "../locale/en.json";
+import en from "../locales/en.json";
 import handlers from "./handlers";
 import "dotenv/config";
 
