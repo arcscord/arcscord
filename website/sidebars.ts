@@ -9,6 +9,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "guide/installation",
         "guide/client",
+        "guide/project-structure",
         "guide/commands",
         "guide/events",
         "guide/components",
