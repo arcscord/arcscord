@@ -93,11 +93,11 @@ const packages: Pkg[] = [
 ];
 
 function Hero(): ReactNode {
-  const logo = useBaseUrl("img/Arcscord_Logo_cropped.png");
+  const logo = useBaseUrl("img/logo.webp");
   return (
     <header className={styles.hero}>
       <div className={styles.heroInner}>
-        <img className={styles.heroLogo} src={logo} alt="Arcscord logo" />
+        <img className={styles.heroLogo} src={logo} alt="Arcscord logo" width={251} height={320} />
         <h1 className={styles.heroTitle}>Arcscord</h1>
         <p className={styles.heroTagline}>
           A TypeScript-first framework for building Discord bots — typed
@@ -122,14 +122,20 @@ function Hero(): ReactNode {
           <img
             src="https://img.shields.io/npm/v/arcscord?color=377bc3&label=arcscord&logo=npm"
             alt="arcscord npm version"
+            width={118}
+            height={20}
           />
           <img
             src="https://img.shields.io/npm/dm/arcscord?color=8298ed&label=downloads"
             alt="arcscord monthly downloads"
+            width={134}
+            height={20}
           />
           <img
             src="https://img.shields.io/github/stars/arcscord/arcscord?color=8298ed&logo=github"
             alt="GitHub stars"
+            width={96}
+            height={20}
           />
         </div>
       </div>

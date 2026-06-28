@@ -48,6 +48,7 @@
 
 .heroBadges img {
   height: 20px;
+  width: auto;
 }
 
 /* ===== Generic sections ===== */

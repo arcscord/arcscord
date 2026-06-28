@@ -95,8 +95,10 @@ const config: Config = {
       title: "Arcscord",
       logo: {
         alt: "Arcscord logo",
-        src: "img/Arcscord_Logo_cropped.png",
-        srcDark: "img/Arcscord_Logo_cropped.png",
+        src: "img/logo.webp",
+        srcDark: "img/logo.webp",
+        width: 25,
+        height: 32,
       },
       items: [
         { type: "docSidebar", sidebarId: "guideSidebar", position: "left", label: "Guide" },

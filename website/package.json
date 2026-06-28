@@ -4,6 +4,7 @@
   "scripts": {
     "build": "NO_UPDATE_NOTIFIER=1 docusaurus build",
     "clear": "docusaurus clear",
+    "optimize:images": "node scripts/optimize-images.mjs",
     "serve": "docusaurus serve",
     "start": "NO_UPDATE_NOTIFIER=1 docusaurus start",
     "typecheck": "tsc --noEmit"
@@ -20,6 +21,7 @@
   "devDependencies": {
     "@docusaurus/module-type-aliases": "3.10.1",
     "@docusaurus/types": "3.10.1",
+    "sharp": "^0.34.4",
     "typescript": "^6.0.3"
   }
 }
