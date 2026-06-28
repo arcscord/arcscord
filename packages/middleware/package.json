@@ -4,7 +4,7 @@
   "description": "Middleware for arcscord",
   "author": "Arcoz0308",
   "license": "MIT",
-  "homepage": "https://github.com/arcscord/arcscord/tree/main/packages/middleware#readme",
+  "homepage": "https://arcscord.dev/packages/middleware",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arcscord/arcscord.git"

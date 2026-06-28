@@ -4,7 +4,7 @@
   "description": "A custom error handling system",
   "author": "Arcoz0308",
   "license": "MIT",
-  "homepage": "https://github.com/arcscord/arcscord/tree/main/packages/error#readme",
+  "homepage": "https://arcscord.dev/packages/error",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arcscord/arcscord.git"

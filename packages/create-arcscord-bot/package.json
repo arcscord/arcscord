@@ -4,7 +4,7 @@
   "description": "Scaffold a new Arcscord bot",
   "author": "Arcoz0308",
   "license": "MIT",
-  "homepage": "https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot#readme",
+  "homepage": "https://arcscord.dev/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arcscord/arcscord.git"

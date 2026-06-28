@@ -4,7 +4,7 @@
   "description": "A better error class",
   "author": "Arcoz0308",
   "license": "MIT",
-  "homepage": "https://github.com/arcscord/arcscord/tree/main/packages/better_error#readme",
+  "homepage": "https://arcscord.dev/packages/better-error",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arcscord/arcscord.git"

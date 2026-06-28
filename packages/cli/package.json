@@ -4,7 +4,7 @@
   "description": "Arcscord cli",
   "author": "Arcoz0308",
   "license": "MIT",
-  "homepage": "https://github.com/arcscord/arcscord/tree/main/packages/cli#readme",
+  "homepage": "https://arcscord.dev/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/arcscord/arcscord.git"
