@@ -55,6 +55,3 @@ pnpm create arcscord-bot my-test-bot
 
 - [Documentation](https://arcscord.dev/)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot)
-
-- [Documentation](https://arcscord.dev/)
-- [Source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot)
