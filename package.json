@@ -4,7 +4,6 @@
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "clean:full": "node scripts/clean-full.mjs",
-    "snippet:gen": "node -r @swc-node/register -r tsconfig-paths/register scripts/snippet_schema_gen.ts",
     "build": "pnpm build:all && pnpm build:arcscord && pnpm build:middleware",
     "build:all": "pnpm -r --filter='./packages/*' --filter='!./packages/{arcscord,middleware}' run build",
     "build:arcscord": "pnpm -r --filter='./packages/arcscord' run build",
@@ -38,8 +37,7 @@
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "vite": "^8.0.16",
-    "vitest": "4.1.9",
-    "zod-to-json-schema": "^3.25.2"
+    "vitest": "4.1.9"
   },
   "repository": {
     "type": "git",
