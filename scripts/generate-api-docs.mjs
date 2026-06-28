@@ -30,22 +30,22 @@ const packages = [
   {
     dir: "packages/arcscord",
     slug: "arcscord",
-    tsconfig: "packages/arcscord/src/tsconfig.json",
+    tsconfig: "packages/arcscord/tsconfig.json",
   },
   {
     dir: "packages/middleware",
     slug: "middleware",
-    tsconfig: "packages/middleware/src/tsconfig.json",
+    tsconfig: "packages/middleware/tsconfig.json",
   },
   {
     dir: "packages/error",
     slug: "error",
-    tsconfig: "packages/error/src/tsconfig.json",
+    tsconfig: "packages/error/tsconfig.json",
   },
   {
     dir: "packages/better_error",
     slug: "better-error",
-    tsconfig: "packages/better_error/src/tsconfig.json",
+    tsconfig: "packages/better_error/tsconfig.json",
   },
 ];
 
@@ -120,6 +120,7 @@ for (const pkg of packages) {
       include: [join(sourceRoot, pkg.dir, "src/**/*.ts")],
       exclude: [
         join(sourceRoot, pkg.dir, "src/**/*.test.ts"),
+        join(sourceRoot, pkg.dir, "src/**/*.test-d.ts"),
         join(sourceRoot, pkg.dir, "src/**/*.no.test.ts"),
         join(sourceRoot, pkg.dir, "tests/**"),
       ],
