@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       release_ref:
-        description: "Release tag or ref to snapshot, for example v0.3.0. Leave empty to use the selected workflow ref."
+        description: "Release tag to snapshot, for example v0.3.0. Leave empty to auto-detect every package whose current version has no API snapshot yet."
         required: false
         type: string
 
@@ -46,19 +46,24 @@ jobs:
       - name: Build code
         run: pnpm build
       - name: Resolve release ref name
-        run: echo "RELEASE_REF_NAME=${{ github.event.inputs.release_ref || github.ref_name }}" >> "$GITHUB_ENV"
+        # Empty on a manual run without a tag, which switches the resolver to
+        # auto-detect mode (every package whose version has no snapshot yet).
+        run: echo "RELEASE_REF_NAME=${{ github.event.inputs.release_ref || github.event.release.tag_name }}" >> "$GITHUB_ENV"
       - name: Resolve release API packages
         id: release-packages
         run: node docs-tools/scripts/resolve-release-doc-packages.mjs --source-root .
       - name: Generate release API docs
+        if: steps.release-packages.outputs.packages != ''
         run: node docs-tools/scripts/generate-api-docs.mjs --source-root . --output-root . --channel release --packages "${{ steps.release-packages.outputs.packages }}"
       - name: Preserve release API snapshots
+        if: steps.release-packages.outputs.packages != ''
         env:
           RELEASE_PACKAGES: ${{ steps.release-packages.outputs.packages }}
         run: |
           rm -rf /tmp/arcscord-release-api
           node docs-tools/scripts/copy-release-api-snapshots.mjs /tmp/arcscord-release-api
       - name: Move release API snapshots to main
+        if: steps.release-packages.outputs.packages != ''
         run: |
           git reset --hard
           git clean -fd website/static/api
@@ -75,6 +80,8 @@ jobs:
       - name: Generate dev API docs
         run: pnpm docs:api
       - name: Commit release API snapshots
+        env:
+          SNAPSHOT_LABEL: ${{ steps.release-packages.outputs.label }}
         run: |
           if [ -z "$(git status --porcelain --untracked-files=all website/static/api)" ]; then
             echo "No release API snapshot changes to commit."
@@ -84,7 +91,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add website/static/api
-          git commit -m "docs(api): add API snapshots for ${RELEASE_REF_NAME} [skip ci]"
+          git commit -m "docs(api): add API snapshots for ${SNAPSHOT_LABEL} [skip ci]"
           git push origin HEAD:main
       - name: Build docs site
         run: pnpm --filter @arcscord/website build
