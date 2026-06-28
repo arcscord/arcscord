@@ -8,4 +8,10 @@ export default createVitestConfig({
       "#/": new URL("./src/", import.meta.url).pathname,
     },
   },
+  test: {
+    typecheck: {
+      enabled: true,
+      tsconfig: "src/tsconfig.json",
+    },
+  },
 });

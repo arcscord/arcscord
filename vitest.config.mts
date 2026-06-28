@@ -11,4 +11,12 @@ export default createVitestConfig({
       "arcscord": new URL("./packages/arcscord/src/index.ts", import.meta.url).pathname,
     },
   },
+  test: {
+    projects: [
+      "./packages/arcscord/",
+      "./packages/better_error/",
+      "./packages/error/",
+      "./packages/middleware/",
+    ],
+  },
 });
