@@ -70,4 +70,3 @@ jobs:
         working-directory: "packages/${{inputs.package}}"
         env:
           PUBLISH_TAG: ${{ inputs.tag }}
-          NODE_AUTH_TOKEN: ${{secrets.NPM_SECRET}}
