@@ -12,6 +12,6 @@ Detailed CLI documentation is planned for a later pass.
 
 Links:
 
-- [Documentation](https://arcscord.github.io/arcscord/)
+- [Documentation](https://arcscord.dev/)
 - [npm package](https://www.npmjs.com/package/@arcscord/cli)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/cli)

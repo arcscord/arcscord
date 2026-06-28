@@ -8,7 +8,7 @@ Core framework package for Discord bots. It provides the client, command builder
 
 Links:
 
-- [Documentation](https://arcscord.github.io/arcscord/)
+- [Documentation](https://arcscord.dev/)
 - [API reference](/api?package=arcscord)
 - [npm package](https://www.npmjs.com/package/arcscord)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/arcscord)

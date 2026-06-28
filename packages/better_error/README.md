@@ -1,18 +1,17 @@
 # @arcscord/better-error
 
 [![npm version](https://badge.fury.io/js/@arcscord%2Fbetter-error.svg)](https://www.npmjs.com/package/@arcscord/better-error)
-[![Discord Shield](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)
+[![Discord](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)
 
-## About
+A lightweight extension of the native `Error` class that adds structured debug context. When something goes wrong deep in a call stack, it is often useful to attach extra information — the file that was being processed, the value that caused the issue, the step that failed — without having to encode everything into the error message string.
 
-A package that extends Error class, with more functions like debugs
-
-Documentation: https://arcscord.github.io/arcscord/
+`BaseError` accepts a `debugs` object alongside the message, keeping diagnostic data structured and inspectable rather than buried in a formatted string. It is used throughout the arcscord ecosystem as the base class for all framework errors.
 
 ## Install
 
-`pnpm add @arcscord/better-error`<br>
-or `npm install @arcscord/better-error`
+```sh
+pnpm add @arcscord/better-error
+```
 
 ## Example
 
@@ -20,9 +19,22 @@ or `npm install @arcscord/better-error`
 import { BaseError } from "@arcscord/better-error";
 
 const error = new BaseError({
-  message: "An error happened",
+  message: "Failed to load config",
   debugs: {
-    when: "now",
-  }
+    path: "/etc/bot/config.json",
+    reason: "file not found",
+  },
 });
+
+console.error(error.message); // "Failed to load config"
+console.error(error.debugs); // { path: "...", reason: "..." }
 ```
+
+## Links
+
+- [Documentation](https://arcscord.dev/packages/better-error)
+- [API reference](https://arcscord.dev/api?package=better-error)
+
+## License
+
+MIT

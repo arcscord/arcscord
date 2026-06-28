@@ -21,7 +21,7 @@ function foo(num: number): Result<boolean, Error> {
 
 Links:
 
-- [Documentation](https://arcscord.github.io/arcscord/)
+- [Documentation](https://arcscord.dev/packages/error)
 - [API reference](/api?package=error)
 - [npm package](https://www.npmjs.com/package/@arcscord/error)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/error)

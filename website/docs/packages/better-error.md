@@ -19,7 +19,7 @@ const error = new BaseError({
 
 Links:
 
-- [Documentation](https://arcscord.github.io/arcscord/)
+- [Documentation](https://arcscord.dev/packages/better-error)
 - [API reference](/api?package=better-error)
 - [npm package](https://www.npmjs.com/package/@arcscord/better-error)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/better_error)

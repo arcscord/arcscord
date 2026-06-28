@@ -10,7 +10,7 @@ This package does not define the middleware system itself. The core middleware A
 
 Links:
 
-- [Documentation](https://arcscord.github.io/arcscord/)
+- [Documentation](https://arcscord.dev/)
 - [API reference](/api?package=middleware)
 - [npm package](https://www.npmjs.com/package/@arcscord/middleware)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/middleware)
