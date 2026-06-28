@@ -31,7 +31,30 @@ pnpm create arcscord-bot my-bot -- --package-manager npm --eslint arcscord --i18
 After scaffolding, the project is yours — Arcscord imposes no structure, organize it however
 you like.
 
+The `arcscord` version pinned in generated projects is set automatically when
+create-arcscord-bot is published (to the latest release at that moment), so it always matches
+the version the templates were tested against.
+
+## Local development
+
+To test the scaffolder from this repo without publishing:
+
+```sh
+# build it
+pnpm --filter create-arcscord-bot build
+
+# run the built binary directly
+node packages/create-arcscord-bot/dist/index.js my-test-bot --package-manager pnpm --no-install
+
+# or test the real `create` invocation by linking it globally
+cd packages/create-arcscord-bot && pnpm link --global
+pnpm create arcscord-bot my-test-bot
+```
+
 ## Links
+
+- [Documentation](https://arcscord.dev/)
+- [Source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot)
 
 - [Documentation](https://arcscord.dev/)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot)

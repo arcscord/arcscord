@@ -1,3 +1,5 @@
+import { ARCSCORD_VERSION } from "../arcscord-version.js";
+
 export type PackageJSONOptions = {
   name: string;
   eslint?: "eslint" | "antfu" | "arcscord" | false;
@@ -6,26 +8,25 @@ export type PackageJSONOptions = {
 };
 
 const dependenciesVersions = {
-  "arcscord": "0.3.0-beta-8",
-  "discord.js": "^14.16.3",
-  "@swc-node/core": "^1.13.3",
-  "@swc-node/register": "^1.10.9",
-  "@types/node": "^20.16.13",
-  "dotenv": "^16.4.5",
-  "nodemon": "^3.1.7",
-  "tsc-alias": "^1.8.10",
+  "discord.js": "^14.26.4",
+  "@swc-node/core": "^1.14.1",
+  "@swc-node/register": "^1.11.1",
+  "@types/node": "^26.0.1",
+  "dotenv": "^17.4.2",
+  "nodemon": "^3.1.14",
+  "tsc-alias": "^1.8.17",
   "tsconfig-paths": "^4.2.0",
-  "typescript": "^5.7.2",
+  "typescript": "^6.0.3",
 
-  "eslint": "^9.17.0",
-  "@eslint/js": "^9.17.0 ",
-  "typescript-eslint": "^8.19.0",
-  "@antfu/eslint-config": "^3.11.0",
+  "eslint": "^10.6.0",
+  "@eslint/js": "^10.0.1",
+  "typescript-eslint": "^8.62.0",
+  "@antfu/eslint-config": "^9.1.0",
 
-  "prettier": "^3.4.2",
-  "eslint-config-prettier": "^9.1.0",
+  "prettier": "^3.9.1",
+  "eslint-config-prettier": "^10.1.8",
 
-  "i18next": "^23.16.4",
+  "i18next": "^26.3.3",
 };
 
 export function generatePackageJson(options: PackageJSONOptions): string {
@@ -38,7 +39,7 @@ export function generatePackageJson(options: PackageJSONOptions): string {
       dev: "npx nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
     },
     dependencies: {
-      "arcscord": dependenciesVersions.arcscord,
+      "arcscord": ARCSCORD_VERSION,
       "discord.js": dependenciesVersions["discord.js"],
     },
     devDependencies: {

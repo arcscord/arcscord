@@ -38,6 +38,15 @@ jobs:
           registry-url: "https://registry.npmjs.org"
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile
+      - name: Pin latest arcscord version
+        if: ${{ inputs.package == 'create-arcscord-bot' }}
+        run: |
+          VERSION=$(npm view arcscord version)
+          echo "Pinning arcscord@$VERSION for generated projects"
+          cat > packages/create-arcscord-bot/src/arcscord-version.ts <<EOF
+          // Pinned automatically at publish time (see .github/workflows/publish.yml).
+          export const ARCSCORD_VERSION = "$VERSION";
+          EOF
       - name: Clean build artifacts
         run: pnpm clean
       - name: Build code
