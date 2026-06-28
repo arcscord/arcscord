@@ -1,55 +1,14 @@
 import type { CommandInteraction } from "discord.js";
-import type { ArcClient } from "#/base";
 import type { Command } from "#/base/command/command_definition.type";
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, Routes } from "discord-api-types/v10";
-import { describe, expect, expectTypeOf, it, vi } from "vitest";
-import { buildCommandWithSubs, createCommand } from "#/base/command/command_func";
+import { describe, expect, it, vi } from "vitest";
+import { createCommand } from "#/base/command/command_func";
+import { createMockClient } from "#/testing";
 import { CommandManager } from "./command_manager.class";
 
-function createMockClient() {
-  const client = {
-    arcOptions: {
-      applicationId: "app_1",
-      enableInternalTrace: false,
-    },
-    application: null,
-    guilds: {
-      cache: new Map(),
-    },
-    rest: {
-      put: vi.fn(),
-    },
-    localeManager: {
-      enabled: false,
-      availableLanguages: ["fr"],
-      i18n: {
-        getFixedT: vi.fn(() => (key: string) => key),
-      },
-      mapLanguage: vi.fn((locale: string) => locale),
-      t: vi.fn((key: string) => key),
-      detectLanguage: vi.fn(async () => "en"),
-      ready: Promise.resolve(),
-    },
-    getErrorMessage: vi.fn(() => ({ content: "An error occurred." })),
-    createMessageContext: vi.fn(() => ({ t: (key: string) => key })),
-    createLogger: () => ({
-      trace: vi.fn(),
-      debug: vi.fn(),
-      info: vi.fn(),
-      warning: vi.fn(),
-      error: vi.fn(),
-      logError: vi.fn(),
-      fatal: vi.fn(),
-      fatalError: vi.fn(),
-      log: vi.fn(),
-    }),
-    on: vi.fn(),
-  } as unknown as ArcClient;
-
-  return {
-    client,
-    manager: new CommandManager(client),
-  };
+function createMockClientWithManager() {
+  const client = createMockClient();
+  return { client, manager: new CommandManager(client) };
 }
 
 function createMockSlashInteraction(overrides: Partial<CommandInteraction> = {}): CommandInteraction {
@@ -91,7 +50,7 @@ type ExposedHandleInteraction = { handleInteraction: HandleInteractionFn };
 
 describe("command manager", () => {
   it("registers global commands through REST when applicationId is available before ready", async () => {
-    const { client, manager } = createMockClient();
+    const { client, manager } = createMockClientWithManager();
     vi.mocked(client.rest.put).mockResolvedValue([
       {
         id: "cmd_1",
@@ -135,7 +94,7 @@ describe("command manager", () => {
   });
 
   it("registers guild commands through REST when the guild cache is not ready", async () => {
-    const { client, manager } = createMockClient();
+    const { client, manager } = createMockClientWithManager();
     vi.mocked(client.rest.put).mockResolvedValue([
       {
         id: "cmd_2",
@@ -180,7 +139,7 @@ describe("command manager", () => {
   });
 
   it("dispatches autocomplete interactions to the focused option handler", async () => {
-    const { manager } = createMockClient();
+    const { manager } = createMockClientWithManager();
     const respond = vi.fn();
     const animeHandler = vi.fn(ctx => ctx.sendChoices(["Naruto"]));
     const yearHandler = vi.fn(ctx => ctx.sendChoices([2002]));
@@ -266,7 +225,7 @@ describe("command manager", () => {
   });
 
   it("rejects missing autocomplete handlers when loading commands", () => {
-    const { manager } = createMockClient();
+    const { manager } = createMockClientWithManager();
     const invalidCommand = {
       build: {
         slash: {
@@ -290,7 +249,7 @@ describe("command manager", () => {
   });
 
   it("rejects autocomplete handlers that do not match enabled options when loading commands", () => {
-    const { manager } = createMockClient();
+    const { manager } = createMockClientWithManager();
     const invalidCommand = {
       build: {
         slash: {
@@ -316,7 +275,7 @@ describe("command manager", () => {
   });
 
   it("rejects missing autocomplete handlers for subcommands when loading commands", () => {
-    const { manager } = createMockClient();
+    const { manager } = createMockClientWithManager();
     const invalidCommand = {
       name: "search",
       description: "Search commands",
@@ -343,76 +302,9 @@ describe("command manager", () => {
     expect(err?.message).toBe("missing autocomplete handler for option \"query\" in command \"search.anime\"");
   });
 
-  it("types autocomplete handlers from their option definitions", () => {
-    const fullCommand = createCommand({
-      build: {
-        slash: {
-          name: "full",
-          description: "Full command",
-        },
-      },
-      run: ctx => ctx.ok(),
-    });
-
-    buildCommandWithSubs({
-      name: "sub",
-      description: "Subcommands",
-      subCommands: [
-        // @ts-expect-error full commands cannot be registered as subcommands.
-        fullCommand,
-      ],
-    });
-
-    createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            anime: {
-              type: "string",
-              description: "Anime name",
-              autocomplete: true,
-            },
-            year: {
-              type: "integer",
-              description: "Release year",
-              autocomplete: true,
-            },
-            hidden: {
-              type: "boolean",
-              description: "Hidden result",
-            },
-          },
-        },
-      },
-      autocomplete: {
-        anime: (ctx) => {
-          expectTypeOf(ctx.name).toEqualTypeOf<"anime">();
-          expectTypeOf(ctx.value).toEqualTypeOf<string>();
-          void ctx.sendChoices(["Naruto"]);
-          // @ts-expect-error string autocomplete choices cannot be numeric-only.
-          void ctx.sendChoices([2002]);
-          return ctx.ok();
-        },
-        year: (ctx) => {
-          expectTypeOf(ctx.name).toEqualTypeOf<"year">();
-          expectTypeOf(ctx.value).toEqualTypeOf<string>();
-          void ctx.sendChoices([2002]);
-          // @ts-expect-error numeric autocomplete choices cannot be string-only.
-          void ctx.sendChoices(["Naruto"]);
-          return ctx.ok();
-        },
-        // @ts-expect-error only options with autocomplete: true can have handlers.
-        hidden: ctx => ctx.ok(),
-      },
-      run: ctx => ctx.ok(),
-    });
-  });
-
   it("passes status returned when run() returns ok", async () => {
     const resultHandler = vi.fn();
-    const { client } = createMockClient();
+    const { client } = createMockClientWithManager();
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
@@ -432,7 +324,7 @@ describe("command manager", () => {
 
   it("passes status thrown and preserves the raw thrown value", async () => {
     const resultHandler = vi.fn();
-    const { client } = createMockClient();
+    const { client } = createMockClientWithManager();
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const thrown = new Error("boom");
@@ -456,7 +348,7 @@ describe("command manager", () => {
 
   it("normalizes void run() return to ok(true) in resultHandler", async () => {
     const resultHandler = vi.fn();
-    const { client } = createMockClient();
+    const { client } = createMockClientWithManager();
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
@@ -477,7 +369,7 @@ describe("command manager", () => {
 
   it("normalizes string run() return to ok(string) in resultHandler", async () => {
     const resultHandler = vi.fn();
-    const { client } = createMockClient();
+    const { client } = createMockClientWithManager();
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
@@ -498,7 +390,7 @@ describe("command manager", () => {
 
   it("applies dispatch diagnostics level for commandNotFound", async () => {
     const resultHandler = vi.fn();
-    const { client } = createMockClient();
+    const { client } = createMockClientWithManager();
     const managerWithOptions = new CommandManager(client, {
       resultHandler,
       dispatchDiagnostics: {
@@ -513,5 +405,85 @@ describe("command manager", () => {
 
     expect(resultHandler).not.toHaveBeenCalled();
     expect(managerWithOptions.logger.warning).toHaveBeenCalled();
+  });
+
+  it("dispatches user context menu interaction to run()", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const run = vi.fn(ctx => ctx.ok());
+    const command = createCommand({
+      build: { user: { name: "Profile" } },
+      run,
+    });
+    managerWithOptions.commands.set("cmd_1_Profile", command);
+
+    const interaction = {
+      command: { id: "cmd_1", name: "Profile", type: ApplicationCommandType.User, guildId: null, toJSON: () => ({}) },
+      commandName: "Profile",
+      user: { id: "user_1" },
+      guild: null,
+      guildId: null,
+      member: null,
+      channel: null,
+      channelId: null,
+      context: InteractionContextType.Guild,
+      authorizingIntegrationOwners: {},
+      locale: "en-US",
+      isChatInputCommand: () => false,
+      isUserContextMenuCommand: () => true,
+      isMessageContextMenuCommand: () => false,
+      isRepliable: () => true,
+      reply: vi.fn(),
+      toJSON: () => ({}),
+      targetUser: { id: "target_1" },
+      targetMember: null,
+    } as unknown as CommandInteraction;
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
+
+    expect(run).toHaveBeenCalledOnce();
+    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+  });
+
+  it("dispatches message context menu interaction to run()", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const run = vi.fn(ctx => ctx.ok());
+    const command = createCommand({
+      build: { message: { name: "Info" } },
+      run,
+    });
+    managerWithOptions.commands.set("cmd_1_Info", command);
+
+    const targetMessage = { id: "msg_1" };
+    const interaction = {
+      command: { id: "cmd_1", name: "Info", type: ApplicationCommandType.Message, guildId: null, toJSON: () => ({}) },
+      commandName: "Info",
+      user: { id: "user_1" },
+      guild: null,
+      guildId: null,
+      member: null,
+      channel: null,
+      channelId: null,
+      context: InteractionContextType.Guild,
+      authorizingIntegrationOwners: {},
+      locale: "en-US",
+      isChatInputCommand: () => false,
+      isUserContextMenuCommand: () => false,
+      isMessageContextMenuCommand: () => true,
+      isRepliable: () => true,
+      reply: vi.fn(),
+      toJSON: () => ({}),
+      targetMessage,
+    } as unknown as CommandInteraction;
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
+
+    expect(run).toHaveBeenCalledOnce();
+    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
   });
 });

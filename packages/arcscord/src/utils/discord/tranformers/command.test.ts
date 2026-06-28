@@ -101,7 +101,7 @@ describe("command transformers", () => {
   it("builds callback localizations only for languages with loaded resources", async () => {
     const client = await createI18nClient();
 
-    expect(localizationToAPI(t => t($ => $.command.name), client, true)).toEqual({
+    expect(localizationToAPI(t => (t as any)(($: any) => $.command.name), client, true)).toEqual({
       "en-US": "i18n-en",
       "en-GB": "i18n-en",
       "fr": "i18n-fr",

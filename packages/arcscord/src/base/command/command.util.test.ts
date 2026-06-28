@@ -1,3 +1,4 @@
+import type { Message } from "discord.js";
 import { ApplicationCommandOptionType } from "discord-api-types/v10";
 import { describe, expect, it } from "vitest";
 import { createMockCommandInteraction } from "#/testing";
@@ -86,7 +87,7 @@ describe("command util string formatting", () => {
       targetMessage: {
         channelId: "channel_1",
         guildId: "guild_1",
-      },
+      } as Partial<Message>,
     });
 
     expect(commandInteractionToString(interaction)).toBe(

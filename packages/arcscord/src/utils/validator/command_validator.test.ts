@@ -188,9 +188,9 @@ describe("command validator", () => {
       build: {
         slash: {
           name: "i18n",
-          nameLocalizations: t => t($ => $.i18n.command.name),
+          nameLocalizations: t => (t as any)(($: any) => $.i18n.command.name),
           description: "default description",
-          descriptionLocalizations: t => t($ => $.i18n.command.description),
+          descriptionLocalizations: t => (t as any)(($: any) => $.i18n.command.description),
         },
       },
       run: ctx => ctx.ok(),

@@ -37,4 +37,15 @@ export default antfu(
       "ts/explicit-function-return-type": "off",
     },
   },
+  {
+    files: ["**/*.test.ts", "**/_test/**/*.ts"],
+    rules: {
+      "ts/explicit-function-return-type": "off",
+      "ts/no-explicit-any": "off",
+      "ts/no-unsafe-assignment": "off",
+      "ts/no-unsafe-call": "off",
+      "ts/no-unsafe-member-access": "off",
+      "ts/no-unsafe-argument": "off",
+    },
+  },
 );

@@ -1,3 +1,4 @@
+import type { GatewayIntentBits } from "discord-api-types/v10";
 import type { ArcClient } from "#/base";
 import type { AnyEventHandler, HandlersList } from "#/index";
 import type { EventManagerOptions } from "./event_manager.type";
@@ -31,7 +32,7 @@ function createMockClient(
       enableInternalTrace: false,
     },
     options: {
-      intents: new IntentsBitField(intents),
+      intents: new IntentsBitField(intents as unknown as GatewayIntentBits[]),
     },
     createLogger: () => ({
       trace: vi.fn(),
@@ -101,7 +102,7 @@ describe("event manager", () => {
 
   it("loads events and binds listeners", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async (_ctx: unknown, _msg: unknown) => ok(true as const));
     const event = createEvent({
       event: "messageCreate",
       run,
@@ -117,7 +118,7 @@ describe("event manager", () => {
 
   it("unloads a registered event listener", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async () => ok(true as const));
     const event = createEvent({
       event: "messageCreate",
       name: "messageLogger",
@@ -136,7 +137,7 @@ describe("event manager", () => {
 
   it("unloads once events after the first emit", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async () => ok(true as const));
     const event = createEvent({
       event: "messageCreate",
       options: {
@@ -175,7 +176,7 @@ describe("event manager", () => {
   it("runs before ready by default", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
     client.ready = false;
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async () => ok(true as const));
 
     await manager.loadEvent(createEvent({
       event: "messageCreate",
@@ -191,7 +192,7 @@ describe("event manager", () => {
   it("queues events before ready when beforeReady is queue", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
     client.ready = false;
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async () => ok(true as const));
 
     await manager.loadEvent(createEvent({
       event: "messageCreate",
@@ -216,7 +217,7 @@ describe("event manager", () => {
   it("drops events before ready when beforeReady is drop", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
     client.ready = false;
-    const run = vi.fn(() => ok(true));
+    const run = vi.fn(async () => ok(true as const));
 
     await manager.loadEvent(createEvent({
       event: "messageCreate",

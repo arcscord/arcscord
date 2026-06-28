@@ -41,7 +41,7 @@ describe("commandMiddleware", () => {
 
   it("creates a cancel result", () => {
     const middleware = new TestCommandMiddleware();
-    const cancel = Promise.resolve(ok(true));
+    const cancel = Promise.resolve(ok(true as const));
 
     expect(middleware.cancel(cancel)).toEqual({
       cancel,

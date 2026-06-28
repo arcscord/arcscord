@@ -1,4 +1,5 @@
 import type {
+  ButtonInteraction,
   CommandInteraction,
   Message,
   MessageComponentInteraction,
@@ -33,6 +34,10 @@ export type MockComponentInteractionOptions = {
   customId?: string;
   guild?: MessageComponentInteraction["guild"];
   user?: MockUserOptions;
+};
+
+export type MockMessageComponentInteractionOptions = MockComponentInteractionOptions & {
+  message?: Partial<Message>;
 };
 
 export function createMockUser(options: MockUserOptions = {}): User {
@@ -75,4 +80,24 @@ export function createMockComponentInteraction(
     inGuild: () => options.guild !== null && options.guild !== undefined,
     user: createMockUser(options.user),
   } as unknown as MessageComponentInteraction;
+}
+
+export function createMockMessageComponentInteraction(
+  options: MockMessageComponentInteractionOptions = {},
+): ButtonInteraction {
+  return {
+    channel: options.channel ?? null,
+    appPermissions: new PermissionsBitField(options.appPermissions ?? []),
+    customId: options.customId ?? "test",
+    guild: options.guild ?? null,
+    inGuild: () => options.guild !== null && options.guild !== undefined,
+    user: createMockUser(options.user),
+    message: options.message ?? { id: "msg_1", components: [] },
+    reply: async () => {},
+    editReply: async () => {},
+    deferReply: async () => {},
+    deferUpdate: async () => {},
+    showModal: async () => {},
+    update: async () => {},
+  } as unknown as ButtonInteraction;
 }
