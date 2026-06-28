@@ -1,6 +1,6 @@
 {
-  "test": "test",
-  "default": {
-    "run": "pong"
+  "ping": {
+    "title": "🏓 Pong!",
+    "latency": "Latency: `{{ms}}ms`"
   }
 }
