@@ -36,12 +36,16 @@
     "docs": "typedoc"
   },
   "dependencies": {
-    "arcscord": "workspace:^",
+    "arcscord": "workspace:^"
+  },
+  "peerDependencies": {
     "discord.js": "^14.26.4",
-    "typescript": "^6.0.3"
+    "typescript": ">=5.0.0"
   },
   "devDependencies": {
-    "tsup": "^8.5.1"
+    "discord.js": "^14.26.4",
+    "tsup": "^8.5.1",
+    "typescript": "^6.0.3"
   },
   "files": [
     "dist/cjs/",

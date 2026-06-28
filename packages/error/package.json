@@ -42,7 +42,6 @@
     "tsup": "^8.5.1",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
-    "vite": "8.0.16",
     "vitest": "^4.1.9"
   },
   "files": [
