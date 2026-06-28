@@ -1,48 +1,20 @@
-import type { CommandInteraction } from "discord.js";
+import type { AutocompleteInteraction, CommandInteraction } from "discord.js";
 import type { Command } from "#/base/command/command_definition.type";
-import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType, Routes } from "discord-api-types/v10";
+import { ApplicationCommandOptionType, ApplicationCommandType, Routes } from "discord-api-types/v10";
 import { describe, expect, it, vi } from "vitest";
 import { createCommand } from "#/base/command/command_func";
-import { createMockClient } from "#/testing";
+import {
+  createMockAutocompleteInteraction,
+  createMockChatInputInteraction,
+  createMockClient,
+  createMockMessageContextMenuInteraction,
+  createMockUserContextMenuInteraction,
+} from "#/testing";
 import { CommandManager } from "./command_manager.class";
 
 function createMockClientWithManager() {
   const client = createMockClient();
   return { client, manager: new CommandManager(client) };
-}
-
-function createMockSlashInteraction(overrides: Partial<CommandInteraction> = {}): CommandInteraction {
-  return {
-    command: {
-      id: "cmd_1",
-      name: "ping",
-      type: ApplicationCommandType.ChatInput,
-      guildId: null,
-      toJSON: () => ({}),
-    },
-    commandName: "ping",
-    user: { id: "user_1" },
-    guild: null,
-    guildId: null,
-    member: null,
-    channel: null,
-    channelId: null,
-    context: InteractionContextType.Guild,
-    authorizingIntegrationOwners: {},
-    locale: "en-US",
-    isChatInputCommand: () => true,
-    isUserContextMenuCommand: () => false,
-    isMessageContextMenuCommand: () => false,
-    isRepliable: () => true,
-    reply: vi.fn(),
-    toJSON: () => ({}),
-    options: {
-      data: [],
-      getSubcommand: () => null,
-      getSubcommandGroup: () => null,
-    },
-    ...overrides,
-  } as unknown as CommandInteraction;
 }
 
 type HandleInteractionFn = (interaction: CommandInteraction) => Promise<void>;
@@ -140,7 +112,6 @@ describe("command manager", () => {
 
   it("dispatches autocomplete interactions to the focused option handler", async () => {
     const { manager } = createMockClientWithManager();
-    const respond = vi.fn();
     const animeHandler = vi.fn(ctx => ctx.sendChoices(["Naruto"]));
     const yearHandler = vi.fn(ctx => ctx.sendChoices([2002]));
     const command = createCommand({
@@ -171,47 +142,17 @@ describe("command manager", () => {
 
     manager.commands.set("cmd_1_search", command);
 
+    const { interaction, respond } = createMockAutocompleteInteraction({
+      commandId: "cmd_1",
+      commandName: "search",
+      focusedOption: { name: "anime", value: "Nar", type: ApplicationCommandOptionType.String },
+    });
+
     const autocompleteManager = manager as unknown as {
-      handleAutocomplete: (interaction: {
-        channel: null;
-        commandName: string;
-        command: {
-          id: string;
-          name: string;
-          type: ApplicationCommandType;
-          guildId: null;
-          toJSON: () => object;
-        };
-        guild: null;
-        locale: string;
-        options: {
-          getFocused: (full: boolean) => string | { name: string; value: string; type: ApplicationCommandOptionType };
-        };
-        respond: typeof respond;
-        user: { id: string };
-      }) => Promise<void>;
+      handleAutocomplete: (interaction: AutocompleteInteraction) => Promise<void>;
     };
 
-    await autocompleteManager.handleAutocomplete({
-      channel: null,
-      commandName: "search",
-      command: {
-        id: "cmd_1",
-        name: "search",
-        type: ApplicationCommandType.ChatInput,
-        guildId: null,
-        toJSON: () => ({ id: "cmd_1", name: "search" }),
-      },
-      guild: null,
-      locale: "en-US",
-      options: {
-        getFocused: vi.fn((full: boolean) => full
-          ? { name: "anime", value: "Nar", type: ApplicationCommandOptionType.String }
-          : "Nar"),
-      },
-      respond,
-      user: { id: "user_1" },
-    });
+    await autocompleteManager.handleAutocomplete(interaction);
 
     expect(animeHandler).toHaveBeenCalledTimes(1);
     expect(yearHandler).not.toHaveBeenCalled();
@@ -314,7 +255,7 @@ describe("command manager", () => {
     managerWithOptions.commands.set("cmd_1_ping", command);
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
-      createMockSlashInteraction(),
+      createMockChatInputInteraction(),
     );
 
     expect(resultHandler).toHaveBeenCalledOnce();
@@ -337,7 +278,7 @@ describe("command manager", () => {
     managerWithOptions.commands.set("cmd_1_ping", command);
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
-      createMockSlashInteraction(),
+      createMockChatInputInteraction(),
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
@@ -358,7 +299,7 @@ describe("command manager", () => {
     managerWithOptions.commands.set("cmd_1_ping", command);
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
-      createMockSlashInteraction(),
+      createMockChatInputInteraction(),
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
@@ -379,7 +320,7 @@ describe("command manager", () => {
     managerWithOptions.commands.set("cmd_1_ping", command);
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
-      createMockSlashInteraction(),
+      createMockChatInputInteraction(),
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
@@ -398,7 +339,7 @@ describe("command manager", () => {
       },
     });
 
-    const interaction = createMockSlashInteraction();
+    const interaction = createMockChatInputInteraction();
     (interaction as unknown as Record<string, unknown>).command = null;
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
@@ -419,27 +360,11 @@ describe("command manager", () => {
     });
     managerWithOptions.commands.set("cmd_1_Profile", command);
 
-    const interaction = {
-      command: { id: "cmd_1", name: "Profile", type: ApplicationCommandType.User, guildId: null, toJSON: () => ({}) },
+    const interaction = createMockUserContextMenuInteraction({
+      commandId: "cmd_1",
       commandName: "Profile",
-      user: { id: "user_1" },
-      guild: null,
-      guildId: null,
-      member: null,
-      channel: null,
-      channelId: null,
-      context: InteractionContextType.Guild,
-      authorizingIntegrationOwners: {},
-      locale: "en-US",
-      isChatInputCommand: () => false,
-      isUserContextMenuCommand: () => true,
-      isMessageContextMenuCommand: () => false,
-      isRepliable: () => true,
-      reply: vi.fn(),
-      toJSON: () => ({}),
       targetUser: { id: "target_1" },
-      targetMember: null,
-    } as unknown as CommandInteraction;
+    });
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 
@@ -459,27 +384,11 @@ describe("command manager", () => {
     });
     managerWithOptions.commands.set("cmd_1_Info", command);
 
-    const targetMessage = { id: "msg_1" };
-    const interaction = {
-      command: { id: "cmd_1", name: "Info", type: ApplicationCommandType.Message, guildId: null, toJSON: () => ({}) },
+    const interaction = createMockMessageContextMenuInteraction({
+      commandId: "cmd_1",
       commandName: "Info",
-      user: { id: "user_1" },
-      guild: null,
-      guildId: null,
-      member: null,
-      channel: null,
-      channelId: null,
-      context: InteractionContextType.Guild,
-      authorizingIntegrationOwners: {},
-      locale: "en-US",
-      isChatInputCommand: () => false,
-      isUserContextMenuCommand: () => false,
-      isMessageContextMenuCommand: () => true,
-      isRepliable: () => true,
-      reply: vi.fn(),
-      toJSON: () => ({}),
-      targetMessage,
-    } as unknown as CommandInteraction;
+      targetMessage: { id: "msg_1" } as never,
+    });
 
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 

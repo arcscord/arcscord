@@ -39,6 +39,33 @@ it("types ctx.params with multiple route variables", () => {
   });
 });
 
+it("build takes only options for a static route", () => {
+  const btn = createButton({
+    route: "static_button",
+    build: (id, label) => buttonComponent({ customId: id(), label, style: "primary" }),
+    run: async ctx => ctx.ok(),
+  });
+  expectTypeOf(btn.build).parameters.toEqualTypeOf<[string]>();
+});
+
+it("build takes params object first then options for a dynamic route", () => {
+  const btn = createButton({
+    route: "ticket/close/{ticketId}",
+    build: (id, label) => buttonComponent({ customId: id(), label, style: "danger" }),
+    run: async ctx => ctx.ok(),
+  });
+  expectTypeOf(btn.build).parameters.toEqualTypeOf<[{ ticketId: string }, string]>();
+});
+
+it("build takes multiple params objects for routes with several variables", () => {
+  const btn = createButton({
+    route: "guild/{guildId}/channel/{channelId}",
+    build: id => buttonComponent({ customId: id(), style: "secondary", label: "Go" }),
+    run: async ctx => ctx.ok(),
+  });
+  expectTypeOf(btn.build).parameters.toEqualTypeOf<[{ guildId: string; channelId: string }]>();
+});
+
 it("types modal ctx.params from route", () => {
   createModal({
     route: "ticket/create/{type}",
