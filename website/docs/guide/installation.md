@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: Install Arcscord and discord.js with pnpm, npm, or yarn, and set up the Node.js runtime for your Discord bot project.
 ---
 
 # Installation

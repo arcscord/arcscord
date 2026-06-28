@@ -1,5 +1,6 @@
 ---
 sidebar_position: 3
+description: Ready-to-use middleware classes for Arcscord commands and components.
 ---
 
 # @arcscord/middleware

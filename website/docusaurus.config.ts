@@ -4,8 +4,9 @@ import { themes } from "prism-react-renderer";
 
 const config: Config = {
   title: "Arcscord",
-  tagline: "TypeScript tools for Discord bots",
-  favicon: "img/logo.svg",
+  tagline:
+    "A TypeScript-first framework for building Discord bots, with typed commands, components, and result-style error handling on top of discord.js.",
+  favicon: "img/favicon.png",
   url: "https://arcscord.dev",
   baseUrl: "/",
   organizationName: "arcscord",
@@ -33,17 +34,69 @@ const config: Config = {
         theme: {
           customCss: "./src/css/custom.css",
         },
+        sitemap: {
+          changefreq: "weekly",
+          priority: 0.5,
+          ignorePatterns: ["/tags/**"],
+          filename: "sitemap.xml",
+        },
       } satisfies Preset.Options,
     ],
   ],
 
+  headTags: [
+    {
+      tagName: "meta",
+      attributes: {
+        name: "theme-color",
+        content: "#377bc3",
+      },
+    },
+    {
+      tagName: "script",
+      attributes: {
+        type: "application/ld+json",
+      },
+      innerHTML: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "SoftwareSourceCode",
+        "name": "Arcscord",
+        "description":
+          "A TypeScript-first framework for building Discord bots, with typed commands, components, and result-style error handling on top of discord.js.",
+        "codeRepository": "https://github.com/arcscord/arcscord",
+        "programmingLanguage": "TypeScript",
+        "url": "https://arcscord.dev",
+        "license": "https://github.com/arcscord/arcscord/blob/main/LICENSE",
+      }),
+    },
+  ],
+
   themeConfig: {
+    colorMode: {
+      defaultMode: "dark",
+      respectPrefersColorScheme: false,
+    },
+    image: "img/social-card.png",
+    metadata: [
+      {
+        name: "description",
+        content:
+          "A TypeScript-first framework for building Discord bots, with typed commands, components, and result-style error handling on top of discord.js.",
+      },
+      {
+        name: "keywords",
+        content:
+          "arcscord, discord bot, discord.js, discord bot framework, typescript discord, discord bot typescript",
+      },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
     navbar: {
       title: "Arcscord",
       logo: {
         alt: "Arcscord logo",
-        src: "img/logo.svg",
-        srcDark: "img/logo.svg",
+        src: "img/Arcscord_Logo_cropped.png",
+        srcDark: "img/Arcscord_Logo_cropped.png",
       },
       items: [
         { type: "docSidebar", sidebarId: "guideSidebar", position: "left", label: "Guide" },

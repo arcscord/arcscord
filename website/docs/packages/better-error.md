@@ -1,5 +1,6 @@
 ---
 sidebar_position: 5
+description: A lightweight extension of the native Error class that adds structured debug context.
 ---
 
 # @arcscord/better-error

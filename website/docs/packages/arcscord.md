@@ -1,5 +1,6 @@
 ---
 sidebar_position: 1
+description: Core Arcscord framework — client, command and component builders, event helpers, managers, localization, and logging for Discord bots.
 ---
 
 # arcscord

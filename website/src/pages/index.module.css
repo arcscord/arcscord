@@ -1,0 +1,158 @@
+/* ===== Hero ===== */
+.hero {
+  padding: 4rem 1rem 3.5rem;
+  text-align: center;
+  background:
+    radial-gradient(circle at 50% -20%, rgba(130, 152, 237, 0.18), transparent 60%),
+    var(--ifm-background-surface-color);
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+}
+
+.heroInner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.heroLogo {
+  width: auto;
+  height: 140px;
+  margin-bottom: 1rem;
+}
+
+.heroTitle {
+  font-size: 3rem;
+  line-height: 1.1;
+  margin-bottom: 0.75rem;
+}
+
+.heroTagline {
+  font-size: 1.25rem;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2rem;
+}
+
+.heroButtons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+}
+
+.heroBadges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.heroBadges img {
+  height: 20px;
+}
+
+/* ===== Generic sections ===== */
+.section {
+  padding: 3.5rem 0;
+}
+
+.sectionAlt {
+  background: var(--ifm-background-surface-color);
+}
+
+.sectionTitle {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.sectionSubtitle {
+  text-align: center;
+  color: var(--ifm-color-emphasis-700);
+  margin-bottom: 2rem;
+}
+
+.codeWrapper {
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+/* ===== Features ===== */
+.featureGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.featureCard {
+  display: block;
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 10px;
+  background: var(--ifm-background-color);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.featureCard:hover {
+  text-decoration: none;
+  border-color: var(--ifm-color-primary);
+  transform: translateY(-2px);
+}
+
+.featureTitle {
+  font-size: 1.15rem;
+  margin-bottom: 0.4rem;
+  color: var(--ifm-heading-color);
+}
+
+.featureDescription {
+  margin: 0;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+/* ===== Packages ===== */
+.packageGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  max-width: 920px;
+  margin: 0 auto;
+}
+
+.packageCard {
+  padding: 1.5rem;
+  border: 1px solid var(--ifm-toc-border-color);
+  border-radius: 10px;
+  background: var(--ifm-background-color);
+}
+
+.packageName {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.packageDescription {
+  margin: 0.6rem 0 1rem;
+  color: var(--ifm-color-emphasis-700);
+  font-size: 0.95rem;
+}
+
+.packageLinks {
+  display: flex;
+  gap: 1rem;
+  font-weight: 600;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .heroTitle {
+    font-size: 2.25rem;
+  }
+
+  .featureGrid,
+  .packageGrid {
+    grid-template-columns: 1fr;
+  }
+}

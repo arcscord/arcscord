@@ -1,5 +1,6 @@
 ---
 sidebar_position: 4
+description: Result-style error handling for TypeScript — functions return a Result<T, E> tuple instead of throwing.
 ---
 
 # @arcscord/error
