@@ -46,6 +46,10 @@
   justify-content: center;
 }
 
+.heroBadges a {
+  display: inline-flex;
+}
+
 .heroBadges img {
   height: 20px;
   width: auto;

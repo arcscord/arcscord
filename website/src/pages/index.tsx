@@ -119,24 +119,30 @@ function Hero(): ReactNode {
           </Link>
         </div>
         <div className={styles.heroBadges}>
-          <img
-            src="https://img.shields.io/npm/v/arcscord?color=377bc3&label=arcscord&logo=npm"
-            alt="arcscord npm version"
-            width={118}
-            height={20}
-          />
-          <img
-            src="https://img.shields.io/npm/dm/arcscord?color=8298ed&label=downloads"
-            alt="arcscord monthly downloads"
-            width={134}
-            height={20}
-          />
-          <img
-            src="https://img.shields.io/github/stars/arcscord/arcscord?color=8298ed&logo=github"
-            alt="GitHub stars"
-            width={96}
-            height={20}
-          />
+          <Link href="https://www.npmjs.com/package/arcscord" aria-label="arcscord on npm">
+            <img
+              src="https://img.shields.io/npm/v/arcscord?color=377bc3&label=arcscord&logo=npm"
+              alt="arcscord npm version"
+              width={118}
+              height={20}
+            />
+          </Link>
+          <Link href="https://www.npmjs.com/package/arcscord" aria-label="arcscord downloads on npm">
+            <img
+              src="https://img.shields.io/npm/dm/arcscord?color=8298ed&label=downloads"
+              alt="arcscord monthly downloads"
+              width={134}
+              height={20}
+            />
+          </Link>
+          <Link href="https://github.com/arcscord/arcscord" aria-label="arcscord on GitHub">
+            <img
+              src="https://img.shields.io/github/stars/arcscord/arcscord?color=8298ed&logo=github"
+              alt="GitHub stars"
+              width={96}
+              height={20}
+            />
+          </Link>
         </div>
       </div>
     </header>
