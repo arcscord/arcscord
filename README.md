@@ -15,7 +15,7 @@
 ## Packages 📦
 
 - `arcscord` - [source](https://github.com/arcscord/arcscord/tree/main/packages/arcscord) - The core Discord bot framework.
-- `@arcscord/cli` - [source](https://github.com/arcscord/arcscord/tree/main/packages/cli) - The command-line tooling for Arcscord projects.
+- `create-arcscord-bot` - [source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot) - Scaffold a ready-to-run Arcscord bot with `npm create arcscord-bot`.
 - `@arcscord/middleware` - [source](https://github.com/arcscord/arcscord/tree/main/packages/middleware) - Middleware utilities for Arcscord.
 - `@arcscord/error` - [source](https://github.com/arcscord/arcscord/tree/main/packages/error) - Result-style error handling helpers.
 - `@arcscord/better-error` - [source](https://github.com/arcscord/arcscord/tree/main/packages/better_error) - A richer error class with debug context support.

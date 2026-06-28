@@ -12,7 +12,7 @@ export default antfu(
       "website/docs/*",
       "json_docs/*",
       ".vscode/settings.json",
-      "packages/cli/templates/**",
+      "**/templates/**",
       ".local/*",
       "CLAUDE.md",
       "AGENTS.md",
@@ -46,6 +46,12 @@ export default antfu(
       "ts/no-unsafe-call": "off",
       "ts/no-unsafe-member-access": "off",
       "ts/no-unsafe-argument": "off",
+    },
+  },
+  {
+    files: ["packages/create-arcscord-bot/**"],
+    rules: {
+      "no-console": "off",
     },
   },
 );

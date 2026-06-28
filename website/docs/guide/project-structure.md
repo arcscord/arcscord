@@ -130,11 +130,6 @@ const client = new ArcClient(process.env.TOKEN!, {
 await client.loadHandlers(handlers);
 ```
 
-:::tip
-The Arcscord CLI can scaffold a handler and update `handlers.ts` for you — see
-`arcscord new`.
-:::
-
 ## Scaling up
 
 As your bot grows, split each handler folder into **category or feature subfolders**. The
@@ -158,9 +153,8 @@ src/
         └── cancel_ticket.ts
 ```
 
-This changes nothing at runtime — handlers are still imported into `handlers.ts`. The CLI
-follows the same convention: `arcscord new command --name moderation/kick` creates the
-subfolder, wires up the `def.ts`, and adds the entry to your registry.
+This changes nothing at runtime — handlers are still imported into `handlers.ts`. Organize the
+folders however you like; only the imports in `handlers.ts` matter.
 
 ## Alternative: organize by feature
 
