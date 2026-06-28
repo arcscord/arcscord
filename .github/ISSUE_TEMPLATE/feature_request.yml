@@ -19,6 +19,7 @@ body:
         - "@arcscord/middleware"
         - "@arcscord/error"
         - "@arcscord/better-error"
+        - create-arcscord-bot
         - website/docs
         - multiple packages
         - unknown

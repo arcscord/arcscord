@@ -10,9 +10,9 @@ on:
         options:
           - arcscord
           - middleware
-          - cli
           - error
           - better_error
+          - create-arcscord-bot
       tag:
         description: the version tag to publish
         required: false

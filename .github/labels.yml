@@ -43,9 +43,9 @@
 - name: packages/error
   color: 0E8A16
   description: About error package
-- name: packages/dynamic-loader
-  color: 0E8A16
-  description: About dynamic loaded package
 - name: packages/middleware
   color: 0E8A16
-  description:
+  description: About middleware package
+- name: packages/create-arcscord-bot
+  color: 0E8A16
+  description: About create-arcscord-bot package
