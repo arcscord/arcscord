@@ -1,4 +1,5 @@
-import { BaseError } from "../src";
+import { describe, expect, it } from "vitest";
+import { BaseError } from "../";
 
 describe("baseError", () => {
   it("should create an error with a message", () => {

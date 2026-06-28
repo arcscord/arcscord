@@ -1,4 +1,3 @@
-import type { ESBuildOptions } from "vite";
 import type { ViteUserConfig } from "vitest/config";
 import { defaultExclude, defineConfig } from "vitest/config";
 
@@ -10,6 +9,7 @@ export function createVitestConfig(options: ViteUserConfig = {}) {
   return defineConfig({
     ...options,
     resolve: {
+      tsconfigPaths: true,
       ...options.resolve,
       alias: {
         "@arcscord/better-error": new URL("../packages/better_error/src/index.ts", import.meta.url).pathname,
@@ -22,9 +22,9 @@ export function createVitestConfig(options: ViteUserConfig = {}) {
       globals: true,
       exclude: [...defaultExclude, "**/dist/**", "**/*.no.test.*"],
     },
-    esbuild: {
-      ...options?.esbuild,
-      target: (options?.esbuild as ESBuildOptions | undefined)?.target ?? "es2022",
+    oxc: {
+      target: "es2022",
+      ...options?.oxc,
     },
   });
 }

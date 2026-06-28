@@ -8,5 +8,5 @@
       "arcscord/testing": ["../arcscord/src/testing/index.ts"]
     }
   },
-  "include": ["src", "tsup.config.ts"]
+  "include": ["src", "tsup.config.ts", "vitest.config.mts"]
 }

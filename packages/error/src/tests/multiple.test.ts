@@ -1,6 +1,6 @@
-import type { Result } from "../src";
+import type { Result } from "../";
 import { describe, expect, it } from "vitest";
-import { error, multiple, ok } from "../src";
+import { error, multiple, ok } from "../";
 
 class CustomError extends Error {}
 class AnotherError extends Error {}

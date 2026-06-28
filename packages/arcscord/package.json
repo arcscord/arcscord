@@ -52,7 +52,7 @@
   "scripts": {
     "test": "vitest run",
     "build": "tsup",
-    "typecheck": "tsc -b src",
+    "typecheck": "tsc -p tsconfig.eslint.json",
     "docs": "typedoc"
   },
   "dependencies": {

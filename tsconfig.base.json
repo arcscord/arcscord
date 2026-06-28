@@ -27,5 +27,9 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "skipLibCheck": true
-  }
+  },
+  "exclude": [
+    "**/tsup.config.ts",
+    "**/vitest.config.mts"
+  ]
 }

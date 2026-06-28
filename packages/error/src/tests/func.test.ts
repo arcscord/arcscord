@@ -1,4 +1,5 @@
-import { error, forceSafe, ok } from "../src";
+import { describe, expect, it } from "vitest";
+import { error, forceSafe, ok } from "../";
 
 describe("result functions", () => {
   describe("ok function", () => {

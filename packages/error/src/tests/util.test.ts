@@ -1,4 +1,5 @@
-import { anyToError } from "../src";
+import { describe, expect, it } from "vitest";
+import { anyToError } from "../";
 
 describe("anyToError function", () => {
   it("should return the same Error object if input is an Error", () => {

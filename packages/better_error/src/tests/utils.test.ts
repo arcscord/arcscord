@@ -1,4 +1,5 @@
-import { stringifyUnknown } from "../src";
+import { describe, expect, it } from "vitest";
+import { stringifyUnknown } from "../";
 
 describe("stringifyUnknown", () => {
   it("should return 'null' for null value", () => {
