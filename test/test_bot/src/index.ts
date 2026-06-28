@@ -1,7 +1,7 @@
 import process from "node:process";
 import { ArcClient } from "arcscord";
 import { Partials } from "discord.js";
-import handlers from "./_handlers";
+import handlers from "./handlers";
 import en from "./locale/en.json";
 import fr from "./locale/fr.json";
 

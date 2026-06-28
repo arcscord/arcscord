@@ -68,7 +68,7 @@ For applications that keep commands, components, and events in one generated
 handler list, use `client.loadHandlers`:
 
 ```ts
-import handlers from "./_handlers";
+import handlers from "./handlers";
 
 await client.loadHandlers(handlers, true /* info logs */);
 ```
