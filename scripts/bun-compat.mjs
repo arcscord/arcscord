@@ -11,7 +11,9 @@ import { fileURLToPath } from "node:url";
 
 const rootDir = new URL("../", import.meta.url);
 const arcscordDir = new URL("packages/arcscord/", rootDir);
-const vendorDir = new URL("test/compat/bun-consumer/vendor/", rootDir);
+const consumerDir = new URL("test/compat/bun-consumer/", rootDir);
+const vendorDir = new URL("vendor/", consumerDir);
+const installedArcscordDir = new URL("node_modules/arcscord/", consumerDir);
 
 // `shell: true` lets the platform shell resolve the `pnpm` shim regardless of
 // how it was installed (pnpm.cmd / pnpm.exe on Windows, pnpm on Unix). Args are
@@ -42,3 +44,13 @@ await rename(
 );
 
 console.log(`→ Packed ${tarball} → vendor/arcscord.tgz`);
+
+// 4. Drop the previously installed arcscord from the consumer.
+//
+// The dependency spec (`file:./vendor/arcscord.tgz`) and the package version are
+// unchanged across repacks, so a subsequent `bun install` can keep the stale
+// `node_modules/arcscord` from an earlier install — making typecheck/smoke/tests
+// run against old code instead of the tarball just produced. Removing it forces
+// `bun install` to re-extract the fresh tarball.
+await rm(installedArcscordDir, { recursive: true, force: true });
+console.log("→ Removed stale consumer node_modules/arcscord");
