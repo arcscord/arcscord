@@ -40,6 +40,7 @@ export type MockComponentInteractionOptions = {
   channel?: MessageComponentInteraction["channel"];
   customId?: string;
   guild?: MessageComponentInteraction["guild"];
+  memberPermissions?: PermissionsString[];
   user?: MockUserOptions;
 };
 
@@ -100,6 +101,9 @@ function buildComponentInteractionBase(options: MockComponentInteractionOptions)
     customId: options.customId ?? "test",
     guild: options.guild ?? null,
     inGuild: () => options.guild !== null && options.guild !== undefined,
+    memberPermissions: options.memberPermissions
+      ? new PermissionsBitField(options.memberPermissions)
+      : null,
     user: createMockUser(options.user),
     reply: async () => {},
     editReply: async () => {},

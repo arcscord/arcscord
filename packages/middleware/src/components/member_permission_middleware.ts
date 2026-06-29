@@ -59,7 +59,7 @@ export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
   }
 
   run(ctx: ComponentContext): ComponentMiddlewareRun<ComponentMemberPermissionMiddlewareNext> {
-    const permissions = ctx.member?.permissions;
+    const permissions = ctx.interaction.memberPermissions;
     const memberPermissions = new PermissionsBitField(
       typeof permissions === "string" ? BigInt(permissions) : permissions ?? 0n,
     );

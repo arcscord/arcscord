@@ -69,6 +69,22 @@ describe("componentMemberPermissionMiddleware", () => {
     });
   });
 
+  it("treats every permission as missing when the interaction has no member permissions", async () => {
+    const middleware = new ComponentMemberPermissionMiddleware(["ManageMessages", "BanMembers"], ({ missingPermissions }) => ({
+      content: `Missing: ${missingPermissions.join(", ")}`,
+    }));
+    const ctx = createContext();
+
+    const result = middleware.run(ctx);
+
+    expect(result.cancel).not.toBeNull();
+    await result.cancel;
+    expect(ctx.reply).toHaveBeenCalledWith({
+      content: "Missing: ManageMessages, BanMembers",
+      flags: MessageFlags.Ephemeral,
+    });
+  });
+
   it("cancels with an edit reply when the interaction is deferred", async () => {
     const middleware = new ComponentMemberPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `Missing: ${missingPermissions.join(", ")}`,

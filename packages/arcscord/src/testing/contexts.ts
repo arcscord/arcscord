@@ -92,6 +92,7 @@ export function createMockCommandContext(options: MockCommandContextOptions = {}
 export function createMockComponentContext(options: MockComponentContextOptions = {}): ComponentContext {
   const interaction = createMockComponentInteraction({
     ...options.interaction,
+    memberPermissions: options.interaction?.memberPermissions ?? options.memberPermissions,
     user: {
       ...options.interaction?.user,
       id: options.interaction?.user?.id ?? options.userId,
