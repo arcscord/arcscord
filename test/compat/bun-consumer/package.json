@@ -1,0 +1,23 @@
+{
+  "name": "@arcscord/bun-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Bun consumer compatibility project for arcscord (tests the packed package, not workspace source)",
+  "scripts": {
+    "smoke": "bun run smoke.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "arcscord": "file:./vendor/arcscord.tgz",
+    "discord.js": "^14.26.4"
+  },
+  "devDependencies": {
+    "@types/node": "^26.0.1",
+    "bun-types": "^1.3.0",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "bun": ">=1.3.0"
+  }
+}

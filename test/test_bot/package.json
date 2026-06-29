@@ -9,6 +9,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node -r dotenv/config -r @swc-node/register -r tsconfig-paths/register src/index.ts debug",
+    "start:bun": "bun src/index.ts debug",
     "typecheck": "tsc -p tsconfig.eslint.json"
   },
   "dependencies": {

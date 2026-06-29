@@ -8,6 +8,6 @@ export async function packageManagerPrompt(packageManager?: PackageManagerType):
 
   return await select({
     message: "What package manager do you want to use?",
-    choices: ["npm", "pnpm", "yarn"],
+    choices: ["npm", "pnpm", "yarn", "bun"],
   });
 }

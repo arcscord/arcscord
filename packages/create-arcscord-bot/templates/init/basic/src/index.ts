@@ -1,7 +1,6 @@
 import * as process from "node:process";
 import { ArcClient } from "arcscord";
 import handlers from "./handlers";
-import "dotenv/config";
 
 const client = new ArcClient(process.env.TOKEN ?? "", {
   intents: [],

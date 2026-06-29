@@ -1,7 +1,12 @@
+import type { PackageManagerType } from "../types.js";
 import { ARCSCORD_VERSION } from "../arcscord-version.js";
+
+export const MINIMUM_NODE_VERSION = ">=24.11.0";
+export const MINIMUM_BUN_VERSION = ">=1.3.0";
 
 export type PackageJSONOptions = {
   name: string;
+  packageManager: PackageManagerType;
   eslint?: "eslint" | "antfu" | "arcscord" | false;
   prettier?: boolean;
   i18n?: boolean;
@@ -12,7 +17,6 @@ const dependenciesVersions = {
   "@swc-node/core": "^1.14.1",
   "@swc-node/register": "^1.11.1",
   "@types/node": "^26.0.1",
-  "dotenv": "^17.4.2",
   "nodemon": "^3.1.14",
   "tsc-alias": "^1.8.17",
   "tsconfig-paths": "^4.2.0",
@@ -30,28 +34,49 @@ const dependenciesVersions = {
 };
 
 export function generatePackageJson(options: PackageJSONOptions): string {
+  const isBun = options.packageManager === "bun";
+
+  // `.env` is loaded by the runtime, not the code (no `dotenv` dependency):
+  // - Bun loads `.env` automatically.
+  // - Node uses the native `--env-file-if-exists` flag (loads `.env` when present,
+  //   falls back to the ambient environment otherwise, e.g. Docker/prod).
+  const scripts: Record<string, string> = isBun
+    ? {
+        start: "bun src/index.ts",
+        dev: "bun --watch src/index.ts dev debug",
+      }
+    : {
+        start: "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
+        dev: "npx nodemon --exec \"node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts\" dev debug",
+      };
+
+  const devDependencies: Record<string, string> = isBun
+    ? {
+        "@types/node": dependenciesVersions["@types/node"],
+        "tsc-alias": dependenciesVersions["tsc-alias"],
+        "typescript": dependenciesVersions.typescript,
+      }
+    : {
+        "@swc-node/core": dependenciesVersions["@swc-node/core"],
+        "@swc-node/register": dependenciesVersions["@swc-node/register"],
+        "@types/node": dependenciesVersions["@types/node"],
+        "nodemon": dependenciesVersions.nodemon,
+        "tsc-alias": dependenciesVersions["tsc-alias"],
+        "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
+        "typescript": dependenciesVersions.typescript,
+      };
+
   const jsonObj: Record<string, unknown> = {
     name: options.name,
     version: "1.0.0",
     description: "A discord bot made with arcscord",
-    scripts: {
-      start: "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-      dev: "npx nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
-    },
+    scripts,
     dependencies: {
       "arcscord": ARCSCORD_VERSION,
       "discord.js": dependenciesVersions["discord.js"],
     },
-    devDependencies: {
-      "@swc-node/core": dependenciesVersions["@swc-node/core"],
-      "@swc-node/register": dependenciesVersions["@swc-node/register"],
-      "@types/node": dependenciesVersions["@types/node"],
-      "dotenv": dependenciesVersions.dotenv,
-      "nodemon": dependenciesVersions.nodemon,
-      "tsc-alias": dependenciesVersions["tsc-alias"],
-      "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
-      "typescript": dependenciesVersions.typescript,
-    },
+    devDependencies,
+    engines: isBun ? { bun: MINIMUM_BUN_VERSION } : { node: MINIMUM_NODE_VERSION },
   };
 
   if (options.eslint) {

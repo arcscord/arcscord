@@ -20,7 +20,7 @@ const program = new Command()
   .name("create-arcscord-bot")
   .description("Scaffold a new Arcscord bot")
   .addArgument(new Argument("[name]", "project name / target directory"))
-  .addOption(new Option("--package-manager <packageManager>", "package manager to use").choices(["npm", "pnpm", "yarn"] as const))
+  .addOption(new Option("--package-manager <packageManager>", "package manager to use").choices(["npm", "pnpm", "yarn", "bun"] as const))
   .addOption(new Option("--prettier", "use prettier"))
   .addOption(new Option("--eslint [config]", "use eslint").choices(["eslint", "antfu", "arcscord"] as const))
   .addOption(new Option("--i18n", "use i18n"))
@@ -67,6 +67,7 @@ const program = new Command()
 
     await writeFile(`${root}/package.json`, generatePackageJson({
       name,
+      packageManager,
       eslint,
       prettier,
       i18n: additional.i18n,

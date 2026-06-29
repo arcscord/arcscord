@@ -1,0 +1,45 @@
+name: Bun Compatibility
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  BunCompatibility:
+    name: Bun Compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+      - name: Use Node.js v24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build and pack arcscord
+        run: pnpm bun:pack
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+        timeout-minutes: 15
+      - name: Use Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version-file: .bun-version
+      - name: Install consumer dependencies
+        working-directory: test/compat/bun-consumer
+        run: bun install
+      - name: Typecheck consumer
+        working-directory: test/compat/bun-consumer
+        run: bun run typecheck
+      - name: Run smoke test (no login)
+        working-directory: test/compat/bun-consumer
+        run: bun run smoke
+      - name: Run unit tests
+        working-directory: test/compat/bun-consumer
+        run: bun test
