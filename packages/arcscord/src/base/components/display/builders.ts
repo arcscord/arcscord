@@ -21,6 +21,8 @@ import type {
   MediaGalleryOptions,
   MessageV2Child,
   MessageV2Component,
+  MessageV2EditOptions,
+  MessageV2EditReplyOptions,
   MessageV2Options,
   MessageV2ReplyOptions,
   SectionAccessory,
@@ -102,33 +104,43 @@ function messageChildToAPI(child: MessageV2Child): MessageV2Component {
 }
 
 /**
- * Creates an interaction reply payload for Discord components v2.
+ * Creates a Discord components v2 message payload.
  *
  * The helper enables the `IsComponentsV2` flag and converts string children to text display components.
- * Components v2 replies use components as the message body, so `content`, `embeds`, `poll`,
+ * Components v2 messages use components as the message body, so `content`, `embeds`, `poll`,
  * and `stickers` are intentionally not accepted by this helper.
+ *
+ * By default the returned payload is edit-compatible, so it can be passed to `reply`, `editReply`,
+ * `updateMessage` and `message.edit`. Passing reply-only options (`ephemeral`, `tts`, …) narrows the
+ * result to a reply payload. Note that `IsComponentsV2` must already be set on the original message:
+ * Discord does not allow toggling the flag on an edit.
  */
 export function v2Message(
   child: MessageV2Child,
   ...children: MessageV2Child[]
-): MessageV2ReplyOptions;
+): MessageV2EditReplyOptions;
+export function v2Message(
+  options: MessageV2EditOptions,
+  child: MessageV2Child,
+  ...children: MessageV2Child[]
+): MessageV2EditReplyOptions;
 export function v2Message(
   options: MessageV2Options,
   child: MessageV2Child,
   ...children: MessageV2Child[]
 ): MessageV2ReplyOptions;
 export function v2Message(
-  first: MessageV2Options | MessageV2Child,
+  first: MessageV2EditOptions | MessageV2Options | MessageV2Child,
   ...children: MessageV2Child[]
-): MessageV2ReplyOptions {
-  const options = isOptionsObject(first) ? first as MessageV2Options : {};
+): MessageV2EditReplyOptions | MessageV2ReplyOptions {
+  const options = isOptionsObject(first) ? first as MessageV2EditOptions : {};
   const allChildren = isOptionsObject(first)
     ? children
     : [first as MessageV2Child, ...children];
 
   return {
     ...options,
-    flags: (Number(options.flags ?? 0) | MessageFlags.IsComponentsV2) as MessageV2Options["flags"],
+    flags: (Number(options.flags ?? 0) | MessageFlags.IsComponentsV2) as MessageV2EditReplyOptions["flags"],
     components: allChildren.map(messageChildToAPI),
   };
 }

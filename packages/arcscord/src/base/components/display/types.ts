@@ -7,6 +7,8 @@ import type {
   FileComponentData,
   InteractionReplyOptions,
   MediaGalleryComponentData,
+  MessageEditOptions,
+  MessageFlags,
   SectionComponentData,
   SeparatorComponentData,
   TextDisplayComponentData,
@@ -27,6 +29,28 @@ import type {
 export type MessageV2Options = Omit<InteractionReplyOptions, "components" | "content" | "embeds" | "poll" | "stickers">;
 export type MessageV2ReplyOptions = MessageV2Options & {
   readonly components: readonly MessageV2Component[];
+};
+
+/**
+ * Components v2 options usable for both initial replies and message updates/edits.
+ *
+ * Derived from `MessageEditOptions` so the produced payload is assignable to
+ * `reply`, `editReply`, `updateMessage` and `message.edit`. It intentionally
+ * omits the reply-only fields (`ephemeral`, `tts`, …) carried by {@link MessageV2Options}.
+ */
+export type MessageV2EditOptions = Omit<MessageEditOptions, "components" | "content" | "embeds">;
+
+/**
+ * Output payload of {@link v2Message} when no reply-only option is given.
+ *
+ * `flags` is narrowed to the literal flag union shared by reply and edit payloads.
+ * Discord's `BitFieldResolvable` is contravariant, so neither the wide reply nor the
+ * narrow edit `flags` type is assignable to the other — typing the field as the literal
+ * union is what makes the payload accepted by every send/edit method.
+ */
+export type MessageV2EditReplyOptions = Omit<MessageV2EditOptions, "flags"> & {
+  readonly components: readonly MessageV2Component[];
+  readonly flags?: MessageFlags.IsComponentsV2 | MessageFlags.SuppressEmbeds;
 };
 
 export type DisplayButton = Button | ButtonBuilder;

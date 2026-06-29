@@ -112,6 +112,8 @@ export type {
   MediaGalleryOptions,
   MessageV2Child,
   MessageV2Component,
+  MessageV2EditOptions,
+  MessageV2EditReplyOptions,
   MessageV2Options,
   MessageV2ReplyOptions,
   SectionAccessory,
