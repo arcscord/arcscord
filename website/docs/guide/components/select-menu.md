@@ -151,6 +151,10 @@ export const moodMenu = createTypedStringMenu({
 
 When `maxValues` is `1`, `ctx.values` is the single selected key (a string). When `maxValues > 1`, `ctx.values` is an array of keys.
 
+:::warning `values` must be static
+You must declare `values` as a static object literal asserted with `as const`. Its keys define both the `ctx.values` type **and** the set of values accepted at runtime — a selection outside that set (for example coming from an outdated message whose options no longer match) is rejected before `run` is called. Building `values` dynamically (or dropping `as const`) collapses `ctx.values` back to `string` and removes the type safety this helper provides.
+:::
+
 ## User select
 
 Lets the user pick one or more server members.

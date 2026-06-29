@@ -12,7 +12,6 @@ import type {
 import type { ArcClient, ComponentContext } from "#/base";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
-import type { TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
 import type { ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
@@ -35,14 +34,6 @@ import { normalizeRunReturn } from "#/utils/error/run_normalize";
 type MatchedComponent = {
   component: ComponentHandler;
   params: Record<string, string>;
-};
-
-type TypedStringSelectComponent = ComponentHandler & {
-  type: ComponentType.StringSelect;
-  typedStringSelectSnapshots: Map<string, {
-    values: TypedSelectMenuOptions;
-    maxValues?: number;
-  }>;
 };
 
 /**
@@ -170,10 +161,41 @@ export class ComponentManager extends BaseManager {
         return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale, params }));
       case ComponentType.StringSelect: {
         const stringSelectInteraction = interaction as StringSelectMenuInteraction;
-        const [validationError, values] = this.validateStringSelectValues(stringSelectInteraction, component);
-        if (validationError) {
-          return error(validationError);
+        const typed = component as {
+          typedSingleValue?: boolean;
+          typedAllowedValues?: ReadonlySet<string>;
+        };
+
+        if (typed.typedAllowedValues) {
+          const invalidValues = stringSelectInteraction.values.filter(
+            value => !typed.typedAllowedValues!.has(value),
+          );
+          if (invalidValues.length > 0) {
+            return error(new ComponentError({
+              message: `received invalid values for typed string select ${component.route}`,
+              interaction,
+              debugs: {
+                allowedValues: [...typed.typedAllowedValues],
+                invalidValues,
+                selectedValues: stringSelectInteraction.values,
+              },
+            }));
+          }
+          if (typed.typedSingleValue && stringSelectInteraction.values.length > 1) {
+            return error(new ComponentError({
+              message: `received multiples values for typed single string select ${component.route}`,
+              interaction,
+              debugs: {
+                allowedValues: [...typed.typedAllowedValues],
+                selectedValues: stringSelectInteraction.values,
+              },
+            }));
+          }
         }
+
+        const values = typed.typedSingleValue === true
+          ? stringSelectInteraction.values[0]
+          : stringSelectInteraction.values;
 
         return ok(new StringSelectMenuContext(this.client, stringSelectInteraction, {
           locale,
@@ -227,56 +249,6 @@ export class ComponentManager extends BaseManager {
           interaction,
         }));
     }
-  }
-
-  private isTypedStringSelectComponent(component: ComponentHandler): component is TypedStringSelectComponent {
-    return (
-      "type" in component
-      && component.type === ComponentType.StringSelect
-      && "typedStringSelectSnapshots" in component
-      && component.typedStringSelectSnapshots instanceof Map
-    );
-  }
-
-  private validateStringSelectValues(
-    interaction: StringSelectMenuInteraction,
-    component: ComponentHandler,
-  ): Result<string | string[], ComponentError> {
-    const selectedValues = interaction.values;
-
-    if (!this.isTypedStringSelectComponent(component)) {
-      return ok(selectedValues);
-    }
-
-    const snapshot = component.typedStringSelectSnapshots.get(interaction.customId);
-    if (!snapshot) {
-      return error(new ComponentError({
-        message: `missing typed string select values snapshot for ${component.route}`,
-        interaction,
-        debugs: {
-          customId: interaction.customId,
-          route: component.route,
-        },
-      }));
-    }
-
-    const allowedValues = Object.keys(snapshot.values);
-    const allowedValuesSet = new Set(allowedValues);
-    const invalidValues = selectedValues.filter(value => !allowedValuesSet.has(value));
-
-    if (invalidValues.length === 0) {
-      return ok(snapshot.maxValues === 1 ? selectedValues[0] : selectedValues);
-    }
-
-    return error(new ComponentError({
-      message: `received invalid values for typed string select ${component.route}`,
-      interaction,
-      debugs: {
-        allowedValues,
-        invalidValues,
-        selectedValues,
-      },
-    }));
   }
 
   private async handleComponentInteraction(

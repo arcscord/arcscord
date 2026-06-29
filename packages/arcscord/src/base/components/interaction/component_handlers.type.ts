@@ -161,21 +161,8 @@ export type StringSelectMenuComponentHandler<
    */
   run: (ctx: StringSelectMenuContext<Middleware, Typed, Route, MaxValues>) => MaybePromise<ComponentRunReturn>;
 } & (Typed extends TypedSelectMenuOptions
-  ? { typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot<Typed, MaxValues>> }
+  ? { typedSingleValue?: boolean; typedAllowedValues?: ReadonlySet<string> }
   : NonNullable<unknown>);
-
-/**
- * Runtime snapshot of values used to build a typed string select.
- *
- * @internal
- */
-export type TypedStringSelectSnapshot<
-  Values extends TypedSelectMenuOptions = TypedSelectMenuOptions,
-  MaxValues extends number | undefined = number | undefined,
-> = {
-  values: Values;
-  maxValues?: MaxValues;
-};
 
 /**
  * Storage-compatible string select handler shape.
@@ -186,7 +173,16 @@ export type AnyStringSelectMenuComponentHandler = BaseComponentHandler<Component
   handlerType?: typeof componentHandlerTypeEnum.messageComponent;
   type: ComponentType.StringSelect;
   build: (...args: any[]) => ActionRowData<StringSelectMenuComponentData>;
-  typedStringSelectSnapshots?: Map<string, TypedStringSelectSnapshot>;
+  /**
+   * Set at build time when the menu was created with `createTypedStringMenu`
+   * and `maxValues` is `1`, signalling that `ctx.values` is a single value.
+   */
+  typedSingleValue?: boolean;
+  /**
+   * Allowed values captured at build time from the static `values` keys of a
+   * `createTypedStringMenu`. Used to reject selections from outdated menus.
+   */
+  typedAllowedValues?: ReadonlySet<string>;
   run: (ctx: StringSelectMenuContext<ComponentMiddleware[], never, string>) => MaybePromise<ComponentRunReturn>;
 };
 

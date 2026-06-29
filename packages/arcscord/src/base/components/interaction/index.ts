@@ -23,7 +23,6 @@ export type {
   RouteComponentHandle,
   SelectMenuComponentHandler,
   StringSelectMenuComponentHandler,
-  TypedStringSelectSnapshot,
   UserSelectMenuComponentHandler,
 } from "./component_handlers.type";
 export {

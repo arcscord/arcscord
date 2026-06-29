@@ -12,7 +12,6 @@ import type {
   RoleSelectMenuComponentHandler,
   SelectMenuComponentHandler,
   StringSelectMenuComponentHandler,
-  TypedStringSelectSnapshot,
   UserSelectMenuComponentHandler,
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
@@ -142,6 +141,14 @@ export function createSelectMenu<
  *
  * The selected values are inferred from the keys of `values`.
  * When `maxValues` is `1`, `ctx.values` is typed and returned as a single value.
+ *
+ * > **Warning:** `values` **must** be a static object literal asserted with
+ * > `as const`. Its keys define both the `ctx.values` type and the set of
+ * > values accepted at runtime — selections outside that set (e.g. from an
+ * > outdated message) are rejected. Building `values` dynamically (or omitting
+ * > `as const`) collapses `ctx.values` back to `string` and voids the type
+ * > safety this helper provides.
+ *
  * @param options - The properties to configure the typed string select menu
  * @returns The complete set of properties for the typed string select menu
  * @example
@@ -180,28 +187,27 @@ export function createTypedStringMenu<
   options: TypedStringMenuOptions<Options, Middleware, Route, Values, MaxValues>,
 ): StringSelectMenuComponentHandler<Options, Middleware, Route, Values, MaxValues> {
   const resolveRouteBuild = createRouteBuildResolver<Route, Options>(options.route);
-  const typedStringSelectSnapshots = new Map<
-    string,
-    TypedStringSelectSnapshot<Values, MaxValues>
-  >();
-  return {
+  const handler = {
     ...options,
     build: (...args: ComponentBuildArgs<Route, Options>): ActionRowData<StringSelectMenuComponentData> => {
       const [buildId, buildArgs] = resolveRouteBuild(...args);
       const menu = options.build(buildId, ...buildArgs);
-      typedStringSelectSnapshots.set(menu.customId, {
-        values: menu.values,
-        maxValues: menu.maxValues,
-      });
+      // `values` is required to be a static `as const` literal, so its keys are
+      // the same across every build. Capture them once to both shape
+      // `ctx.values` and reject selections coming from outdated menus.
+      handler.typedSingleValue = menu.maxValues === 1;
+      handler.typedAllowedValues = new Set(Object.keys(menu.values));
       return stringSelectMenu({
         ...menu,
         options: menu.values,
       });
     },
     handlerType: componentHandlerTypeEnum.messageComponent,
-    typedStringSelectSnapshots,
+    typedSingleValue: false,
+    typedAllowedValues: new Set<string>(),
     type: ComponentType.StringSelect,
-  } as unknown as StringSelectMenuComponentHandler<
+  };
+  return handler as unknown as StringSelectMenuComponentHandler<
     Options,
     Middleware,
     Route,

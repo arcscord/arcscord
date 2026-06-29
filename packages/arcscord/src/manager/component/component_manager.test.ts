@@ -1,25 +1,6 @@
-import type { Result } from "@arcscord/error";
-import type { StringSelectMenuInteraction } from "discord.js";
-import type { ComponentHandler } from "../../base/components/interaction/component_handlers.type";
 import { ComponentType } from "discord-api-types/v10";
 import { describe, expect, it } from "vitest";
 import { createSelectMenu, createTypedStringMenu, stringSelectMenu } from "../../base/components";
-import { ComponentError } from "../../utils/error/class/component_error";
-import { ComponentManager } from "./component_manager.class";
-
-const validateStringSelectValues = (
-  ComponentManager.prototype as unknown as {
-    isTypedStringSelectComponent: (component: ComponentHandler) => boolean;
-    validateStringSelectValues: (
-      interaction: StringSelectMenuInteraction,
-      component: ComponentHandler,
-    ) => Result<string | string[], ComponentError>;
-  }
-).validateStringSelectValues;
-
-const componentManagerPrivateMethods = ComponentManager.prototype as unknown as {
-  isTypedStringSelectComponent: (component: ComponentHandler) => boolean;
-};
 
 const typedValues = {
   fun: {
@@ -56,63 +37,34 @@ const singleValueStringSelectMenu = createTypedStringMenu({
   },
 });
 
-function createStringSelectInteraction(values: string[]): StringSelectMenuInteraction {
-  return {
-    channel: null,
-    customId: "typed_string_select",
-    guild: null,
-    user: {
-      id: "user_1",
-    },
-    values,
-  } as StringSelectMenuInteraction;
-}
+type TypedHandlerInternals = {
+  typedSingleValue?: boolean;
+  typedAllowedValues?: ReadonlySet<string>;
+};
 
-describe("component manager", () => {
-  it("accepts declared values for typed string select menus", () => {
+describe("typed string select handler", () => {
+  it("does not flag a single value when maxValues is omitted", () => {
     typedStringSelectMenu.build();
 
-    const [err, values] = validateStringSelectValues.call(
-      componentManagerPrivateMethods,
-      createStringSelectInteraction(["fun", "happy"]),
-      typedStringSelectMenu,
-    );
-
-    expect(err).toBeNull();
-    expect(values).toEqual(["fun", "happy"]);
+    expect((typedStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBe(false);
   });
 
-  it("rejects undeclared values for typed string select menus", () => {
-    typedStringSelectMenu.build();
-
-    const [err, values] = validateStringSelectValues.call(
-      componentManagerPrivateMethods,
-      createStringSelectInteraction(["fun", "stale"]),
-      typedStringSelectMenu,
-    );
-
-    expect(err).toBeInstanceOf(ComponentError);
-    expect(err?.message).toBe("received invalid values for typed string select typed_string_select");
-    expect(values).toBeNull();
-  });
-
-  it("returns a single declared value when maxValues is one", () => {
+  it("flags a single value when maxValues is one", () => {
     singleValueStringSelectMenu.build();
 
-    const [err, values] = validateStringSelectValues.call(
-      componentManagerPrivateMethods,
-      {
-        ...createStringSelectInteraction(["fun"]),
-        customId: "single_typed_string_select",
-      } as StringSelectMenuInteraction,
-      singleValueStringSelectMenu,
-    );
-
-    expect(err).toBeNull();
-    expect(values).toBe("fun");
+    expect((singleValueStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBe(true);
   });
 
-  it("keeps untyped string select menus unrestricted", () => {
+  it("captures the declared values as the allowed set", () => {
+    typedStringSelectMenu.build();
+
+    expect([...(typedStringSelectMenu as TypedHandlerInternals).typedAllowedValues!]).toEqual([
+      "fun",
+      "happy",
+    ]);
+  });
+
+  it("does not flag anything on untyped string select menus", () => {
     const untypedStringSelectMenu = createSelectMenu({
       type: ComponentType.StringSelect,
       route: "untyped_string_select",
@@ -123,13 +75,9 @@ describe("component manager", () => {
       run: async ctx => ctx.ok(ctx.values.join(",")),
     });
 
-    const [err, values] = validateStringSelectValues.call(
-      componentManagerPrivateMethods,
-      createStringSelectInteraction(["stale"]),
-      untypedStringSelectMenu,
-    );
+    untypedStringSelectMenu.build();
 
-    expect(err).toBeNull();
-    expect(values).toEqual(["stale"]);
+    expect((untypedStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBeUndefined();
+    expect((untypedStringSelectMenu as TypedHandlerInternals).typedAllowedValues).toBeUndefined();
   });
 });
