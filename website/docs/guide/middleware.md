@@ -4,7 +4,7 @@ sidebar_position: 5
 
 # Middleware
 
-Arcscord middlewares run before a command or component handler. They are useful for checks and shared behavior such as permissions, feature flags, telemetry, cooldowns, author-only components, or any other logic that should happen before the main handler.
+Arcscord middlewares run before a command or component handler. They are useful for checks and shared behavior such as permissions, feature flags, telemetry, author-only components, or any other logic that should happen before the main handler.
 
 Middleware support is provided by the core `arcscord` package through `CommandMiddleware` and `ComponentMiddleware`. Ready-to-use middleware implementations are documented separately in the [`@arcscord/middleware` package page](/packages/middleware).
 
@@ -268,18 +268,19 @@ return this.error(new ComponentError({
 Middlewares from `@arcscord/middleware` accept message factories. These factories receive middleware data plus `ctx`, `locale`, and `t`, so you can define the user-facing message once and reuse it across commands.
 
 ```ts
-import type { CooldownMessageOptions, MessageOptions } from "@arcscord/middleware";
+import type { CommandBotPermissionMiddlewareMessageOptions, MessageOptions } from "@arcscord/middleware";
 import type { CommandContext } from "arcscord";
-import { CooldownMiddleware } from "@arcscord/middleware";
+import type { PermissionsString } from "discord.js";
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 
-const cooldownMessage: MessageOptions<CooldownMessageOptions, CommandContext> = ({ cooldownRemaining, t }) => ({
-  content: t($ => $.middleware.cooldown, {
-    seconds: Math.ceil(cooldownRemaining / 1000),
+const missingBotPermissionMessage: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext> = ({ missingPermissions, t }) => ({
+  content: t($ => $.middleware.bot_missing_permissions, {
+    permissions: missingPermissions.join(", "),
   }),
 });
 
-export const createCooldownMiddleware = (duration: number) => {
-  return new CooldownMiddleware(duration, cooldownMessage);
+export const createBotPermissionMiddleware = (permissions: PermissionsString[]) => {
+  return new CommandBotPermissionMiddleware(permissions, missingBotPermissionMessage);
 };
 ```
 
@@ -287,7 +288,7 @@ Then each command only chooses the middleware configuration:
 
 ```ts
 use: [
-  createCooldownMiddleware(10),
+  createBotPermissionMiddleware(["ManageMessages"]),
 ];
 ```
 
@@ -295,7 +296,7 @@ use: [
 
 - Keep middleware focused on one responsibility.
 - Use stable `name` values with `as const` so `ctx.additional` is typed correctly.
-- Prefer `cancel` for expected user-facing blocks such as missing permissions or cooldowns.
+- Prefer `cancel` for expected user-facing blocks such as missing permissions or disallowed users.
 - Prefer `error` for invalid configuration, unexpected state, or failures that should be logged centrally.
 - Return small serializable objects from `next`; they are easier to inspect and test.
 - Put reusable middleware in shared files or packages instead of duplicating checks in handlers.

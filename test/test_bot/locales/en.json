@@ -33,7 +33,6 @@
     }
   },
   "middleware": {
-    "cooldown": "Wait {{seconds}}s before using this command again.",
     "command": {
       "allowList": "You are not allowed to use this command.",
       "botPermission": "I am missing command permissions: {{permissions}}.",

@@ -5,7 +5,7 @@
 
 Ready-to-use middleware for [arcscord](https://www.npmjs.com/package/arcscord) command and component handlers.
 
-Provides guards for cooldowns, user allowlists, component author checks, and Discord permissions.
+Provides guards for user allowlists, component author checks, and Discord permissions.
 
 ## Install
 
@@ -16,19 +16,19 @@ pnpm add @arcscord/middleware
 ## Example
 
 ```ts
-import { CooldownMiddleware } from "@arcscord/middleware";
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
 
-export const pingCommand = createCommand({
+export const pruneCommand = createCommand({
   build: {
-    slash: { name: "ping", description: "Reply with pong." },
+    slash: { name: "prune", description: "Delete recent messages." },
   },
   use: [
-    new CooldownMiddleware(10, ({ cooldownRemaining }) => ({
-      content: `Wait ${Math.ceil(cooldownRemaining / 1000)}s before using this command again.`,
+    new CommandBotPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
+      content: `I am missing: ${missingPermissions.join(", ")}`,
     })),
   ],
-  run: ctx => ctx.reply("Pong!"),
+  run: ctx => ctx.reply("Messages pruned."),
 });
 ```
 

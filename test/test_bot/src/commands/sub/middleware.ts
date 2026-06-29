@@ -1,7 +1,7 @@
-import { CooldownMiddleware } from "@arcscord/middleware";
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
-import { commandCooldownMessage } from "../../utils/middleware_messages";
+import { commandBotPermissionMessage } from "../../utils/middleware_messages";
 
 export const testMiddlewareSubCommand = createCommand({
   build: {
@@ -9,7 +9,7 @@ export const testMiddlewareSubCommand = createCommand({
     description: "test",
 
   },
-  use: [new CooldownMiddleware(10, commandCooldownMessage)],
+  use: [new CommandBotPermissionMiddleware(["ManageMessages"], commandBotPermissionMessage)],
   run: (ctx) => {
     return ctx.reply(ctx.t($ => $.middleware.command.ok), {
       flags: MessageFlags.Ephemeral,

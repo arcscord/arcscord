@@ -9,7 +9,6 @@ import { messageInfosCommand } from "./commands/message_infos";
 import {
   middlewareAllowListCommand,
   middlewareBotPermissionCommand,
-  middlewareCooldownCommand,
 } from "./commands/middleware";
 import { subCommand } from "./commands/sub/def";
 import { channelSelectMenu } from "./components/channel_select_menu";
@@ -74,7 +73,6 @@ export default {
     componentTestCommand,
     autocompleteCommand,
     disableComponentCommand,
-    middlewareCooldownCommand,
     middlewareAllowListCommand,
     middlewareBotPermissionCommand,
     subCommand,

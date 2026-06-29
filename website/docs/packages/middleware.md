@@ -38,7 +38,6 @@ import {
   ComponentMemberPermissionMiddleware,
   CommandUserAllowListMiddleware,
   ComponentUserAllowListMiddleware,
-  CooldownMiddleware,
 } from "@arcscord/middleware";
 ```
 
@@ -47,18 +46,19 @@ import {
 Middleware messages can be static Discord.js message objects or callbacks. A callback receives the middleware-specific data plus `ctx`, `locale`, and `t`, which lets you centralize localized messages instead of redefining them on every command.
 
 ```ts
-import type { CooldownMessageOptions, MessageOptions } from "@arcscord/middleware";
+import type { CommandBotPermissionMiddlewareMessageOptions, MessageOptions } from "@arcscord/middleware";
 import type { CommandContext } from "arcscord";
-import { CooldownMiddleware } from "@arcscord/middleware";
+import type { PermissionsString } from "discord.js";
+import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 
-const cooldownMessage: MessageOptions<CooldownMessageOptions, CommandContext> = ({ cooldownRemaining, t }) => ({
-  content: t($ => $.middleware.cooldown, {
-    seconds: Math.ceil(cooldownRemaining / 1000),
+const missingBotPermissionMessage: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext> = ({ missingPermissions, t }) => ({
+  content: t($ => $.middleware.bot_missing_permissions, {
+    permissions: missingPermissions.join(", "),
   }),
 });
 
-export const createCooldownMiddleware = (duration: number) => {
-  return new CooldownMiddleware(duration, cooldownMessage);
+export const createBotPermissionMiddleware = (permissions: PermissionsString[]) => {
+  return new CommandBotPermissionMiddleware(permissions, missingBotPermissionMessage);
 };
 ```
 
@@ -66,65 +66,9 @@ Use the helper wherever you need the same behavior:
 
 ```ts
 use: [
-  createCooldownMiddleware(10),
+  createBotPermissionMiddleware(["ManageMessages"]),
 ];
 ```
-
-## CooldownMiddleware
-
-`CooldownMiddleware` prevents a user from running a command again before a configured duration expires.
-
-```ts
-import { CooldownMiddleware } from "@arcscord/middleware";
-import { createCommand } from "arcscord";
-
-export const pingCommand = createCommand({
-  build: {
-    slash: {
-      name: "ping",
-      description: "Ping with cooldown",
-    },
-  },
-  use: [
-    new CooldownMiddleware(10, ({ cooldownRemaining }) => ({
-      content: `Please wait ${Math.ceil(cooldownRemaining / 1000)} seconds.`,
-    })),
-  ],
-  run: ctx => ctx.reply("Pong!"),
-});
-```
-
-Constructor:
-
-```ts
-new CooldownMiddleware(duration, message, autoClear);
-```
-
-| Parameter | Type | Description |
-| --- | --- | --- |
-| `duration` | `number` | Cooldown duration in seconds. |
-| `message` | `(options) => BaseMessageOptions` | Message returned when the user is still on cooldown. |
-| `autoClear` | `false \| number` | Optional cleanup interval in seconds. Defaults to `3600`. Use `false` to disable automatic cleanup. |
-
-The message callback receives:
-
-| Field | Description |
-| --- | --- |
-| `user` | The Discord user affected by the cooldown. |
-| `cooldownDuration` | The configured duration in seconds. |
-| `cooldownRemaining` | Remaining time in milliseconds. |
-| `cooldownEnd` | Date when the cooldown expires. |
-| `commandName` | Name of the command that triggered the cooldown. |
-| `ctx` | Arcscord command context. |
-| `locale` | Detected interaction locale. |
-| `t` | Fixed translation function for the detected locale. |
-
-### Behavior
-
-- The cooldown is tracked per user.
-- When the user is still on cooldown, the middleware replies or edits the deferred reply and cancels the command.
-- When the cooldown has expired, the middleware stores the new cooldown end time and continues with `next({})`.
-- If `autoClear` is enabled, expired user entries are removed periodically.
 
 ## CommandUserAllowListMiddleware
 
@@ -316,6 +260,10 @@ new ComponentUserAllowListMiddleware(userIds, message);
 
 `ComponentMemberPermissionMiddleware` restricts a component to members with every required Discord permission.
 
+:::info
+This middleware exists only for components. For commands, declare the required member permissions directly in the command definition (`build.slash.defaultMemberPermissions`) instead of using a middleware.
+:::
+
 ```ts
 import { ComponentMemberPermissionMiddleware } from "@arcscord/middleware";
 import { button, createButton } from "arcscord";
@@ -422,9 +370,9 @@ Package middlewares can be mixed with your own middleware in the same `use` arra
 
 ```ts
 use: [
-  new CooldownMiddleware(10, () => ({
-    content: "Slow down.",
-  })),
+  new CommandUserAllowListMiddleware(developerIds, {
+    content: "This command is reserved for bot developers.",
+  }),
   new MyCustomMiddleware(),
 ];
 ```

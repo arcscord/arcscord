@@ -129,4 +129,4 @@ export const reportCommand = createCommand({
 
 `preReply: true` defers a public response. `preReply: "ephemeral"` defers a response visible only to the user who ran the command. Because the interaction is already deferred, use `ctx.editReply()` for the final response.
 
-Use middleware for runtime checks such as bot permissions, member permissions, allowlists, or cooldowns.
+Use middleware for runtime checks such as bot permissions, allowlists, or other shared pre-handler logic.
