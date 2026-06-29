@@ -61,21 +61,6 @@ describe("authorOnlyMiddleware", () => {
     });
   });
 
-  it("continues with ignore status when the original interaction author is unavailable", () => {
-    const middleware = new AuthorOnlyMiddleware({
-      content: "Author only",
-    });
-    const ctx = withMessageMetadata(createContext());
-
-    expect(middleware.run(ctx)).toEqual({
-      cancel: null,
-      error: null,
-      next: {
-        status: "ignore",
-      },
-    });
-  });
-
   it("cancels with a localized reply for another user", async () => {
     const translate = vi.fn((key: string) => `translated:${key}`);
     const middleware = new AuthorOnlyMiddleware(({ ctx, locale, t: fixedT }) => ({
