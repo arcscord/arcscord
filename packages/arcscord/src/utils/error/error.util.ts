@@ -25,7 +25,7 @@ export function stringifyDebugValue(
     return [key, value.toString()];
   }
   else {
-    return [key, `${!value}`];
+    return [key, `${value}`];
   }
 }
 
