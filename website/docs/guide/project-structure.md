@@ -44,11 +44,11 @@ discordbot/
 │   ├── services/
 │   │   ├── ticket_service.ts
 │   │   └── moderation_service.ts
-│   ├── locales/
-│   │   ├── en.json
-│   │   └── fr.json
 │   ├── handlers.ts
 │   └── index.ts
+├── locales/
+│   ├── en.json
+│   └── fr.json
 ├── package.json
 └── tsconfig.json
 ```

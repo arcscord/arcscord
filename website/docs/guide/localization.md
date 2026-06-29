@@ -17,8 +17,8 @@ Enable the locale manager and provide either `i18nOptions` or `customI18n`.
 
 ```ts title="src/index.ts"
 import { ArcClient } from "arcscord";
-import en from "../locale/en.json";
-import fr from "../locale/fr.json";
+import en from "../locales/en.json";
+import fr from "../locales/fr.json";
 
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   intents: ["Guilds"],
@@ -88,8 +88,8 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
 
 Use i18next module augmentation if you want selector-style typed keys.
 
-```ts title="src/@types/i18next.d.ts"
-import type en from "../../locale/en.json";
+```ts title="src/types/i18next.d.ts"
+import type en from "../../locales/en.json";
 
 declare const resources: {
   readonly translations: typeof en;

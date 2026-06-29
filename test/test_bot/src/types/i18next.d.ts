@@ -1,4 +1,4 @@
-import type en from "../locales/en.json";
+import type en from "../../locales/en.json";
 
 declare const resources: {
   readonly test: typeof en;
