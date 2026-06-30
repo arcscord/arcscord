@@ -70,7 +70,7 @@
   "devDependencies": {
     "@swc-node/core": "^1.14.1",
     "@swc-node/register": "^1.11.1",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.0.1",
     "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "tsup": "^8.5.1",

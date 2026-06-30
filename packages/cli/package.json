@@ -31,7 +31,7 @@
   "devDependencies": {
     "@types/babel__generator": "^7.27.0",
     "@types/babel__traverse": "^7.28.0",
-    "@types/node": "^26.0.0",
+    "@types/node": "^26.0.1",
     "i18next": "^26.3.3",
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
