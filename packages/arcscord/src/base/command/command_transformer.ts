@@ -107,7 +107,7 @@ export function subCommandListToAPI(
 
   if (def.subCommands) {
     subCommands.push(
-      ...def.subCommands.map(cmd => subCommandToAPI(cmd.build, client)),
+      ...def.subCommands.map(cmd => subCommandToAPI(cmd, client)),
     );
   }
 
@@ -119,7 +119,7 @@ export function subCommandListToAPI(
         description: option.description,
         name_localizations: localizationToAPI(option.nameLocalizations, client, true),
         description_localizations: localizationToAPI(option.descriptionLocalizations, client),
-        options: option.subCommands.map(cmd => subCommandToAPI(cmd.build, client)),
+        options: option.subCommands.map(cmd => subCommandToAPI(cmd, client)),
       });
     }
   }

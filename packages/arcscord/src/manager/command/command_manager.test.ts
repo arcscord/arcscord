@@ -115,21 +115,19 @@ describe("command manager", () => {
     const animeHandler = vi.fn(ctx => ctx.sendChoices(["Naruto"]));
     const yearHandler = vi.fn(ctx => ctx.sendChoices([2002]));
     const command = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            anime: {
-              type: "string",
-              description: "Anime name",
-              autocomplete: true,
-            },
-            year: {
-              type: "integer",
-              description: "Release year",
-              autocomplete: true,
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          anime: {
+            type: "string",
+            description: "Anime name",
+            autocomplete: true,
+          },
+          year: {
+            type: "integer",
+            description: "Release year",
+            autocomplete: true,
           },
         },
       },
@@ -168,16 +166,14 @@ describe("command manager", () => {
   it("rejects missing autocomplete handlers when loading commands", () => {
     const { manager } = createMockClientWithManager();
     const invalidCommand = {
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            anime: {
-              type: "string",
-              description: "Anime name",
-              autocomplete: true,
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          anime: {
+            type: "string",
+            description: "Anime name",
+            autocomplete: true,
           },
         },
       },
@@ -192,15 +188,13 @@ describe("command manager", () => {
   it("rejects autocomplete handlers that do not match enabled options when loading commands", () => {
     const { manager } = createMockClientWithManager();
     const invalidCommand = {
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            anime: {
-              type: "string",
-              description: "Anime name",
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          anime: {
+            type: "string",
+            description: "Anime name",
           },
         },
       },
@@ -222,15 +216,13 @@ describe("command manager", () => {
       description: "Search commands",
       subCommands: [
         {
-          build: {
-            name: "anime",
-            description: "Search anime",
-            options: {
-              query: {
-                type: "string",
-                description: "Anime name",
-                autocomplete: true,
-              },
+          name: "anime",
+          description: "Search anime",
+          options: {
+            query: {
+              type: "string",
+              description: "Anime name",
+              autocomplete: true,
             },
           },
           run: vi.fn(),
@@ -249,7 +241,7 @@ describe("command manager", () => {
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
-      build: { slash: { name: "ping", description: "Ping" } },
+      slash: { name: "ping", description: "Ping" },
       run: ctx => ctx.ok(),
     });
     managerWithOptions.commands.set("cmd_1_ping", command);
@@ -270,7 +262,7 @@ describe("command manager", () => {
 
     const thrown = new Error("boom");
     const command = createCommand({
-      build: { slash: { name: "ping", description: "Ping" } },
+      slash: { name: "ping", description: "Ping" },
       run: () => {
         throw thrown;
       },
@@ -293,7 +285,7 @@ describe("command manager", () => {
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
-      build: { slash: { name: "ping", description: "Ping" } },
+      slash: { name: "ping", description: "Ping" },
       run: () => {},
     });
     managerWithOptions.commands.set("cmd_1_ping", command);
@@ -314,7 +306,7 @@ describe("command manager", () => {
     const managerWithOptions = new CommandManager(client, { resultHandler });
 
     const command = createCommand({
-      build: { slash: { name: "ping", description: "Ping" } },
+      slash: { name: "ping", description: "Ping" },
       run: () => "pong!",
     });
     managerWithOptions.commands.set("cmd_1_ping", command);
@@ -355,7 +347,7 @@ describe("command manager", () => {
 
     const run = vi.fn(ctx => ctx.ok());
     const command = createCommand({
-      build: { user: { name: "Profile" } },
+      user: { name: "Profile" },
       run,
     });
     managerWithOptions.commands.set("cmd_1_Profile", command);
@@ -379,7 +371,7 @@ describe("command manager", () => {
 
     const run = vi.fn(ctx => ctx.ok());
     const command = createCommand({
-      build: { message: { name: "Info" } },
+      message: { name: "Info" },
       run,
     });
     managerWithOptions.commands.set("cmd_1_Info", command);

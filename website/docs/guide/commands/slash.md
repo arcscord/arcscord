@@ -4,7 +4,7 @@ sidebar_position: 1
 
 # Slash commands
 
-Slash commands are declared in `build.slash`. Arcscord infers the handler context from the definition, so options declared in the builder are available on `ctx.options`.
+Slash commands are declared in `slash`. Arcscord infers the handler context from the definition, so options declared in the builder are available on `ctx.options`.
 
 ## Basic command
 
@@ -13,11 +13,9 @@ import { createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const pingCommand = createCommand({
-  build: {
-    slash: {
-      name: "ping",
-      description: "Check if the bot is available",
-    },
+  slash: {
+    name: "ping",
+    description: "Check if the bot is available",
   },
   run: ctx => ctx.reply("Pong!"),
 });
@@ -25,33 +23,31 @@ export const pingCommand = createCommand({
 
 ## Options
 
-Slash command options are declared in `build.slash.options`. The selected values are exposed on `ctx.options`.
+Slash command options are declared in `slash.options`. The selected values are exposed on `ctx.options`.
 
 ```ts
 import { createCommand } from "arcscord";
 
 export const avatarCommand = createCommand({
-  build: {
-    slash: {
-      name: "avatar",
-      description: "Show a Discord avatar",
-      options: {
-        user: {
-          type: "user",
-          description: "User to inspect",
-        },
-        size: {
-          type: "number",
-          description: "Image size",
-          choices: [
-            128,
-            256,
-            {
-              name: "1024 (default)",
-              value: 1024,
-            },
-          ],
-        },
+  slash: {
+    name: "avatar",
+    description: "Show a Discord avatar",
+    options: {
+      user: {
+        type: "user",
+        description: "User to inspect",
+      },
+      size: {
+        type: "number",
+        description: "Image size",
+        choices: [
+          128,
+          256,
+          {
+            name: "1024 (default)",
+            value: 1024,
+          },
+        ],
       },
     },
   },
@@ -77,16 +73,14 @@ Use `required: true` when Discord should reject the command before it reaches yo
 import { createCommand } from "arcscord";
 
 export const sayCommand = createCommand({
-  build: {
-    slash: {
-      name: "say",
-      description: "Send a message",
-      options: {
-        text: {
-          type: "string",
-          description: "Message content",
-          required: true,
-        },
+  slash: {
+    name: "say",
+    description: "Send a message",
+    options: {
+      text: {
+        type: "string",
+        description: "Message content",
+        required: true,
       },
     },
   },
@@ -102,24 +96,22 @@ String, integer, and number options can provide choices. Add `as const` to the a
 import { createCommand } from "arcscord";
 
 export const colorCommand = createCommand({
-  build: {
-    slash: {
-      name: "color",
-      description: "Pick a color",
-      options: {
-        color: {
-          type: "string",
-          description: "Color to select",
-          required: true,
-          choices: [
-            "red",
-            "green",
-            {
-              name: "Deep blue",
-              value: "blue",
-            },
-          ] as const,
-        },
+  slash: {
+    name: "color",
+    description: "Pick a color",
+    options: {
+      color: {
+        type: "string",
+        description: "Color to select",
+        required: true,
+        choices: [
+          "red",
+          "green",
+          {
+            name: "Deep blue",
+            value: "blue",
+          },
+        ] as const,
       },
     },
   },

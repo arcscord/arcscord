@@ -1,9 +1,9 @@
 import type { Result } from "@arcscord/error";
 import type { ArcClient } from "#/base";
-import type { AnyCommandHandler } from "#/base/command/command.type";
 import type {
   BaseCommandDefinition,
   Command,
+  FullCommandDefinition,
   SlashCommandDefinition,
   SlashWithSubsCommandDefinition,
   SubCommandDefinition,
@@ -47,15 +47,15 @@ export function validateCommands(
 
   for (const command of commands) {
     if (!isSubCommand(command)) {
-      const [validationErr] = validateCommandDefinition(command.build, client, context);
+      const [validationErr] = validateCommandDefinition(command, client, context);
       if (validationErr) {
         return error(validationErr);
       }
 
       const commandEntries = [
-        ["slash", command.build.slash],
-        ["message", command.build.message],
-        ["user", command.build.user],
+        ["slash", command.slash],
+        ["message", command.message],
+        ["user", command.user],
       ] as const;
 
       for (const [type, definition] of commandEntries) {
@@ -98,7 +98,7 @@ export function validateCommands(
 }
 
 function validateCommandDefinition(
-  definition: AnyCommandHandler["build"],
+  definition: FullCommandDefinition,
   client: ArcClient,
   context: CommandValidationContext,
 ): Result<true, InternalError> {
@@ -152,8 +152,8 @@ function validateSubCommandListDefinition(
   for (const subCommand of command.subCommands ?? []) {
     const [duplicateErr] = validateUniqueName(
       topLevelNames,
-      subCommand.build.name,
-      subCommand.build.name,
+      subCommand.name,
+      subCommand.name,
       `subcommand in slash command "${command.name}"`,
       context,
     );
@@ -162,8 +162,8 @@ function validateSubCommandListDefinition(
     }
 
     const [subCommandErr] = validateSubCommandDefinition(
-      subCommand.build,
-      `subcommand "${command.name}.${subCommand.build.name}"`,
+      subCommand,
+      `subcommand "${command.name}.${subCommand.name}"`,
       client,
       context,
     );
@@ -283,8 +283,8 @@ function validateSubCommandGroupDefinition(
   for (const subCommand of groupDefinition.subCommands) {
     const [duplicateErr] = validateUniqueName(
       subCommandNames,
-      subCommand.build.name,
-      subCommand.build.name,
+      subCommand.name,
+      subCommand.name,
       `${path} subcommand`,
       context,
     );
@@ -293,8 +293,8 @@ function validateSubCommandGroupDefinition(
     }
 
     const [subCommandErr] = validateSubCommandDefinition(
-      subCommand.build,
-      `${path} subcommand "${subCommand.build.name}"`,
+      subCommand,
+      `${path} subcommand "${subCommand.name}"`,
       client,
       context,
     );

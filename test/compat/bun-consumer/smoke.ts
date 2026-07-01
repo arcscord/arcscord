@@ -22,11 +22,9 @@ const client = new ArcClient("smoke-token", {
 
 // 2. Build a slash command.
 const pingCommand = createCommand({
-  build: {
-    slash: {
-      name: "ping",
-      description: "Check the bot latency",
-    },
+  slash: {
+    name: "ping",
+    description: "Check the bot latency",
   },
   run: ctx => ctx.reply("pong"),
 });

@@ -116,7 +116,7 @@ export class CommandManager
         }
 
         let hasPush = false;
-        const data = commandToAPI(command.build, this.client);
+        const data = commandToAPI(command, this.client);
 
         if (data.slash) {
           commandsBody.push(data.slash);
@@ -176,21 +176,21 @@ export class CommandManager
   }
 
   private validateCommandAutocomplete(command: AnyCommandHandler, group: string): Result<true, InternalError> {
-    if (!hasSlashCommand(command.build) || !command.build.slash.options) {
-      return this.validateAutocompleteHandlers(command.autocomplete, undefined, command.build.slash?.name ?? command.build.message?.name ?? command.build.user?.name ?? "unknown", group);
+    if (!hasSlashCommand(command) || !command.slash.options) {
+      return this.validateAutocompleteHandlers(command.autocomplete, undefined, command.slash?.name ?? command.message?.name ?? command.user?.name ?? "unknown", group);
     }
 
     return this.validateAutocompleteHandlers(
       command.autocomplete,
-      command.build.slash.options,
-      command.build.slash.name,
+      command.slash.options,
+      command.slash.name,
       group,
     );
   }
 
   private validateSubCommandListAutocomplete(command: SlashWithSubsCommandDefinition, group: string): Result<true, InternalError> {
     for (const subCommand of command.subCommands ?? []) {
-      const [err] = this.validateSubCommandAutocomplete(subCommand.build, subCommand.autocomplete, `${command.name}.${subCommand.build.name}`, group);
+      const [err] = this.validateSubCommandAutocomplete(subCommand, subCommand.autocomplete, `${command.name}.${subCommand.name}`, group);
       if (err) {
         return error(err);
       }
@@ -200,9 +200,9 @@ export class CommandManager
       for (const [groupName, subCommandGroup] of Object.entries(command.subCommandsGroups)) {
         for (const subCommand of subCommandGroup.subCommands) {
           const [err] = this.validateSubCommandAutocomplete(
-            subCommand.build,
+            subCommand,
             subCommand.autocomplete,
-            `${command.name}.${groupName}.${subCommand.build.name}`,
+            `${command.name}.${groupName}.${subCommand.name}`,
             group,
           );
           if (err) {
@@ -459,8 +459,8 @@ export class CommandManager
     apiCommands: ApplicationCommandRegistration[],
   ): void {
     if (!isSubCommand(command)) {
-      if (hasSlashCommand(command.build)) {
-        const name = command.build.slash.name;
+      if (hasSlashCommand(command)) {
+        const name = command.slash.name;
         const apiCommand = apiCommands.find(
           cmd =>
             (cmd.type as ApplicationCommandType)
@@ -469,19 +469,19 @@ export class CommandManager
 
         if (!apiCommand) {
           this.trace(
-            `slash command "${command.build.slash.name}" not found in API`,
+            `slash command "${command.slash.name}" not found in API`,
           );
         }
         else {
           this.trace(
-            `resolve slash command ${command.build.slash.name} (${apiCommand.id}) !`,
+            `resolve slash command ${command.slash.name} (${apiCommand.id}) !`,
           );
           this.commands.set(this.resolveCommandName(apiCommand), command);
         }
       }
 
-      if (hasMessageCommand(command.build)) {
-        const name = command.build.message.name;
+      if (hasMessageCommand(command)) {
+        const name = command.message.name;
         const apiCommand = apiCommands.find(
           cmd =>
             (cmd.type as ApplicationCommandType)
@@ -490,19 +490,19 @@ export class CommandManager
 
         if (!apiCommand) {
           this.trace(
-            `message command "${command.build.message.name}" not found in API`,
+            `message command "${command.message.name}" not found in API`,
           );
         }
         else {
           this.trace(
-            `resolve message command ${command.build.message.name} (${apiCommand.id}) !`,
+            `resolve message command ${command.message.name} (${apiCommand.id}) !`,
           );
           this.commands.set(this.resolveCommandName(apiCommand), command);
         }
       }
 
-      if (hasUserCommand(command.build)) {
-        const name = command.build.user.name;
+      if (hasUserCommand(command)) {
+        const name = command.user.name;
         const apiCommand = apiCommands.find(
           cmd =>
             (cmd.type as ApplicationCommandType)
@@ -511,12 +511,12 @@ export class CommandManager
 
         if (!apiCommand) {
           this.trace(
-            `user command "${command.build.user.name}" not found in API`,
+            `user command "${command.user.name}" not found in API`,
           );
         }
         else {
           this.trace(
-            `resolve user command ${command.build.user.name} (${apiCommand.id}) !`,
+            `resolve user command ${command.user.name} (${apiCommand.id}) !`,
           );
           this.commands.set(this.resolveCommandName(apiCommand), command);
         }
@@ -643,7 +643,7 @@ export class CommandManager
       list = command.subCommandsGroups[subCommandGroupName].subCommands;
     }
 
-    const cmd = list?.find(cmd => cmd.build.name === subCommandName);
+    const cmd = list?.find(cmd => cmd.name === subCommandName);
 
     if (!cmd) {
       return error(
@@ -686,9 +686,9 @@ export class CommandManager
 
     /* Build typed context */
     if (interaction.isChatInputCommand()) {
-      if ("name" in command.build) {
-        const [optErr, options] = command.build.options
-          ? await parseOptions<typeof command.build.options>(interaction, command.build.options)
+      if ("name" in command) {
+        const [optErr, options] = command.options
+          ? await parseOptions<typeof command.options>(interaction, command.options)
           : [null, null];
 
         if (optErr) {
@@ -708,9 +708,9 @@ export class CommandManager
           locale,
         });
       }
-      else if (command.build.slash) {
-        const [optErr, options] = command.build.slash.options
-          ? await parseOptions<typeof command.build.slash.options>(interaction, command.build.slash.options)
+      else if (command.slash) {
+        const [optErr, options] = command.slash.options
+          ? await parseOptions<typeof command.slash.options>(interaction, command.slash.options)
           : [null, null];
 
         if (optErr) {
@@ -740,7 +740,7 @@ export class CommandManager
       }
     }
     else if (interaction.isUserContextMenuCommand()) {
-      if ("user" in command.build) {
+      if ("user" in command) {
         context = new UserCommandContext(command, interaction, {
           resolvedName: infos.resolvedName,
           targetUser: interaction.targetUser,
@@ -759,7 +759,7 @@ export class CommandManager
       }
     }
     else if (interaction.isMessageContextMenuCommand()) {
-      if ("message" in command.build) {
+      if ("message" in command) {
         context = new MessageCommandContext(command, interaction, {
           resolvedName: infos.resolvedName,
           message: interaction.targetMessage,

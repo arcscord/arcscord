@@ -20,9 +20,7 @@ import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
 
 export const pruneCommand = createCommand({
-  build: {
-    slash: { name: "prune", description: "Delete recent messages." },
-  },
+  slash: { name: "prune", description: "Delete recent messages." },
   use: [
     new CommandBotPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
       content: `I am missing: ${missingPermissions.join(", ")}`,

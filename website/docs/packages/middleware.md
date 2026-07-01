@@ -81,11 +81,9 @@ import { createCommand } from "arcscord";
 const developerIds = ["123456789"];
 
 export const debugCommand = createCommand({
-  build: {
-    slash: {
-      name: "debug",
-      description: "Developer debug command",
-    },
+  slash: {
+    name: "debug",
+    description: "Developer debug command",
   },
   use: [
     new CommandUserAllowListMiddleware(developerIds, {
@@ -122,12 +120,10 @@ import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
 
 export const pruneCommand = createCommand({
-  build: {
-    slash: {
-      name: "prune",
-      description: "Delete recent messages",
-      contexts: ["guild"],
-    },
+  slash: {
+    name: "prune",
+    description: "Delete recent messages",
+    contexts: ["guild"],
   },
   use: [
     new CommandBotPermissionMiddleware(["ManageMessages"], ({ missingPermissions }) => ({
@@ -261,7 +257,7 @@ new ComponentUserAllowListMiddleware(userIds, message);
 `ComponentMemberPermissionMiddleware` restricts a component to members with every required Discord permission.
 
 :::info
-This middleware exists only for components. For commands, declare the required member permissions directly in the command definition (`build.slash.defaultMemberPermissions`) instead of using a middleware.
+This middleware exists only for components. For commands, declare the required member permissions directly in the command definition (`slash.defaultMemberPermissions`) instead of using a middleware.
 :::
 
 ```ts

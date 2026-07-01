@@ -84,11 +84,9 @@ import { error, ok } from "@arcscord/error";
 import { createCommand } from "arcscord";
 
 export const resultCommand = createCommand({
-  build: {
-    slash: {
-      name: "result",
-      description: "Return a result",
-    },
+  slash: {
+    name: "result",
+    description: "Return a result",
   },
   run: () => {
     if (Math.random() > 0.5) {

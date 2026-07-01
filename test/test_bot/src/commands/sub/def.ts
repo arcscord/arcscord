@@ -1,9 +1,9 @@
-import { buildCommandWithSubs } from "arcscord";
+import { createCommandWithSubs } from "arcscord";
 import { autocompleteSubCommand } from "./autocomplete";
 import { buttonComponentSubCommand, modalComponentSubCommand, stringSelectMenuComponentSubCommand } from "./component";
 import { testMiddlewareSubCommand } from "./middleware";
 
-export const subCommand = buildCommandWithSubs({
+export const subCommand = createCommandWithSubs({
   name: "sub",
   description: "sub command",
   subCommands: [

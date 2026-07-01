@@ -5,7 +5,7 @@
 
 Arcscord is a TypeScript framework for building Discord bots on top of Discord.js. It wraps the Discord.js client with a structured layer of typed handlers, managers, and middleware, so you can focus on bot logic instead of wiring boilerplate.
 
-Commands, components (buttons, selects, modals), and events are each declared as self-contained objects with a `build` definition and a `run` handler. The framework resolves incoming interactions to the right handler, creates a typed context, runs any middleware in order, and calls your handler — no manual routing needed.
+Commands, components (buttons, selects, modals), and events are each declared as self-contained objects with a declarative definition and a `run` handler. The framework resolves incoming interactions to the right handler, creates a typed context, runs any middleware in order, and calls your handler — no manual routing needed.
 
 Arcscord also includes optional localization via i18next, a built-in logger with diagnostics support, and result-style error handling through `@arcscord/error` so failures are always explicit and typed.
 
@@ -25,9 +25,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 });
 
 const pingCommand = createCommand({
-  build: {
-    slash: { name: "ping", description: "Reply with pong." },
-  },
+  slash: { name: "ping", description: "Reply with pong." },
   run: ctx => ctx.reply("Pong!"),
 });
 

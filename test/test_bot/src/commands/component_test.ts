@@ -31,80 +31,78 @@ import { typedStringSelectMenu } from "../components/typed_string_select_menu";
 import { userSelectMenu } from "../components/user_select_menu";
 
 export const componentTestCommand = createCommand({
-  build: {
-    slash: {
-      name: "component-test",
-      description: "Components tests",
-      options: {
-        component: {
-          description: "Component to send",
-          type: "string",
-          required: true,
-          choices: [
-            {
-              name: "simple_button",
-              value: "simple_button",
-            },
-            {
-              name: "typed_string_select",
-              value: "typed_string_select",
-            },
-            {
-              name: "typed_single_string_select",
-              value: "typed_single_string_select",
-            },
-            {
-              name: "select",
-              value: "select",
-            },
-            {
-              name: "modal_profile",
-              value: "modal_profile",
-            },
-            {
-              name: "modal_feedback",
-              value: "modal_feedback",
-            },
-            {
-              name: "modal_survey",
-              value: "modal_survey",
-            },
-            {
-              name: "modal_upload",
-              value: "modal_upload",
-            },
-            {
-              name: "modal_selects",
-              value: "modal_selects",
-            },
-            {
-              name: "components_v2_layout",
-              value: "components_v2_layout",
-            },
-            {
-              name: "components_v2_media",
-              value: "components_v2_media",
-            },
-            {
-              name: "components_v2_complete",
-              value: "components_v2_complete",
-            },
-            {
-              name: "components_v2_practical",
-              value: "components_v2_practical",
-            },
-            {
-              name: "components_v2_i18n",
-              value: "components_v2_i18n",
-            },
-            {
-              name: "route_params",
-              value: "route_params",
-            },
-            "middleware",
-          ],
-        } as const,
-      },
+  slash: {
+    name: "component-test",
+    description: "Components tests",
+    options: {
+      component: {
+        description: "Component to send",
+        type: "string",
+        required: true,
+        choices: [
+          {
+            name: "simple_button",
+            value: "simple_button",
+          },
+          {
+            name: "typed_string_select",
+            value: "typed_string_select",
+          },
+          {
+            name: "typed_single_string_select",
+            value: "typed_single_string_select",
+          },
+          {
+            name: "select",
+            value: "select",
+          },
+          {
+            name: "modal_profile",
+            value: "modal_profile",
+          },
+          {
+            name: "modal_feedback",
+            value: "modal_feedback",
+          },
+          {
+            name: "modal_survey",
+            value: "modal_survey",
+          },
+          {
+            name: "modal_upload",
+            value: "modal_upload",
+          },
+          {
+            name: "modal_selects",
+            value: "modal_selects",
+          },
+          {
+            name: "components_v2_layout",
+            value: "components_v2_layout",
+          },
+          {
+            name: "components_v2_media",
+            value: "components_v2_media",
+          },
+          {
+            name: "components_v2_complete",
+            value: "components_v2_complete",
+          },
+          {
+            name: "components_v2_practical",
+            value: "components_v2_practical",
+          },
+          {
+            name: "components_v2_i18n",
+            value: "components_v2_i18n",
+          },
+          {
+            name: "route_params",
+            value: "route_params",
+          },
+          "middleware",
+        ],
+      } as const,
     },
   },
   run: async (ctx) => {

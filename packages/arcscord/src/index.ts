@@ -24,6 +24,7 @@ export type {
   AnyCommandHandler,
   AnySubCommandHandler,
   AutocompleteCommand,
+  CommandExtras,
   CommandHandler,
   CommandRunResult,
   CommandRunReturn,
@@ -55,7 +56,7 @@ export type {
   SubCommandDefinition,
   SubCommandGroupDefinition,
 } from "./base/command/command_definition.type";
-export { buildCommandWithSubs, createCommand } from "./base/command/command_func";
+export { createCommand, createCommandWithSubs, createSubCommand } from "./base/command/command_func";
 export {
   CommandMiddleware,
 } from "./base/command/command_middleware";

@@ -79,11 +79,9 @@ Use it on a command:
 import { createCommand } from "arcscord";
 
 export const adminCommand = createCommand({
-  build: {
-    slash: {
-      name: "admin",
-      description: "Admin-only command",
-    },
+  slash: {
+    name: "admin",
+    description: "Admin-only command",
   },
   use: [new AllowedUsersMiddleware()],
   run: (ctx) => {
@@ -216,11 +214,9 @@ class UserScopeMiddleware extends CommandMiddleware {
 }
 
 export const scopedCommand = createCommand({
-  build: {
-    slash: {
-      name: "scope",
-      description: "Read middleware data",
-    },
+  slash: {
+    name: "scope",
+    description: "Read middleware data",
   },
   use: [new UserScopeMiddleware()],
   run: (ctx) => {

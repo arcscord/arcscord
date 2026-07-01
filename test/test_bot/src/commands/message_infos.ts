@@ -2,11 +2,9 @@ import { createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const messageInfosCommand = createCommand({
-  build: {
-    message: {
-      name: "message-infos",
-      integrationTypes: ["userInstall", "guildInstall"],
-    },
+  message: {
+    name: "message-infos",
+    integrationTypes: ["userInstall", "guildInstall"],
   },
   run: (ctx) => {
     const infos: Set<string> = new Set();

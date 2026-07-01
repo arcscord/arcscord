@@ -21,7 +21,7 @@ class AuthMiddleware extends CommandMiddleware {
 
 it("types ctx.additional from a single command middleware", () => {
   createCommand({
-    build: { slash: { name: "test", description: "Test" } },
+    slash: { name: "test", description: "Test" },
     use: [new TrackerMiddleware()],
     run: (ctx) => {
       expectTypeOf(ctx.additional.tracker).toEqualTypeOf<{ requestId: string }>();
@@ -33,7 +33,7 @@ it("types ctx.additional from a single command middleware", () => {
 
 it("types ctx.additional from multiple command middlewares", () => {
   createCommand({
-    build: { slash: { name: "test", description: "Test" } },
+    slash: { name: "test", description: "Test" },
     use: [new TrackerMiddleware(), new AuthMiddleware()],
     run: (ctx) => {
       expectTypeOf(ctx.additional.tracker).toEqualTypeOf<{ requestId: string }>();

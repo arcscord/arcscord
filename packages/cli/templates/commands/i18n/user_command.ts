@@ -1,11 +1,9 @@
 import { createCommand } from "arcscord";
 
 export const {{name}}Command = createCommand({
-  build: {
-    user: {
-      name: "{{name}}",
-      nameLocalizations: t => t("{{i18nName}}"),
-    },
+  user: {
+    name: "{{name}}",
+    nameLocalizations: t => t("{{i18nName}}"),
   },
   run: (ctx) => {
     return ctx.reply(ctx.t("default.run"));

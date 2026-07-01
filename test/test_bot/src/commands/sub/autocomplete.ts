@@ -1,18 +1,16 @@
-import { createCommand } from "arcscord";
+import { createSubCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 import { animeList } from "../../utils/test_values";
 
-export const autocompleteSubCommand = createCommand({
-  build: {
-    name: "autocomplete",
-    description: "autocomplete command testing",
-    options: {
-      anime: {
-        description: "Your favorite anime",
-        type: "string",
-        autocomplete: true,
-        required: true,
-      },
+export const autocompleteSubCommand = createSubCommand({
+  name: "autocomplete",
+  description: "autocomplete command testing",
+  options: {
+    anime: {
+      description: "Your favorite anime",
+      type: "string",
+      autocomplete: true,
+      required: true,
     },
   },
   run: (ctx) => {

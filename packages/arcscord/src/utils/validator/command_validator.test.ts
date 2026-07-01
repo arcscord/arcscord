@@ -2,7 +2,7 @@ import type { ArcClient } from "#/base";
 import { ApplicationCommandType } from "discord-api-types/v10";
 import i18next from "i18next";
 import { describe, expect, it, vi } from "vitest";
-import { buildCommandWithSubs, createCommand } from "#/base/command/command_func";
+import { createCommand, createCommandWithSubs } from "#/base/command/command_func";
 import { CommandValidationError, validateCommands } from "#/utils";
 
 function createMockClient(): ArcClient {
@@ -74,11 +74,9 @@ async function validateI18nTestCommands(commands: Parameters<typeof validateComm
 describe("command validator", () => {
   it("rejects command names longer than Discord allows", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "a".repeat(33),
-          description: "Too long",
-        },
+      slash: {
+        name: "a".repeat(33),
+        description: "Too long",
       },
       run: ctx => ctx.ok(),
     });
@@ -91,11 +89,9 @@ describe("command validator", () => {
 
   it("rejects slash command descriptions longer than Discord allows", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "a".repeat(101),
-        },
+      slash: {
+        name: "search",
+        description: "a".repeat(101),
       },
       run: ctx => ctx.ok(),
     });
@@ -108,11 +104,9 @@ describe("command validator", () => {
 
   it("rejects slash command names with disallowed characters", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "Search anime",
-          description: "Search anime",
-        },
+      slash: {
+        name: "Search anime",
+        description: "Search anime",
       },
       run: ctx => ctx.ok(),
     });
@@ -125,15 +119,13 @@ describe("command validator", () => {
 
   it("rejects slash option names with disallowed characters", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            "anime name": {
-              type: "string",
-              description: "Anime name",
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          "anime name": {
+            type: "string",
+            description: "Anime name",
           },
         },
       },
@@ -148,10 +140,8 @@ describe("command validator", () => {
 
   it("allows spaces and mixed case for context menu command names", () => {
     const command = createCommand({
-      build: {
-        user: {
-          name: "View Profile",
-        },
+      user: {
+        name: "View Profile",
       },
       run: ctx => ctx.ok(),
     });
@@ -159,20 +149,18 @@ describe("command validator", () => {
     const [err] = validateTestCommands([command]);
 
     expect(err).toBeNull();
-    expect(command.build.user?.name).toBe("View Profile");
+    expect(command.user?.name).toBe("View Profile");
     expect(ApplicationCommandType.User).toBe(2);
   });
 
   it("rejects invalid slash command name localizations", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          nameLocalizations: {
-            fr: "Chercher",
-          },
-          description: "Search anime",
+      slash: {
+        name: "search",
+        nameLocalizations: {
+          fr: "Chercher",
         },
+        description: "Search anime",
       },
       run: ctx => ctx.ok(),
     });
@@ -185,13 +173,11 @@ describe("command validator", () => {
 
   it("validates selector localizations against loaded resource values", async () => {
     const command = createCommand({
-      build: {
-        slash: {
-          name: "i18n",
-          nameLocalizations: t => (t as any)(($: any) => $.i18n.command.name),
-          description: "default description",
-          descriptionLocalizations: t => (t as any)(($: any) => $.i18n.command.description),
-        },
+      slash: {
+        name: "i18n",
+        nameLocalizations: t => (t as any)(($: any) => $.i18n.command.name),
+        description: "default description",
+        descriptionLocalizations: t => (t as any)(($: any) => $.i18n.command.description),
       },
       run: ctx => ctx.ok(),
     });
@@ -203,12 +189,10 @@ describe("command validator", () => {
 
   it("rejects invalid callback name localizations instead of sanitizing them", async () => {
     const command = createCommand({
-      build: {
-        slash: {
-          name: "reload",
-          nameLocalizations: () => "admin.tools:reload",
-          description: "Reload tools",
-        },
+      slash: {
+        name: "reload",
+        nameLocalizations: () => "admin.tools:reload",
+        description: "Reload tools",
       },
       run: ctx => ctx.ok(),
     });
@@ -221,14 +205,12 @@ describe("command validator", () => {
 
   it("rejects unsupported localization keys", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          nameLocalizations: {
-            "xx-XX": "search",
-          } as never,
-          description: "Search anime",
-        },
+      slash: {
+        name: "search",
+        nameLocalizations: {
+          "xx-XX": "search",
+        } as never,
+        description: "Search anime",
       },
       run: ctx => ctx.ok(),
     });
@@ -241,13 +223,11 @@ describe("command validator", () => {
 
   it("rejects invalid description localizations", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          descriptionLocalizations: {
-            fr: "a".repeat(101),
-          },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        descriptionLocalizations: {
+          fr: "a".repeat(101),
         },
       },
       run: ctx => ctx.ok(),
@@ -261,17 +241,15 @@ describe("command validator", () => {
 
   it("rejects invalid string option length bounds", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            query: {
-              type: "string",
-              description: "Anime name",
-              min_length: 10,
-              max_length: 5,
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          query: {
+            type: "string",
+            description: "Anime name",
+            min_length: 10,
+            max_length: 5,
           },
         },
       },
@@ -286,21 +264,19 @@ describe("command validator", () => {
 
   it("rejects string choice values longer than Discord allows", () => {
     const invalidCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-          options: {
-            query: {
-              type: "string",
-              description: "Anime name",
-              choices: [
-                {
-                  name: "Long value",
-                  value: "a".repeat(101),
-                },
-              ],
-            },
+      slash: {
+        name: "search",
+        description: "Search anime",
+        options: {
+          query: {
+            type: "string",
+            description: "Anime name",
+            choices: [
+              {
+                name: "Long value",
+                value: "a".repeat(101),
+              },
+            ],
           },
         },
       },
@@ -315,20 +291,16 @@ describe("command validator", () => {
 
   it("rejects duplicate top-level command names by command type", () => {
     const firstCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search anime",
-        },
+      slash: {
+        name: "search",
+        description: "Search anime",
       },
       run: ctx => ctx.ok(),
     });
     const secondCommand = createCommand({
-      build: {
-        slash: {
-          name: "search",
-          description: "Search manga",
-        },
+      slash: {
+        name: "search",
+        description: "Search manga",
       },
       run: ctx => ctx.ok(),
     });
@@ -340,22 +312,18 @@ describe("command validator", () => {
   });
 
   it("rejects duplicate subcommand names in the same command", () => {
-    const invalidCommand = buildCommandWithSubs({
+    const invalidCommand = createCommandWithSubs({
       name: "search",
       description: "Search commands",
       subCommands: [
         {
-          build: {
-            name: "anime",
-            description: "Search anime",
-          },
+          name: "anime",
+          description: "Search anime",
           run: vi.fn(),
         },
         {
-          build: {
-            name: "anime",
-            description: "Search manga",
-          },
+          name: "anime",
+          description: "Search manga",
           run: vi.fn(),
         },
       ],

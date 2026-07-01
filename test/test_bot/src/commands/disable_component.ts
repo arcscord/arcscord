@@ -9,11 +9,9 @@ import { stringSelectMenu } from "../components/string_select_menu";
 import { userSelectMenu } from "../components/user_select_menu";
 
 export const disableComponentCommand = createCommand({
-  build: {
-    slash: {
-      name: "disable-component",
-      description: "disable component",
-    },
+  slash: {
+    name: "disable-component",
+    description: "disable component",
   },
   run: (ctx) => {
     return ctx.reply({

@@ -20,12 +20,10 @@ describe("arcscord bun consumer", () => {
 
   test("builds a slash command", () => {
     const command = createCommand({
-      build: {
-        slash: { name: "ping", description: "Check the bot latency" },
-      },
+      slash: { name: "ping", description: "Check the bot latency" },
       run: ctx => ctx.reply("pong"),
     });
-    expect(command.build.slash?.name).toBe("ping");
+    expect(command.slash?.name).toBe("ping");
   });
 
   test("builds a button component", () => {

@@ -1,32 +1,28 @@
 import type { Attachment, GuildBasedChannel, Message, Role, User } from "discord.js";
 import { describe, expectTypeOf, it } from "vitest";
-import { buildCommandWithSubs, createCommand } from "./command_func";
+import { createCommand, createCommandWithSubs, createSubCommand } from "./command_func";
 
 it("types autocomplete handlers from their option definitions", () => {
-  const fullCommand = createCommand({
-    build: {
-      name: "full",
-      description: "Full command",
-    },
+  const subCommand = createSubCommand({
+    name: "full",
+    description: "Full command",
     run: ctx => ctx.ok(),
   });
 
-  buildCommandWithSubs({
+  createCommandWithSubs({
     name: "sub",
     description: "Subcommands",
-    subCommands: [fullCommand],
+    subCommands: [subCommand],
   });
 
   createCommand({
-    build: {
-      slash: {
-        name: "search",
-        description: "Search anime",
-        options: {
-          anime: { type: "string", description: "Anime name", autocomplete: true },
-          year: { type: "integer", description: "Release year", autocomplete: true },
-          hidden: { type: "boolean", description: "Hidden result" },
-        },
+    slash: {
+      name: "search",
+      description: "Search anime",
+      options: {
+        anime: { type: "string", description: "Anime name", autocomplete: true },
+        year: { type: "integer", description: "Release year", autocomplete: true },
+        hidden: { type: "boolean", description: "Hidden result" },
       },
     },
     autocomplete: {
@@ -55,15 +51,13 @@ it("types autocomplete handlers from their option definitions", () => {
 
 it("types slash command ctx.options from required and optional definitions", () => {
   createCommand({
-    build: {
-      slash: {
-        name: "search",
-        description: "Search",
-        options: {
-          query: { type: "string", description: "Query" },
-          limit: { type: "integer", description: "Limit", required: false },
-          exact: { type: "boolean", description: "Exact match", required: true },
-        },
+    slash: {
+      name: "search",
+      description: "Search",
+      options: {
+        query: { type: "string", description: "Query" },
+        limit: { type: "integer", description: "Limit", required: false },
+        exact: { type: "boolean", description: "Exact match", required: true },
       },
     },
     run: (ctx) => {
@@ -78,21 +72,19 @@ it("types slash command ctx.options from required and optional definitions", () 
 describe("slash command option types", () => {
   it("types required options without undefined", () => {
     createCommand({
-      build: {
-        slash: {
-          name: "types",
-          description: "Option types test",
-          options: {
-            text: { type: "string", description: "Text", required: true },
-            count: { type: "integer", description: "Count", required: true },
-            amount: { type: "number", description: "Amount", required: true },
-            flag: { type: "boolean", description: "Flag", required: true },
-            who: { type: "user", description: "User", required: true },
-            where: { type: "channel", description: "Channel", required: true },
-            which: { type: "role", description: "Role", required: true },
-            mention: { type: "mentionable", description: "Mention", required: true },
-            file: { type: "attachment", description: "Attachment", required: true },
-          },
+      slash: {
+        name: "types",
+        description: "Option types test",
+        options: {
+          text: { type: "string", description: "Text", required: true },
+          count: { type: "integer", description: "Count", required: true },
+          amount: { type: "number", description: "Amount", required: true },
+          flag: { type: "boolean", description: "Flag", required: true },
+          who: { type: "user", description: "User", required: true },
+          where: { type: "channel", description: "Channel", required: true },
+          which: { type: "role", description: "Role", required: true },
+          mention: { type: "mentionable", description: "Mention", required: true },
+          file: { type: "attachment", description: "Attachment", required: true },
         },
       },
       run: (ctx) => {
@@ -112,21 +104,19 @@ describe("slash command option types", () => {
 
   it("types optional options as T | undefined", () => {
     createCommand({
-      build: {
-        slash: {
-          name: "optional",
-          description: "Optional options test",
-          options: {
-            text: { type: "string", description: "Text" },
-            count: { type: "integer", description: "Count" },
-            amount: { type: "number", description: "Amount" },
-            flag: { type: "boolean", description: "Flag" },
-            who: { type: "user", description: "User" },
-            where: { type: "channel", description: "Channel" },
-            which: { type: "role", description: "Role" },
-            mention: { type: "mentionable", description: "Mention" },
-            file: { type: "attachment", description: "Attachment" },
-          },
+      slash: {
+        name: "optional",
+        description: "Optional options test",
+        options: {
+          text: { type: "string", description: "Text" },
+          count: { type: "integer", description: "Count" },
+          amount: { type: "number", description: "Amount" },
+          flag: { type: "boolean", description: "Flag" },
+          who: { type: "user", description: "User" },
+          where: { type: "channel", description: "Channel" },
+          which: { type: "role", description: "Role" },
+          mention: { type: "mentionable", description: "Mention" },
+          file: { type: "attachment", description: "Attachment" },
         },
       },
       run: (ctx) => {
@@ -147,9 +137,7 @@ describe("slash command option types", () => {
 
 it("types user command ctx.targetUser as User", () => {
   createCommand({
-    build: {
-      user: { name: "Inspect user" },
-    },
+    user: { name: "Inspect user" },
     run: (ctx) => {
       expectTypeOf(ctx.targetUser).toEqualTypeOf<User>();
       return ctx.ok();
@@ -159,9 +147,7 @@ it("types user command ctx.targetUser as User", () => {
 
 it("types message command ctx.targetMessage as Message", () => {
   createCommand({
-    build: {
-      message: { name: "Inspect message" },
-    },
+    message: { name: "Inspect message" },
     run: (ctx) => {
       expectTypeOf(ctx.targetMessage).toEqualTypeOf<Message>();
       return ctx.ok();

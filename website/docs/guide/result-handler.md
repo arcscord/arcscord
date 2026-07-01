@@ -24,7 +24,7 @@ This means you can keep your handler simple without sacrificing observability:
 
 ```ts
 export const ping = createCommand({
-  build: { slash: { name: "ping", description: "Ping!" } },
+  slash: { name: "ping", description: "Ping!" },
   run: async (ctx) => {
     await ctx.reply({ content: "Pong!" });
     // return nothing — normalized to ok(true)

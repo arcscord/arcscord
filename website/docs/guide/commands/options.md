@@ -4,7 +4,7 @@ sidebar_position: 2
 
 # Command options
 
-Slash commands and subcommands can define options. Options are declared as a named object in `build.slash.options` or in a subcommand `build.options`.
+Slash commands and subcommands can define options. Options are declared as a named object in `slash.options` or in a subcommand's `options`.
 
 Discord documents the raw option model in the [application command option structure](https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-structure) and the [application command option types](https://discord.com/developers/docs/interactions/application-commands#application-command-object-application-command-option-type).
 
@@ -44,7 +44,7 @@ Arcscord supports these Discord option types:
 | `number` | `number` | Decimal or whole numeric values. |
 | `attachment` | Discord.js `Attachment` | Uploading a file with the command. |
 
-Discord also has raw `subcommand` and `subcommand_group` option types. In Arcscord, use `buildCommandWithSubs` instead of declaring those manually.
+Discord also has raw `subcommand` and `subcommand_group` option types. In Arcscord, use `createCommandWithSubs` instead of declaring those manually.
 
 ## String
 
@@ -240,16 +240,14 @@ Choices and autocomplete are mutually exclusive for the same option.
 import { createCommand } from "arcscord";
 
 export const searchCommand = createCommand({
-  build: {
-    slash: {
-      name: "search",
-      description: "Search by tag",
-      options: {
-        tag: {
-          type: "string",
-          description: "Tag to search",
-          autocomplete: true,
-        },
+  slash: {
+    name: "search",
+    description: "Search by tag",
+    options: {
+      tag: {
+        type: "string",
+        description: "Tag to search",
+        autocomplete: true,
       },
     },
   },

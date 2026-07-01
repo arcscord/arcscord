@@ -2,11 +2,9 @@ import { accessory, container, createCommand, section, v2Message } from "arcscor
 import { pingButton } from "../components/ping_button";
 
 export const pingCommand = createCommand({
-  build: {
-    slash: {
-      name: "ping",
-      description: "Check the bot latency",
-    },
+  slash: {
+    name: "ping",
+    description: "Check the bot latency",
   },
   run: ctx => ctx.reply(v2Message(
     container(

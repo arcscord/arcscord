@@ -16,13 +16,11 @@ Use `defaultMemberPermissions` to tell Discord which guild permissions a member 
 import { createCommand } from "arcscord";
 
 export const pruneCommand = createCommand({
-  build: {
-    slash: {
-      name: "prune",
-      description: "Delete recent messages",
-      defaultMemberPermissions: ["ManageMessages"],
-      contexts: ["guild"],
-    },
+  slash: {
+    name: "prune",
+    description: "Delete recent messages",
+    defaultMemberPermissions: ["ManageMessages"],
+    contexts: ["guild"],
   },
   run: ctx => ctx.reply("Messages pruned"),
 });
@@ -54,12 +52,10 @@ Use `contexts` to control where Discord allows the command to be used.
 
 ```ts
 export const dmCommand = createCommand({
-  build: {
-    slash: {
-      name: "help",
-      description: "Show help",
-      contexts: ["guild", "botDm"],
-    },
+  slash: {
+    name: "help",
+    description: "Show help",
+    contexts: ["guild", "botDm"],
   },
   run: ctx => ctx.reply("Help message"),
 });
@@ -78,13 +74,11 @@ Use `integrationTypes` to control where the command can be installed.
 
 ```ts
 export const personalCommand = createCommand({
-  build: {
-    slash: {
-      name: "bookmark",
-      description: "Save a personal bookmark",
-      integrationTypes: ["userInstall"],
-      contexts: ["botDm", "privateChannel"],
-    },
+  slash: {
+    name: "bookmark",
+    description: "Save a personal bookmark",
+    integrationTypes: ["userInstall"],
+    contexts: ["botDm", "privateChannel"],
   },
   run: ctx => ctx.reply("Bookmark saved"),
 });
@@ -96,13 +90,11 @@ User and message context menu commands use the same fields.
 
 ```ts
 export const reportMessageCommand = createCommand({
-  build: {
-    message: {
-      name: "Report message",
-      defaultMemberPermissions: ["ManageMessages"],
-      contexts: ["guild"],
-      integrationTypes: ["guildInstall"],
-    },
+  message: {
+    name: "Report message",
+    defaultMemberPermissions: ["ManageMessages"],
+    contexts: ["guild"],
+    integrationTypes: ["guildInstall"],
   },
   run: ctx => ctx.reply(`Reported message ${ctx.targetMessage.id}`),
 });
@@ -110,12 +102,12 @@ export const reportMessageCommand = createCommand({
 
 ## Subcommands
 
-For commands built with `buildCommandWithSubs`, access control belongs on the top-level command. Individual subcommands do not define separate Discord command permissions.
+For commands built with `createCommandWithSubs`, access control belongs on the top-level command. Individual subcommands do not define separate Discord command permissions.
 
 ```ts
-import { buildCommandWithSubs } from "arcscord";
+import { createCommandWithSubs } from "arcscord";
 
-export const moderationCommand = buildCommandWithSubs({
+export const moderationCommand = createCommandWithSubs({
   name: "moderation",
   description: "Moderation tools",
   defaultMemberPermissions: ["ModerateMembers"],

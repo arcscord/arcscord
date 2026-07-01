@@ -3,17 +3,15 @@ import { MessageFlags } from "discord.js";
 import { animeList } from "../utils/test_values";
 
 export const autocompleteCommand = createCommand({
-  build: {
-    slash: {
-      name: "autocomplete",
-      description: "autocomplete command testing",
-      options: {
-        anime: {
-          description: "Your favorite anime",
-          type: "string",
-          autocomplete: true,
-          required: true,
-        },
+  slash: {
+    name: "autocomplete",
+    description: "autocomplete command testing",
+    options: {
+      anime: {
+        description: "Your favorite anime",
+        type: "string",
+        autocomplete: true,
+        required: true,
       },
     },
   },

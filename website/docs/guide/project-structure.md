@@ -78,15 +78,15 @@ design recommendation — Arcscord neither requires nor knows about it.
 
 When a command has subcommands (e.g. a `moderation` command with `kick` / `ban` / `mute`),
 put each subcommand in its own file and assemble them in a `def.ts` using
-`buildCommandWithSubs`:
+`createCommandWithSubs`:
 
 ```ts title="commands/moderation/def.ts"
-import { buildCommandWithSubs } from "arcscord";
+import { createCommandWithSubs } from "arcscord";
 import { banSubCommand } from "./ban";
 import { kickSubCommand } from "./kick";
 import { muteSubCommand } from "./mute";
 
-export const moderationCommand = buildCommandWithSubs({
+export const moderationCommand = createCommandWithSubs({
   name: "moderation",
   description: "Moderation tools",
   subCommands: [kickSubCommand, banSubCommand, muteSubCommand],

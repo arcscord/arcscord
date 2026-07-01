@@ -6,7 +6,7 @@ sidebar_position: 4
 
 Subcommands are slash command actions grouped under a single top-level command. They are useful when several actions belong to the same feature area, such as `/moderation ban`, `/moderation kick`, and `/moderation timeout`.
 
-Arcscord represents this with `buildCommandWithSubs`. The top-level command owns the Discord command name and description. Each subcommand is created with `createCommand`, but its `build` object is a subcommand definition: it has `name`, `description`, and optional `options`, without a nested `slash` field.
+Arcscord represents this with `createCommandWithSubs`. The top-level command owns the Discord command name and description. Each subcommand is created with `createSubCommand`: it has `name`, `description`, and optional `options` directly, without a nested `slash` field.
 
 ## When to use subcommands
 
@@ -22,22 +22,20 @@ Discord subcommands are only available for slash commands. User and message cont
 Each subcommand has its own handler. Arcscord resolves the selected subcommand and runs only that handler.
 
 ```ts
-import { buildCommandWithSubs, createCommand } from "arcscord";
+import { createCommandWithSubs, createSubCommand } from "arcscord";
 
-const banCommand = createCommand({
-  build: {
-    name: "ban",
-    description: "Ban a member",
-    options: {
-      user: {
-        type: "user",
-        description: "Member to ban",
-        required: true,
-      },
-      reason: {
-        type: "string",
-        description: "Reason shown in moderation logs",
-      },
+const banCommand = createSubCommand({
+  name: "ban",
+  description: "Ban a member",
+  options: {
+    user: {
+      type: "user",
+      description: "Member to ban",
+      required: true,
+    },
+    reason: {
+      type: "string",
+      description: "Reason shown in moderation logs",
     },
   },
   run: (ctx) => {
@@ -49,22 +47,20 @@ const banCommand = createCommand({
   },
 });
 
-const kickCommand = createCommand({
-  build: {
-    name: "kick",
-    description: "Kick a member",
-    options: {
-      user: {
-        type: "user",
-        description: "Member to kick",
-        required: true,
-      },
+const kickCommand = createSubCommand({
+  name: "kick",
+  description: "Kick a member",
+  options: {
+    user: {
+      type: "user",
+      description: "Member to kick",
+      required: true,
     },
   },
   run: ctx => ctx.reply(`Kicked ${ctx.options.user.username}`),
 });
 
-export const moderationCommand = buildCommandWithSubs({
+export const moderationCommand = createCommandWithSubs({
   name: "moderation",
   description: "Moderation tools",
   subCommands: [banCommand, kickCommand],
@@ -78,23 +74,21 @@ This registers one Discord command named `moderation`. Discord displays `ban` an
 Subcommand options are declared exactly like slash command options, but they belong to the subcommand definition.
 
 ```ts
-const timeoutCommand = createCommand({
-  build: {
-    name: "timeout",
-    description: "Timeout a member",
-    options: {
-      user: {
-        type: "user",
-        description: "Member to timeout",
-        required: true,
-      },
-      minutes: {
-        type: "integer",
-        description: "Timeout duration in minutes",
-        required: true,
-        min_value: 1,
-        max_value: 10080,
-      },
+const timeoutCommand = createSubCommand({
+  name: "timeout",
+  description: "Timeout a member",
+  options: {
+    user: {
+      type: "user",
+      description: "Member to timeout",
+      required: true,
+    },
+    minutes: {
+      type: "integer",
+      description: "Timeout duration in minutes",
+      required: true,
+      min_value: 1,
+      max_value: 10080,
     },
   },
   run: (ctx) => {
@@ -119,39 +113,35 @@ For example:
 - `/member note list`
 
 ```ts
-import { buildCommandWithSubs, createCommand } from "arcscord";
+import { createCommandWithSubs, createSubCommand } from "arcscord";
 
-const addRoleCommand = createCommand({
-  build: {
-    name: "add",
-    description: "Add a role",
-    options: {
-      role: {
-        type: "role",
-        description: "Role to add",
-        required: true,
-      },
+const addRoleCommand = createSubCommand({
+  name: "add",
+  description: "Add a role",
+  options: {
+    role: {
+      type: "role",
+      description: "Role to add",
+      required: true,
     },
   },
   run: ctx => ctx.reply(`Added ${ctx.options.role.name}`),
 });
 
-const removeRoleCommand = createCommand({
-  build: {
-    name: "remove",
-    description: "Remove a role",
-    options: {
-      role: {
-        type: "role",
-        description: "Role to remove",
-        required: true,
-      },
+const removeRoleCommand = createSubCommand({
+  name: "remove",
+  description: "Remove a role",
+  options: {
+    role: {
+      type: "role",
+      description: "Role to remove",
+      required: true,
     },
   },
   run: ctx => ctx.reply(`Removed ${ctx.options.role.name}`),
 });
 
-export const memberCommand = buildCommandWithSubs({
+export const memberCommand = createCommandWithSubs({
   name: "member",
   description: "Manage members",
   subCommandsGroups: {
@@ -168,7 +158,7 @@ export const memberCommand = buildCommandWithSubs({
 Discord supports direct subcommands and subcommand groups on the same top-level command, and Arcscord exposes both `subCommands` and `subCommandsGroups`.
 
 ```ts
-export const memberCommand = buildCommandWithSubs({
+export const memberCommand = createCommandWithSubs({
   name: "member",
   description: "Manage members",
   subCommands: [banCommand],
@@ -185,10 +175,10 @@ Keep this shape readable. If the command becomes hard to scan, split unrelated a
 
 ## Access control
 
-Permissions, installation types, and contexts are configured on the top-level command created with `buildCommandWithSubs`.
+Permissions, installation types, and contexts are configured on the top-level command created with `createCommandWithSubs`.
 
 ```ts
-export const moderationCommand = buildCommandWithSubs({
+export const moderationCommand = createCommandWithSubs({
   name: "moderation",
   description: "Moderation tools",
   defaultMemberPermissions: ["ModerateMembers"],

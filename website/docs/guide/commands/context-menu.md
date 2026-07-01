@@ -15,10 +15,8 @@ import { createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 export const inspectUserCommand = createCommand({
-  build: {
-    user: {
-      name: "Inspect user",
-    },
+  user: {
+    name: "Inspect user",
   },
   run: ctx => ctx.reply(`Selected user: ${ctx.targetUser.username}`),
 });
@@ -32,10 +30,8 @@ Message commands receive a `MessageCommandContext`. The selected message is avai
 import { createCommand } from "arcscord";
 
 export const quoteMessageCommand = createCommand({
-  build: {
-    message: {
-      name: "Quote message",
-    },
+  message: {
+    name: "Quote message",
   },
   run: (ctx) => {
     return ctx.reply({
@@ -54,13 +50,11 @@ One command can expose both context menu surfaces. Use the context flags to narr
 import { createCommand } from "arcscord";
 
 export const inspectCommand = createCommand({
-  build: {
-    user: {
-      name: "Inspect user",
-    },
-    message: {
-      name: "Inspect message",
-    },
+  user: {
+    name: "Inspect user",
+  },
+  message: {
+    name: "Inspect message",
   },
   run: (ctx) => {
     if (ctx.isUserCommand) {

@@ -151,43 +151,41 @@ export const docModals = [
 ];
 
 export const docCommand = createCommand({
-  build: {
-    slash: {
-      name: "doc",
-      description: "Documentation screenshot helper — trigger modals and v2 layouts for docs screenshots",
-      options: {
-        screenshot: {
-          type: "string",
-          description: "Which screenshot to generate",
-          required: true,
-          choices: [
-            // ── Modals (opens a form dialog — screenshot the dialog) ──────
-            { name: "modal_basic", value: "modal_basic" },
-            // screenshot: static/img/components/modal/modal-basic.png
-            { name: "modal_select_fields", value: "modal_select_fields" },
-            // screenshot: static/img/components/modal/modal-select-fields.png
-            { name: "modal_radio_checkbox", value: "modal_radio_checkbox" },
-            // screenshot: static/img/components/modal/modal-radio-checkbox.png
-            { name: "modal_file_upload", value: "modal_file_upload" },
-            // screenshot: static/img/components/modal/modal-file-upload.png
-            { name: "modal_entity_selects", value: "modal_entity_selects" },
-            // screenshot: static/img/components/modal/modal-entity-selects.png
+  slash: {
+    name: "doc",
+    description: "Documentation screenshot helper — trigger modals and v2 layouts for docs screenshots",
+    options: {
+      screenshot: {
+        type: "string",
+        description: "Which screenshot to generate",
+        required: true,
+        choices: [
+          // ── Modals (opens a form dialog — screenshot the dialog) ──────
+          { name: "modal_basic", value: "modal_basic" },
+          // screenshot: static/img/components/modal/modal-basic.png
+          { name: "modal_select_fields", value: "modal_select_fields" },
+          // screenshot: static/img/components/modal/modal-select-fields.png
+          { name: "modal_radio_checkbox", value: "modal_radio_checkbox" },
+          // screenshot: static/img/components/modal/modal-radio-checkbox.png
+          { name: "modal_file_upload", value: "modal_file_upload" },
+          // screenshot: static/img/components/modal/modal-file-upload.png
+          { name: "modal_entity_selects", value: "modal_entity_selects" },
+          // screenshot: static/img/components/modal/modal-entity-selects.png
 
-            // ── Select menus (sends a message — screenshot the message) ──
-            { name: "select_menu_overview", value: "select_menu_overview" },
-            // screenshot: static/img/components/select-menu/select-menu-overview.png
+          // ── Select menus (sends a message — screenshot the message) ──
+          { name: "select_menu_overview", value: "select_menu_overview" },
+          // screenshot: static/img/components/select-menu/select-menu-overview.png
 
-            // ── Components v2 (sends a message — screenshot the message) ──
-            { name: "v2_layout", value: "v2_layout" },
-            // screenshot: static/img/components/v2/v2-layout.png
-            { name: "v2_media", value: "v2_media" },
-            // screenshot: static/img/components/v2/v2-media.png
-            { name: "v2_practical", value: "v2_practical" },
-            // screenshot: static/img/components/v2/v2-practical.png
-            { name: "v2_section_thumbnail", value: "v2_section_thumbnail" },
-            // screenshot: static/img/components/v2/v2-section-thumbnail.png
-          ] as const,
-        },
+          // ── Components v2 (sends a message — screenshot the message) ──
+          { name: "v2_layout", value: "v2_layout" },
+          // screenshot: static/img/components/v2/v2-layout.png
+          { name: "v2_media", value: "v2_media" },
+          // screenshot: static/img/components/v2/v2-media.png
+          { name: "v2_practical", value: "v2_practical" },
+          // screenshot: static/img/components/v2/v2-practical.png
+          { name: "v2_section_thumbnail", value: "v2_section_thumbnail" },
+          // screenshot: static/img/components/v2/v2-section-thumbnail.png
+        ] as const,
       },
     },
   },

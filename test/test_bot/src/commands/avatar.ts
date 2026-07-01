@@ -2,37 +2,35 @@ import { createCommand } from "arcscord";
 import { EmbedBuilder, MessageFlags } from "discord.js";
 
 export const avatarCommand = createCommand({
-  build: {
-    slash: {
-      name: "avatar",
-      description: "test command",
-      options: {
-        user: {
-          type: "user",
-          description: "The user",
-        },
-        size: {
-          type: "number",
-          description: "yeah",
-          choices: [
-            64,
-            128,
-            256,
-            512,
-            {
-              name: "1024 (default)",
-              value: 1024,
-            },
-            2048,
-          ],
-        } as const,
+  slash: {
+    name: "avatar",
+    description: "test command",
+    options: {
+      user: {
+        type: "user",
+        description: "The user",
       },
-      integrationTypes: ["userInstall", "guildInstall"],
+      size: {
+        type: "number",
+        description: "yeah",
+        choices: [
+          64,
+          128,
+          256,
+          512,
+          {
+            name: "1024 (default)",
+            value: 1024,
+          },
+          2048,
+        ],
+      } as const,
     },
-    user: {
-      name: "avatar",
-      integrationTypes: ["userInstall", "guildInstall"],
-    },
+    integrationTypes: ["userInstall", "guildInstall"],
+  },
+  user: {
+    name: "avatar",
+    integrationTypes: ["userInstall", "guildInstall"],
   },
   run: (ctx) => {
     const user = ctx.isSlashCommand

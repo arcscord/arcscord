@@ -3,21 +3,19 @@ import { MessageFlags } from "discord.js";
 import { i18nButton } from "../components/i18n_button";
 
 export const i18nCommand = createCommand({
-  build: {
-    slash: {
-      name: "i18n",
-      nameLocalizations: t => t($ => $.i18n.command.name),
-      description: "default description",
-      descriptionLocalizations: t => t($ => $.i18n.command.description),
-      options: {
-        topic: {
-          description: "Localized autocomplete topic",
-          nameLocalizations: t => t($ => $.i18n.autocomplete.option.name),
-          descriptionLocalizations: t => t($ => $.i18n.autocomplete.option.description),
-          type: "string",
-          autocomplete: true,
-          required: true,
-        },
+  slash: {
+    name: "i18n",
+    nameLocalizations: t => t($ => $.i18n.command.name),
+    description: "default description",
+    descriptionLocalizations: t => t($ => $.i18n.command.description),
+    options: {
+      topic: {
+        description: "Localized autocomplete topic",
+        nameLocalizations: t => t($ => $.i18n.autocomplete.option.name),
+        descriptionLocalizations: t => t($ => $.i18n.autocomplete.option.description),
+        type: "string",
+        autocomplete: true,
+        required: true,
       },
     },
   },

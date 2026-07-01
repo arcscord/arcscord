@@ -127,20 +127,18 @@ Discord command metadata has API limits. Slash command names, option names, subc
 import { createCommand } from "arcscord";
 
 export const i18nCommand = createCommand({
-  build: {
-    slash: {
-      name: "i18n",
-      nameLocalizations: t => t($ => $.i18n.command.name),
-      description: "Localized command example",
-      descriptionLocalizations: t => t($ => $.i18n.command.description),
-      options: {
-        topic: {
-          type: "string",
-          description: "Topic",
-          nameLocalizations: t => t($ => $.i18n.command.topicName),
-          descriptionLocalizations: t => t($ => $.i18n.command.topicDescription),
-          required: true,
-        },
+  slash: {
+    name: "i18n",
+    nameLocalizations: t => t($ => $.i18n.command.name),
+    description: "Localized command example",
+    descriptionLocalizations: t => t($ => $.i18n.command.description),
+    options: {
+      topic: {
+        type: "string",
+        description: "Topic",
+        nameLocalizations: t => t($ => $.i18n.command.topicName),
+        descriptionLocalizations: t => t($ => $.i18n.command.topicDescription),
+        required: true,
       },
     },
   },
@@ -162,19 +160,17 @@ Autocomplete handlers run at interaction time. Use `ctx.t(...)` for choices that
 import { createCommand } from "arcscord";
 
 export const searchCommand = createCommand({
-  build: {
-    slash: {
-      name: "search",
-      description: "Search with localized autocomplete",
-      options: {
-        category: {
-          type: "string",
-          description: "Category",
-          nameLocalizations: t => t($ => $.search.category.name),
-          descriptionLocalizations: t => t($ => $.search.category.description),
-          autocomplete: true,
-          required: true,
-        },
+  slash: {
+    name: "search",
+    description: "Search with localized autocomplete",
+    options: {
+      category: {
+        type: "string",
+        description: "Category",
+        nameLocalizations: t => t($ => $.search.category.name),
+        descriptionLocalizations: t => t($ => $.search.category.description),
+        autocomplete: true,
+        required: true,
       },
     },
   },
@@ -224,11 +220,9 @@ export const languageButton = createButton({
 });
 
 export const componentCommand = createCommand({
-  build: {
-    slash: {
-      name: "localized-component",
-      description: "Send a localized component",
-    },
+  slash: {
+    name: "localized-component",
+    description: "Send a localized component",
   },
   run: (ctx) => {
     return ctx.reply({

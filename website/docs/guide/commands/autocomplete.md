@@ -4,7 +4,7 @@ sidebar_position: 3
 
 # Command autocomplete
 
-Autocomplete lets Discord request suggestions while a user is typing a slash command option. Arcscord models autocomplete per option: enable it in the command build, then provide one handler for each autocomplete option.
+Autocomplete lets Discord request suggestions while a user is typing a slash command option. Arcscord models autocomplete per option: enable it in the command definition, then provide one handler for each autocomplete option.
 
 Discord only supports autocomplete for `string`, `integer`, and `number` options.
 
@@ -22,17 +22,15 @@ import { createCommand } from "arcscord";
 const animeList = ["Naruto", "Bleach", "One Piece"];
 
 export const searchCommand = createCommand({
-  build: {
-    slash: {
-      name: "search",
-      description: "Search anime",
-      options: {
-        anime: {
-          type: "string",
-          description: "Anime name",
-          autocomplete: true,
-          required: true,
-        },
+  slash: {
+    name: "search",
+    description: "Search anime",
+    options: {
+      anime: {
+        type: "string",
+        description: "Anime name",
+        autocomplete: true,
+        required: true,
       },
     },
   },
@@ -85,21 +83,19 @@ Declare one handler per autocomplete option.
 
 ```ts
 export const searchCommand = createCommand({
-  build: {
-    slash: {
-      name: "search",
-      description: "Search anime",
-      options: {
-        anime: {
-          type: "string",
-          description: "Anime name",
-          autocomplete: true,
-        },
-        year: {
-          type: "integer",
-          description: "Release year",
-          autocomplete: true,
-        },
+  slash: {
+    name: "search",
+    description: "Search anime",
+    options: {
+      anime: {
+        type: "string",
+        description: "Anime name",
+        autocomplete: true,
+      },
+      year: {
+        type: "integer",
+        description: "Release year",
+        autocomplete: true,
       },
     },
   },
@@ -135,7 +131,7 @@ autocomplete: {
 Autocomplete follows these rules:
 
 1. An option with `autocomplete: true` must have a matching handler in `autocomplete`.
-2. A handler key must match an option declared in the build.
+2. A handler key must match an option declared in the definition.
 3. A handler key must target a `string`, `integer`, or `number` option.
 4. An option cannot use both `choices` and `autocomplete: true`.
 5. `ctx.value` is the raw typed string from Discord, and `ctx.sendChoices()` is typed from the focused option.

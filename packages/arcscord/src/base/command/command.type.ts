@@ -3,9 +3,10 @@ import type {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import type { CommandContext, FullCommandDefinition, SubCommandDefinition } from "#/base";
+import type { BaseCommandDefinition, CommandContext, FullCommandDefinition, SlashCommandDefinition, SubCommandDefinition } from "#/base";
 import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
+import type { OptionsList } from "#/base/command/option.type";
 import type { CommandError } from "#/utils/error/class/command_error";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
@@ -54,22 +55,19 @@ type BivariantCommandCallback<Ctx> = {
 }["bivarianceHack"];
 
 /**
- * Command properties.
+ * Behavioural properties attached to a command definition (everything that is
+ * not part of the Discord definition itself).
  *
- * @template Build - The command build
+ * Kept separate from the definition so that the definition type stays clean
+ * when spread at the top level of a {@link CommandHandler}.
+ *
+ * @template Build - The command definition
  * @template Middlewares - The list of middleware used in command
  */
-export type CommandHandler<
+export type CommandExtras<
   Build extends SubCommandDefinition | FullCommandDefinition = SubCommandDefinition | FullCommandDefinition,
   Middlewares extends CommandMiddleware[] = CommandMiddleware[],
 > = {
-  /**
-   * The command definition/build.
-   *
-   * Accept {@link FullCommandDefinition} and {@link SubCommandDefinition}
-   */
-  build: Build;
-
   /**
    * Whether to defer the interaction before executing middlewares and the command.
    *
@@ -91,7 +89,7 @@ export type CommandHandler<
    */
   run: {
     bivarianceHack: (
-      ctx: CommandContext<Build, Middlewares>,
+      ctx: CommandContext<NoInfer<Build>, Middlewares>,
     ) => MaybePromise<CommandRunReturn>;
   }["bivarianceHack"];
 
@@ -100,17 +98,86 @@ export type CommandHandler<
    */
   use?: Middlewares;
 
-  autocomplete?: AutocompleteHandlers<Build>;
-
+  autocomplete?: AutocompleteHandlers<NoInfer<Build>>;
 };
+
+/**
+ * Command properties.
+ *
+ * The Discord definition ({@link FullCommandDefinition} or
+ * {@link SubCommandDefinition}) is spread directly at the top level alongside
+ * the behavioural {@link CommandExtras}.
+ *
+ * @template Build - The command definition
+ * @template Middlewares - The list of middleware used in command
+ */
+export type CommandHandler<
+  Build extends SubCommandDefinition | FullCommandDefinition = SubCommandDefinition | FullCommandDefinition,
+  Middlewares extends CommandMiddleware[] = CommandMiddleware[],
+> = Build & CommandExtras<Build, Middlewares>;
+
+/**
+ * @internal
+ */
+export type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : false;
+
+/**
+ * Reassembles a {@link FullCommandDefinition} from the individually inferred
+ * surfaces. A surface only contributes a (required) key when it was provided, so
+ * `CommandContext` discriminates the right context union.
+ *
+ * @internal
+ */
+export type AssembleFullDefinition<Slash, Message, User>
+  = (IsOmitted<Slash, SlashCommandDefinition> extends true ? Record<never, never> : { slash: Slash })
+    & (IsOmitted<Message, BaseCommandDefinition> extends true ? Record<never, never> : { message: Message })
+    & (IsOmitted<User, BaseCommandDefinition> extends true ? Record<never, never> : { user: User });
+
+/**
+ * Input type for {@link createCommand}.
+ *
+ * Each surface is a naked type-parameter property (constraint without
+ * `undefined`) so that it is inferred independently of `run` — reliable
+ * inference, exactly like the old single `build` property — while the
+ * constraint provides contextual typing for callback values such as
+ * localization callbacks. The inferred surfaces are reassembled to type the
+ * command context.
+ *
+ * @internal
+ */
+export type FullCommandInput<
+  Slash extends SlashCommandDefinition,
+  Message extends BaseCommandDefinition,
+  User extends BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = CommandMiddleware[],
+> = {
+  slash?: Slash;
+  message?: Message;
+  user?: User;
+} & CommandExtras<AssembleFullDefinition<Slash, Message, User>, Middlewares>;
+
+/**
+ * Input type for {@link createSubCommand}.
+ *
+ * The option map is a naked type-parameter property so that it is inferred
+ * independently of `run`, while {@link SubCommandDefinition} provides contextual
+ * typing for the remaining (name/description/localization) properties.
+ *
+ * @internal
+ */
+export type SubCommandInput<
+  Options extends OptionsList,
+  Middlewares extends CommandMiddleware[] = CommandMiddleware[],
+> = Omit<SubCommandDefinition, "options"> & {
+  options?: Options;
+} & CommandExtras<SubCommandDefinition & { options: Options }, Middlewares>;
 
 /**
  * Broad command handler shape used when storing heterogeneous commands.
  *
  * @internal
  */
-export type AnyCommandHandler = {
-  build: FullCommandDefinition;
+export type AnyCommandHandler = FullCommandDefinition & {
   preReply?: PreReplyMode;
   // Heterogeneous command collections store handlers with different context types.
   run: BivariantCommandCallback<any>;
@@ -123,8 +190,7 @@ export type AnyCommandHandler = {
  *
  * @internal
  */
-export type AnySubCommandHandler = {
-  build: SubCommandDefinition;
+export type AnySubCommandHandler = SubCommandDefinition & {
   preReply?: PreReplyMode;
   // Heterogeneous subcommand collections store handlers with different option maps.
   run: BivariantCommandCallback<any>;

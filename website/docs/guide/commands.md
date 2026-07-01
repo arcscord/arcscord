@@ -8,17 +8,15 @@ Commands are declared with `createCommand` and loaded with `ArcClient`. This pag
 
 ## Create a command
 
-The most common command is a slash command. Its definition lives in `build.slash`, and its handler lives in `run`.
+The most common command is a slash command. Its definition lives in `slash`, and its handler lives in `run`.
 
 ```ts
 import { createCommand } from "arcscord";
 
 export const pingCommand = createCommand({
-  build: {
-    slash: {
-      name: "ping",
-      description: "Check if the bot is available",
-    },
+  slash: {
+    name: "ping",
+    description: "Check if the bot is available",
   },
   run: ctx => ctx.reply("Pong!"),
 });
@@ -71,25 +69,23 @@ await client.loadHandlers({
 
 Arcscord supports several Discord application command shapes:
 
-- Slash commands — use `createCommand` with `build.slash`
-- User context menu commands — use `createCommand` with `build.user`
-- Message context menu commands — use `createCommand` with `build.message`
-- Subcommands — use `buildCommandWithSubs`, **not** `createCommand`
+- Slash commands — use `createCommand` with `slash`
+- User context menu commands — use `createCommand` with `user`
+- Message context menu commands — use `createCommand` with `message`
+- Subcommands — use `createCommandWithSubs`, **not** `createCommand`
 
-For subcommands, each subcommand is created with `createCommand` using a flat `build` (no `slash` wrapper), and the group is assembled with `buildCommandWithSubs`:
+For subcommands, each subcommand is created with `createSubCommand` (a flat definition with `name`/`description`, no `slash` wrapper), and the group is assembled with `createCommandWithSubs`:
 
 ```ts
-import { buildCommandWithSubs, createCommand } from "arcscord";
+import { createCommandWithSubs, createSubCommand } from "arcscord";
 
-const banSubCommand = createCommand({
-  build: {
-    name: "ban",          // no "slash" wrapper for subcommands
-    description: "Ban a member",
-  },
+const banSubCommand = createSubCommand({
+  name: "ban",          // no "slash" wrapper for subcommands
+  description: "Ban a member",
   run: ctx => ctx.reply("Banned!"),
 });
 
-export const modCommand = buildCommandWithSubs({
+export const modCommand = createCommandWithSubs({
   name: "mod",
   description: "Moderation tools",
   subCommands: [banSubCommand],
@@ -112,11 +108,9 @@ Use `preReply` when a command may take longer than Discord's initial interaction
 
 ```ts
 export const reportCommand = createCommand({
-  build: {
-    slash: {
-      name: "report",
-      description: "Generate a report",
-    },
+  slash: {
+    name: "report",
+    description: "Generate a report",
   },
   preReply: "ephemeral",
   run: async (ctx) => {
