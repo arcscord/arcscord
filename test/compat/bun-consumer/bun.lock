@@ -5,7 +5,7 @@
     "": {
       "name": "@arcscord/bun-consumer",
       "dependencies": {
-        "arcscord": "file:./vendor/arcscord.tgz",
+        "arcscord": "file:vendor/arcscord.tgz",
         "discord.js": "^14.26.4",
       },
       "devDependencies": {
@@ -44,7 +44,7 @@
 
     "@vladfrangu/async_event_emitter": ["@vladfrangu/async_event_emitter@2.4.7", "", {}, "sha512-Xfe6rpCTxSxfbswi/W/Pz7zp1WWSNn4A0eW4mLkQUewCrXXtMj31lCg+iQyTkh/CkusZSq9eDflu7tjEDXUY6g=="],
 
-    "arcscord": ["arcscord@./vendor/arcscord.tgz", { "dependencies": { "@arcscord/better-error": "^1.0.5", "@arcscord/error": "^2.0.2", "dayjs": "^1.11.21", "discord-api-types": "^0.38.49", "discord.js": "^14.26.4", "i18next": "^26.3.1", "tintify": "^1.1.0" }, "peerDependencies": { "typescript": ">=5.0.0" } }, "sha512-MlAWR+EZihpeRXHbh7AP6flijQdXH/Rt/zaM+0JoOiwjAtYngv/GFDnaobBnRy8Vzsec0X00YIcWDGLnA5KT7g=="],
+    "arcscord": ["arcscord@vendor/arcscord.tgz", { "dependencies": { "@arcscord/better-error": "^1.0.5", "@arcscord/error": "^2.0.2", "dayjs": "^1.11.21", "discord-api-types": "^0.38.49", "discord.js": "^14.26.4", "i18next": "^26.3.3", "tintify": "^1.1.0" }, "peerDependencies": { "typescript": ">=5.0.0" } }, "sha512-/y6t1j52Z0OrbLkll6qoZDCvFYYBMd110IPxRRjk6JmGbISyo7vJBWy6yRSnPXp+vG3yq8GeXDR6k++veKvFvw=="],
 
     "bun-types": ["bun-types@1.3.14", "", { "dependencies": { "@types/node": "*" } }, "sha512-4N0ig0fEomHt5R0KCFWjovxow98rIoRwKolrYdCcknNwMekCXRnWEUvgu5soYV8QXtVsrUD8B95MBOZGPvr6KQ=="],
 

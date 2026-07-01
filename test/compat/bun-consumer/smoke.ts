@@ -54,7 +54,7 @@ client.logger.info("bun smoke: client ready");
 if (!(client instanceof ArcClient)) {
   throw new TypeError("ArcClient instantiation failed");
 }
-if (pingCommand.build.slash?.name !== "ping") {
+if (pingCommand.slash?.name !== "ping") {
   throw new Error("command build failed");
 }
 if (!builtButton) {

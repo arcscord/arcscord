@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "arcscord": "file:./vendor/arcscord.tgz",
+    "arcscord": "file:vendor/arcscord.tgz",
     "discord.js": "^14.26.4"
   },
   "devDependencies": {
