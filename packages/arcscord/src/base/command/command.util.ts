@@ -187,33 +187,22 @@ export async function parseOptions<T extends OptionsList>(
     switch (option.type) {
       case "user": {
         const user = interaction.options.getUser(name, false);
-        if (!user && option.required && required) {
-          return error(
-            new BaseError({
-              message: `User is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, user);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
+
         result[name] = user || undefined;
         break;
       }
 
       case "role": {
         const role = interaction.options.getRole(name, false);
-        if (!role && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Role is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, role);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         if (!(role instanceof Role) && role !== null) {
@@ -254,16 +243,10 @@ export async function parseOptions<T extends OptionsList>(
 
       case "channel": {
         const channel = interaction.options.getChannel(name, false);
-        if (!channel && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Channel is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, channel);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         if (channel instanceof BaseChannel || channel === null) {
@@ -306,16 +289,10 @@ export async function parseOptions<T extends OptionsList>(
 
       case "mentionable": {
         const mentionable = interaction.options.getMentionable(name, false);
-        if (!mentionable && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Mention is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, mentionable);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         if (mentionable instanceof Role || mentionable instanceof User) {
@@ -346,16 +323,10 @@ export async function parseOptions<T extends OptionsList>(
 
       case "boolean": {
         const boolean = interaction.options.getBoolean(name, false);
-        if (boolean === null && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Boolean is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, boolean);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         result[name] = boolean !== null ? boolean : undefined;
@@ -364,16 +335,10 @@ export async function parseOptions<T extends OptionsList>(
 
       case "attachment": {
         const attachment = interaction.options.getAttachment(name, false);
-        if (!attachment && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Attachment is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, attachment);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         result[name] = attachment || undefined;
@@ -382,16 +347,10 @@ export async function parseOptions<T extends OptionsList>(
 
       case "string": {
         const value = interaction.options.getString(name, false);
-        if (!value && option.required && required) {
-          return error(
-            new BaseError({
-              message: `String is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, value);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         if (value === null) {
@@ -399,7 +358,7 @@ export async function parseOptions<T extends OptionsList>(
           break;
         }
 
-        if (option.min_length && value.length < option.min_length) {
+        if (option.min_length !== undefined && value.length < option.min_length) {
           return error(
             new BaseError({
               message:
@@ -413,7 +372,7 @@ export async function parseOptions<T extends OptionsList>(
           );
         }
 
-        if (option.max_length && value.length > option.max_length) {
+        if (option.max_length !== undefined && value.length > option.max_length) {
           return error(
             new BaseError({
               message: `Maximum length exceeded, get ${value.length}, max ${option.min_length} for option ${name}`,
@@ -475,16 +434,10 @@ export async function parseOptions<T extends OptionsList>(
           = option.type === "number"
             ? interaction.options.getNumber(name, false)
             : interaction.options.getInteger(name, false);
-        if (!value && option.required && required) {
-          return error(
-            new BaseError({
-              message: `Number is required, get undefined for ${name}`,
-              debugs: {
-                options: interaction.options.data,
-                definer: optionsList,
-              },
-            }),
-          );
+
+        const requireResult = checkRequired(name, option, value);
+        if (requireResult !== "valid" && required) {
+          return error(requireResult);
         }
 
         if (value === null) {
@@ -492,7 +445,7 @@ export async function parseOptions<T extends OptionsList>(
           break;
         }
 
-        if (option.min_value && value < option.min_value) {
+        if (option.min_value !== undefined && value < option.min_value) {
           return error(
             new BaseError({
               message: `Minimum value is required, get ${value}, min required is ${option.min_value} for option ${name}`,
@@ -504,7 +457,7 @@ export async function parseOptions<T extends OptionsList>(
           );
         }
 
-        if (option.max_value && value > option.max_value) {
+        if (option.max_value !== undefined && value > option.max_value) {
           return error(
             new BaseError({
               message: `Maximum value exceeded, get ${value}, max ${option.max_value} for option ${name}`,
@@ -563,4 +516,13 @@ export async function parseOptions<T extends OptionsList>(
   }
 
   return ok(result as ContextOptions<T>);
+}
+
+function checkRequired(name: string, option: Option, value: NonNullable<unknown> | null): "valid" | BaseError {
+  if (option.required && value === null) {
+    return new BaseError({
+      message: `Option ${name} is required but was not provided.`,
+    });
+  }
+  return "valid";
 }
