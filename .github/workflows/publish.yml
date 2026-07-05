@@ -28,6 +28,15 @@ jobs:
     steps:
       - name: Checkout Project
         uses: actions/checkout@v7
+      - name: Guard prerelease publishes without a dist-tag
+        run: |
+          VERSION=$(grep -m1 '"version"' "packages/${{ inputs.package }}/package.json" | sed -E 's/.*"version": *"([^"]+)".*/\1/')
+          if [[ "$VERSION" == *-* && -z "$PUBLISH_TAG" ]]; then
+            echo "::error::Version $VERSION looks like a prerelease but no dist-tag (tag input) was provided. Refusing to publish to 'latest'."
+            exit 1
+          fi
+        env:
+          PUBLISH_TAG: ${{ inputs.tag }}
       - name: Install pnpm
         uses: pnpm/action-setup@v6
       - name: Use Node.js v24
