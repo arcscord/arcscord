@@ -36,3 +36,8 @@ website/static/api/**/dev.json
 
 # Ignore package locks
 package-lock.json
+
+# Agents
+.claude/
+CLAUDE.md
+AGENTS.md
