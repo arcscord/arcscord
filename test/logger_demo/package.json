@@ -1,0 +1,28 @@
+{
+  "name": "@arcscord/logger-demo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runnable demo of arcscord's logger: defaults, meta, child(), diagnostics sink, fatal, and pino/winston/debug adapters",
+  "author": "",
+  "license": "ISC",
+  "keywords": [],
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
+    "typecheck": "tsc -p tsconfig.eslint.json"
+  },
+  "dependencies": {
+    "arcscord": "workspace:*"
+  },
+  "devDependencies": {
+    "@swc-node/core": "^1.14.1",
+    "@swc-node/register": "^1.11.1",
+    "@types/debug": "^4.1.12",
+    "@types/node": "^26.0.1",
+    "debug": "^4.4.0",
+    "pino": "9.5.0",
+    "tsconfig-paths": "^4.2.0",
+    "typescript": "^6.0.3",
+    "winston": "^3.17.0"
+  }
+}

@@ -54,4 +54,10 @@ export default antfu(
       "no-console": "off",
     },
   },
+  {
+    files: ["test/logger_demo/**"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 );
