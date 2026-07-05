@@ -190,7 +190,7 @@ function Install(): ReactNode {
       <div className="container">
         <h2 className={styles.sectionTitle}>Installation</h2>
         <p className={styles.sectionSubtitle}>
-          Requires Node.js 24.11.0 or newer.
+          Requires Node.js 24.11.0 or newer, or Bun 1.3.0 or newer.
         </p>
         <div className={styles.codeWrapper}>
           <Tabs groupId="package-manager">
@@ -202,6 +202,9 @@ function Install(): ReactNode {
             </TabItem>
             <TabItem value="yarn" label="yarn">
               <CodeBlock language="bash">yarn add arcscord discord.js</CodeBlock>
+            </TabItem>
+            <TabItem value="bun" label="bun">
+              <CodeBlock language="bash">bun add arcscord discord.js</CodeBlock>
             </TabItem>
           </Tabs>
         </div>

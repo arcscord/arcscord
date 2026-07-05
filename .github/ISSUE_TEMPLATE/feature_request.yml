@@ -15,7 +15,6 @@ body:
       description: Which package would this affect?
       options:
         - arcscord
-        - "@arcscord/cli"
         - "@arcscord/middleware"
         - "@arcscord/error"
         - "@arcscord/better-error"

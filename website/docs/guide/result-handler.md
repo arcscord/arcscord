@@ -229,7 +229,7 @@ The default result handlers for all three managers:
 - **`status === "returned"`, ok result** — log at debug level.
 
 The error reply message comes from `client.getErrorMessage(id, locale)`. You
-can customize it via `arcOptions.getErrorMessage` on the client.
+can customize it with `baseMessages.error` in the `ArcClient` options.
 
 For more on pre-run failures (command not found, option parsing errors, etc.)
 and how to configure their logging level and user reply, see

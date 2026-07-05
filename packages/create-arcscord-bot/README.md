@@ -8,6 +8,8 @@ pnpm create arcscord-bot
 npm create arcscord-bot
 # or
 yarn create arcscord-bot
+# or
+bun create arcscord-bot
 ```
 
 It sets up TypeScript, the `ArcClient`, optional ESLint / Prettier / i18n, and a working
@@ -22,7 +24,7 @@ pnpm create arcscord-bot my-bot -- --package-manager npm --eslint arcscord --i18
 | Option | Description |
 | --- | --- |
 | `[name]` | Project name / target directory |
-| `--package-manager <npm\|pnpm\|yarn>` | Package manager to use |
+| `--package-manager <npm\|pnpm\|yarn\|bun>` | Package manager to use |
 | `--eslint [eslint\|antfu\|arcscord]` | Enable ESLint with the given config |
 | `--prettier` | Enable Prettier (with the recommended ESLint config) |
 | `--i18n` | Enable i18n (i18next) |

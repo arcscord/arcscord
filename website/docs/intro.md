@@ -19,6 +19,7 @@ Welcome to the Arcscord guide. Pick where to start:
 ## Packages
 
 - [`arcscord`](/packages/arcscord): core Discord bot framework.
+- `create-arcscord-bot`: ready-to-run project scaffolder, documented in [Installation](/guide/installation).
 - [`@arcscord/middleware`](/packages/middleware): reusable middleware for commands and components.
 - [`@arcscord/error`](/packages/error): result-style error handling helpers.
 - [`@arcscord/better-error`](/packages/better-error): richer `Error` class with debug context.
