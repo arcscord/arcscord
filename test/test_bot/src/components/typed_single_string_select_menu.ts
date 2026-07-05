@@ -2,19 +2,19 @@ import { createTypedStringMenu } from "arcscord";
 
 export const typedSingleStringSelectMenu = createTypedStringMenu({
   route: "typed_single_string_select_menu",
+  values: {
+    fun: {
+      label: "Fun",
+      description: "A fun option",
+    },
+    happy: {
+      label: "Happy",
+      description: "A happy option",
+    },
+  } as const,
+  maxValues: 1,
   build: id => ({
     customId: id(),
-    values: {
-      fun: {
-        label: "Fun",
-        description: "A fun option",
-      },
-      happy: {
-        label: "Happy",
-        description: "A happy option",
-      },
-    } as const,
-    maxValues: 1,
   }),
   run: (ctx) => {
     const selectedValue = ctx.values;

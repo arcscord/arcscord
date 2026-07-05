@@ -55,6 +55,7 @@ managers: {
       componentNotFound: { level: "warn", reply: false },
       multipleMatches: { level: "error" },
       contextCreationFailed: { level: "error" },
+      typedSelectInvalidValues: { level: "error" },
       deferFailed: { level: "warn", reply: false },
     },
   },
@@ -66,6 +67,7 @@ managers: {
 | `componentNotFound` | `"error"` | No route matched the custom ID |
 | `multipleMatches` | `"error"` | More than one route matched |
 | `contextCreationFailed` | `"error"` | Context object could not be built |
+| `typedSelectInvalidValues` | `"error"` | A typed string select (`createTypedStringMenu`) received a value outside its declared set |
 | `deferFailed` | `"warn"` | `deferReply()` threw |
 
 ## DiagnosticLevel

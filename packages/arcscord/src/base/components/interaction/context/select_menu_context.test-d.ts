@@ -26,12 +26,12 @@ describe("select menu handler ctx.values types", () => {
   it("typed string select ctx.values is literal key array by default", () => {
     createTypedStringMenu({
       route: "test",
+      values: {
+        fun: { label: "Fun" },
+        happy: { label: "Happy" },
+      } as const,
       build: id => ({
         customId: id(),
-        values: {
-          fun: { label: "Fun" },
-          happy: { label: "Happy" },
-        } as const,
       }),
       run: async (ctx) => {
         expectTypeOf(ctx.values).toEqualTypeOf<("fun" | "happy")[]>();
@@ -43,13 +43,13 @@ describe("select menu handler ctx.values types", () => {
   it("typed string select ctx.values is literal union when maxValues is 1", () => {
     createTypedStringMenu({
       route: "test",
+      values: {
+        fun: { label: "Fun" },
+        happy: { label: "Happy" },
+      } as const,
+      maxValues: 1,
       build: id => ({
         customId: id(),
-        values: {
-          fun: { label: "Fun" },
-          happy: { label: "Happy" },
-        } as const,
-        maxValues: 1,
       }),
       run: async (ctx) => {
         expectTypeOf(ctx.values).toEqualTypeOf<"fun" | "happy">();

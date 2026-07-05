@@ -12,9 +12,9 @@ const typedValues = {
 
 const typedStringSelectMenu = createTypedStringMenu({
   route: "typed_string_select",
+  values: typedValues,
   build: id => ({
     customId: id(),
-    values: typedValues,
   }),
   run: async (ctx) => {
     const value: "fun" | "happy" = ctx.values[0];
@@ -25,10 +25,10 @@ const typedStringSelectMenu = createTypedStringMenu({
 
 const singleValueStringSelectMenu = createTypedStringMenu({
   route: "single_typed_string_select",
+  values: typedValues,
+  maxValues: 1,
   build: id => ({
     customId: id(),
-    values: typedValues,
-    maxValues: 1,
   }),
   run: async (ctx) => {
     const value: "fun" | "happy" = ctx.values;
@@ -43,21 +43,15 @@ type TypedHandlerInternals = {
 };
 
 describe("typed string select handler", () => {
-  it("does not flag a single value when maxValues is omitted", () => {
-    typedStringSelectMenu.build();
-
+  it("does not flag a single value when maxValues is omitted, even before build() ever runs", () => {
     expect((typedStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBe(false);
   });
 
-  it("flags a single value when maxValues is one", () => {
-    singleValueStringSelectMenu.build();
-
+  it("flags a single value when maxValues is one, even before build() ever runs", () => {
     expect((singleValueStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBe(true);
   });
 
-  it("captures the declared values as the allowed set", () => {
-    typedStringSelectMenu.build();
-
+  it("captures the declared values as the allowed set, even before build() ever runs", () => {
     expect([...(typedStringSelectMenu as TypedHandlerInternals).typedAllowedValues!]).toEqual([
       "fun",
       "happy",
@@ -74,8 +68,6 @@ describe("typed string select handler", () => {
       }),
       run: async ctx => ctx.ok(ctx.values.join(",")),
     });
-
-    untypedStringSelectMenu.build();
 
     expect((untypedStringSelectMenu as TypedHandlerInternals).typedSingleValue).toBeUndefined();
     expect((untypedStringSelectMenu as TypedHandlerInternals).typedAllowedValues).toBeUndefined();

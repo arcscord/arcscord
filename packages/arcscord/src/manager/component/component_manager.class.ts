@@ -161,37 +161,7 @@ export class ComponentManager extends BaseManager {
         return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale, params }));
       case ComponentType.StringSelect: {
         const stringSelectInteraction = interaction as StringSelectMenuInteraction;
-        const typed = component as {
-          typedSingleValue?: boolean;
-          typedAllowedValues?: ReadonlySet<string>;
-        };
-
-        if (typed.typedAllowedValues) {
-          const invalidValues = stringSelectInteraction.values.filter(
-            value => !typed.typedAllowedValues!.has(value),
-          );
-          if (invalidValues.length > 0) {
-            return error(new ComponentError({
-              message: `received invalid values for typed string select ${component.route}`,
-              interaction,
-              debugs: {
-                allowedValues: [...typed.typedAllowedValues],
-                invalidValues,
-                selectedValues: stringSelectInteraction.values,
-              },
-            }));
-          }
-          if (typed.typedSingleValue && stringSelectInteraction.values.length > 1) {
-            return error(new ComponentError({
-              message: `received multiples values for typed single string select ${component.route}`,
-              interaction,
-              debugs: {
-                allowedValues: [...typed.typedAllowedValues],
-                selectedValues: stringSelectInteraction.values,
-              },
-            }));
-          }
-        }
+        const typed = component as { typedSingleValue?: boolean };
 
         const values = typed.typedSingleValue === true
           ? stringSelectInteraction.values[0]
@@ -281,6 +251,22 @@ export class ComponentManager extends BaseManager {
 
     const matched = matchedComponents[0];
 
+    /* Typed string select value validation */
+    if (type === ComponentType.StringSelect) {
+      const [validationErr] = this.validateTypedStringSelect(
+        matched.component,
+        interaction as StringSelectMenuInteraction,
+      );
+      if (validationErr) {
+        return this.sendDispatchError(
+          this.options.dispatchDiagnostics.typedSelectInvalidValues,
+          "error",
+          validationErr,
+          { interaction, locale },
+        );
+      }
+    }
+
     /* Context creation */
     const [ctxErr, context] = this.createContext(interaction, type, locale, matched.params, matched.component);
     if (ctxErr) {
@@ -324,6 +310,53 @@ export class ComponentManager extends BaseManager {
     }
 
     await this.executeComponent(matched.component, context, start);
+  }
+
+  /**
+   * Validates the selected values of a `createTypedStringMenu` component
+   * against its declared allowed set. No-op for plain (untyped) string
+   * selects, which never have `typedAllowedValues` set.
+   */
+  private validateTypedStringSelect(
+    component: ComponentHandler,
+    interaction: StringSelectMenuInteraction,
+  ): Result<true, ComponentError> {
+    const typed = component as {
+      typedSingleValue?: boolean;
+      typedAllowedValues?: ReadonlySet<string>;
+    };
+
+    if (!typed.typedAllowedValues) {
+      return ok(true);
+    }
+
+    const invalidValues = interaction.values.filter(
+      value => !typed.typedAllowedValues!.has(value),
+    );
+    if (invalidValues.length > 0) {
+      return error(new ComponentError({
+        message: `received invalid values for typed string select ${component.route}`,
+        interaction,
+        debugs: {
+          allowedValues: [...typed.typedAllowedValues],
+          invalidValues,
+          selectedValues: interaction.values,
+        },
+      }));
+    }
+
+    if (typed.typedSingleValue && interaction.values.length > 1) {
+      return error(new ComponentError({
+        message: `received multiples values for typed single string select ${component.route}`,
+        interaction,
+        debugs: {
+          allowedValues: [...typed.typedAllowedValues],
+          selectedValues: interaction.values,
+        },
+      }));
+    }
+
+    return ok(true);
   }
 
   private findMatchingComponents(

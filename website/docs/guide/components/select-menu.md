@@ -103,16 +103,13 @@ richCategoryMenu.build() // no args needed
 
 Use `createTypedStringMenu` when the option set is fixed at compile time. Arcscord infers the value type from the keys, so `ctx.values` is a typed union array.
 
-### `build` return object
+### Top-level options
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| `customId` | `string` | Yes | Must be `id()`. |
-| `values` | `Record<string, OptionDef \| string>` | Yes | The fixed option set. Keys become the selectable values. |
-| `placeholder` | `string` | No | Placeholder text. |
-| `minValues` | `number` | No | Min selections. Default: `1`. |
+| `values` | `Record<string, OptionDef \| string>` | Yes | The fixed option set. Keys become the selectable values. Captured immediately when `createTypedStringMenu` is called. |
 | `maxValues` | `number` | No | Max selections. When `1`, `ctx.value` is a single string. When `> 1`, `ctx.values` is an array. |
-| `disabled` | `boolean` | No | Disabled state. |
+| `minValues` | `number` | No | Min selections. Default: `1`. |
 
 Each option definition in `values`:
 
@@ -125,20 +122,28 @@ Each option definition in `values`:
 
 Or pass a plain `string` as the value — it becomes the label.
 
+### `build` return object
+
+| Field | Type | Required | Description |
+|---|---|---|---|
+| `customId` | `string` | Yes | Must be `id()`. |
+| `placeholder` | `string` | No | Placeholder text. |
+| `disabled` | `boolean` | No | Disabled state. |
+
 ```ts
 import { createTypedStringMenu } from "arcscord";
 
 export const moodMenu = createTypedStringMenu({
   route: "mood_menu",
+  values: {
+    great: { label: "Great 🎉", description: "Feeling awesome" },
+    okay:  { label: "Okay 😐" },
+    bad:   { label: "Bad 😞", description: "Having a rough day" },
+  } as const,  // as const is required for TypeScript to infer the key union
+  maxValues: 1,
   build: id => ({
     customId: id(),
-    values: {
-      great: { label: "Great 🎉", description: "Feeling awesome" },
-      okay:  { label: "Okay 😐" },
-      bad:   { label: "Bad 😞", description: "Having a rough day" },
-    } as const,  // as const is required for TypeScript to infer the key union
     placeholder: "How are you feeling?",
-    maxValues: 1,
   }),
   run: (ctx) => {
     const mood = ctx.values; // typed as "great" | "okay" | "bad"
@@ -147,12 +152,12 @@ export const moodMenu = createTypedStringMenu({
 });
 ```
 
-`as const` on the inline `values` object is what makes TypeScript narrow the type. Without it, `ctx.values` falls back to `string`.
+`as const` on the `values` object is what makes TypeScript narrow the type. Without it, `ctx.values` falls back to `string`.
 
 When `maxValues` is `1`, `ctx.values` is the single selected key (a string). When `maxValues > 1`, `ctx.values` is an array of keys.
 
 :::warning `values` must be static
-You must declare `values` as a static object literal asserted with `as const`. Its keys define both the `ctx.values` type **and** the set of values accepted at runtime — a selection outside that set (for example coming from an outdated message whose options no longer match) is rejected before `run` is called. Building `values` dynamically (or dropping `as const`) collapses `ctx.values` back to `string` and removes the type safety this helper provides.
+You must declare `values` as a static object literal asserted with `as const`, passed directly to `createTypedStringMenu` (not inside `build`). Its keys define both the `ctx.values` type **and** the set of values accepted at runtime — a selection outside that set (for example coming from an outdated message whose options no longer match) is rejected before `run` is called. Building `values` dynamically (or dropping `as const`) collapses `ctx.values` back to `string` and removes the type safety this helper provides.
 :::
 
 ## User select

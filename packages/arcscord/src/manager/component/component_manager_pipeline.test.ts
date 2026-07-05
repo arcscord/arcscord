@@ -136,9 +136,9 @@ describe("component manager pipeline", () => {
       const run = vi.fn(async ctx => ctx.ok(ctx.values.join(",")));
       const handler = createTypedStringMenu({
         route: "typed-select",
+        values: { fun: "Fun", happy: "Happy" } as const,
         build: id => ({
           customId: id(),
-          values: { fun: "Fun", happy: "Happy" } as const,
         }),
         run,
       });
@@ -161,9 +161,9 @@ describe("component manager pipeline", () => {
       const run = vi.fn(async ctx => ctx.ok());
       const handler = createTypedStringMenu({
         route: "typed-select-strict",
+        values: { fun: "Fun", happy: "Happy" } as const,
         build: id => ({
           customId: id(),
-          values: { fun: "Fun", happy: "Happy" } as const,
         }),
         run,
       });
@@ -187,10 +187,10 @@ describe("component manager pipeline", () => {
       const run = vi.fn(async ctx => ctx.ok());
       const handler = createTypedStringMenu({
         route: "typed-select-single",
+        values: { fun: "Fun", happy: "Happy" } as const,
+        maxValues: 1,
         build: id => ({
           customId: id(),
-          values: { fun: "Fun", happy: "Happy" } as const,
-          maxValues: 1,
         }),
         run,
       });
@@ -205,6 +205,90 @@ describe("component manager pipeline", () => {
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
       expect(manager.logger.logError).toHaveBeenCalledOnce();
+    });
+
+    it("validates values correctly for a typed string select whose build() has never run (e.g. right after a restart)", async () => {
+      const resultHandler = vi.fn();
+      const { manager } = createManagerWithClient({ resultHandler });
+
+      const run = vi.fn(async ctx => ctx.ok(ctx.values.join(",")));
+      const handler = createTypedStringMenu({
+        route: "typed-select-never-built",
+        values: { fun: "Fun", happy: "Happy" } as const,
+        build: id => ({
+          customId: id(),
+        }),
+        run,
+      });
+      // Deliberately skip handler.build() to simulate a handler that was just
+      // re-registered on startup but whose message was sent before the
+      // restart, so the code path that calls build() hasn't run again yet.
+      manager.loadComponent(handler);
+
+      await dispatch(manager, createMockStringSelectMenuInteraction({
+        customId: "typed-select-never-built",
+        values: ["fun"],
+      }));
+
+      expect(run).toHaveBeenCalledOnce();
+      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+    });
+
+    it("rejects an invalid value for a typed string select whose build() has never run", async () => {
+      const resultHandler = vi.fn();
+      const { manager } = createManagerWithClient({ resultHandler });
+
+      const run = vi.fn(async ctx => ctx.ok());
+      const handler = createTypedStringMenu({
+        route: "typed-select-never-built-strict",
+        values: { fun: "Fun", happy: "Happy" } as const,
+        build: id => ({
+          customId: id(),
+        }),
+        run,
+      });
+      manager.loadComponent(handler);
+
+      await dispatch(manager, createMockStringSelectMenuInteraction({
+        customId: "typed-select-never-built-strict",
+        values: ["outdated-value"],
+      }));
+
+      expect(run).not.toHaveBeenCalled();
+      expect(resultHandler).not.toHaveBeenCalled();
+      expect(manager.logger.logError).toHaveBeenCalledOnce();
+    });
+
+    it("routes invalid typed-select values through dispatchDiagnostics.typedSelectInvalidValues, not contextCreationFailed", async () => {
+      const resultHandler = vi.fn();
+      const { manager } = createManagerWithClient({
+        resultHandler,
+        dispatchDiagnostics: {
+          typedSelectInvalidValues: { level: "warn" },
+        },
+      });
+
+      const run = vi.fn(async ctx => ctx.ok());
+      const handler = createTypedStringMenu({
+        route: "typed-select-diagnostic",
+        values: { fun: "Fun", happy: "Happy" } as const,
+        build: id => ({
+          customId: id(),
+        }),
+        run,
+      });
+      handler.build();
+      manager.loadComponent(handler);
+
+      await dispatch(manager, createMockStringSelectMenuInteraction({
+        customId: "typed-select-diagnostic",
+        values: ["outdated-value"],
+      }));
+
+      expect(run).not.toHaveBeenCalled();
+      expect(resultHandler).not.toHaveBeenCalled();
+      expect(manager.logger.warning).toHaveBeenCalledOnce();
+      expect(manager.logger.logError).not.toHaveBeenCalled();
     });
 
     it("exposes selected users for a user select menu", async () => {

@@ -174,12 +174,12 @@ export type AnyStringSelectMenuComponentHandler = BaseComponentHandler<Component
   type: ComponentType.StringSelect;
   build: (...args: any[]) => ActionRowData<StringSelectMenuComponentData>;
   /**
-   * Set at build time when the menu was created with `createTypedStringMenu`
-   * and `maxValues` is `1`, signalling that `ctx.values` is a single value.
+   * Set when the menu was created with `createTypedStringMenu` and
+   * `maxValues` is `1`, signalling that `ctx.values` is a single value.
    */
   typedSingleValue?: boolean;
   /**
-   * Allowed values captured at build time from the static `values` keys of a
+   * Allowed values captured from the static `values` keys of a
    * `createTypedStringMenu`. Used to reject selections from outdated menus.
    */
   typedAllowedValues?: ReadonlySet<string>;

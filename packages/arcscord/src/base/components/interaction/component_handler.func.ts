@@ -57,13 +57,18 @@ type TypedStringMenuOptions<
   route: Route;
   preReply?: PreReplyMode;
   use?: Middleware;
+  /**
+   * The fixed option set. Must be a static `as const` object literal — its
+   * keys are captured once, at creation time (not lazily inside `build()`),
+   * so the allowed set is known even before the first `build()` call.
+   */
+  values: Values;
+  maxValues?: MaxValues;
+  minValues?: number;
   build: (
     id: IdInitialiseFunction,
     ...args: Options
-  ) => Omit<StringSelectMenu<"message">, "maxValues" | "options" | "type"> & {
-    values: Values;
-    maxValues?: MaxValues;
-  };
+  ) => Omit<StringSelectMenu<"message">, "maxValues" | "minValues" | "options" | "type">;
   run: (
     ctx: StringSelectMenuContext<
       Middleware,
@@ -155,19 +160,19 @@ export function createSelectMenu<
  * ```ts
  * const typedStringSelectMenu = createTypedStringMenu({
  *   route: "typed_string_select",
+ *   values: {
+ *     fun: {
+ *       label: "Fun",
+ *       description: "A fun option",
+ *     },
+ *     happy: {
+ *       label: "Happy",
+ *       description: "A happy option",
+ *     },
+ *   },
+ *   maxValues: 2,
  *   build: id => ({
  *     customId: id(),
- *     values: {
- *       fun: {
- *         label: "Fun",
- *         description: "A fun option",
- *       },
- *       happy: {
- *         label: "Happy",
- *         description: "A happy option",
- *       },
- *     },
- *     maxValues: 2,
  *   }),
  *   run: (ctx) => {
  *     const selectedValues: Array<keyof typeof typedStringSelectValues> = ctx.values;
@@ -187,24 +192,29 @@ export function createTypedStringMenu<
   options: TypedStringMenuOptions<Options, Middleware, Route, Values, MaxValues>,
 ): StringSelectMenuComponentHandler<Options, Middleware, Route, Values, MaxValues> {
   const resolveRouteBuild = createRouteBuildResolver<Route, Options>(options.route);
+  // `values`/`maxValues` are static (required to be an `as const` literal), so
+  // they're captured immediately here instead of waiting for `build()` to
+  // run. This means the allowed set is known the instant the handler is
+  // created — including right after a restart, before any message using it
+  // has been rebuilt — so ComponentManager can always validate incoming
+  // values correctly.
+  const typedAllowedValues = new Set(Object.keys(options.values));
+  const typedSingleValue = options.maxValues === 1;
   const handler = {
     ...options,
     build: (...args: ComponentBuildArgs<Route, Options>): ActionRowData<StringSelectMenuComponentData> => {
       const [buildId, buildArgs] = resolveRouteBuild(...args);
       const menu = options.build(buildId, ...buildArgs);
-      // `values` is required to be a static `as const` literal, so its keys are
-      // the same across every build. Capture them once to both shape
-      // `ctx.values` and reject selections coming from outdated menus.
-      handler.typedSingleValue = menu.maxValues === 1;
-      handler.typedAllowedValues = new Set(Object.keys(menu.values));
       return stringSelectMenu({
         ...menu,
-        options: menu.values,
+        options: options.values,
+        maxValues: options.maxValues,
+        minValues: options.minValues,
       });
     },
     handlerType: componentHandlerTypeEnum.messageComponent,
-    typedSingleValue: false,
-    typedAllowedValues: new Set<string>(),
+    typedSingleValue,
+    typedAllowedValues,
     type: ComponentType.StringSelect,
   };
   return handler as unknown as StringSelectMenuComponentHandler<

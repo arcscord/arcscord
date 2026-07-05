@@ -145,6 +145,16 @@ export type ComponentDispatchDiagnostics = {
   contextCreationFailed?: DispatchErrorConfig;
 
   /**
+   * A typed string select menu (`createTypedStringMenu`) received a value
+   * outside its declared allowed set, or more values than allowed for a
+   * single-value menu. Commonly happens with an outdated message built
+   * before a code change to the menu's `values`.
+   *
+   * @default { level: "error" }
+   */
+  typedSelectInvalidValues?: DispatchErrorConfig;
+
+  /**
    * The pre-reply `deferReply` call failed before `run()` was invoked.
    * Defaults to no user-facing reply because the interaction state is unknown.
    * @default { level: "warn", reply: false }
