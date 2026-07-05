@@ -269,7 +269,18 @@ describe("command manager", () => {
         name_localizations: { fr: "ping" },
         description: "Ping command",
         description_localizations: { fr: "Commande ping" },
+        dm_permission: true,
+        nsfw: false,
         type: ApplicationCommandType.ChatInput,
+        options: [
+          {
+            type: ApplicationCommandOptionType.String,
+            name: "topic",
+            description: "Topic",
+            required: false,
+            autocomplete: false,
+          },
+        ],
       },
     ]);
 
@@ -279,6 +290,76 @@ describe("command manager", () => {
         name_localizations: { fr: "ping" },
         description: "Ping command",
         description_localizations: { fr: "Commande ping" },
+        type: ApplicationCommandType.ChatInput,
+        options: [
+          {
+            type: ApplicationCommandOptionType.String,
+            name: "topic",
+            description: "Topic",
+          },
+        ],
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(manager.logger.warning).not.toHaveBeenCalled();
+  });
+
+  it("does not warn for Discord default context menu fields", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "warn", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([
+      {
+        id: "cmd_1",
+        application_id: "app_1",
+        version: "1",
+        name: "avatar",
+        description: "",
+        dm_permission: true,
+        nsfw: false,
+        type: ApplicationCommandType.User,
+      },
+    ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "avatar",
+        type: ApplicationCommandType.User,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(manager.logger.warning).not.toHaveBeenCalled();
+  });
+
+  it("does not warn when explicit integration types match in a different order", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "warn", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([
+      {
+        id: "cmd_1",
+        application_id: "app_1",
+        version: "1",
+        name: "avatar",
+        description: "Avatar command",
+        integration_types: [1, 0],
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "avatar",
+        description: "Avatar command",
+        integration_types: [0, 1],
         type: ApplicationCommandType.ChatInput,
       },
     ]);

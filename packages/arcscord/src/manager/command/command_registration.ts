@@ -290,8 +290,8 @@ function commandsAreEquivalent(
   localCommand: RESTPostAPIApplicationCommandsJSONBody,
   existingCommand: ExistingCommand,
 ): boolean {
-  return stableStringify(normalizeCommandForCompare(localCommand))
-    === stableStringify(normalizeCommandForCompare(existingCommand));
+  return stableStringify(normalizeLocalCommandForCompare(localCommand))
+    === stableStringify(normalizeExistingCommandForCompare(existingCommand, localCommand));
 }
 
 function mapLocalCommands(
@@ -335,24 +335,57 @@ export function apiCommandToResolvedCommand(command: APIApplicationCommand): App
   };
 }
 
-function normalizeCommandForCompare(command: RESTPostAPIApplicationCommandsJSONBody | ExistingCommand): unknown {
+function normalizeLocalCommandForCompare(command: RESTPostAPIApplicationCommandsJSONBody): unknown {
+  const type = normalizedCommandType(command);
+
   return pruneEmptyValues({
-    type: normalizedCommandType(command),
+    type,
     name: command.name,
-    name_localizations: "name_localizations" in command ? command.name_localizations : undefined,
-    description: "description" in command ? command.description : undefined,
-    description_localizations: "description_localizations" in command
+    name_localizations: command.name_localizations,
+    description: type === ApplicationCommandType.ChatInput && "description" in command
+      ? command.description
+      : undefined,
+    description_localizations: type === ApplicationCommandType.ChatInput
       ? command.description_localizations
       : undefined,
     options: "options" in command ? command.options : undefined,
-    default_member_permissions: "default_member_permissions" in command
-      ? normalizePrimitive(command.default_member_permissions)
-      : undefined,
-    dm_permission: "dm_permission" in command ? command.dm_permission : undefined,
-    integration_types: "integration_types" in command ? command.integration_types : undefined,
-    contexts: "contexts" in command ? command.contexts : undefined,
-    nsfw: "nsfw" in command ? command.nsfw : undefined,
+    default_member_permissions: normalizePrimitive(command.default_member_permissions),
+    dm_permission: command.dm_permission,
+    integration_types: normalizeNumberArray(command.integration_types),
+    contexts: normalizeNumberArray(command.contexts),
+    nsfw: command.nsfw,
   });
+}
+
+function normalizeExistingCommandForCompare(
+  command: ExistingCommand,
+  localCommand: RESTPostAPIApplicationCommandsJSONBody,
+): unknown {
+  const type = normalizedCommandType(localCommand);
+
+  return pruneEmptyValues({
+    type: normalizedCommandType(command),
+    name: command.name,
+    name_localizations: command.name_localizations,
+    description: type === ApplicationCommandType.ChatInput ? command.description : undefined,
+    description_localizations: type === ApplicationCommandType.ChatInput
+      ? command.description_localizations
+      : undefined,
+    options: "options" in command ? command.options : undefined,
+    default_member_permissions: normalizePrimitive(command.default_member_permissions),
+    dm_permission: hasExplicitValue(localCommand, "dm_permission") ? command.dm_permission : undefined,
+    integration_types: hasExplicitValue(localCommand, "integration_types")
+      ? normalizeNumberArray(command.integration_types)
+      : undefined,
+    contexts: hasExplicitValue(localCommand, "contexts")
+      ? normalizeNumberArray(command.contexts)
+      : undefined,
+    nsfw: hasExplicitValue(localCommand, "nsfw") ? command.nsfw : undefined,
+  });
+}
+
+function hasExplicitValue<T extends object>(value: T, key: keyof T): boolean {
+  return Object.hasOwn(value, key) && value[key] !== undefined;
 }
 
 function normalizePrimitive(value: unknown): unknown {
@@ -360,6 +393,10 @@ function normalizePrimitive(value: unknown): unknown {
     return value.toString();
   }
   return value;
+}
+
+function normalizeNumberArray(value: readonly number[] | null | undefined): number[] | undefined {
+  return value ? [...value].sort((left, right) => left - right) : undefined;
 }
 
 function pruneEmptyValues(value: unknown): unknown {
@@ -382,6 +419,15 @@ function pruneEmptyValues(value: unknown): unknown {
       }
       if (entry && typeof entry === "object") {
         return Object.keys(entry).length > 0;
+      }
+      return true;
+    })
+    .filter(([key, entry]) => {
+      if ((key === "required" || key === "autocomplete" || key === "nsfw") && entry === false) {
+        return false;
+      }
+      if (key === "dm_permission" && entry === true) {
+        return false;
       }
       return true;
     });
