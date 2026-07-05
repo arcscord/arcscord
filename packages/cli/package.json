@@ -1,7 +1,8 @@
 {
   "name": "@arcscord/cli",
   "version": "1.0.0",
-  "description": "Arcscord cli",
+  "private": true,
+  "description": "Abandoned internal Arcscord CLI prototype",
   "author": "Arcoz0308",
   "license": "MIT",
   "homepage": "https://arcscord.dev/",

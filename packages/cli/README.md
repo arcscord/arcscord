@@ -1,16 +1,16 @@
 # @arcscord/cli
 
 > [!WARNING]
-> **This package is frozen and no longer actively developed.**
+> **This package is abandoned, unpublished, and not part of the supported Arcscord API.**
 >
-> Arcscord is a framework that works with any project structure, so I decided not to finish the CLI and to freeze the package before its first release. If you find this package interesting and would like to continue its development, feel free to open an issue.
+> Arcscord is intended to work with any project structure, so this CLI no longer matches the project's direction. The code remains in the repository for reference, but the package was never published to npm and should not be used for new projects.
+>
+> Use the maintained scaffolder instead:
 >
 > ```sh
 > pnpm create arcscord-bot
-> # or: npm create arcscord-bot / yarn create arcscord-bot
+> # or: npm create arcscord-bot / yarn create arcscord-bot / bun create arcscord-bot
 > ```
->
-> 
 
 ## Links
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/cli)
