@@ -1,5 +1,5 @@
 import type { GatewayIntentBits } from "discord-api-types/v10";
-import type { ArcClient } from "#/base";
+import type { ArcClient } from "#/base/client/client.class";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
 import { IntentsBitField } from "discord.js";
 import { vi } from "vitest";
