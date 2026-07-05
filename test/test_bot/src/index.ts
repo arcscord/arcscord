@@ -28,23 +28,21 @@ const client = new ArcClient(process.env.TOKEN as string, {
       },
       enabled: true,
     },
+    command: {
+      registration: {
+        global: {
+          commands: "put",
+        },
+      },
+    },
   },
   applicationId: process.env.APPLICATION_ID as string,
 });
 
 client.loadHandlers(handlers);
 
-async function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 client.on("clientReady", async () => {
-  await sleep(1000);
-  const [err, count] = await client.commandManager.deleteUnloadedCommands();
-  if (err) {
-    return client.logger.fatalError(err);
-  }
-  client.logger.info(`Deleted ${count} unloaded commands`);
+  client.logger.info(`The client is ready!`);
 });
 
 void client.login();
