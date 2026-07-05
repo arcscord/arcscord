@@ -17,6 +17,13 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
+      label: "Migration",
+      items: [
+        "guide/migration/from-discordjs",
+      ],
+    },
+    {
+      type: "category",
       label: "Commands",
       items: [
         "guide/commands/slash",

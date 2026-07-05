@@ -6,6 +6,32 @@ sidebar_position: 7
 
 The built-in logger (`ArcLogger`) works out of the box with no configuration: `console` output, human-readable in development, JSON in production. Every level accepts an optional structured `meta` object, and the whole thing is swappable — see [Bring your own logger](#bring-your-own-logger) below.
 
+## Pretty vs JSON output
+
+```ts
+import { ArcLogger } from "arcscord";
+
+const logger = new ArcLogger("demo");
+logger.info("server started");
+logger.warn("cache miss, falling back to database");
+logger.error("failed to reach the database");
+```
+
+`format: "pretty"` (default) — colorized, human-readable:
+
+```
+[2026-07-05 20:26:46] demo [INFO]  server started
+[2026-07-05 20:26:46] demo [WARN]  cache miss, falling back to database
+[2026-07-05 20:26:46] demo [ERROR] failed to reach the database
+```
+
+`format: "json"` — one object per line, for log processors:
+
+```json
+{"time":"2026-07-05T18:26:46.143Z","level":"info","process":"demo","message":"server started"}
+{"time":"2026-07-05T18:26:46.143Z","level":"warn","process":"demo","message":"cache miss, falling back to database"}
+```
+
 ## Structured fields (`meta`)
 
 Every method on `LoggerInterface` accepts an optional `meta` object as its last argument, so contextual fields don't have to be baked into the message string:
@@ -19,7 +45,11 @@ logger.info("Command executed", {
 });
 ```
 
-In `pretty` format this renders as the message followed by short `key : value` lines. In `json` format the fields are merged under a `meta` key, so log processors can filter/aggregate on them instead of parsing the message text.
+In `pretty` format this renders as the message followed by short `key : value` lines. In `json` format the fields are merged under a `meta` key, so log processors can filter/aggregate on them instead of parsing the message text:
+
+```json
+{"time":"2026-07-05T18:26:46.143Z","level":"info","process":"demo","message":"Command executed","meta":{"command":"ping","interactionId":"1234567890","guildId":"42","durationMs":12}}
+```
 
 ## Scoped context with `child()`
 

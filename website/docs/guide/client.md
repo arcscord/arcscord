@@ -6,6 +6,8 @@ sidebar_position: 2
 
 `ArcClient` extends [discord.js `Client`](https://discord.js.org/docs/packages/discord.js/main/Client:Class). All discord.js options, properties, events, and REST methods are available on it.
 
+Porting an existing discord.js bot? See [Migrate from discord.js](/guide/migration/from-discordjs) for side-by-side examples.
+
 ## Constructor
 
 ```ts

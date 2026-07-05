@@ -41,6 +41,44 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadEvents([messageEvent]);
 ```
 
+## Common examples
+
+### `clientReady`
+
+```ts
+import { createEvent } from "arcscord";
+
+export const readyEvent = createEvent({
+  event: "clientReady",
+  options: { once: true },
+  run: (ctx) => {
+    ctx.client.logger.info(
+      `Logged in as ${ctx.client.user?.tag} — watching ${ctx.client.guilds.cache.size} guild(s)`,
+    );
+    return ctx.ok(true);
+  },
+});
+```
+
+### `messageCreate`
+
+```ts
+import { createEvent } from "arcscord";
+
+export const messageCreateEvent = createEvent({
+  event: "messageCreate",
+  name: "messagePrefixLogger",
+  run: (ctx, message) => {
+    if (message.author.bot) {
+      return ctx.ok(true);
+    }
+
+    ctx.client.logger.debug(`message from ${message.author.username}: ${message.content}`);
+    return ctx.ok(true);
+  },
+});
+```
+
 ## Loading events
 
 Use `client.loadEvents` when you already have an array of event handlers:

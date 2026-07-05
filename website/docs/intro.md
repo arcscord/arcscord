@@ -1,6 +1,6 @@
 ---
 sidebar_position: 1
-description: Arcscord is a TypeScript-first toolkit for building Discord bots — core framework, middleware, and error-handling utilities.
+description: Find the right starting point in the Arcscord guide — installation, migrating from discord.js, or the API reference.
 keywords:
   - arcscord
   - discord bot
@@ -10,15 +10,15 @@ keywords:
 
 # Arcscord
 
-Arcscord is a TypeScript-first toolkit for building Discord bots. The monorepo contains the core framework, middleware helpers, and error utilities.
+Welcome to the Arcscord guide. Pick where to start:
 
-Use the guide for workflows and examples. Use the API reference for generated signatures from source comments.
-
-Project documentation is available at [https://arcscord.dev/](https://arcscord.dev/).
+- **New to Discord bots?** Start with [Installation](/guide/installation).
+- **Already have a discord.js bot?** See [Migrate from discord.js](/guide/migration/from-discordjs).
+- **Looking for generated signatures?** Use the [API reference](/api).
 
 ## Packages
 
-- `arcscord`: core Discord bot framework.
-- `@arcscord/middleware`: reusable middleware for commands and components.
-- `@arcscord/error`: result-style error handling helpers.
-- `@arcscord/better-error`: richer `Error` class with debug context.
+- [`arcscord`](/packages/arcscord): core Discord bot framework.
+- [`@arcscord/middleware`](/packages/middleware): reusable middleware for commands and components.
+- [`@arcscord/error`](/packages/error): result-style error handling helpers.
+- [`@arcscord/better-error`](/packages/better-error): richer `Error` class with debug context.
