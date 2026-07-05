@@ -10,9 +10,11 @@ import type {
   UserSelectMenuInteraction,
 } from "discord.js";
 import type { ArcClient, ComponentContext } from "#/base";
+import type { ComponentRunReturn } from "#/base/components/interaction/component.type";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
 import type { ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import type { MaybePromise } from "#/utils/type/util.type";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
@@ -102,13 +104,20 @@ export class ComponentManager extends BaseManager {
       this.components.modal.set(compiledRoute.canonical, component);
     }
     else {
-      // @ts-expect-error fix error with others component types
-      this.components[component.type].set(compiledRoute.canonical, component);
+      this.setComponent(component.type, compiledRoute.canonical, component);
     }
 
     this.trace(
       `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
     );
+  }
+
+  private setComponent<K extends Exclude<keyof ComponentList, "modal">>(
+    type: K,
+    canonical: string,
+    component: ComponentList[K] extends Map<string, infer H> ? H : never,
+  ): void {
+    (this.components[type] as unknown as Map<string, typeof component>).set(canonical, component);
   }
 
   /**
@@ -423,8 +432,10 @@ export class ComponentManager extends BaseManager {
 
   private async executeComponent(component: ComponentHandler, context: ComponentContext, start: number): Promise<void> {
     try {
-      // @ts-expect-error fix error with others context types
-      const rawResult = await component.run(context);
+      // `component.run` and `context` are each unions correlated by construction
+      // (see `createContext`'s exhaustive switch), but that link isn't provable
+      // statically once both are widened back to their general union types here.
+      const rawResult = await (component.run as (ctx: ComponentContext) => MaybePromise<ComponentRunReturn>)(context);
       return this.options.resultHandler({
         status: "returned",
         result: normalizeRunReturn(rawResult),

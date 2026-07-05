@@ -7,7 +7,7 @@ import type {
   CommandInteraction,
 } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
-import type { CommandContext } from "#/base/command";
+import type { CommandContext, PartialCommandDefinitionForSlash, SlashCommandContextBuilderOptions } from "#/base/command";
 import type {
   Command,
   SlashWithSubsCommandDefinition,
@@ -628,10 +628,13 @@ export class CommandManager
           );
         }
 
-        context = new SlashCommandContext(command, interaction, {
+        context = new SlashCommandContext<AnySubCommandHandler>(command, interaction, {
           resolvedName: infos.resolvedName,
-          // @ts-expect-error fix generic bug
-          options,
+          // `options` is `ContextOptions<OptionsList> | null` here, but `T` can only
+          // be pinned to the erased storage type (`AnySubCommandHandler`), whose
+          // `options` field is optional — so `ContextOptionsDef<T>` collapses to
+          // `null`. The real shape is guaranteed correct at runtime by `parseOptions`.
+          options: options as SlashCommandContextBuilderOptions<AnySubCommandHandler>["options"],
           client: this.client,
           locale,
         });
@@ -650,10 +653,14 @@ export class CommandManager
           );
         }
 
-        context = new SlashCommandContext(command, interaction, {
+        context = new SlashCommandContext<PartialCommandDefinitionForSlash>(command, interaction, {
           resolvedName: infos.resolvedName,
-          // @ts-expect-error fix generic bug
-          options,
+          // Same erasure boundary as above: `command` is `AnyCommandHandler`, whose
+          // `slash` is optional, so it can't be used directly as `T` (fails the
+          // generic constraint); `PartialCommandDefinitionForSlash` is the closest
+          // valid `T`, and its `options` is likewise optional, so `ContextOptionsDef<T>`
+          // collapses to `null` even though the real value is non-null at runtime.
+          options: options as SlashCommandContextBuilderOptions<PartialCommandDefinitionForSlash>["options"],
           client: this.client,
           locale,
         });

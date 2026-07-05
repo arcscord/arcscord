@@ -2,6 +2,7 @@ import type { ComponentType } from "discord-api-types/v10";
 import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 import type { ComponentRunResult } from "#/base/components/interaction/component.type";
 import type {
+  AnyStringSelectMenuComponentHandler,
   ButtonComponentHandler,
   ChannelSelectMenuComponentHandler,
   ComponentHandler,
@@ -29,7 +30,7 @@ export type OldComponentList = {
 
 export type ComponentList = {
   [ComponentType.Button]: Map<string, ButtonComponentHandler>;
-  [ComponentType.StringSelect]: Map<string, StringSelectMenuComponentHandler>;
+  [ComponentType.StringSelect]: Map<string, AnyStringSelectMenuComponentHandler>;
   [ComponentType.UserSelect]: Map<string, UserSelectMenuComponentHandler>;
   [ComponentType.RoleSelect]: Map<string, RoleSelectMenuComponentHandler>;
   [ComponentType.MentionableSelect]: Map<string, MentionableSelectMenuComponentHandler>;
