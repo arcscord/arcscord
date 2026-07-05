@@ -24,7 +24,12 @@ export type MockClientOptions = {
   enableInternalTrace?: boolean;
 };
 
-export function createMockClient(options: MockClientOptions = {}): ArcClient {
+export type MockArcClient = ArcClient & {
+  _listenersMap: Map<string, ((...args: unknown[]) => void | Promise<void>)[]>;
+  _emitMock: (event: string, ...args: unknown[]) => Promise<void>;
+};
+
+export function createMockClient(options: MockClientOptions = {}): MockArcClient {
   const listenersMap = new Map<string, ((...args: unknown[]) => void | Promise<void>)[]>();
 
   const client = {
@@ -82,10 +87,7 @@ export function createMockClient(options: MockClientOptions = {}): ArcClient {
         await listener(...args);
       }
     },
-  } as unknown as ArcClient & {
-    _listenersMap: Map<string, ((...args: unknown[]) => void | Promise<void>)[]>;
-    _emitMock: (event: string, ...args: unknown[]) => Promise<void>;
-  };
+  } as unknown as MockArcClient;
 
   return client;
 }

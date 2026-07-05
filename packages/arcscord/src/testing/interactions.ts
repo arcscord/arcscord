@@ -2,6 +2,7 @@ import type { ApplicationCommandOptionType } from "discord-api-types/v10";
 import type {
   AutocompleteInteraction,
   ButtonInteraction,
+  Channel,
   ChannelSelectMenuInteraction,
   CommandInteraction,
   Guild,
@@ -17,7 +18,7 @@ import type {
   User,
   UserSelectMenuInteraction,
 } from "discord.js";
-import { ApplicationCommandType, InteractionContextType } from "discord-api-types/v10";
+import { ApplicationCommandType, ComponentType, InteractionContextType } from "discord-api-types/v10";
 import { PermissionsBitField } from "discord.js";
 import { vi } from "vitest";
 
@@ -85,11 +86,15 @@ function buildCommandInteractionBase(
     context: InteractionContextType.Guild,
     authorizingIntegrationOwners: {},
     locale: "en-US",
+    isCommand: () => true,
+    isAutocomplete: () => false,
     isChatInputCommand: () => options.isChatInputCommand,
     isUserContextMenuCommand: () => options.isUserContextMenuCommand,
     isMessageContextMenuCommand: () => options.isMessageContextMenuCommand,
     isRepliable: () => true,
-    reply: vi.fn(),
+    reply: vi.fn(async () => {}),
+    editReply: vi.fn(async () => {}),
+    deferReply: vi.fn(async () => {}),
     toJSON: () => ({}),
   };
 }
@@ -105,12 +110,21 @@ function buildComponentInteractionBase(options: MockComponentInteractionOptions)
       ? new PermissionsBitField(options.memberPermissions)
       : null,
     user: createMockUser(options.user),
-    reply: async () => {},
-    editReply: async () => {},
-    deferReply: async () => {},
-    deferUpdate: async () => {},
-    showModal: async () => {},
-    update: async () => {},
+    reply: vi.fn(async () => {}),
+    editReply: vi.fn(async () => {}),
+    deferReply: vi.fn(async () => {}),
+    deferUpdate: vi.fn(async () => {}),
+    showModal: vi.fn(async () => {}),
+    update: vi.fn(async () => {}),
+    isRepliable: () => true,
+    isMessageComponent: () => true,
+    isModalSubmit: () => false,
+    isButton: () => false,
+    isStringSelectMenu: () => false,
+    isUserSelectMenu: () => false,
+    isRoleSelectMenu: () => false,
+    isMentionableSelectMenu: () => false,
+    isChannelSelectMenu: () => false,
   };
 }
 
@@ -144,6 +158,8 @@ export function createMockCommandInteraction(
     appPermissions: new PermissionsBitField(options.appPermissions ?? []),
     guild: options.guild ?? null,
     inGuild: () => options.guild !== null && options.guild !== undefined,
+    isCommand: () => true,
+    isAutocomplete: () => false,
     isChatInputCommand: () => kind === "chatInput",
     isMessageContextMenuCommand: () => kind === "messageContextMenu",
     isUserContextMenuCommand: () => kind === "userContextMenu",
@@ -250,6 +266,7 @@ export function createMockButtonInteraction(
 ): ButtonInteraction {
   return {
     ...buildComponentInteractionBase(options),
+    isButton: () => true,
     message: options.message ?? { id: "msg_1", components: [] },
   } as unknown as ButtonInteraction;
 }
@@ -267,6 +284,7 @@ export function createMockStringSelectMenuInteraction(
 ): StringSelectMenuInteraction {
   return {
     ...buildComponentInteractionBase(options),
+    isStringSelectMenu: () => true,
     values: options.values ?? [],
   } as unknown as StringSelectMenuInteraction;
 }
@@ -281,7 +299,8 @@ export function createMockUserSelectMenuInteraction(
 ): UserSelectMenuInteraction {
   return {
     ...buildComponentInteractionBase(options),
-    users: {},
+    isUserSelectMenu: () => true,
+    users: options.users ?? [],
     members: {},
   } as unknown as UserSelectMenuInteraction;
 }
@@ -296,7 +315,8 @@ export function createMockRoleSelectMenuInteraction(
 ): RoleSelectMenuInteraction {
   return {
     ...buildComponentInteractionBase(options),
-    roles: {},
+    isRoleSelectMenu: () => true,
+    roles: options.roles ?? [],
   } as unknown as RoleSelectMenuInteraction;
 }
 
@@ -311,13 +331,16 @@ export function createMockMentionableSelectMenuInteraction(
 ): MentionableSelectMenuInteraction {
   return {
     ...buildComponentInteractionBase(options),
-    users: {},
-    roles: {},
+    isMentionableSelectMenu: () => true,
+    users: options.users ?? [],
+    roles: options.roles ?? [],
     members: {},
   } as unknown as MentionableSelectMenuInteraction;
 }
 
-export type MockChannelSelectMenuInteractionOptions = MockComponentInteractionOptions;
+export type MockChannelSelectMenuInteractionOptions = MockComponentInteractionOptions & {
+  channels?: Channel[];
+};
 
 /** Channel select menu interaction mock. */
 export function createMockChannelSelectMenuInteraction(
@@ -325,7 +348,8 @@ export function createMockChannelSelectMenuInteraction(
 ): ChannelSelectMenuInteraction {
   return {
     ...buildComponentInteractionBase(options),
-    channels: {},
+    isChannelSelectMenu: () => true,
+    channels: options.channels ?? [],
   } as unknown as ChannelSelectMenuInteraction;
 }
 
@@ -337,11 +361,21 @@ export type MockModalSubmitInteractionOptions = MockComponentInteractionOptions 
 export function createMockModalSubmitInteraction(
   options: MockModalSubmitInteractionOptions = {},
 ): ModalSubmitInteraction {
+  const rawFields = new Map(
+    Object.entries(options.fields ?? {}).map(([customId, value]) => [
+      customId,
+      { customId, value, type: ComponentType.TextInput },
+    ]),
+  );
+
   return {
     ...buildComponentInteractionBase(options),
+    isMessageComponent: () => false,
+    isModalSubmit: () => true,
     fields: {
+      fields: rawFields,
       getTextInputValue: (id: string) => options.fields?.[id] ?? "",
-      getField: () => null,
+      getField: (id: string) => rawFields.get(id) ?? null,
     },
     message: null,
   } as unknown as ModalSubmitInteraction;
@@ -396,6 +430,8 @@ export type MockAutocompleteInteractionOptions = {
   commandName?: string;
   user?: MockUserOptions;
   focusedOption?: MockAutocompleteFocusedOption;
+  getSubcommand?: () => string | null;
+  getSubcommandGroup?: () => string | null;
 };
 
 /**
@@ -423,10 +459,15 @@ export function createMockAutocompleteInteraction(options: MockAutocompleteInter
     },
     guild: null,
     locale: "en-US",
+    isCommand: () => false,
+    isAutocomplete: () => true,
+    isChatInputCommand: () => false,
     options: {
       getFocused: (full: boolean) => full
         ? { name: focused.name, value: focused.value, type: focused.type }
         : focused.value,
+      getSubcommand: options.getSubcommand ?? (() => null),
+      getSubcommandGroup: options.getSubcommandGroup ?? (() => null),
     },
     respond,
     user: createMockUser(options.user),
