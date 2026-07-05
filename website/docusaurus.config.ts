@@ -105,6 +105,7 @@ const config: Config = {
         { to: "/api", label: "API", position: "left" },
         { href: "https://discord.gg/4geBanVWGR", label: "Discord", position: "right" },
         { href: "https://github.com/arcscord/arcscord", label: "GitHub", position: "right" },
+        { href: "https://github.com/arcscord/arcscord/releases", label: "Changelog", position: "right" },
       ],
     },
     prism: {

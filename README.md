@@ -5,6 +5,7 @@
 [![GitHub](https://img.shields.io/github/license/arcscord/arcscord?logo=github&style=flat)](https://github.com/arcscord/arcscord/blob/main/LICENSE)
 [![Discord Server](https://img.shields.io/discord/1012097557532528791?color=blue&label=Discord&logo=discord&style=shield)](https://discord.gg/4geBanVWGR)
 [![npm version](https://img.shields.io/npm/v/arcscord?color=green&label=npm&logo=npm)](https://www.npmjs.com/package/arcscord)
+[![GitHub Release](https://img.shields.io/github/v/release/arcscord/arcscord?label=release&logo=github)](https://github.com/arcscord/arcscord/releases)
 
 **Arcscord simplifies creating Discord bots with TypeScript and provides utility packages.**
 

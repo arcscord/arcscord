@@ -34,6 +34,10 @@ await client.waitReady();
 await client.loadCommands([pingCommand]);
 ```
 
+## Testing
+
+`arcscord/testing` provides mock client, context, and interaction builders for unit tests. This subpath is **experimental** — its API may change without following semver.
+
 ## Links
 
 - [Documentation](https://arcscord.dev/)
