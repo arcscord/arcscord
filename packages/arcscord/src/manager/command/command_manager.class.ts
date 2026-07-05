@@ -640,7 +640,15 @@ export class CommandManager
     let list = command.subCommands;
     const subCommandGroupName = interaction.options.getSubcommandGroup(false);
     if (subCommandGroupName && command.subCommandsGroups) {
-      list = command.subCommandsGroups[subCommandGroupName].subCommands;
+      const group = command.subCommandsGroups[subCommandGroupName];
+      if (!group) {
+        return error(
+          new BaseError({
+            message: `no subCommand group found for ${subCommandGroupName} in command ${command.name}`,
+          }),
+        );
+      }
+      list = group.subCommands;
     }
 
     const cmd = list?.find(cmd => cmd.name === subCommandName);
