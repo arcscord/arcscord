@@ -116,6 +116,296 @@ describe("command manager", () => {
     ]);
   });
 
+  it("creates or updates global commands without deleting unused commands in create mode", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "create", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get)
+      .mockResolvedValueOnce([
+        {
+          id: "cmd_1",
+          application_id: "app_1",
+          version: "1",
+          name: "ping",
+          description: "Old ping command",
+          type: ApplicationCommandType.ChatInput,
+        },
+        {
+          id: "cmd_unused",
+          application_id: "app_1",
+          version: "1",
+          name: "old",
+          description: "Unused command",
+          type: ApplicationCommandType.ChatInput,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: "cmd_1",
+          application_id: "app_1",
+          version: "2",
+          name: "ping",
+          description: "Ping command",
+          type: ApplicationCommandType.ChatInput,
+        },
+        {
+          id: "cmd_2",
+          application_id: "app_1",
+          version: "1",
+          name: "profile",
+          type: ApplicationCommandType.User,
+        },
+        {
+          id: "cmd_unused",
+          application_id: "app_1",
+          version: "1",
+          name: "old",
+          description: "Unused command",
+          type: ApplicationCommandType.ChatInput,
+        },
+      ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "ping",
+        description: "Ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+      {
+        name: "profile",
+        type: ApplicationCommandType.User,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(client.rest.patch).toHaveBeenCalledWith(
+      Routes.applicationCommand("app_1", "cmd_1"),
+      {
+        body: {
+          name: "ping",
+          description: "Ping command",
+          type: ApplicationCommandType.ChatInput,
+        },
+      },
+    );
+    expect(client.rest.post).toHaveBeenCalledWith(
+      Routes.applicationCommands("app_1"),
+      {
+        body: {
+          name: "profile",
+          type: ApplicationCommandType.User,
+        },
+      },
+    );
+    expect(client.rest.delete).not.toHaveBeenCalled();
+    expect(client.rest.put).not.toHaveBeenCalled();
+  });
+
+  it("warns about missing, changed, and unused commands without mutating in warn mode", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "warn", unused: "warn" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([
+      {
+        id: "cmd_1",
+        application_id: "app_1",
+        version: "1",
+        name: "ping",
+        description: "Old ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+      {
+        id: "cmd_unused",
+        application_id: "app_1",
+        version: "1",
+        name: "old",
+        description: "Unused command",
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "ping",
+        description: "Ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+      {
+        name: "profile",
+        type: ApplicationCommandType.User,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(manager.logger.warning).toHaveBeenCalledTimes(3);
+    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("differs"));
+    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("missing"));
+    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("Unused"));
+    expect(client.rest.put).not.toHaveBeenCalled();
+    expect(client.rest.post).not.toHaveBeenCalled();
+    expect(client.rest.patch).not.toHaveBeenCalled();
+    expect(client.rest.delete).not.toHaveBeenCalled();
+  });
+
+  it("does not warn when localized command payloads match explicitly", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "warn", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([
+      {
+        id: "cmd_1",
+        application_id: "app_1",
+        version: "1",
+        name: "ping",
+        name_localizations: { fr: "ping" },
+        description: "Ping command",
+        description_localizations: { fr: "Commande ping" },
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "ping",
+        name_localizations: { fr: "ping" },
+        description: "Ping command",
+        description_localizations: { fr: "Commande ping" },
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(manager.logger.warning).not.toHaveBeenCalled();
+  });
+
+  it("warns when localized command payloads differ", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "warn", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([
+      {
+        id: "cmd_1",
+        application_id: "app_1",
+        version: "1",
+        name: "ping",
+        name_localizations: { fr: "ping" },
+        description: "Ping command",
+        description_localizations: { fr: "Ancienne commande ping" },
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    const result = await manager.pushGlobalCommands([
+      {
+        name: "ping",
+        name_localizations: { fr: "ping" },
+        description: "Ping command",
+        description_localizations: { fr: "Commande ping" },
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(manager.logger.warning).toHaveBeenCalledOnce();
+    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("differs"));
+  });
+
+  it("deletes unused guild commands when unused mode is delete without overwriting the guild scope", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        guild: { commands: "ignore", unused: "delete" },
+      },
+    });
+    vi.mocked(client.rest.get)
+      .mockResolvedValueOnce([
+        {
+          id: "cmd_1",
+          application_id: "app_1",
+          guild_id: "guild_1",
+          version: "1",
+          name: "ping",
+          description: "Ping command",
+          type: ApplicationCommandType.ChatInput,
+        },
+        {
+          id: "cmd_unused",
+          application_id: "app_1",
+          guild_id: "guild_1",
+          version: "1",
+          name: "old",
+          description: "Unused command",
+          type: ApplicationCommandType.ChatInput,
+        },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: "cmd_1",
+          application_id: "app_1",
+          guild_id: "guild_1",
+          version: "1",
+          name: "ping",
+          description: "Ping command",
+          type: ApplicationCommandType.ChatInput,
+        },
+      ]);
+
+    const result = await manager.pushGuildCommands("guild_1", [
+      {
+        name: "ping",
+        description: "Ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    expect(result[0]).toBeNull();
+    expect(client.rest.delete).toHaveBeenCalledWith(
+      Routes.applicationGuildCommand("app_1", "guild_1", "cmd_unused"),
+    );
+    expect(client.rest.put).not.toHaveBeenCalled();
+  });
+
+  it("uses different registration settings for global and guild scopes", async () => {
+    const { client } = createMockClientWithManager();
+    const manager = new CommandManager(client, {
+      registration: {
+        global: { commands: "ignore", unused: "ignore" },
+        guild: { commands: "warn", unused: "ignore" },
+      },
+    });
+    vi.mocked(client.rest.get).mockResolvedValue([]);
+
+    await manager.pushGlobalCommands([
+      {
+        name: "ping",
+        description: "Ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+    await manager.pushGuildCommands("guild_1", [
+      {
+        name: "ping",
+        description: "Ping command",
+        type: ApplicationCommandType.ChatInput,
+      },
+    ]);
+
+    expect(manager.logger.warning).toHaveBeenCalledOnce();
+    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("missing"));
+  });
+
   it("dispatches autocomplete interactions to the focused option handler", async () => {
     const { manager } = createMockClientWithManager();
     const animeHandler = vi.fn(ctx => ctx.sendChoices(["Naruto"]));

@@ -53,6 +53,52 @@ await client.loadCommands(
 );
 ```
 
+## Registration strategy
+
+Command registration is configurable per scope from the command manager options.
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  applicationId: process.env.DISCORD_APPLICATION_ID!,
+  managers: {
+    command: {
+      registration: {
+        global: {
+          commands: "put",
+          unused: "ignore",
+        },
+        guild: {
+          commands: "create",
+          unused: "warn",
+        },
+      },
+    },
+  },
+});
+```
+
+The `commands` option controls how local command definitions are pushed:
+
+| Mode | Behavior |
+| --- | --- |
+| `put` | Bulk overwrite the full scope. This is the default and removes commands that are not in the local list. |
+| `create` | Create or update every local command one by one, without deleting unused commands. |
+| `warn` | Compare local commands with Discord and log warnings for missing or different commands. Discord is not modified. |
+| `ignore` | Do not create, update, or warn about local commands. |
+
+The `unused` option controls Discord commands that are missing from the local command list:
+
+| Mode | Behavior |
+| --- | --- |
+| `delete` | Delete unused commands from Discord. |
+| `warn` | Log warnings for unused commands, without deleting them. |
+| `ignore` | Do nothing for unused commands. This is the default. |
+
+`commands: "put"` uses Discord's bulk overwrite endpoint, so unused commands are removed by Discord even when `unused` is `warn` or `ignore`.
+
+Diff checks include command names, descriptions, options, and localization dictionaries such as `name_localizations` and `description_localizations`.
+
 ## Loading handlers
 
 `loadHandlers` can load events, components, and commands together. If `applicationId` is configured, command loading does not wait for `clientReady`.

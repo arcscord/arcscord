@@ -1,11 +1,8 @@
 import type { Result } from "@arcscord/error";
 import type {
-  APIApplicationCommand,
   RESTPostAPIApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import type {
-  ApplicationCommand,
-  ApplicationCommandDataResolvable,
   AutocompleteInteraction,
   CommandInteraction,
 } from "discord.js";
@@ -23,9 +20,10 @@ import type {
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
 } from "#/manager/command/command_manager.type";
+import type { ApplicationCommandRegistration } from "./command_registration";
 import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
-import { ApplicationCommandType, Routes } from "discord-api-types/v10";
+import { ApplicationCommandType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
 import {
   AutocompleteContext,
@@ -45,10 +43,10 @@ import { BaseManager } from "#/base/manager/manager.class";
 import { CommandError, CommandValidationError, validateCommands } from "#/utils";
 import { InternalError } from "#/utils/error/class/internal_error";
 import { applyDiagnosticLevel, normalizeRunReturn } from "#/utils/error/run_normalize";
-
-export type ApplicationCommandRegistration = Pick<ApplicationCommand, "id" | "name" | "type"> & {
-  guildId: string | null;
-};
+import {
+  normalizeCommandRegistrationConfig,
+  registerCommands,
+} from "./command_registration";
 
 /**
  * The `CommandManager` class is responsible for managing commands;
@@ -67,6 +65,7 @@ export class CommandManager
       resultHandler: this.resultHandler.bind(this),
       dispatchDiagnostics: {},
       ...options,
+      registration: normalizeCommandRegistrationConfig(options?.registration),
     };
 
     this.client.on("interactionCreate", (interaction) => {
@@ -294,50 +293,15 @@ export class CommandManager
    * @return A promise that resolves to a result object containing an array of globally registered application commands or an error.
    */
   async pushGlobalCommands(
-    commands: ApplicationCommandDataResolvable[],
+    commands: RESTPostAPIApplicationCommandsJSONBody[],
   ): Promise<Result<ApplicationCommandRegistration[], InternalError>> {
-    if (!this.client.application) {
-      if (!this.client.arcOptions.applicationId) {
-        return error(new InternalError("No application found in client"));
-      }
-
-      try {
-        const data = await this.client.rest.put(
-          Routes.applicationCommands(this.client.arcOptions.applicationId),
-          {
-            body: commands,
-          },
-        ) as APIApplicationCommand[];
-        this.trace(
-          `Registered ${commands.length} global commands`,
-        );
-        return ok(data.map(cmd => this.apiCommandToResolvedCommand(cmd)));
-      }
-      catch (e) {
-        return error(
-          new InternalError({
-            message: "Failed to load commands globally",
-            originalError: anyToError(e),
-          }),
-        );
-      }
-    }
-
-    try {
-      const data = await this.client.application.commands.set(commands);
-      this.trace(
-        `Registered ${commands.length} global commands`,
-      );
-      return ok(data.map(cmd => cmd));
-    }
-    catch (e) {
-      return error(
-        new InternalError({
-          message: "Failed to load commands globally",
-          originalError: anyToError(e),
-        }),
-      );
-    }
+    return await registerCommands({
+      client: this.client,
+      logger: this.logger,
+      scope: "global",
+      config: this.options.registration.global,
+      commands,
+    });
   }
 
   /**
@@ -351,45 +315,14 @@ export class CommandManager
     guildId: string,
     commands: RESTPostAPIApplicationCommandsJSONBody[],
   ): Promise<Result<ApplicationCommandRegistration[], InternalError>> {
-    const guild = this.client.guilds.cache.get(guildId);
-    if (!guild) {
-      if (!this.client.arcOptions.applicationId) {
-        return error(new InternalError("No application found in client"));
-      }
-
-      try {
-        const data = await this.client.rest.put(
-          Routes.applicationGuildCommands(this.client.arcOptions.applicationId, guildId),
-          {
-            body: commands,
-          },
-        ) as APIApplicationCommand[];
-        this.trace(
-          `Registered ${commands.length} guild commands for guild ${guildId}`,
-        );
-        return ok(data.map(cmd => this.apiCommandToResolvedCommand(cmd)));
-      }
-      catch (e) {
-        return error(new InternalError({
-          message: `failed to load commands for guild ${guildId}`,
-          originalError: anyToError(e),
-        }));
-      }
-    }
-
-    try {
-      const data = await guild.commands.set(commands);
-      this.trace(
-        `Registered ${commands.length} guild commands for guild ${guildId}`,
-      );
-      return ok(data.map(cmd => cmd));
-    }
-    catch (e) {
-      return error(new InternalError({
-        message: `failed to load commands for guild ${guildId}`,
-        originalError: anyToError(e),
-      }));
-    }
+    return await registerCommands({
+      client: this.client,
+      logger: this.logger,
+      scope: "guild",
+      config: this.options.registration.guild,
+      commands,
+      guildId,
+    });
   }
 
   /**
@@ -567,15 +500,6 @@ export class CommandManager
       return `g_${apiCommand.id}_${apiCommand.name}`;
     }
     return `${apiCommand.id}_${apiCommand.name}`;
-  }
-
-  private apiCommandToResolvedCommand(command: APIApplicationCommand): ApplicationCommandRegistration {
-    return {
-      id: command.id,
-      name: command.name,
-      type: command.type,
-      guildId: command.guild_id ?? null,
-    };
   }
 
   private getCommand(interaction: CommandInteraction | AutocompleteInteraction): Result<

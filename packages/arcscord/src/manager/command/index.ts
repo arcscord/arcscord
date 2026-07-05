@@ -1,5 +1,4 @@
 export { CommandManager } from "./command_manager.class";
-export type { ApplicationCommandRegistration } from "./command_manager.class";
 export type {
   CommandManagerOptions,
   CommandResultHandler,
@@ -8,3 +7,13 @@ export type {
   CommandReturnedHandlerInfos,
   CommandThrownHandlerInfos,
 } from "./command_manager.type";
+export type {
+  ApplicationCommandRegistration,
+  CommandRegistrationCommandMode,
+  CommandRegistrationConfig,
+  CommandRegistrationScope,
+  CommandRegistrationScopeConfig,
+  CommandRegistrationUnusedMode,
+  RequiredCommandRegistrationConfig,
+  RequiredCommandRegistrationScopeConfig,
+} from "./command_registration";

@@ -1,5 +1,6 @@
 import type { CommandInteraction } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, CommandContext, CommandRunResult } from "#/base";
+import type { CommandRegistrationConfig } from "#/manager/command/command_registration";
 import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
 
 /**
@@ -118,6 +119,14 @@ export type CommandManagerOptions = {
    * @default logs errors and sends `client.getErrorMessage(...)` to the user
    */
   resultHandler?: CommandResultHandler;
+
+  /**
+   * Controls how loaded commands are synchronized with Discord per scope.
+   *
+   * By default Arcscord keeps the previous behavior and bulk overwrites the
+   * target scope when commands are loaded.
+   */
+  registration?: CommandRegistrationConfig;
 
   /**
    * Per-case configuration for dispatch errors that occur before `run()` is

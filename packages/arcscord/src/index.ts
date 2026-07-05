@@ -322,6 +322,13 @@ export {
 } from "./manager";
 export type {
   ApplicationCommandRegistration,
+  CommandRegistrationCommandMode,
+  CommandRegistrationConfig,
+  CommandRegistrationScope,
+  CommandRegistrationScopeConfig,
+  CommandRegistrationUnusedMode,
+  RequiredCommandRegistrationConfig,
+  RequiredCommandRegistrationScopeConfig,
 } from "./manager";
 export type {
   CommandManagerOptions,
