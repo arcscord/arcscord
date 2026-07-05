@@ -12,11 +12,17 @@ Preview, development, and unreleased versions may receive fixes when the same is
 
 Do not report security vulnerabilities in public GitHub issues, pull requests, discussions, or public Discord channels.
 
-Report vulnerabilities through the Arcscord Discord server:
+Report vulnerabilities through GitHub private vulnerability reporting:
+
+https://github.com/arcscord/arcscord/security/advisories/new
+
+This creates a private report visible only to maintainers, so the issue can be discussed and fixed before public disclosure.
+
+Use the private GitHub report especially when the issue is critical or could be exploited immediately. Critical issues include token exposure, remote code execution, privilege escalation, account takeover, supply-chain compromise, or a bypass that lets untrusted users run privileged bot actions.
+
+If GitHub private vulnerability reporting is unavailable, contact the maintainers through the Arcscord Discord server and ask for a private security contact:
 
 https://discord.gg/4geBanVWGR
-
-Use a private message to the maintainers or developers when the issue is critical or could be exploited immediately. Critical issues include token exposure, remote code execution, privilege escalation, account takeover, supply-chain compromise, or a bypass that lets untrusted users run privileged bot actions.
 
 Include as much of the following as you can:
 
