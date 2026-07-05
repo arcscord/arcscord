@@ -243,10 +243,10 @@ describe("command manager", () => {
     ]);
 
     expect(result[0]).toBeNull();
-    expect(manager.logger.warning).toHaveBeenCalledTimes(3);
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("differs"));
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("missing"));
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("Unused"));
+    expect(manager.logger.warn).toHaveBeenCalledTimes(3);
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("differs"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("missing"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("Unused"));
     expect(client.rest.put).not.toHaveBeenCalled();
     expect(client.rest.post).not.toHaveBeenCalled();
     expect(client.rest.patch).not.toHaveBeenCalled();
@@ -302,7 +302,7 @@ describe("command manager", () => {
     ]);
 
     expect(result[0]).toBeNull();
-    expect(manager.logger.warning).not.toHaveBeenCalled();
+    expect(manager.logger.warn).not.toHaveBeenCalled();
   });
 
   it("does not warn for Discord default context menu fields", async () => {
@@ -333,7 +333,7 @@ describe("command manager", () => {
     ]);
 
     expect(result[0]).toBeNull();
-    expect(manager.logger.warning).not.toHaveBeenCalled();
+    expect(manager.logger.warn).not.toHaveBeenCalled();
   });
 
   it("does not warn when explicit integration types match in a different order", async () => {
@@ -365,7 +365,7 @@ describe("command manager", () => {
     ]);
 
     expect(result[0]).toBeNull();
-    expect(manager.logger.warning).not.toHaveBeenCalled();
+    expect(manager.logger.warn).not.toHaveBeenCalled();
   });
 
   it("warns when localized command payloads differ", async () => {
@@ -399,8 +399,8 @@ describe("command manager", () => {
     ]);
 
     expect(result[0]).toBeNull();
-    expect(manager.logger.warning).toHaveBeenCalledOnce();
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("differs"));
+    expect(manager.logger.warn).toHaveBeenCalledOnce();
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("differs"));
   });
 
   it("deletes unused guild commands when unused mode is delete without overwriting the guild scope", async () => {
@@ -483,8 +483,8 @@ describe("command manager", () => {
       },
     ]);
 
-    expect(manager.logger.warning).toHaveBeenCalledOnce();
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("missing"));
+    expect(manager.logger.warn).toHaveBeenCalledOnce();
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("missing"));
   });
 
   it("dispatches autocomplete interactions to the focused option handler", async () => {
@@ -714,7 +714,7 @@ describe("command manager", () => {
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 
     expect(resultHandler).not.toHaveBeenCalled();
-    expect(managerWithOptions.logger.warning).toHaveBeenCalled();
+    expect(managerWithOptions.logger.warn).toHaveBeenCalled();
   });
 
   it("dispatches user context menu interaction to run()", async () => {
@@ -1051,7 +1051,7 @@ describe("command manager", () => {
 
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
-      expect(managerWithOptions.logger.warning).toHaveBeenCalled();
+      expect(managerWithOptions.logger.warn).toHaveBeenCalled();
     });
 
     it("uses editReply instead of reply for the default resultHandler when defer is true", async () => {

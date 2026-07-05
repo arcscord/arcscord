@@ -14,8 +14,8 @@ export const logLevelInfos: Record<LogLevel, LogLevelInfo> = {
     textColor: forground256Color(255),
     logPriority: 2,
   },
-  warning: {
-    logText: "WARNING",
+  warn: {
+    logText: "WARN",
     titleColor: forground256Color(220),
     textColor: forground256Color(255),
     logPriority: 3,

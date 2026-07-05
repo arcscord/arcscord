@@ -9,18 +9,18 @@ describe("logs texts", () => {
     console.log(formatLog("trace", "test"));
     console.log(formatLog("debug", "test"));
     console.log(formatLog("info", "test"));
-    console.log(formatLog("warning", "test"));
+    console.log(formatLog("warn", "test"));
     console.log(formatLog("error", "test"));
     console.log(formatLog("fatal", "test"));
 
     console.log(formatLog("info", "test2", "database"));
 
     defaultLogger.debug(["name", "zghgu"]);
-    defaultLogger.error("erroooor", [
-      ["author", "arcoz"],
-      ["server", "test"],
-      ["command", "testing"],
-    ]);
+    defaultLogger.error("erroooor", {
+      author: "arcoz",
+      server: "test",
+      command: "testing",
+    });
 
     try {
       // noinspection ExceptionCaughtLocallyJS

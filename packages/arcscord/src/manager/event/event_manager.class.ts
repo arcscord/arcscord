@@ -157,7 +157,10 @@ export class EventManager extends BaseManager {
     try {
       const context = new EventContext(this.client, event);
       const rawResult = await event.run(context, ...args);
-      this.logger.debug(`Event handled: ${event.name}`);
+      this.logger.debug(`Event handled: ${event.name}`, {
+        handler: event.name,
+        event: event.event,
+      });
       await this.options.resultHandler({
         status: "returned",
         result: normalizeRunReturn(rawResult),
@@ -212,7 +215,7 @@ export class EventManager extends BaseManager {
     }
 
     if (action === "warn") {
-      this.logger.warning(issue.message);
+      this.logger.warn(issue.message);
       return;
     }
 

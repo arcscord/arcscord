@@ -38,7 +38,7 @@ function createMockClient(
       trace: vi.fn(),
       debug: vi.fn(),
       info: vi.fn(),
-      warning: vi.fn(),
+      warn: vi.fn(),
       error: vi.fn(),
       logError: vi.fn(),
       fatal: vi.fn(),
@@ -360,7 +360,7 @@ describe("event manager", () => {
       run: () => ok(true),
     }));
 
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("Guilds"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("Guilds"));
   });
 
   it("throws when a missing intent check is strict", async () => {
@@ -401,7 +401,7 @@ describe("event manager", () => {
       run: () => ok(true),
     }));
 
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("Partial intent coverage"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("Partial intent coverage"));
   });
 
   it("does not warn about disabled coverage targets", async () => {
@@ -420,7 +420,7 @@ describe("event manager", () => {
       run: () => ok(true),
     }));
 
-    expect(manager.logger.warning).not.toHaveBeenCalled();
+    expect(manager.logger.warn).not.toHaveBeenCalled();
   });
 
   it("warns when an enabled coverage target is missing", async () => {
@@ -439,8 +439,8 @@ describe("event manager", () => {
       run: () => ok(true),
     }));
 
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("dm"));
-    expect(manager.logger.warning).toHaveBeenCalledWith(expect.stringContaining("DirectMessages"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("dm"));
+    expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("DirectMessages"));
   });
 
   it("still checks missing against every possible oneOf intent", async () => {

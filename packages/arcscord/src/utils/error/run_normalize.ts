@@ -71,7 +71,7 @@ export function applyDiagnosticLevel(
       logger.info(err.message);
       return;
     case "warn":
-      logger.warning(err.message);
+      logger.warn(err.message);
       return;
     case "error":
       err.generateId();

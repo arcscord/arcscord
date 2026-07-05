@@ -1,4 +1,4 @@
-import type { DebugValueString } from "#/utils/error/error.type";
+import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerConstructor, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
 import { effectReset } from "tintify";
@@ -18,8 +18,8 @@ import {
 } from "#/utils/logger/logger.const";
 
 export function resolveLogLevel(level?: string): LogLevel {
-  if (level === "warn") {
-    return "warning";
+  if (level === "warning") {
+    return "warn";
   }
 
   if (level && level in logLevelInfos) {
@@ -27,6 +27,16 @@ export function resolveLogLevel(level?: string): LogLevel {
   }
 
   return "info";
+}
+
+/**
+ * Resolves the default output function for a level when no custom `loggerFunc` is provided.
+ * Routes `warn`/`error`/`fatal` to `console.error` and everything else to `console.log`,
+ * matching the Unix/Node stdout-stderr convention.
+ */
+export function resolveDefaultLogFunc(level: LogLevel): LogFunc {
+  // eslint-disable-next-line no-console
+  return level === "warn" || level === "error" || level === "fatal" ? console.error : console.log;
 }
 
 export function resolveLogFormat(format?: string): Required<LoggerOptions>["format"] {
@@ -41,12 +51,14 @@ export function formatJsonLog(
   logLevel: LogLevel,
   message: string,
   processName = "main",
+  meta?: DebugValues,
 ): string {
   return JSON.stringify({
     time: new Date().toISOString(),
     level: logLevel,
     process: processName,
     message,
+    ...(meta && Object.keys(meta).length > 0 ? { meta } : {}),
   });
 }
 
@@ -108,7 +120,8 @@ export function formatShortDebug(message: string | DebugValueString): string {
  *
  * @param constructorFunc - The constructor function to create the logger instance.
  * @param name - The name to be assigned to the logger.
- * @param logFunc - Optional custom logging function. If not provided, defaults to `console.log`.
+ * @param logFunc - Optional custom logging function. If omitted, the logger picks its own
+ * per-level default (`console.error` for warn/error/fatal, `console.log` otherwise).
  * @return - The created logger instance.
  */
 export function createLogger(
@@ -117,6 +130,6 @@ export function createLogger(
   logFunc?: LogFunc,
   options?: LoggerOptions,
 ): LoggerInterface {
-  // eslint-disable-next-line no-console,new-cap
-  return new constructorFunc(name, logFunc || console.log, options);
+  // eslint-disable-next-line new-cap
+  return new constructorFunc(name, logFunc, options);
 }

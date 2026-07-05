@@ -199,10 +199,21 @@ export function createErrorReport(
   };
 }
 
+export type ErrorReportRenderOptions = {
+  /**
+   * Whether to include the stack trace and the full cause chain.
+   * @default true
+   */
+  includeStack?: boolean;
+};
+
 export function renderErrorReport(
   report: ErrorReport,
   processName: string,
+  options: ErrorReportRenderOptions = {},
 ): string {
+  const { includeStack = true } = options;
+
   const lines = [
     formatLog(report.level, report.message, processName),
   ];
@@ -215,6 +226,10 @@ export function renderErrorReport(
 
   for (const [key, value] of Object.entries(report.debug)) {
     lines.push(formatShortDebug([key, stringifyValue(value)]));
+  }
+
+  if (!includeStack) {
+    return lines.join("\n");
   }
 
   if (report.error.stack) {
@@ -238,14 +253,19 @@ export function renderErrorReport(
 export function renderJsonErrorReport(
   report: ErrorReport,
   processName: string,
+  options: ErrorReportRenderOptions = {},
 ): string {
+  const { includeStack = true } = options;
+
   return JSON.stringify({
     time: new Date().toISOString(),
     level: report.level,
     process: processName,
     errorId: report.id,
     message: report.message,
-    error: report.error,
+    error: includeStack
+      ? report.error
+      : { type: report.error.type, message: report.error.message },
     debug: report.debug,
   });
 }

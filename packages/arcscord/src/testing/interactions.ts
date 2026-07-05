@@ -76,7 +76,9 @@ function buildCommandInteractionBase(
       guildId: null,
       toJSON: () => ({}),
     },
+    commandId: options.commandId ?? "cmd_1",
     commandName: options.commandName ?? "test",
+    commandGuildId: null,
     user: createMockUser(options.user),
     guild: options.guild ?? null,
     guildId: null,
@@ -155,6 +157,7 @@ export function createMockCommandInteraction(
     channel: options.channel ?? null,
     commandId: options.commandId ?? "command_1",
     commandName: options.commandName ?? "test",
+    commandGuildId: null,
     appPermissions: new PermissionsBitField(options.appPermissions ?? []),
     guild: options.guild ?? null,
     inGuild: () => options.guild !== null && options.guild !== undefined,
@@ -449,7 +452,9 @@ export function createMockAutocompleteInteraction(options: MockAutocompleteInter
 
   const interaction = {
     channel: null,
+    commandId: options.commandId ?? "cmd_1",
     commandName: options.commandName ?? "test",
+    commandGuildId: null,
     command: {
       id: options.commandId ?? "cmd_1",
       name: options.commandName ?? "test",

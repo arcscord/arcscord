@@ -287,7 +287,7 @@ describe("component manager pipeline", () => {
 
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
-      expect(manager.logger.warning).toHaveBeenCalledOnce();
+      expect(manager.logger.warn).toHaveBeenCalledOnce();
       expect(manager.logger.logError).not.toHaveBeenCalled();
     });
 
@@ -579,7 +579,7 @@ describe("component manager pipeline", () => {
 
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
-      expect(manager.logger.warning).toHaveBeenCalled();
+      expect(manager.logger.warn).toHaveBeenCalled();
     });
 
     it("uses editReply instead of reply for the default resultHandler when defer is true", async () => {

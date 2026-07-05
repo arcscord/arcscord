@@ -232,7 +232,7 @@ export class LocaleManager extends BaseManager {
       return this.mapLanguage(lang || this.defaultLanguage());
     }
     catch (e) {
-      this.logger.warning(`Failed to detect language, a throw happens, error : ${anyToError(e).message}`);
+      this.logger.warn(`Failed to detect language, a throw happens, error : ${anyToError(e).message}`);
       return this.defaultLanguage();
     }
   }

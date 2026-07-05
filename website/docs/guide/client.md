@@ -56,9 +56,10 @@ Controls the built-in logger. All fields are optional.
 |---|---|---|---|
 | `level` | `"trace"` \| `"debug"` \| `"info"` \| `"warn"` \| `"error"` \| `"fatal"` | `"info"` | Minimum level to log. Use `"debug"` to see command/component execution logs during development. |
 | `format` | `"pretty"` \| `"json"` | `"pretty"` | Output format. Use `"json"` in production or containers. |
-| `loggerFunc` | `(...data: unknown[]) => void` | `console.log` | Custom function to receive each log line. |
+| `loggerFunc` | `(...data: unknown[]) => void` | per-level `console.log`/`console.error` | Custom function to receive each log line. When omitted, warn/error/fatal go to `console.error`, everything else to `console.log`. |
 | `customLogger` | `LoggerConstructor` | `ArcLogger` | Replace the built-in logger class entirely. Must satisfy `LoggerInterface`. |
-| `diagnostics` | `object` | — | Secondary output channel for detailed error diagnostics (separate format/function). |
+| `diagnostics` | `{ loggerFunc, format? }` | — | Secondary output for full error diagnostics. Providing `loggerFunc` is what turns it on. |
+| `errorDetail` | `"short"` \| `"full"` | `"short"` if `diagnostics` is set, `"full"` otherwise | How much detail `logError`/`fatalError` print on the main sink. |
 
 ```ts
 const client = new ArcClient(process.env.DISCORD_TOKEN!, {

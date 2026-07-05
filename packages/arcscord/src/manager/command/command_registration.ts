@@ -251,7 +251,7 @@ async function handleUnusedCommands(
 
   for (const command of unusedCommands) {
     if (unusedMode === "warn") {
-      logger.warning(
+      logger.warn(
         `Unused ${scope} command "${command.name}" (${formatCommandType(command.type)}) exists on Discord`,
       );
       continue;
@@ -272,14 +272,14 @@ function warnLocalCommandDifferences(
     const commandType = normalizedCommandType(command);
 
     if (!existingCommand) {
-      logger.warning(
+      logger.warn(
         `${scope} command "${command.name}" (${formatCommandType(commandType)}) is missing on Discord`,
       );
       continue;
     }
 
     if (!commandsAreEquivalent(command, existingCommand)) {
-      logger.warning(
+      logger.warn(
         `${scope} command "${command.name}" (${formatCommandType(commandType)}) differs from Discord registration`,
       );
     }

@@ -9,7 +9,7 @@ function createMockLogger(): LoggerInterface {
     trace: vi.fn(),
     debug: vi.fn(),
     info: vi.fn(),
-    warning: vi.fn(),
+    warn: vi.fn(),
     error: vi.fn(),
     logError: vi.fn(),
     fatal: vi.fn(),
@@ -93,7 +93,7 @@ describe("applyDiagnosticLevel", () => {
     const err = new BaseError({ message: "test" });
     applyDiagnosticLevel(logger, "ignore", err);
     expect(logger.debug).not.toHaveBeenCalled();
-    expect(logger.warning).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(logger.logError).not.toHaveBeenCalled();
   });
 
@@ -115,7 +115,7 @@ describe("applyDiagnosticLevel", () => {
     const logger = createMockLogger();
     const err = new BaseError({ message: "test" });
     applyDiagnosticLevel(logger, "warn", err);
-    expect(logger.warning).toHaveBeenCalledWith("test");
+    expect(logger.warn).toHaveBeenCalledWith("test");
   });
 
   it("logs at error level and generates an id", () => {

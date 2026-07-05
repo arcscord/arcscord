@@ -4,6 +4,7 @@ import {
   colorDebugValue,
   createLogger,
   formatJsonLog,
+  resolveDefaultLogFunc,
   resolveLogFormat,
   resolveLogLevel,
   shouldLog,
@@ -12,8 +13,12 @@ import {
 
 describe("logger.util", () => {
   describe("resolveLogLevel", () => {
-    it.each(["trace", "debug", "info", "warning", "error", "fatal"])("passes through the valid level \"%s\" unchanged", (level) => {
+    it.each(["trace", "debug", "info", "warn", "error", "fatal"])("passes through the valid level \"%s\" unchanged", (level) => {
       expect(resolveLogLevel(level)).toBe(level);
+    });
+
+    it("maps the legacy \"warning\" alias to \"warn\"", () => {
+      expect(resolveLogLevel("warning")).toBe("warn");
     });
 
     it("falls back to \"info\" for an unknown level", () => {
@@ -58,12 +63,23 @@ describe("logger.util", () => {
 
   describe("shouldLog", () => {
     it.each([
-      ["debug", "warning", false],
+      ["debug", "warn", false],
       ["fatal", "trace", true],
-      ["warning", "warning", true],
+      ["warn", "warn", true],
       ["trace", "fatal", false],
     ] as const)("shouldLog(%s, %s) is %s", (level, configuredLevel, expected) => {
       expect(shouldLog(level, configuredLevel)).toBe(expected);
+    });
+  });
+
+  describe("resolveDefaultLogFunc", () => {
+    it.each(["warn", "error", "fatal"] as const)("routes \"%s\" to console.error", (level) => {
+      expect(resolveDefaultLogFunc(level)).toBe(console.error);
+    });
+
+    it.each(["trace", "debug", "info"] as const)("routes \"%s\" to console.log", (level) => {
+      // eslint-disable-next-line no-console
+      expect(resolveDefaultLogFunc(level)).toBe(console.log);
     });
   });
 
@@ -83,6 +99,16 @@ describe("logger.util", () => {
     it("defaults the process name to \"main\"", () => {
       const parsed = JSON.parse(formatJsonLog("info", "started"));
       expect(parsed.process).toBe("main");
+    });
+
+    it("merges meta fields under a \"meta\" key when provided", () => {
+      const parsed = JSON.parse(formatJsonLog("info", "started", "my-process", { userId: "42" }));
+      expect(parsed.meta).toEqual({ userId: "42" });
+    });
+
+    it("omits the \"meta\" key when no meta is provided", () => {
+      const parsed = JSON.parse(formatJsonLog("info", "started"));
+      expect(parsed.meta).toBeUndefined();
     });
   });
 

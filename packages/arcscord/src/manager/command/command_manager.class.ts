@@ -495,7 +495,7 @@ export class CommandManager
    * GuildFormat : g_commandId_commandName
    * @param apiCommand the command to resolve
    */
-  resolveCommandName(apiCommand: ApplicationCommandRegistration): string {
+  resolveCommandName(apiCommand: Pick<ApplicationCommandRegistration, "id" | "name" | "guildId">): string {
     if (apiCommand.guildId) {
       return `g_${apiCommand.id}_${apiCommand.name}`;
     }
@@ -509,17 +509,11 @@ export class CommandManager
     },
     BaseError
   > {
-    if (!interaction.command) {
-      return error(
-        new BaseError({
-          message: `no command object found for interaction with ${interaction.commandName}`,
-          debugs: {
-            data: interaction.toJSON(),
-          },
-        }),
-      );
-    }
-    const resolvedCommandName = this.resolveCommandName(interaction.command);
+    const resolvedCommandName = this.resolveCommandName({
+      id: interaction.commandId,
+      name: interaction.commandName,
+      guildId: interaction.commandGuildId,
+    });
     const command = this.commands.get(resolvedCommandName);
 
     if (!command) {
@@ -528,7 +522,9 @@ export class CommandManager
           message: `no command found with full id ${resolvedCommandName}`,
           debugs: {
             commands: this.commands.keys(),
-            command: interaction.command.toJSON(),
+            commandId: interaction.commandId,
+            commandName: interaction.commandName,
+            commandGuildId: interaction.commandGuildId,
           },
         }),
       );
@@ -805,7 +801,7 @@ export class CommandManager
     const focused = interaction.options.getFocused(true);
 
     if (!hasAutocomplete(command)) {
-      this.logger.warning(`Got autocomplete for command without autocomplete handler: ${infos.resolvedName}`);
+      this.logger.warn(`Got autocomplete for command without autocomplete handler: ${infos.resolvedName}`);
       return;
     }
 
@@ -944,6 +940,12 @@ export class CommandManager
       this.logger.logError(err);
       return this.sendInternalError(err, infos);
     }
-    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`);
+    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
+      command: infos.interaction.commandName,
+      interactionId: infos.interaction.id,
+      guildId: infos.interaction.guildId,
+      userId: infos.interaction.user.id,
+      durationMs: infos.end - infos.start,
+    });
   }
 }

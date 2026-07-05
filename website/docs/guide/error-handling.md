@@ -187,7 +187,7 @@ resultHandler: (infos) => {
 
   // expected application error returned by handler
   err.generateId();
-  client.logger.warning(`Command failed: ${err.message}`);
+  client.logger.warn(`Command failed: ${err.message}`);
   const message = client.getErrorMessage(err.id, infos.locale);
   if (infos.defer) {
     return infos.interaction.editReply(message);

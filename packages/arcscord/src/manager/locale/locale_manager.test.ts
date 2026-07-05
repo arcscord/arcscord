@@ -12,7 +12,7 @@ function createClient(): ArcClient {
       trace: vi.fn(),
       debug: vi.fn(),
       info: vi.fn(),
-      warning: vi.fn(),
+      warn: vi.fn(),
       error: vi.fn(),
       logError: vi.fn(),
       fatal: vi.fn(),

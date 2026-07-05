@@ -543,6 +543,11 @@ export class ComponentManager extends BaseManager {
       this.logger.logError(err);
       return this.sendInternalError(err, infos);
     }
-    this.logger.debug(`Component executed: ${infos.component.route}`);
+    this.logger.debug(`Component executed: ${infos.component.route}`, {
+      route: infos.component.route,
+      interactionId: infos.interaction.id,
+      guildId: infos.interaction.guildId,
+      userId: infos.interaction.user.id,
+    });
   }
 }

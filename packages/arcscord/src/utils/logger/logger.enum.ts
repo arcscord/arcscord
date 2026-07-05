@@ -7,7 +7,7 @@ export const logLevels = {
   trace: "trace",
   debug: "debug",
   info: "info",
-  warning: "warning",
+  warn: "warn",
   error: "error",
   fatal: "fatal",
 };

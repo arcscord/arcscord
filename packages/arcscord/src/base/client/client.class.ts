@@ -265,6 +265,7 @@ export class ArcClient extends DJSClient {
       const [err] = await this.loadCommands(handlers.commands);
       if (err) {
         this.logger.fatalError(err);
+        throw err;
       }
       if (logs) {
         this.commandManager.logger.info(`Loaded ${handlers.commands.length} commands`);

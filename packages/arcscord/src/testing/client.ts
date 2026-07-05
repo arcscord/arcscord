@@ -9,12 +9,13 @@ export function createMockLogger(): LoggerInterface {
     trace: vi.fn(),
     debug: vi.fn(),
     info: vi.fn(),
-    warning: vi.fn(),
+    warn: vi.fn(),
     error: vi.fn(),
     logError: vi.fn(),
     fatal: vi.fn() as unknown as LoggerInterface["fatal"],
     fatalError: vi.fn() as unknown as LoggerInterface["fatalError"],
     log: vi.fn(),
+    child: vi.fn(() => createMockLogger()),
   };
 }
 
