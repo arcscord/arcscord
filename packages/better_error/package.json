@@ -37,9 +37,9 @@
     "docs": "typedoc"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
+    "@types/node": "^26.1.0",
     "tsup": "^8.5.1",
-    "typedoc": "^0.28.19",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
     "vitest": "^4.1.9"
   },
