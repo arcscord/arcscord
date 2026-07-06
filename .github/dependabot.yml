@@ -18,6 +18,8 @@ updates:
     groups:
       security-dependencies:
         applies-to: security-updates
+        patterns:
+          - "*"
 
   - package-ecosystem: github-actions
     directory: /
