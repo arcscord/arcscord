@@ -16,7 +16,7 @@
     "@arcscord/middleware": "workspace:*",
     "arcscord": "workspace:*",
     "discord.js": "^14.26.4",
-    "i18next": "^26.3.3"
+    "i18next": "^26.3.4"
   },
   "devDependencies": {
     "@swc-node/core": "^1.14.1",

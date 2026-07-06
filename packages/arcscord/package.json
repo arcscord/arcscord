@@ -61,7 +61,7 @@
     "dayjs": "^1.11.21",
     "discord-api-types": "^0.38.49",
     "discord.js": "^14.26.4",
-    "i18next": "^26.3.3",
+    "i18next": "^26.3.4",
     "tintify": "^1.1.0"
   },
   "peerDependencies": {
