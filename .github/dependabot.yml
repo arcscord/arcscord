@@ -7,18 +7,17 @@ updates:
       day: monday
       time: "08:00"
       timezone: Europe/Zurich
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - dependencies
+      - security
     commit-message:
       prefix: chore
       prefix-development: chore
       include: scope
     groups:
-      development-dependencies:
-        dependency-type: development
-      production-dependencies:
-        dependency-type: production
+      security-dependencies:
+        applies-to: security-updates
 
   - package-ecosystem: github-actions
     directory: /
@@ -27,10 +26,11 @@ updates:
       day: monday
       time: "08:30"
       timezone: Europe/Zurich
-    open-pull-requests-limit: 3
+    open-pull-requests-limit: 0
     labels:
       - dependencies
       - ci
+      - security
     commit-message:
       prefix: ci
       include: scope
