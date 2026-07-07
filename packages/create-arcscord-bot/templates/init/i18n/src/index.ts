@@ -24,6 +24,7 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
       availableLanguages: ["en-US", "en-GB"],
     },
   },
+  applicationId: process.env.APPLICATION_ID,
 });
 
 client.on("clientReady", async () => {

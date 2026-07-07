@@ -4,6 +4,7 @@ import handlers from "./handlers";
 
 const client = new ArcClient(process.env.TOKEN ?? "", {
   intents: [],
+  applicationId: process.env.APPLICATION_ID,
 });
 
 client.on("clientReady", async () => {
