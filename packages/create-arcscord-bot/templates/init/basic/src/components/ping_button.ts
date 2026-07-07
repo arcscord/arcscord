@@ -1,5 +1,5 @@
-import { button, container, createButton, v2Message } from "arcscord";
-import { MessageFlags } from "discord.js";
+import type { ComponentRunReturn, MaybePromise } from "arcscord";
+import { accessory, button, container, createButton, section, v2Message } from "arcscord";
 
 export const pingButton = createButton({
   route: "ping_refresh",
@@ -9,11 +9,15 @@ export const pingButton = createButton({
       style: "secondary",
       customId: id(),
     }),
-  // Sends a fresh, ephemeral v2 message with the recomputed latency.
-  run: ctx => ctx.updateMessage(v2Message(
+  // Explicit return type avoids TS7022/TS7023 when this handler rebuilds itself.
+  run: (ctx): MaybePromise<ComponentRunReturn> => ctx.updateMessage(v2Message(
     container(
       { accentColor: 0x5865F2 },
-      `## 🏓 Pong!\nLatency: \`${ctx.client.ws.ping}ms\``,
+      section(
+        "## 🏓 Pong!",
+        `Latency: \`${ctx.client.ws.ping}ms\``,
+        accessory(pingButton.build()),
+      ),
     ),
   )),
 });
