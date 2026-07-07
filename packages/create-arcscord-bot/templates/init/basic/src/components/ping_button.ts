@@ -10,8 +10,7 @@ export const pingButton = createButton({
       customId: id(),
     }),
   // Sends a fresh, ephemeral v2 message with the recomputed latency.
-  run: ctx => ctx.reply(v2Message(
-    { flags: MessageFlags.Ephemeral },
+  run: ctx => ctx.updateMessage(v2Message(
     container(
       { accentColor: 0x5865F2 },
       `## 🏓 Pong!\nLatency: \`${ctx.client.ws.ping}ms\``,
