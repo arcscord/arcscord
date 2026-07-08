@@ -40,13 +40,16 @@ export const profileModal = createModal({
       maxLength: 3,
     }),
   },
-  build: (id, fields) =>
+  // Build args as a single named object (readable): pass localized / variable
+  // text here. `.label(overrides)` overrides only the displayed text — the
+  // parsed `value`s stay fixed, so `ctx.values` typing is unaffected.
+  build: (id, fields, labels?: { title?: string; name?: string; age?: string }) =>
     buildModal({
-      title: "Profile",
+      title: labels?.title ?? "Profile",
       customId: id(),
       components: [
-        fields.name.label(),
-        fields.age.label(),
+        fields.name.label({ label: labels?.name }),
+        fields.age.label({ label: labels?.age }),
       ],
     }),
   run: (ctx) => {
@@ -130,12 +133,17 @@ export const surveyModal = createModal({
       default: true,
     }),
   },
-  build: (id, fields) =>
+  // Per-option display text is overridable too, keyed by the option `value`
+  // (type-safe — only declared values are accepted).
+  build: (id, fields, labels?: { moodLabel?: string; great?: string }) =>
     buildModal({
       title: "Survey",
       customId: id(),
       components: [
-        fields.mood.label(),
+        fields.mood.label({
+          label: labels?.moodLabel,
+          options: { great: { label: labels?.great } },
+        }),
         fields.features.label(),
         fields.subscribe.label(),
       ],

@@ -21,8 +21,12 @@ export type RouteVariablesObject<T extends string> = {
  *
  * Static routes keep the regular typed arguments:
  * `button.build("Label")`.
+ *
+ * `Options` is a tuple of build arguments. It is usually `string[]` (e.g. a
+ * localized label), but modals also accept a single object argument for
+ * readability, e.g. `modal.build({ title, nameLabel })`.
  */
-export type ComponentBuildArgs<Route extends string, Options extends string[]>
+export type ComponentBuildArgs<Route extends string, Options extends unknown[]>
   = string extends Route
     ? Options
     : [RouteVariables<Route>] extends [never]

@@ -308,3 +308,67 @@ build: (id, fields) => buildModal({
   ],
 })
 ```
+
+## Dynamic labels & i18next
+
+Field labels, descriptions, placeholders and **option labels** are fixed when the field is created, so
+they're static by default. To localize them — or make them vary per user — pass overrides to
+`.label(overrides)` inside `build`. Only the displayed text is overridable: option `value`s stay fixed,
+so `ctx.values` typing and validation are unaffected. Calling `.label()` with no argument keeps the
+static text, so existing modals need no changes.
+
+`build` runs on every `.build(...)` call, so it's the right place to inject dynamic text. Pass the
+values through the modal's build arguments — either positionally, or as a single **object** for
+readability:
+
+```ts
+export const profileModal = createModal({
+  route: "modal/profile",
+  fields: {
+    name: modalTextInput({ label: "Name", required: true }),
+    mood: modalRadioGroup({
+      label: "Mood",
+      options: [
+        { label: "Great", value: "great" },
+        { label: "Okay", value: "okay" },
+      ],
+    }),
+  },
+  build: (id, fields, t: { title: string; name: string; mood: string; great: string }) =>
+    buildModal({
+      title: t.title,
+      customId: id(),
+      components: [
+        fields.name.label({ label: t.name }),
+        fields.mood.label({
+          label: t.mood,
+          // keyed by the option value — only declared values are accepted
+          options: { great: { label: t.great } },
+        }),
+      ],
+    }),
+  run: ctx => ctx.reply(`${ctx.values.name} / ${ctx.values.mood}`),
+});
+```
+
+Resolve the translations where you have access to `ctx.t` (a command or component `run`) and pass them
+to `.build`:
+
+```ts
+ctx.showModal(profileModal.build({
+  title: ctx.t($ => $.profile.title),
+  name: ctx.t($ => $.profile.name),
+  mood: ctx.t($ => $.profile.mood),
+  great: ctx.t($ => $.profile.mood_great),
+}));
+```
+
+Each field family accepts the overrides that make sense for it:
+
+| Field | Overridable text |
+| --- | --- |
+| `modalTextInput` | `label`, `description`, `placeholder`, `value` |
+| `modalStringSelect` | `label`, `description`, `placeholder`, per-option `label` / `description` |
+| `modalRadioGroup` / `modalCheckboxGroup` | `label`, `description`, per-option `label` / `description` |
+| user / role / mentionable / channel selects | `label`, `description`, `placeholder` |
+| `modalFileUpload` / `modalCheckbox` | `label`, `description` |

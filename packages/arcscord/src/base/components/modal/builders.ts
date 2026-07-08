@@ -29,6 +29,12 @@ import type {
   FileUploadFieldOptions,
   LabeledFieldOptions,
   ModalFieldComponentInput,
+  ModalGroupOverrides,
+  ModalLabelOverrides,
+  ModalNativeSelectOverrides,
+  ModalOptionOverride,
+  ModalStringSelectOverrides,
+  ModalTextInputOverrides,
   ModalTopLevelComponentInput,
   MultiSelectFieldOptions,
   NativeSelectFieldOptions,
@@ -66,23 +72,67 @@ function hasType(value: unknown): value is { type: ComponentType } {
   return typeof value === "object" && value !== null && "type" in value;
 }
 
-function createModalField<Value>(
+function createModalField<Value, Overrides extends ModalLabelOverrides = ModalLabelOverrides>(
   options: LabeledFieldOptions,
-  createComponent: (customId: string) => ModalFieldComponentInput,
+  createComponent: (customId: string, overrides?: Overrides) => ModalFieldComponentInput,
   parse: ModalFieldDefinition<Value>["parse"],
-): ModalFieldDefinition<Value> {
-  const create = (customId: string): ModalFieldDefinition<Value> => ({
+): ModalFieldDefinition<Value, Overrides> {
+  const create = (customId: string): ModalFieldDefinition<Value, Overrides> => ({
     __modalField: true,
-    label: () => modalLabel({
-      label: options.label,
-      description: options.description,
-      component: componentInLabelToData(createComponent(customId)),
+    label: (overrides?: Overrides) => modalLabel({
+      label: overrides?.label ?? options.label,
+      description: overrides?.description ?? options.description,
+      component: componentInLabelToData(createComponent(customId, overrides)),
     }),
     parse,
     withCustomId: create,
   });
 
   return create("");
+}
+
+/**
+ * Merges per-option display-text overrides (keyed by `value`) onto typed group
+ * options. Option `value`s are never touched.
+ */
+function applyGroupOverrides<O extends { label: string; value: string; description?: string }>(
+  options: readonly O[],
+  overrides?: { readonly [value: string]: ModalOptionOverride | undefined },
+): O[] {
+  if (!overrides) {
+    return [...options];
+  }
+
+  return options.map((option) => {
+    const override = overrides[option.value];
+    if (!override) {
+      return option;
+    }
+
+    return {
+      ...option,
+      ...(override.label !== undefined ? { label: override.label } : {}),
+      ...(override.description !== undefined ? { description: override.description } : {}),
+    };
+  }) as O[];
+}
+
+/**
+ * Expands string-select options (where the option string is also the value)
+ * into `{ label, value }` pairs, applying per-value display-text overrides.
+ */
+function applyStringSelectOverrides(
+  options: readonly string[],
+  overrides?: { readonly [value: string]: ModalOptionOverride | undefined },
+): { label: string; value: string; description?: string }[] {
+  return options.map((option) => {
+    const override = overrides?.[option];
+    return {
+      label: override?.label ?? option,
+      value: option,
+      ...(override?.description !== undefined ? { description: override.description } : {}),
+    };
+  });
 }
 
 function componentInLabelToData(component: ModalFieldComponentInput): ComponentInLabel {
@@ -115,20 +165,22 @@ function topLevelComponentToData(component: ModalTopLevelComponentInput): ModalC
  */
 export function modalTextInput<const Required extends boolean | undefined = true>(
   options: TextInputFieldOptions<Required> & LabeledFieldOptions,
-): ModalFieldDefinition<Required extends false ? string | undefined : string> {
+): ModalFieldDefinition<Required extends false ? string | undefined : string, ModalTextInputOverrides> {
   const { description: _description, label: _label, ...textInputOptions } = options;
 
   return createModalField(
     options,
-    customId => textInputToAPI({
+    (customId, overrides?: ModalTextInputOverrides) => textInputToAPI({
       ...textInputOptions,
       customId,
       required: textInputOptions.required,
       style: textInputOptions.style ?? "short",
+      placeholder: overrides?.placeholder ?? textInputOptions.placeholder,
+      value: overrides?.value ?? textInputOptions.value,
       type: ComponentType.TextInput,
     }),
     options.required === false ? readOptionalTextInputValue : readTextInputValue,
-  ) as ModalFieldDefinition<Required extends false ? string | undefined : string>;
+  ) as ModalFieldDefinition<Required extends false ? string | undefined : string, ModalTextInputOverrides>;
 }
 
 /**
@@ -142,28 +194,29 @@ export function modalStringSelect<
   const Required extends boolean | undefined = true,
 >(
   options: SelectFieldOptions<Required> & LabeledFieldOptions & { options: Options },
-): ModalFieldDefinition<ModalStringSelectValue<Options, 1, Required>>;
+): ModalFieldDefinition<ModalStringSelectValue<Options, 1, Required>, ModalStringSelectOverrides<Options>>;
 export function modalStringSelect<
   const Options extends readonly string[],
   const MaxValues extends number,
   const Required extends boolean | undefined = true,
 >(
   options: MultiSelectFieldOptions<Options, MaxValues, Required> & LabeledFieldOptions,
-): ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>>;
+): ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>, ModalStringSelectOverrides<Options>>;
 export function modalStringSelect<
   const Options extends readonly string[],
   const MaxValues extends number | undefined,
   const Required extends boolean | undefined = true,
 >(
   options: (SelectFieldOptions<Required> | MultiSelectFieldOptions<Options, MaxValues, Required>) & LabeledFieldOptions,
-): ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>> {
+): ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>, ModalStringSelectOverrides<Options>> {
   return createModalField(
     options,
-    customId => selectMenuToAPI({
+    (customId, overrides?: ModalStringSelectOverrides<Options>) => selectMenuToAPI({
       ...options,
       customId,
       maxValues: options.maxValues ?? 1,
-      options: [...options.options],
+      options: applyStringSelectOverrides(options.options, overrides?.options),
+      placeholder: overrides?.placeholder ?? options.placeholder,
       type: ComponentType.StringSelect,
     }),
     input => readSingleOrManyStrings(input, ComponentType.StringSelect, {
@@ -171,7 +224,7 @@ export function modalStringSelect<
       maxValues: options.maxValues,
       required: options.required,
     }),
-  ) as ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>>;
+  ) as ModalFieldDefinition<ModalStringSelectValue<Options, MaxValues, Required>, ModalStringSelectOverrides<Options>>;
 }
 
 /**
@@ -182,10 +235,15 @@ export function modalUserSelect<
   const Required extends boolean | undefined = true,
 >(
   options: NativeSelectFieldOptions<UserSelectMenu<"modal">, MaxValues, Required> & LabeledFieldOptions,
-): ModalFieldDefinition<ModalUserSelectValue<MaxValues, Required>> {
+): ModalFieldDefinition<ModalUserSelectValue<MaxValues, Required>, ModalNativeSelectOverrides> {
   return createModalField(
     options,
-    customId => selectMenuToAPI({ ...options, customId, type: ComponentType.UserSelect }),
+    (customId, overrides?: ModalNativeSelectOverrides) => selectMenuToAPI({
+      ...options,
+      customId,
+      placeholder: overrides?.placeholder ?? options.placeholder,
+      type: ComponentType.UserSelect,
+    }),
     input => readResolvedSingleOrMany(input, ComponentType.UserSelect, {
       maxValues: options.maxValues,
       readValues: (field, ids) => ids.map(id => collectionGet(field.users, id)),
@@ -202,10 +260,15 @@ export function modalRoleSelect<
   const Required extends boolean | undefined = true,
 >(
   options: NativeSelectFieldOptions<RoleSelectMenu<"modal">, MaxValues, Required> & LabeledFieldOptions,
-): ModalFieldDefinition<ModalRoleSelectValue<MaxValues, Required>> {
+): ModalFieldDefinition<ModalRoleSelectValue<MaxValues, Required>, ModalNativeSelectOverrides> {
   return createModalField(
     options,
-    customId => selectMenuToAPI({ ...options, customId, type: ComponentType.RoleSelect }),
+    (customId, overrides?: ModalNativeSelectOverrides) => selectMenuToAPI({
+      ...options,
+      customId,
+      placeholder: overrides?.placeholder ?? options.placeholder,
+      type: ComponentType.RoleSelect,
+    }),
     input => readResolvedSingleOrMany(input, ComponentType.RoleSelect, {
       maxValues: options.maxValues,
       readValues: (field, ids) => ids.map(id => collectionGet(field.roles, id)),
@@ -222,10 +285,15 @@ export function modalMentionableSelect<
   const Required extends boolean | undefined = true,
 >(
   options: NativeSelectFieldOptions<MentionableSelectMenu<"modal">, MaxValues, Required> & LabeledFieldOptions,
-): ModalFieldDefinition<ModalMentionableSelectValue<MaxValues, Required>> {
+): ModalFieldDefinition<ModalMentionableSelectValue<MaxValues, Required>, ModalNativeSelectOverrides> {
   return createModalField(
     options,
-    customId => selectMenuToAPI({ ...options, customId, type: ComponentType.MentionableSelect }),
+    (customId, overrides?: ModalNativeSelectOverrides) => selectMenuToAPI({
+      ...options,
+      customId,
+      placeholder: overrides?.placeholder ?? options.placeholder,
+      type: ComponentType.MentionableSelect,
+    }),
     input => readResolvedSingleOrMany(input, ComponentType.MentionableSelect, {
       maxValues: options.maxValues,
       readValues: (field, ids) => ids.map((id) => {
@@ -244,10 +312,15 @@ export function modalChannelSelect<
   const Required extends boolean | undefined = true,
 >(
   options: NativeSelectFieldOptions<ChannelSelectMenu<"modal">, MaxValues, Required> & LabeledFieldOptions,
-): ModalFieldDefinition<ModalChannelSelectValue<MaxValues, Required>> {
+): ModalFieldDefinition<ModalChannelSelectValue<MaxValues, Required>, ModalNativeSelectOverrides> {
   return createModalField(
     options,
-    customId => selectMenuToAPI({ ...options, customId, type: ComponentType.ChannelSelect }),
+    (customId, overrides?: ModalNativeSelectOverrides) => selectMenuToAPI({
+      ...options,
+      customId,
+      placeholder: overrides?.placeholder ?? options.placeholder,
+      type: ComponentType.ChannelSelect,
+    }),
     input => readResolvedSingleOrMany(input, ComponentType.ChannelSelect, {
       maxValues: options.maxValues,
       readValues: (field, ids) => ids.map(id => collectionGet(field.channels, id)),
@@ -286,15 +359,20 @@ export function modalRadioGroup<
     options: Options;
     required?: Required;
   },
-): ModalFieldDefinition<ModalRadioGroupValue<Options, Required>> {
+): ModalFieldDefinition<ModalRadioGroupValue<Options, Required>, ModalGroupOverrides<Options>> {
   return createModalField(
     options,
-    customId => radioGroupToAPI({ ...options, customId, type: ComponentType.RadioGroup }),
+    (customId, overrides?: ModalGroupOverrides<Options>) => radioGroupToAPI({
+      ...options,
+      options: applyGroupOverrides(options.options, overrides?.options),
+      customId,
+      type: ComponentType.RadioGroup,
+    }),
     input => readRadioValue(input, {
       allowedValues: options.options,
       required: options.required,
     }),
-  ) as ModalFieldDefinition<ModalRadioGroupValue<Options, Required>>;
+  ) as ModalFieldDefinition<ModalRadioGroupValue<Options, Required>, ModalGroupOverrides<Options>>;
 }
 
 /**
@@ -302,14 +380,19 @@ export function modalRadioGroup<
  */
 export function modalCheckboxGroup<const Options extends readonly { label: string; value: string }[]>(
   options: Omit<CheckboxGroup, "customId" | "options" | "type"> & LabeledFieldOptions & { options: Options },
-): ModalFieldDefinition<ModalCheckboxGroupValue<Options>> {
+): ModalFieldDefinition<ModalCheckboxGroupValue<Options>, ModalGroupOverrides<Options>> {
   return createModalField(
     options,
-    customId => checkboxGroupToAPI({ ...options, customId, type: ComponentType.CheckboxGroup }),
+    (customId, overrides?: ModalGroupOverrides<Options>) => checkboxGroupToAPI({
+      ...options,
+      options: applyGroupOverrides(options.options, overrides?.options),
+      customId,
+      type: ComponentType.CheckboxGroup,
+    }),
     input => readCheckboxGroupValue(input, {
       allowedValues: options.options,
     }),
-  ) as ModalFieldDefinition<ModalCheckboxGroupValue<Options>>;
+  ) as ModalFieldDefinition<ModalCheckboxGroupValue<Options>, ModalGroupOverrides<Options>>;
 }
 
 /**
@@ -353,7 +436,7 @@ export function buildModal(options: BuildModalOptions | ModalBuilder): ModalComp
   };
 }
 
-export function withModalFieldIds<Fields extends Record<string, ModalFieldDefinition>>(
+export function withModalFieldIds<Fields extends Record<string, ModalFieldDefinition<any, any>>>(
   fields: Fields,
 ): Fields {
   return Object.fromEntries(

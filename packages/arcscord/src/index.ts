@@ -202,6 +202,13 @@ export {
   modalTextInput,
   modalUserSelect,
 } from "./base/components/modal";
+export type {
+  ModalGroupOverrides,
+  ModalNativeSelectOverrides,
+  ModalOptionOverride,
+  ModalStringSelectOverrides,
+  ModalTextInputOverrides,
+} from "./base/components/modal/types";
 export {
   button,
   channelSelectMenu,
@@ -255,6 +262,7 @@ export type {
   ModalFields,
   ModalFieldValues,
   ModalFileUploadValue,
+  ModalLabelOverrides,
   ModalMentionableSelectValue,
   ModalRadioGroupValue,
   ModalRoleSelectValue,

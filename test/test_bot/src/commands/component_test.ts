@@ -140,11 +140,13 @@ export const componentTestCommand = createCommand({
           channelSelectMenu.build(),
         ));
       case "modal_profile":
-        return ctx.showModal(profileModal.build());
+        // object build args: override the displayed labels at build time
+        return ctx.showModal(profileModal.build({ title: "Profil", name: "Nom", age: "Âge" }));
       case "modal_feedback":
         return ctx.showModal(feedbackModal.build());
       case "modal_survey":
-        return ctx.showModal(surveyModal.build());
+        // override the radio group label + one option label (keyed by value)
+        return ctx.showModal(surveyModal.build({ moodLabel: "Humeur", great: "Excellent" }));
       case "modal_upload":
         return ctx.showModal(uploadModal.build());
       case "modal_selects":

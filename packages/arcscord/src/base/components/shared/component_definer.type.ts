@@ -527,25 +527,37 @@ export type ModalFieldParseInput = {
 };
 
 /**
+ * Base display-text overrides accepted by every modal field's `label()`.
+ *
+ * Only visible text can be overridden at build time (for i18next / variable
+ * values). Option `value`s are never overridable — they drive the inferred
+ * `Value` type and the runtime `parse` validation.
+ */
+export type ModalLabelOverrides = {
+  readonly label?: string;
+  readonly description?: string;
+};
+
+/**
  * Field definition used by typed modal handlers.
  */
-export type ModalFieldDefinition<Value = unknown> = {
+export type ModalFieldDefinition<Value = unknown, Overrides = ModalLabelOverrides> = {
   readonly __modalField: true;
-  readonly label: () => LabelComponentData;
+  readonly label: (overrides?: Overrides) => LabelComponentData;
   readonly parse: (input: ModalFieldParseInput) => Value;
-  readonly withCustomId: (customId: string) => ModalFieldDefinition<Value>;
+  readonly withCustomId: (customId: string) => ModalFieldDefinition<Value, Overrides>;
 };
 
 /**
  * Modal field definition map.
  */
-export type ModalFields = Record<string, ModalFieldDefinition>;
+export type ModalFields = Record<string, ModalFieldDefinition<any, any>>;
 
 /**
  * Values inferred from a modal field definition map.
  */
 export type ModalFieldValues<Fields extends ModalFields> = {
-  readonly [K in keyof Fields]: Fields[K] extends ModalFieldDefinition<infer Value>
+  readonly [K in keyof Fields]: Fields[K] extends ModalFieldDefinition<infer Value, any>
     ? Value
     : never;
 };

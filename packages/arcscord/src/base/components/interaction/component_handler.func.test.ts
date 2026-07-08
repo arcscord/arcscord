@@ -100,6 +100,53 @@ describe("component handler builders", () => {
     });
   });
 
+  it("passes an object build arg through to the modal build function", () => {
+    const modal = createModal({
+      route: "profile/edit",
+      fields: {
+        name: modalTextInput({ label: "Name", required: true }),
+      },
+      build: (id, fields, labels: { title: string; name: string }) => buildModal({
+        title: labels.title,
+        customId: id(),
+        components: [fields.name.label({ label: labels.name })],
+      }),
+      run: async ctx => ctx.ok(ctx.values.name),
+    });
+
+    expect(modal.build({ title: "Profil", name: "Nom" })).toMatchObject({
+      customId: "profile/edit",
+      title: "Profil",
+      components: [
+        {
+          type: ComponentType.Label,
+          label: "Nom",
+          component: { type: ComponentType.TextInput, customId: "name" },
+        },
+      ],
+    });
+  });
+
+  it("accepts route params before an object build arg", () => {
+    const modal = createModal({
+      route: "ticket/edit/{id}",
+      fields: {
+        title: modalTextInput({ label: "Title", required: true }),
+      },
+      build: (id, fields, labels: { title: string }) => buildModal({
+        title: labels.title,
+        customId: id(),
+        components: [fields.title.label()],
+      }),
+      run: async ctx => ctx.ok(ctx.params.id),
+    });
+
+    expect(modal.build({ id: "42" }, { title: "Modifier" })).toMatchObject({
+      customId: "ticket/edit/$42",
+      title: "Modifier",
+    });
+  });
+
   it("supports untyped modal builders without field definitions", () => {
     const modal = createModal({
       route: "raw/modal",

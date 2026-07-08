@@ -20,6 +20,7 @@ export type {
   ModalFields,
   ModalFieldValues,
   ModalFileUploadValue,
+  ModalLabelOverrides,
   ModalMentionableSelectValue,
   ModalRadioGroupValue,
   ModalRoleSelectValue,
@@ -35,3 +36,10 @@ export type {
   TypedTextInput,
 } from "../shared/component_definer.type";
 export * from "./builders";
+export type {
+  ModalGroupOverrides,
+  ModalNativeSelectOverrides,
+  ModalOptionOverride,
+  ModalStringSelectOverrides,
+  ModalTextInputOverrides,
+} from "./types";

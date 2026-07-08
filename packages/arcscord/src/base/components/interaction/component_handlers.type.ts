@@ -53,7 +53,7 @@ export type {
  */
 export type ComponentBuilderOptions<
   Handler extends { build: (...args: any[]) => unknown },
-  Options extends string[],
+  Options extends unknown[],
 > = Omit<Handler, "build"> & {
   build: (id: IdInitialiseFunction, ...args: Options) => ReturnType<Handler["build"]>;
 };
@@ -63,7 +63,7 @@ export type ComponentBuilderOptions<
  */
 export type ModalComponentBuilderOptions<
   Handler extends { build: (...args: any[]) => unknown },
-  Options extends string[],
+  Options extends unknown[],
   Fields extends ModalFields,
 > = Omit<Handler, "build" | "fields"> & {
   fields: Fields;
@@ -278,7 +278,7 @@ export type ChannelSelectMenuComponentHandler<
  * Properties for a modal component.
  */
 export type ModalComponentHandler<
-  Options extends string[] = string[],
+  Options extends unknown[] = unknown[],
   Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
   Fields extends ModalFields | undefined = ModalFields | undefined,

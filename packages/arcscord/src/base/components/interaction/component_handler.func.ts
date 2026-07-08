@@ -31,7 +31,7 @@ import { componentHandlerTypeEnum } from "#/base/components/shared/component.enu
 
 type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
 
-function createRouteBuildResolver<Route extends string, Options extends string[]>(
+function createRouteBuildResolver<Route extends string, Options extends unknown[]>(
   route: Route,
 ): (...args: ComponentBuildArgs<Route, Options>) => [IdInitialiseFunction, Options] {
   const routeHasParams = hasComponentRouteParams(route);
@@ -291,18 +291,18 @@ export function createButton<
  *
  */
 export function createModal<
-  Options extends string[],
+  Options extends unknown[],
   Middleware extends ComponentMiddleware[] = [],
   Route extends string = string,
   const Fields extends ModalFields = ModalFields,
 >(options: Omit<ModalComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, Fields>, Options, Fields>, "handlerType">): ModalComponentHandler<Options, Middleware, Route, Fields>;
 export function createModal<
-  Options extends string[],
+  Options extends unknown[],
   Middleware extends ComponentMiddleware[] = [],
   Route extends string = string,
 >(options: Omit<ComponentBuilderOptions<ModalComponentHandler<Options, Middleware, Route, undefined>, Options>, "fields" | "handlerType">): ModalComponentHandler<Options, Middleware, Route, undefined>;
 export function createModal<
-  Options extends string[],
+  Options extends unknown[],
   Middleware extends ComponentMiddleware[] = [],
   Route extends string = string,
   const Fields extends ModalFields = ModalFields,

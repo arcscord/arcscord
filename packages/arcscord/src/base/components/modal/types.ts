@@ -18,11 +18,14 @@ import type {
 import type {
   ComponentInLabel,
   FileUpload,
+  ModalLabelOverrides,
   ModalTopLevelComponent,
   StringSelectMenu,
   TextDisplayInput,
   TextInput,
 } from "../shared/component_definer.type";
+
+export type { ModalLabelOverrides } from "../shared/component_definer.type";
 
 export type DiscordModalTopLevelBuilder
   = | LabelBuilder
@@ -107,6 +110,55 @@ export type FileUploadFieldOptions<
 export type LabeledFieldOptions = {
   description?: string;
   label: string;
+};
+
+/**
+ * Per-option display-text override (keyed by option value). `value` is never
+ * overridable — only what the user sees.
+ */
+export type ModalOptionOverride = {
+  readonly label?: string;
+  readonly description?: string;
+};
+
+/**
+ * Display-text overrides for a `modalTextInput` field's `label()`.
+ */
+export type ModalTextInputOverrides = ModalLabelOverrides & {
+  readonly placeholder?: string;
+  readonly value?: string;
+};
+
+/**
+ * Display-text overrides for native select fields
+ * (user / role / mentionable / channel).
+ */
+export type ModalNativeSelectOverrides = ModalLabelOverrides & {
+  readonly placeholder?: string;
+};
+
+/**
+ * Display-text overrides for a `modalStringSelect` field's `label()`.
+ *
+ * Option overrides are keyed by the declared option string (which is also the
+ * value), so they stay in sync with the field's inferred `Value` type.
+ */
+export type ModalStringSelectOverrides<Options extends readonly string[]> = ModalLabelOverrides & {
+  readonly placeholder?: string;
+  readonly options?: {
+    readonly [V in Options[number]]?: ModalOptionOverride;
+  };
+};
+
+/**
+ * Display-text overrides for radio / checkbox group fields' `label()`.
+ *
+ * Option overrides are keyed by the declared option `value`.
+ */
+export type ModalGroupOverrides<Options extends readonly { value: string }[]> = ModalLabelOverrides & {
+  readonly options?: {
+    readonly [V in Options[number]["value"]]?: ModalOptionOverride;
+  };
 };
 
 export type CollectionLike<T> = {
