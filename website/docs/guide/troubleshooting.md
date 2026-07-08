@@ -6,6 +6,72 @@ sidebar_position: 7
 
 This page collects common Arcscord setup, TypeScript, and runtime problems with their recommended fixes.
 
+## Localization
+
+### Discord mentions are rendered as `&lt;@...&gt;`
+
+i18next escapes interpolated values by default. This is useful when translations are rendered as HTML, but a Discord mention passed as an interpolation value is changed from `<@457144873859022858>` to `&lt;@457144873859022858&gt;`. Discord then displays it as plain text instead of recognizing it as a mention.
+
+Prefer interpolating only the trusted Discord ID and keeping the mention syntax in the translation:
+
+```json title="locales/en.json"
+{
+  "welcome": "Welcome, <@{{userId}}>"
+}
+```
+
+```ts
+const userId = ctx.interaction.user.id;
+
+return ctx.reply({
+  content: ctx.t($ => $.welcome, { userId }),
+  allowedMentions: { users: [userId] },
+});
+```
+
+Because a Discord snowflake contains only digits, i18next has no special characters to escape. Restricting `allowedMentions` also prevents the message from notifying users other than the intended one.
+
+If the entire mention must be interpolated, mark only that variable as unescaped with i18next's `{{- variable}}` syntax:
+
+```json title="locales/en.json"
+{
+  "welcome": "Welcome, {{- mention}}"
+}
+```
+
+```ts
+const userId = ctx.interaction.user.id;
+
+return ctx.reply({
+  content: ctx.t($ => $.welcome, { mention: `<@${userId}>` }),
+  allowedMentions: { users: [userId] },
+});
+```
+
+You can also disable escaping for one translation call:
+
+```ts
+ctx.t($ => $.welcome, {
+  mention: `<@${ctx.interaction.user.id}>`,
+  interpolation: { escapeValue: false },
+});
+```
+
+This disables escaping for every interpolated value in that call, not only the mention. Only use it when all values are trusted or validated.
+
+As a broader option, set `interpolation.escapeValue` to `false` in the locale manager's `i18nOptions`. This applies to every translation handled by that i18next instance, so it is only appropriate when the translations are used exclusively for Discord output and every untrusted value is validated or escaped separately:
+
+```ts
+i18nOptions: {
+  // ...
+  interpolation: {
+    escapeValue: false,
+  },
+},
+```
+
+See i18next's [unescape documentation](https://www.i18next.com/translation-function/interpolation#unescape) for the exact interpolation behavior. Do not disable escaping merely to pass through arbitrary user-provided text, and use Discord's `allowedMentions` option whenever a translated message can contain mentions.
+
 ## TypeScript
 
 ### TS7022 or TS7023 when a component rebuilds itself
