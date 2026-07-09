@@ -1,4 +1,5 @@
 import type { ArcClient } from "arcscord";
+import { reminderDm } from "#/utils/reply";
 import { deleteReminderById, listDueReminders } from "./database";
 import { formatDiscordTimestamp } from "./duration";
 
@@ -24,15 +25,11 @@ export function startReminderScheduler(client: ArcClient): NodeJS.Timeout {
       for (const reminder of reminders) {
         try {
           const user = await client.users.fetch(reminder.userId);
-          await user.send({
-            content: [
-              "Reminder:",
-              reminder.message,
-              "",
-              `Scheduled for ${formatDiscordTimestamp(reminder.remindAt)}.`,
-            ].join("\n"),
-            allowedMentions: { parse: [] },
-          });
+          await user.send(reminderDm(
+            "Reminder",
+            reminder.message,
+            `Scheduled for ${formatDiscordTimestamp(reminder.remindAt)}.`,
+          ));
         }
         catch (err) {
           client.logger.error(`Failed to send reminder ${reminder.id}`, { error: err });

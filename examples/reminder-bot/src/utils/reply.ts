@@ -1,4 +1,4 @@
-import type { MessageV2ReplyOptions } from "arcscord";
+import type { MessageV2EditReplyOptions, MessageV2ReplyOptions } from "arcscord";
 import { container, separator, v2Message } from "arcscord";
 import { MessageFlags } from "discord.js";
 
@@ -35,6 +35,32 @@ export function reminderReply(
     container(
       { accentColor: accentColors[options.tone] },
       `## ${options.title}`,
+      ...children,
+    ),
+  );
+}
+
+/**
+ * Components v2 payload for reminder DMs.
+ *
+ * DMs are regular messages, so they do not use the ephemeral interaction flag.
+ */
+export function reminderDm(
+  title: string,
+  body: string,
+  details?: string,
+): MessageV2EditReplyOptions {
+  const children = details
+    ? [body, separator(), details] as const
+    : [body] as const;
+
+  return v2Message(
+    {
+      allowedMentions: { parse: [] },
+    },
+    container(
+      { accentColor: accentColors.info },
+      `## ${title}`,
       ...children,
     ),
   );
