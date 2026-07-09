@@ -11,10 +11,10 @@ import { CommandMiddleware, ComponentMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
 import { prisma } from "#/utils/prisma";
 
-type TicketInfos = {
+interface TicketInfos {
   ticketData: Ticket;
   thread: AnyThreadChannel;
-};
+}
 
 /**
  * Shared resolver: look up the ticket bound to a channel and make sure that

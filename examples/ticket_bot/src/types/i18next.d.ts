@@ -7,9 +7,9 @@ declare const resources: {
 };
 
 declare module "i18next" {
-  type CustomTypeOptions = {
+  interface CustomTypeOptions {
     defaultNS: "translations";
     resources: typeof resources;
     enableSelector: "optimize";
-  };
+  }
 }

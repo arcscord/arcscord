@@ -11,12 +11,12 @@ import { prisma } from "#/utils/prisma";
  * `t` is the localized translate function taken from the interaction context
  * (`ctx.t`), so both slash commands and buttons announce in the caller's locale.
  */
-type TicketActionBase = {
+interface TicketActionBase {
   thread: AnyThreadChannel;
   ticket: Ticket;
   actorId: string;
   t: TFunction;
-};
+}
 
 const CLAIM_COLOR = 0x5865F2;
 const CLOSE_COLOR = 0xED4245;
