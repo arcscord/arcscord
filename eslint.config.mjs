@@ -16,6 +16,7 @@ export default antfu(
       ".local/*",
       "CLAUDE.md",
       "AGENTS.md",
+      "**/generated/**",
     ],
   },
   {

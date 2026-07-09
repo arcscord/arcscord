@@ -8,5 +8,8 @@ export default antfu(
       semi: true,
     },
     typescript: true,
+    ignores: [
+      "**/generated/**",
+    ],
   },
 );

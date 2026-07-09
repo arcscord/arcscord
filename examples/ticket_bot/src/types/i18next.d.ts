@@ -7,9 +7,9 @@ declare const resources: {
 };
 
 declare module "i18next" {
-  interface CustomTypeOptions { // eslint-disable-line
+  type CustomTypeOptions = {
     defaultNS: "translations";
     resources: typeof resources;
     enableSelector: "optimize";
-  }
+  };
 }

@@ -36,13 +36,5 @@
     "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "@swc/core",
-      "better-sqlite3",
-      "prisma"
-    ]
   }
 }
