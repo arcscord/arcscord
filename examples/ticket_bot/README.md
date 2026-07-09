@@ -57,7 +57,7 @@ DATABASE_URL="file:./prisma/dev.db"
 is missing. `DATABASE_URL` points Prisma to a local SQLite file. With the default
 value, Prisma creates `prisma/dev.db` when you push a schema.
 
-## Prisma
+## Database
 
 The project includes a SQLite Prisma schema at `prisma/schema.prisma` and a Prisma 7 config at `prisma.config.ts`.
 
@@ -135,7 +135,7 @@ It checks `interaction.memberPermissions`, which Discord computes for the thread
 from its parent channel — a parent-channel-level check that honours per-channel
 permission overwrites (the same rule used when removing members on close).
 
-## Message stats
+### Message stats
 
 A `messageCreate` handler (`src/events/message_count.ts`) counts each
 participant's messages in ticket threads (this is why the bot enables the
@@ -144,7 +144,7 @@ counts as an ephemeral message. It works inside a ticket (defaults to the curren
 thread) or anywhere else via a `ticket` autocomplete option that searches the
 guild's tickets.
 
-## Command stats and the custom result handler
+### Command stats and the custom result handler
 
 `src/utils/command_result_handler.ts` is wired through
 `managers.command.resultHandler` in `src/index.ts`. It runs after every command,
