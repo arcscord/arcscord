@@ -1,0 +1,112 @@
+{
+  "ping": {
+    "title": "🏓 Pong!",
+    "latency": "Latency: `{{ms}}ms`"
+  },
+  "ticket": {
+    "not_in_ticket_channel": "You can only use this command in a ticket thread.",
+    "missing_manage_threads": "You need the Manage Threads permission to do this.",
+    "commands": {
+      "setup": {
+        "name": "setup",
+        "description": "Send the ticket dashboard message in the current channel.",
+        "run": {
+          "success": "The ticket dashboard was sent successfully!"
+        }
+      },
+      "claim": {
+        "name": "claim",
+        "description": "Claim the ticket in the current thread.",
+        "success": "You claimed this ticket.",
+        "errors": {
+          "already_claimed": "This ticket is already claimed by {{- userMention}}.",
+          "already_closed": "This ticket is closed, it cannot be claimed."
+        }
+      },
+      "close": {
+        "name": "close",
+        "description": "Close the ticket in the current thread.",
+        "option_reason_description": "Reason for closing the ticket.",
+        "success": "The ticket has been closed.",
+        "errors": {
+          "already_closed": "This ticket is already closed."
+        }
+      },
+      "reopen": {
+        "name": "reopen",
+        "description": "Reopen the ticket in the current thread.",
+        "success": "The ticket has been reopened.",
+        "errors": {
+          "not_closed": "This ticket is already open."
+        }
+      },
+      "stats": {
+        "name": "stats",
+        "description": "Show a command usage table.",
+        "empty": "No command has been used yet.",
+        "table": {
+          "title": "Command usage stats",
+          "header_command": "Command",
+          "header_uses": "Uses"
+        }
+      },
+      "ticket_stats": {
+        "name": "ticketstats",
+        "description": "Show per-participant message counts for a ticket.",
+        "option_ticket_description": "Ticket to inspect (defaults to the current thread).",
+        "not_found": "No ticket found. Use this inside a ticket thread or pick a ticket.",
+        "empty": "No messages have been recorded for this ticket yet.",
+        "title": "Message stats — ticket #{{ticketId}}"
+      }
+    },
+    "messages": {
+      "dashboard": {
+        "title": "Tickets",
+        "description": "Click the button below to open a ticket.",
+        "button": "Open a ticket"
+      },
+      "ticket_created": {
+        "title": "Ticket #{{ticketId}}",
+        "description": "{{- userMention}} opened a ticket!",
+        "category_label": "Category",
+        "category": {
+          "support": "Support",
+          "bug_report": "Bug",
+          "other": "Other"
+        },
+        "reason_label": "Reason",
+        "buttons": {
+          "close": "Close the ticket",
+          "claim": "Claim the ticket",
+          "reopen": "Reopen the ticket"
+        },
+        "succes": "the ticket was created successfully in {{- channelMention}}!"
+      },
+      "ticket_claimed": {
+        "title": "Ticket claimed",
+        "description": "{{- userMention}} claimed this ticket."
+      },
+      "ticket_closed": {
+        "title": "Ticket closed",
+        "description": "{{- userMention}} closed this ticket.",
+        "reason_label": "Reason"
+      },
+      "ticket_reopened": {
+        "title": "Ticket reopened",
+        "description": "{{- userMention}} reopened this ticket."
+      }
+    },
+    "modals": {
+      "ticket_open": {
+        "title": "Open a ticket",
+        "category_label": "Category",
+        "categorySupport": "Support",
+        "categoryBugReport": "Bug",
+        "categoryOther": "Other",
+        "reason_label": "Reason",
+        "reasonDescription": "Please provide a brief description of your issue.",
+        "reasonPlaceholder": "I need help with..."
+      }
+    }
+  }
+}

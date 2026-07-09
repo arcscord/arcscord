@@ -1,0 +1,112 @@
+{
+  "ping": {
+    "title": "🏓 Pong!",
+    "latency": "Latence: `{{ms}}ms`"
+  },
+  "ticket": {
+    "not_in_ticket_channel": "Tu peux utiliser cette commande uniquement dans un fil de ticket.",
+    "missing_manage_threads": "Tu as besoin de la permission Gérer les fils pour faire cela.",
+    "commands": {
+      "setup": {
+        "name": "configurer",
+        "description": "Envoie le message de tableau de bord des tickets dans le salon actuel.",
+        "run": {
+          "success": "Le tableau de bord des tickets a été envoyé avec succès !"
+        }
+      },
+      "claim": {
+        "name": "gerer",
+        "description": "Prends en charge le ticket du fil actuel.",
+        "success": "Tu as pris en charge ce ticket.",
+        "errors": {
+          "already_claimed": "Ce ticket est déjà pris en charge par {{- userMention}}.",
+          "already_closed": "Ce ticket est fermé, impossible de le prendre en charge."
+        }
+      },
+      "close": {
+        "name": "fermer",
+        "description": "Ferme le ticket du fil actuel.",
+        "option_reason_description": "Raison de la fermeture du ticket.",
+        "success": "Le ticket a été fermé.",
+        "errors": {
+          "already_closed": "Ce ticket est déjà fermé."
+        }
+      },
+      "reopen": {
+        "name": "rouvrir",
+        "description": "Rouvre le ticket du fil actuel.",
+        "success": "Le ticket a été rouvert.",
+        "errors": {
+          "not_closed": "Ce ticket est déjà ouvert."
+        }
+      },
+      "stats": {
+        "name": "stats",
+        "description": "Affiche un tableau d'utilisation des commandes.",
+        "empty": "Aucune commande n'a encore été utilisée.",
+        "table": {
+          "title": "Statistiques d'utilisation des commandes",
+          "header_command": "Commande",
+          "header_uses": "Utilisations"
+        }
+      },
+      "ticket_stats": {
+        "name": "stats-ticket",
+        "description": "Affiche le nombre de messages par participant d'un ticket.",
+        "option_ticket_description": "Ticket à inspecter (par défaut, celui du fil actuel).",
+        "not_found": "Aucun ticket trouvé. Utilise cette commande dans un fil de ticket ou choisis un ticket.",
+        "empty": "Aucun message n'a encore été enregistré pour ce ticket.",
+        "title": "Statistiques de messages — ticket #{{ticketId}}"
+      }
+    },
+    "messages": {
+      "dashboard": {
+        "title": "Tickets",
+        "description": "Clique sur le bouton ci-dessous pour créer un ticket.",
+        "button": "Créer un ticket"
+      },
+      "ticket_created": {
+        "title": "Ticket #{{ticketId}}",
+        "description": "{{- userMention}} a crée un ticket !",
+        "category_label": "Catégorie",
+        "category": {
+          "support": "Support",
+          "bug_report": "Bug",
+          "other": "Autre"
+        },
+        "reason_label": "Raison",
+        "buttons": {
+          "close": "Fermer le ticket",
+          "claim": "Gérer le ticket",
+          "reopen": "Rouvrir le ticket"
+        },
+        "succes": "le ticket a été créé avec succès dans {{- channelMention}}!"
+      },
+      "ticket_claimed": {
+        "title": "Ticket pris en charge",
+        "description": "{{- userMention}} a pris en charge ce ticket."
+      },
+      "ticket_closed": {
+        "title": "Ticket fermé",
+        "description": "{{- userMention}} a fermé ce ticket.",
+        "reason_label": "Raison"
+      },
+      "ticket_reopened": {
+        "title": "Ticket rouvert",
+        "description": "{{- userMention}} a rouvert ce ticket."
+      }
+    },
+    "modals": {
+      "ticket_open": {
+        "title": "Ouvrir un ticket",
+        "category_label": "Catégorie",
+        "categorySupport": "Support",
+        "categoryBugReport": "Bug",
+        "categoryOther": "Autre",
+        "reason_label": "Raison",
+        "reasonDescription": "Veuillez fournir une brève description de votre problème.",
+        "reasonPlaceholder": "J'ai besoin d'aide avec..."
+      }
+    }
+  }
+}

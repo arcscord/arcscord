@@ -60,4 +60,10 @@ export default antfu(
       "no-console": "off",
     },
   },
+  {
+    files: ["examples/**"],
+    rules: {
+      "pnpm/json-prefer-workspace-settings": "off",
+    },
+  },
 );

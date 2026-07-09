@@ -17,6 +17,11 @@ overrides:
   ansi-regex: ^5.0.1
   minimist: ^1.2.8
 
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - "@swc/core"
+  - better-sqlite3
+  - prisma
 peerDependencyRules:
   allowedVersions:
     tsconfck>typescript: "6"

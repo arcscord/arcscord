@@ -1,0 +1,82 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+enum TicketStatus {
+  OPEN
+  CLOSED
+}
+
+enum TicketEventType {
+  CREATED
+  CLAIMED
+  CLOSED
+  REOPENED
+  NOTE
+}
+
+model Ticket {
+  id               Int             @id @default(autoincrement())
+  guildId          String
+  parentChannelId  String
+  threadId         String              @unique
+  starterMessageId String?
+  openerId         String
+  claimedById      String?
+  title            String
+  description      String
+  category         String?
+  status           TicketStatus        @default(OPEN)
+  closeReason      String?
+  closedById       String?
+  closedAt         DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  events           TicketEvent[]
+  participants     TicketParticipant[]
+
+  @@index([guildId, status])
+  @@index([openerId])
+  @@index([createdAt])
+}
+
+/// One row per user seen in a ticket thread.
+///
+/// - `messageCount` is bumped by the messageCreate handler and read by /ticketStats.
+/// - `removed` marks members taken out of the thread on close (those without the
+///   Manage Threads permission) so /reopen can add them back.
+model TicketParticipant {
+  id           Int     @id @default(autoincrement())
+  ticketId     Int
+  userId       String
+  messageCount Int     @default(0)
+  removed      Boolean @default(false)
+  ticket       Ticket  @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@unique([ticketId, userId])
+  @@index([ticketId])
+}
+
+model TicketEvent {
+  id        Int        @id @default(autoincrement())
+  ticketId  Int
+  type      TicketEventType
+  actorId   String
+  body      String?
+  createdAt DateTime        @default(now())
+  ticket    Ticket          @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId, createdAt])
+  @@index([actorId])
+}
+
+model CommandUsage {
+  name       String   @id
+  count      Int      @default(0)
+  lastUsedAt DateTime @updatedAt
+}
