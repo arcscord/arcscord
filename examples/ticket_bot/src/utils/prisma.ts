@@ -6,11 +6,11 @@
  * instance everywhere instead of constructing a new `PrismaClient` per module,
  * so the whole bot shares one connection pool.
  */
-import * as process from "node:process";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
 import { PrismaClient } from "../generated/prisma/client";
+import { readRequiredEnv } from "./env";
 
-const connectionString = `${process.env.DATABASE_URL}`;
+const connectionString = readRequiredEnv("DATABASE_URL");
 
 const adapter = new PrismaBetterSqlite3({ url: connectionString });
 const prisma = new PrismaClient({ adapter });

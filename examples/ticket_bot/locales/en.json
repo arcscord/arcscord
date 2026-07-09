@@ -1,7 +1,8 @@
 {
   "ping": {
     "title": "🏓 Pong!",
-    "latency": "Latency: `{{ms}}ms`"
+    "latency": "Latency: `{{ms}}ms`",
+    "refresh": "Refresh"
   },
   "ticket": {
     "not_in_ticket_channel": "You can only use this command in a ticket thread.",
@@ -10,6 +11,9 @@
       "setup": {
         "name": "setup",
         "description": "Send the ticket dashboard message in the current channel.",
+        "errors": {
+          "text_channel_only": "This command can only be used in text channels."
+        },
         "run": {
           "success": "The ticket dashboard was sent successfully!"
         }
@@ -80,7 +84,7 @@
           "claim": "Claim the ticket",
           "reopen": "Reopen the ticket"
         },
-        "succes": "the ticket was created successfully in {{- channelMention}}!"
+        "success": "The ticket was created successfully in {{- channelMention}}!"
       },
       "ticket_claimed": {
         "title": "Ticket claimed",

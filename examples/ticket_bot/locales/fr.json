@@ -1,7 +1,8 @@
 {
   "ping": {
     "title": "🏓 Pong!",
-    "latency": "Latence: `{{ms}}ms`"
+    "latency": "Latence: `{{ms}}ms`",
+    "refresh": "Rafraîchir"
   },
   "ticket": {
     "not_in_ticket_channel": "Tu peux utiliser cette commande uniquement dans un fil de ticket.",
@@ -10,6 +11,9 @@
       "setup": {
         "name": "configurer",
         "description": "Envoie le message de tableau de bord des tickets dans le salon actuel.",
+        "errors": {
+          "text_channel_only": "Cette commande peut seulement être utilisée dans un salon textuel."
+        },
         "run": {
           "success": "Le tableau de bord des tickets a été envoyé avec succès !"
         }
@@ -80,7 +84,7 @@
           "claim": "Gérer le ticket",
           "reopen": "Rouvrir le ticket"
         },
-        "succes": "le ticket a été créé avec succès dans {{- channelMention}}!"
+        "success": "Le ticket a été créé avec succès dans {{- channelMention}} !"
       },
       "ticket_claimed": {
         "title": "Ticket pris en charge",

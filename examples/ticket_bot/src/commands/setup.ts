@@ -28,7 +28,7 @@ export const setupCommand = createCommand({
     // threads from it.
     const channel = await ctx.client.channels.fetch(ctx.interaction.channelId);
     if (!channel || !channel.isSendable() || channel.type !== ChannelType.GuildText) {
-      return ctx.reply("This command can only be used in text channels.");
+      return ctx.editReply(ctx.t($ => $.ticket.commands.setup.errors.text_channel_only));
     }
 
     await channel.send(v2Message(
@@ -44,7 +44,7 @@ export const setupCommand = createCommand({
     ));
 
     // Because we deferred (preReply), the confirmation goes through `editReply`.
-    ctx.editReply(v2Message(
+    return ctx.editReply(v2Message(
       container(
         { accentColor: 0x5CE65C },
         ctx.t($ => $.ticket.commands.setup.run.success),

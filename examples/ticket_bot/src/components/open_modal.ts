@@ -114,7 +114,7 @@ export const ticketOpenModal = createModal({
     });
 
     // Post the ticket message with the Close/Claim buttons inside the thread.
-    thread.send(v2Message(
+    await thread.send(v2Message(
       container(
         { accentColor: 0x5865F2 },
         `## ${ctx.t($ => $.ticket.messages.ticket_created.title, { ticketId: ticket.id })}`,
@@ -130,6 +130,6 @@ export const ticketOpenModal = createModal({
       ),
     ));
 
-    await ctx.editReply(ctx.t($ => $.ticket.messages.ticket_created.succes, { channelMention: `<#${thread.id}>` }));
+    await ctx.editReply(ctx.t($ => $.ticket.messages.ticket_created.success, { channelMention: `<#${thread.id}>` }));
   },
 });

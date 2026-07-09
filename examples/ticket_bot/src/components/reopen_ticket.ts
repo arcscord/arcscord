@@ -10,10 +10,6 @@ import { reopenTicket } from "#/utils/ticket_actions";
  * the other ticket buttons: a Manage Threads permission guard (from
  * `@arcscord/middleware`) then the component middleware that provides the ticket,
  * then the shared `reopenTicket` helper.
- *
- * Note: ticket_actions.ts imports this button to render it on close, and this
- * file imports `reopenTicket` from ticket_actions — a deliberate cycle that is
- * safe because both references are only used at call time, never at load time.
  */
 export const reopenTicketButton = createButton({
   route: "reopen_ticket",

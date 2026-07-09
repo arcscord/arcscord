@@ -1,9 +1,8 @@
 import type { AnyThreadChannel } from "discord.js";
 import type { TFunction } from "i18next";
 import type { Ticket } from "#/generated/prisma/client";
-import { actionRow, container, separator, v2Message } from "arcscord";
+import { actionRow, button, container, separator, v2Message } from "arcscord";
 import { PermissionFlagsBits } from "discord.js";
-import { reopenTicketButton } from "#/components/reopen_ticket";
 import { prisma } from "#/utils/prisma";
 
 /**
@@ -157,7 +156,12 @@ export async function closeTicket({
         : []),
       separator(),
       actionRow(
-        reopenTicketButton.build(t($ => $.ticket.messages.ticket_created.buttons.reopen)),
+        // Static component routes use their route string as the custom id.
+        button({
+          label: t($ => $.ticket.messages.ticket_created.buttons.reopen),
+          style: "success",
+          customId: "reopen_ticket",
+        }),
       ),
     ),
   ));

@@ -4,15 +4,18 @@
  * Creates the {@link ArcClient} (a thin subclass of the discord.js `Client`),
  * configures its managers, then loads every handler and logs in.
  */
-import * as process from "node:process";
 import { ArcClient } from "arcscord";
 import { GatewayIntentBits } from "discord.js";
 import en from "../locales/en.json";
 import fr from "../locales/fr.json";
 import handlers from "./handlers";
 import { commandResultHandler } from "./utils/command_result_handler";
+import { readRequiredEnv } from "./utils/env";
 
-const client = new ArcClient(process.env.TOKEN ?? "", {
+const token = readRequiredEnv("TOKEN");
+const applicationId = readRequiredEnv("APPLICATION_ID");
+
+const client = new ArcClient(token, {
   // Interactions (slash commands, buttons, modals) need no intents, but the
   // message-counting event does: `GuildMessages` delivers messageCreate (we only
   // read author + channel, so no privileged MessageContent), and `Guilds`
@@ -47,7 +50,7 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
         en: ["en-US", "en-GB"],
       },
       // Discord locales the command name/description localizations are built for.
-      availableLanguages: ["en-US", "en-GB"],
+      availableLanguages: ["en-US", "en-GB", "fr"],
     },
     // Command manager: swap the default result handler for our own, which also
     // records command usage. See utils/command_result_handler.ts.
@@ -55,11 +58,10 @@ const client = new ArcClient(process.env.TOKEN ?? "", {
       resultHandler: commandResultHandler,
     },
   },
-  // Optional. When set, application (slash) commands can be registered over REST
-  // without waiting for the gateway — so `loadHandlers` can run before `login()`
-  // (and before `clientReady`). Without it, you must load handlers after ready,
-  // once the application id is known.
-  applicationId: process.env.APPLICATION_ID,
+  // Required for this example because handlers are loaded before `login()`.
+  // With the application id known, slash commands can be registered over REST
+  // without waiting for `clientReady`.
+  applicationId,
 });
 
 // `clientReady` only logs here; handlers are already loaded below.

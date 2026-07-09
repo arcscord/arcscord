@@ -20,7 +20,7 @@ export const pingCommand = createCommand({
         `## ${ctx.t($ => $.ping.title)}`,
         ctx.t($ => $.ping.latency, { ms: ctx.client.ws.ping }),
         // `accessory` docks the button to the right of the section.
-        accessory(pingButton.build()),
+        accessory(pingButton.build(ctx.t($ => $.ping.refresh))),
       ),
     ),
   )),

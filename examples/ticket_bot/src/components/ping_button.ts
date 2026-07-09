@@ -10,9 +10,9 @@ import { accessory, button, container, createButton, section, v2Message } from "
  */
 export const pingButton = createButton({
   route: "ping_refresh",
-  build: id =>
+  build: (id, label) =>
     button({
-      label: "Refresh",
+      label,
       style: "secondary",
       customId: id(),
     }),
@@ -23,7 +23,7 @@ export const pingButton = createButton({
       section(
         `## ${ctx.t($ => $.ping.title)}`,
         ctx.t($ => $.ping.latency, { ms: ctx.client.ws.ping }),
-        accessory(pingButton.build()),
+        accessory(pingButton.build(ctx.t($ => $.ping.refresh))),
       ),
     ),
   )),
