@@ -58,6 +58,33 @@ const features: Feature[] = [
   },
 ];
 
+type Example = {
+  name: string;
+  github: string;
+  description: string;
+};
+
+const examples: Example[] = [
+  {
+    name: "starter-bot",
+    github: "https://github.com/arcscord/arcscord/tree/main/examples/starter-bot",
+    description:
+      "The smallest end-to-end bot: typed slash and context-menu commands, a self-updating button, a component middleware, and an event listener.",
+  },
+  {
+    name: "reminder-bot",
+    github: "https://github.com/arcscord/arcscord/tree/main/examples/reminder-bot",
+    description:
+      "A user-install bot storing personal reminders in SQLite, with a background scheduler, subcommands, and a duration parser.",
+  },
+  {
+    name: "ticket_bot",
+    github: "https://github.com/arcscord/arcscord/tree/main/examples/ticket_bot",
+    description:
+      "A full support-ticket system on Discord threads: Prisma + SQLite, i18n, modals, autocomplete, and a custom result handler.",
+  },
+];
+
 type Pkg = {
   name: string;
   npm: string;
@@ -238,6 +265,31 @@ function Packages(): ReactNode {
   );
 }
 
+function Examples(): ReactNode {
+  return (
+    <section className={`${styles.section} ${styles.sectionAlt}`}>
+      <div className="container">
+        <h2 className={styles.sectionTitle}>Examples</h2>
+        <p className={styles.sectionSubtitle}>
+          Full bots you can clone and run, from a minimal starter to a
+          Prisma-backed ticket system.
+        </p>
+        <div className={styles.packageGrid}>
+          {examples.map(example => (
+            <div key={example.name} className={styles.packageCard}>
+              <code className={styles.packageName}>{example.name}</code>
+              <p className={styles.packageDescription}>{example.description}</p>
+              <div className={styles.packageLinks}>
+                <Link href={example.github}>View on GitHub</Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export default function Home(): ReactNode {
   const { siteConfig } = useDocusaurusContext();
   return (
@@ -251,6 +303,7 @@ export default function Home(): ReactNode {
         <Features />
         <Install />
         <Packages />
+        <Examples />
       </main>
     </Layout>
   );
