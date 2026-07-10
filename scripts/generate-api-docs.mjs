@@ -4,6 +4,8 @@ import { dirname, join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+import { resolveApiDocVersions } from "./api-doc-versions.mjs";
+
 const scriptRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const sourceRootArgIndex = process.argv.indexOf("--source-root");
 const outputRootArgIndex = process.argv.indexOf("--output-root");
@@ -156,37 +158,21 @@ for (const pkg of packages) {
     }
   }
 
-  const files = existsSync(outDir)
-    ? Object.fromEntries(
-        readdirSync(outDir)
-          .filter(file => file.endsWith(".json"))
-          .map(file => file.slice(0, -".json".length))
-          .sort((a, b) => {
-            if (a === "dev")
-              return -1;
-            if (b === "dev")
-              return 1;
-            if (a === packageJson.version)
-              return -1;
-            if (b === packageJson.version)
-              return 1;
-            return b.localeCompare(a, undefined, { numeric: true });
-          })
-          .map(fileVersion => [fileVersion, `/api/${pkg.slug}/${fileVersion}.json`]),
-      )
-    : {};
-  const versions = Object.keys(files);
-  const defaultVersion = files[packageJson.version]
-    ? packageJson.version
-    : versions.includes("dev")
-      ? "dev"
-      : versions[0];
+  const availableVersions = existsSync(outDir)
+    ? readdirSync(outDir)
+        .filter(file => file.endsWith(".json"))
+        .map(file => file.slice(0, -".json".length))
+    : [];
+  const { defaultVersion, latest, versions } = resolveApiDocVersions(availableVersions);
+  const files = Object.fromEntries(
+    versions.map(fileVersion => [fileVersion, `/api/${pkg.slug}/${fileVersion}.json`]),
+  );
 
   manifest.packages[pkg.slug] = {
     name: packageJson.name,
     description: packageJson.description ?? "",
     currentVersion: packageJson.version,
-    latest: packageJson.version,
+    latest,
     defaultVersion,
     versions,
     files,

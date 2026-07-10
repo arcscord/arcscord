@@ -13,6 +13,7 @@ export default createVitestConfig({
       "./packages/better_error/",
       "./packages/error/",
       "./packages/middleware/",
+      "./scripts/tests/",
     ],
   },
 });
