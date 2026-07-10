@@ -34,9 +34,6 @@
 - name: packages/better-error
   color: 0E8A16
   description: About better error package
-- name: packages/cli
-  color: 0E8A16
-  description: About cli package
 - name: packages/core
   color: 0E8A16
   description: About main package

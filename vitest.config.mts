@@ -13,7 +13,6 @@ export default createVitestConfig({
       "./packages/better_error/",
       "./packages/error/",
       "./packages/middleware/",
-      "./packages/cli",
     ],
   },
 });

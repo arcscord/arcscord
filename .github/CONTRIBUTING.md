@@ -36,12 +36,14 @@ The default `pnpm lint` script applies fixes. Use `pnpm lint --fix=false` when y
 ## Repository Layout
 
 - `packages/arcscord`: core Discord bot framework
-- `packages/cli`: project generator and CLI tooling
+- `packages/create-arcscord-bot`: maintained project scaffolder
 - `packages/middleware`: reusable middleware
 - `packages/error`: result-style error helpers
 - `packages/better_error`: richer error class utilities
 - `website`: documentation site
 - `test/test_bot`: local integration test bot
+
+The former unpublished `@arcscord/cli` prototype was removed from the active workspace. Its history remains available in Git; use `create-arcscord-bot` for project scaffolding.
 
 ## Pull Requests
 
