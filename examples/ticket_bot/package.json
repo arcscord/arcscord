@@ -1,6 +1,7 @@
 {
   "name": "ticket_bot",
   "version": "1.0.0",
+  "packageManager": "pnpm@11.8.0",
   "description": "A discord bot made with arcscord",
   "engines": {
     "node": ">=24.11.0"

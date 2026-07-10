@@ -28,11 +28,13 @@ template. A good reading order is:
 
 ## Install
 
-This folder lives inside the Arcscord monorepo, but it is not a pnpm workspace package. Install dependencies from this directory with `--ignore-workspace`:
+This folder lives inside the Arcscord monorepo, but it has its own small
+`pnpm-workspace.yaml` so pnpm can approve the native builds needed by Prisma,
+`better-sqlite3` and `@swc/core`. Install dependencies from this directory:
 
 ```sh
 cd examples/ticket_bot
-pnpm install --ignore-workspace
+pnpm install
 ```
 
 If pnpm reports an unexpected store location from an existing `node_modules`, reinstall the example dependencies after removing that local `node_modules` directory.

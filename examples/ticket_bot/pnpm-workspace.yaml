@@ -1,0 +1,13 @@
+shellEmulator: true
+trustPolicy: no-downgrade
+
+allowBuilds:
+  "@prisma/engines": true
+  "@swc/core": true
+  better-sqlite3: true
+  prisma: true
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - "@swc/core"
+  - better-sqlite3
+  - prisma

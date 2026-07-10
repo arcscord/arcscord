@@ -1,0 +1,121 @@
+name: Example CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - examples/**
+      - .github/workflows/example-ci.yml
+  pull_request:
+    paths:
+      - examples/**
+      - .github/workflows/example-ci.yml
+  workflow_dispatch:
+
+jobs:
+  ExampleBots:
+    name: Example Bot (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Add new example bots here. The whole folder is used for change detection.
+          - name: ticket_bot
+            path: examples/ticket_bot
+          - name: reminder-bot
+            path: examples/reminder-bot
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Detect example changes
+        id: changes
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "base_sha=manual" >> "$GITHUB_OUTPUT"
+            echo "head_sha=${{ github.sha }}" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          else
+            BASE_SHA="${{ github.event.before }}"
+          fi
+
+          HEAD_SHA="${{ github.sha }}"
+          EMPTY_SHA="0000000000000000000000000000000000000000"
+
+          if [ -z "$BASE_SHA" ] || [ "$BASE_SHA" = "$EMPTY_SHA" ]; then
+            BASE_SHA="$(git rev-parse "${HEAD_SHA}^" 2>/dev/null || true)"
+          fi
+
+          if [ -z "$BASE_SHA" ]; then
+            CHANGED=true
+          elif git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "${{ matrix.path }}"; then
+            CHANGED=false
+          else
+            CHANGED=true
+          fi
+
+          echo "changed=$CHANGED" >> "$GITHUB_OUTPUT"
+          echo "base_sha=${BASE_SHA:-none}" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$HEAD_SHA" >> "$GITHUB_OUTPUT"
+      - name: Install pnpm
+        if: steps.changes.outputs.changed == 'true'
+        uses: pnpm/action-setup@v6
+      - name: Add ESLint problem matcher
+        if: steps.changes.outputs.changed == 'true'
+        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
+      - name: Add TypeScript problem matcher
+        if: steps.changes.outputs.changed == 'true'
+        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
+      - name: Use Node.js v24
+        if: steps.changes.outputs.changed == 'true'
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
+      - name: Install example dependencies
+        if: steps.changes.outputs.changed == 'true'
+        id: install
+        working-directory: ${{ matrix.path }}
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck example
+        if: steps.changes.outputs.changed == 'true'
+        id: typecheck
+        working-directory: ${{ matrix.path }}
+        run: pnpm typecheck
+      - name: Lint example
+        if: steps.changes.outputs.changed == 'true'
+        id: lint
+        working-directory: ${{ matrix.path }}
+        run: pnpm lint
+      - name: Write example summary
+        if: always()
+        run: |
+          {
+            echo "## Example bot: ${{ matrix.name }}"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Path | \`${{ matrix.path }}\` |"
+            echo "| Changed | \`${{ steps.changes.outputs.changed }}\` |"
+            echo "| Base SHA | \`${{ steps.changes.outputs.base_sha }}\` |"
+            echo "| Head SHA | \`${{ steps.changes.outputs.head_sha }}\` |"
+            echo ""
+            if [ "${{ steps.changes.outputs.changed }}" = "true" ]; then
+              echo "| Check | Command | Result |"
+              echo "| --- | --- | --- |"
+              echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+              echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
+              echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
+            else
+              echo "No files changed under \`${{ matrix.path }}/\`; this example was skipped."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"

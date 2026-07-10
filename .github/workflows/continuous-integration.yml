@@ -39,69 +39,7 @@ jobs:
             echo "| Root workspace | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Root workspace | \`pnpm lint --fix=false\` | \`${{ steps.lint.outcome }}\` |"
             echo ""
-            echo "Example bots are linted in the dedicated **Example Bots** matrix job with their own dependencies."
-          } >> "$GITHUB_STEP_SUMMARY"
-
-  Examples:
-    name: Example Bots (${{ matrix.name }})
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: ticket_bot
-            path: examples/ticket_bot
-            install: pnpm install --frozen-lockfile --ignore-workspace
-          - name: reminder-bot
-            path: examples/reminder-bot
-            install: pnpm install --frozen-lockfile
-    steps:
-      - name: Checkout Project
-        uses: actions/checkout@v7
-      - name: Install pnpm
-        uses: pnpm/action-setup@v6
-      - name: Add ESLint problem matcher
-        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
-      - name: Add TypeScript problem matcher
-        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
-      - name: Use Node.js v24
-        uses: actions/setup-node@v6
-        with:
-          node-version: 24
-          cache: pnpm
-          cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
-      - name: Install example dependencies
-        id: install
-        working-directory: ${{ matrix.path }}
-        run: ${{ matrix.install }}
-      - name: Typecheck example
-        id: typecheck
-        working-directory: ${{ matrix.path }}
-        run: pnpm typecheck
-      - name: Lint example
-        id: lint
-        working-directory: ${{ matrix.path }}
-        run: pnpm lint
-      - name: Write example summary
-        if: always()
-        working-directory: ${{ matrix.path }}
-        run: |
-          PACKAGE_NAME=$(node -p "require('./package.json').name")
-          {
-            echo "## Example bot: ${{ matrix.name }}"
-            echo ""
-            echo "| Field | Value |"
-            echo "| --- | --- |"
-            echo "| Package | \`$PACKAGE_NAME\` |"
-            echo "| Path | \`${{ matrix.path }}\` |"
-            echo "| Node | \`$(node --version)\` |"
-            echo "| pnpm | \`$(pnpm --version)\` |"
-            echo ""
-            echo "| Check | Command | Result |"
-            echo "| --- | --- | --- |"
-            echo "| Install | \`${{ matrix.install }}\` | \`${{ steps.install.outcome }}\` |"
-            echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
-            echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
+            echo "Example bots are checked by the separate **Example CI** workflow when their folders change."
           } >> "$GITHUB_STEP_SUMMARY"
 
   Building:
