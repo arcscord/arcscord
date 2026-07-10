@@ -8,6 +8,7 @@
   "scripts": {
     "start": "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
     "dev": "npx nodemon --exec \"node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts\" dev debug",
+    "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
   },
