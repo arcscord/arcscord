@@ -92,6 +92,8 @@ jobs:
         if: steps.changes.outputs.changed == 'true'
         id: db_generate
         working-directory: ${{ matrix.path }}
+        env:
+          DATABASE_URL: file:./prisma/dev.db
         run: |
           if node -e "process.exit(require('./package.json').scripts?.['db:generate'] ? 0 : 1)"; then
             pnpm db:generate
