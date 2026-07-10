@@ -4,6 +4,7 @@ import {
   colorDebugValue,
   createLogger,
   formatJsonLog,
+  formatLog,
   resolveDefaultLogFunc,
   resolveLogFormat,
   resolveLogLevel,
@@ -109,6 +110,20 @@ describe("logger.util", () => {
     it("omits the \"meta\" key when no meta is provided", () => {
       const parsed = JSON.parse(formatJsonLog("info", "started"));
       expect(parsed.meta).toBeUndefined();
+    });
+  });
+
+  describe("formatLog", () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it("formats the timestamp in the process local time", () => {
+      const now = new Date(2026, 0, 2, 3, 4, 5);
+      vi.useFakeTimers();
+      vi.setSystemTime(now);
+
+      expect(formatLog("info", "started")).toContain("[2026-01-02 03:04:05]");
     });
   });
 

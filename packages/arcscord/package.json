@@ -58,7 +58,6 @@
   "dependencies": {
     "@arcscord/better-error": "workspace:^",
     "@arcscord/error": "workspace:^",
-    "dayjs": "^1.11.21",
     "discord-api-types": "^0.38.49",
     "discord.js": "^14.26.4",
     "i18next": "^26.3.3",

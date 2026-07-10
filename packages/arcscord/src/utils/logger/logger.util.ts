@@ -2,7 +2,6 @@ import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerConstructor, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
 import { effectReset } from "tintify";
-import { DayJS } from "#/utils/dayjs/dayjs";
 import {
   DATE_COLOR,
   DEBUG_KEY_COLOR,
@@ -16,6 +15,12 @@ import {
   SHORT_DEBUG_SPACING,
   SPACE_FILLER,
 } from "#/utils/logger/logger.const";
+
+function formatLocalDate(date: Date): string {
+  const pad = (value: number): string => value.toString().padStart(2, "0");
+
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
+}
 
 export function resolveLogLevel(level?: string): LogLevel {
   if (level === "warning") {
@@ -77,7 +82,7 @@ export function formatLog(
   const reset = effectReset.all;
   const options = logLevelInfos[logLevel];
 
-  const date = DayJS().format("YYYY-MM-DD HH:mm:ss");
+  const date = formatLocalDate(new Date());
 
   if (processName.length > MAX_PROCESS_LENGTH) {
     processName = processName.slice(0, MAX_PROCESS_LENGTH);
