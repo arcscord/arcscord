@@ -13,7 +13,7 @@ importers:
         version: 1.0.0-next.1(typescript@6.0.3)
       discord.js:
         specifier: ^14.26.4
-        version: 14.26.5
+        version: 14.26.4
     devDependencies:
       '@antfu/eslint-config':
         specifier: ^9.1.0
@@ -848,8 +848,8 @@ packages:
   discord-api-types@0.38.49:
     resolution: {integrity: sha512-XnqcWmnFZFAE8ZM8SHAw9DIV8D3Or00rMQ8iQLotrEA2PmXhl+ykaf6L6q4l474hrSUH1JaYcv+iOMRWp2p6Tg==}
 
-  discord.js@14.26.5:
-    resolution: {integrity: sha512-SGYgjiAs0o8ZzMC97XmFXKONyairJ9YzVda+LvoSKs9YYh2gPtQhY+liaV6H/w72jxYbu9ggiSqAXoF3FLOH4A==}
+  discord.js@14.26.4:
+    resolution: {integrity: sha512-4oBp8tc6Kf8IDBwAHhbsMaAqx1b5fob9SNasZT7V6yyyUydoO5i5fGuX7TmvRtR+q/WgKRnRViRoAWnG7fNyvA==}
     engines: {node: '>=18'}
 
   electron-to-chromium@1.5.389:
@@ -934,8 +934,8 @@ packages:
     peerDependencies:
       eslint: ^9.0.0 || ^10.0.0
 
-  eslint-plugin-jsdoc@63.0.13:
-    resolution: {integrity: sha512-ahG1kWA8jYNwaQJtzJlnF+v4Gb9w5r+WL98gp+L8qjLN9ErpL5sevGuemN+fCYsU3Np27F36KmDc8UPi1ml/dg==}
+  eslint-plugin-jsdoc@63.0.12:
+    resolution: {integrity: sha512-99VfBHyoLlF9n5w9wh+jLWDBzCgYd3tfw3M/aynAd+H2ylGHWLbde/GPTuo/5az3jMAN0fH7QzCYvEOY6u+Ypg==}
     engines: {node: ^22.13.0 || >=24}
     peerDependencies:
       eslint: ^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0
@@ -1206,8 +1206,8 @@ packages:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
 
-  ignore@7.0.6:
-    resolution: {integrity: sha512-BAg6QkE8W+TuQLrrw0Ugr7HegXduRuuj8/ti2kSOc+jz1dmx8/WNcjr6XGnq5YpDWxFwwaavqD0+jIUOKelTsw==}
+  ignore@7.0.5:
+    resolution: {integrity: sha512-Hs59xBNfUIunMFgWAbGX5cq6893IbWg4KnrjbYwX3tx0ztorVgTDA6B2sxf8ejHJ4wz8BqGUMYlnzNBer5NvGg==}
     engines: {node: '>= 4'}
 
   imurmurhash@0.1.4:
@@ -1868,7 +1868,7 @@ snapshots:
       eslint-plugin-antfu: 3.2.3(eslint@10.6.0)
       eslint-plugin-command: 3.5.2(@typescript-eslint/rule-tester@8.63.0(eslint@10.6.0)(typescript@6.0.3))(@typescript-eslint/typescript-estree@8.63.0(typescript@6.0.3))(@typescript-eslint/utils@8.63.0(eslint@10.6.0)(typescript@6.0.3))(eslint@10.6.0)
       eslint-plugin-import-lite: 0.6.0(eslint@10.6.0)
-      eslint-plugin-jsdoc: 63.0.13(eslint@10.6.0)
+      eslint-plugin-jsdoc: 63.0.12(eslint@10.6.0)
       eslint-plugin-jsonc: 3.3.0(eslint@10.6.0)
       eslint-plugin-n: 18.2.1(eslint@10.6.0)(typescript@6.0.3)
       eslint-plugin-no-only-tests: 3.4.0
@@ -2028,7 +2028,7 @@ snapshots:
     dependencies:
       escape-string-regexp: 4.0.0
       eslint: 10.6.0
-      ignore: 7.0.6
+      ignore: 7.0.5
 
   '@eslint-community/eslint-utils@4.9.1(eslint@10.6.0)':
     dependencies:
@@ -2342,7 +2342,7 @@ snapshots:
       '@typescript-eslint/utils': 8.63.0(eslint@10.6.0)(typescript@6.0.3)
       '@typescript-eslint/visitor-keys': 8.63.0
       eslint: 10.6.0
-      ignore: 7.0.6
+      ignore: 7.0.5
       natural-compare: 1.4.0
       ts-api-utils: 2.5.0(typescript@6.0.3)
       typescript: 6.0.3
@@ -2509,7 +2509,7 @@ snapshots:
       '@arcscord/error': 2.0.2
       dayjs: 1.11.21
       discord-api-types: 0.38.49
-      discord.js: 14.26.5
+      discord.js: 14.26.4
       i18next: 26.3.6(typescript@6.0.3)
       tintify: 1.1.0
       typescript: 6.0.3
@@ -2629,7 +2629,7 @@ snapshots:
 
   discord-api-types@0.38.49: {}
 
-  discord.js@14.26.5:
+  discord.js@14.26.4:
     dependencies:
       '@discordjs/builders': 1.14.1
       '@discordjs/collection': 1.5.3
@@ -2713,7 +2713,7 @@ snapshots:
     dependencies:
       eslint: 10.6.0
 
-  eslint-plugin-jsdoc@63.0.13(eslint@10.6.0):
+  eslint-plugin-jsdoc@63.0.12(eslint@10.6.0):
     dependencies:
       '@es-joy/jsdoccomment': 0.88.0
       '@es-joy/resolve.exports': 1.2.0
@@ -3044,7 +3044,7 @@ snapshots:
 
   ignore@5.3.2: {}
 
-  ignore@7.0.6: {}
+  ignore@7.0.5: {}
 
   imurmurhash@0.1.4: {}
 
