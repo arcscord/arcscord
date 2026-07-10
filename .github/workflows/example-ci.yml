@@ -26,6 +26,8 @@ jobs:
             path: examples/ticket_bot
           - name: reminder-bot
             path: examples/reminder-bot
+          - name: starter-bot
+            path: examples/starter-bot
     steps:
       - name: Checkout Project
         uses: actions/checkout@v7
