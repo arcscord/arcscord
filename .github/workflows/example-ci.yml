@@ -56,6 +56,8 @@ jobs:
 
           if [ -z "$BASE_SHA" ]; then
             CHANGED=true
+          elif ! git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- ".github/workflows/example-ci.yml"; then
+            CHANGED=true
           elif git diff --quiet "$BASE_SHA" "$HEAD_SHA" -- "${{ matrix.path }}"; then
             CHANGED=false
           else
@@ -86,6 +88,16 @@ jobs:
         id: install
         working-directory: ${{ matrix.path }}
         run: pnpm install --frozen-lockfile
+      - name: Generate database client
+        if: steps.changes.outputs.changed == 'true'
+        id: db_generate
+        working-directory: ${{ matrix.path }}
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.['db:generate'] ? 0 : 1)"; then
+            pnpm db:generate
+          else
+            echo "No db:generate script for this example."
+          fi
       - name: Typecheck example
         if: steps.changes.outputs.changed == 'true'
         id: typecheck
@@ -113,6 +125,7 @@ jobs:
               echo "| Check | Command | Result |"
               echo "| --- | --- | --- |"
               echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+              echo "| Database client | \`pnpm db:generate\` when available | \`${{ steps.db_generate.outcome }}\` |"
               echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
               echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
             else
