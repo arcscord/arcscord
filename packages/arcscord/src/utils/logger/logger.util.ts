@@ -1,8 +1,8 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerConstructor, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
-import { effectReset } from "tintify";
 import {
+  ANSI_RESET,
   DATE_COLOR,
   DEBUG_KEY_COLOR,
   DEBUG_VALUE_COLOR,
@@ -79,7 +79,7 @@ export function formatLog(
   message: string,
   processName = "main",
 ): string {
-  const reset = effectReset.all;
+  const reset = ANSI_RESET;
   const options = logLevelInfos[logLevel];
 
   const date = formatLocalDate(new Date());
@@ -100,7 +100,7 @@ export function formatLog(
 }
 
 export function colorDebugValue([key, value]: DebugValueString): string {
-  const reset = effectReset.all;
+  const reset = ANSI_RESET;
   return `${reset}${DEBUG_KEY_COLOR}${key} : ${reset}${DEBUG_VALUE_COLOR}${value}`;
 }
 
@@ -110,7 +110,7 @@ export function formatShortDebug(message: string | DebugValueString): string {
   }
 
   const options = logLevelInfos.debug;
-  const reset = effectReset.all;
+  const reset = ANSI_RESET;
 
   const prefix = `${reset}${SEPARATOR_COLOR}${" ".repeat(SHORT_DEBUG_SPACING)}${SHORT_DEBUG_PREFIX}`;
   const middle = `[${reset}${options.titleColor}${options.logText}${reset}${SEPARATOR_COLOR}]`;

@@ -19,7 +19,6 @@
     "docs:api:release": "node scripts/generate-api-docs.mjs --channel release",
     "docs:build": "pnpm docs:api && pnpm --filter @arcscord/website build",
     "docs:start": "pnpm docs:api && pnpm --filter @arcscord/website start",
-    "docs:json": "pnpm docs:api",
     "prepare": "husky",
     "preinstall": "npx only-allow pnpm"
   },
@@ -29,17 +28,13 @@
     "@commitlint/config-conventional": "^21.1.0",
     "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
-    "cz-conventional-changelog": "^3.3.0",
     "eslint": "^10.6.0",
     "husky": "^9.1.7",
     "lint-staged": "^17.0.8",
     "only-allow": "^1.2.2",
-    "tsc-alias": "^1.8.17",
-    "tsconfig-paths": "^4.2.0",
     "tsdown": "0.22.4",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
-    "vite": "^8.1.0",
     "vitest": "4.1.9"
   },
   "repository": {

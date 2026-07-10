@@ -3,9 +3,11 @@
   "compilerOptions": {
     "paths": {
       "#/*": ["./src/*"],
+      "@arcscord/better-error": ["../better_error/src/index.ts"],
+      "@arcscord/error": ["../error/src/index.ts"],
       "arcscord": ["./src/index.ts"],
       "arcscord/testing": ["./src/testing/index.ts"]
     }
   },
-  "include": ["src", "tsdown.config.ts", "vitest.config.mts"]
+  "include": ["src", "tsdown.config.mts", "vitest.config.mts"]
 }

@@ -23,9 +23,7 @@
     "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
     "dotenv": "^17.4.2",
-    "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
-    "vite-tsconfig-paths": "^6.1.1",
-    "vitest": "^4.1.9"
+    "typescript": "^6.0.3"
   }
 }

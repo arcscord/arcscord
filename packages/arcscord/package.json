@@ -46,9 +46,6 @@
       }
     }
   },
-  "imports": {
-    "#/*": "./dist/*.js"
-  },
   "scripts": {
     "test": "vitest run",
     "build": "tsdown",
@@ -60,8 +57,7 @@
     "@arcscord/error": "workspace:^",
     "discord-api-types": "^0.38.49",
     "discord.js": "^14.26.4",
-    "i18next": "^26.3.3",
-    "tintify": "^1.1.0"
+    "i18next": "^26.3.3"
   },
   "peerDependencies": {
     "typescript": ">=5.0.0"
@@ -70,12 +66,10 @@
     "@swc-node/core": "^1.14.1",
     "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
-    "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "tsdown": "0.22.4",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
-    "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.1.9"
   },
   "files": [

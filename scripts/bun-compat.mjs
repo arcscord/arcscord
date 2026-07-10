@@ -7,6 +7,7 @@
  */
 import { execFileSync } from "node:child_process";
 import { mkdir, readdir, rename, rm } from "node:fs/promises";
+import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 const rootDir = new URL("../", import.meta.url);
@@ -15,22 +16,20 @@ const consumerDir = new URL("test/compat/bun-consumer/", rootDir);
 const vendorDir = new URL("vendor/", consumerDir);
 const installedArcscordDir = new URL("node_modules/arcscord/", consumerDir);
 
-// `shell: true` lets the platform shell resolve the `pnpm` shim regardless of
-// how it was installed (pnpm.cmd / pnpm.exe on Windows, pnpm on Unix). Args are
-// static and trusted, so there is no injection concern.
-function run(cmd, args, cwd) {
-  execFileSync(cmd, args, { cwd: fileURLToPath(cwd), stdio: "inherit", shell: true });
+function runPnpm(args, cwd) {
+  const command = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+  execFileSync(command, args, { cwd: fileURLToPath(cwd), stdio: "inherit" });
 }
 
 // 1. Build the whole workspace (arcscord + its @arcscord/* deps).
 console.log("→ Building workspace...");
-run("pnpm", ["build"], rootDir);
+runPnpm(["build"], rootDir);
 
 // 2. Reset the vendor folder and pack arcscord into it.
 console.log("→ Packing arcscord...");
 await rm(vendorDir, { recursive: true, force: true });
 await mkdir(vendorDir, { recursive: true });
-run("pnpm", ["pack", "--pack-destination", fileURLToPath(vendorDir)], arcscordDir);
+runPnpm(["pack", "--pack-destination", fileURLToPath(vendorDir)], arcscordDir);
 
 // 3. Normalize the version-stamped tarball name to a stable `arcscord.tgz`.
 const files = await readdir(fileURLToPath(vendorDir));

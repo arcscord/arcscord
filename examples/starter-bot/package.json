@@ -22,7 +22,6 @@
     "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
     "eslint": "^10.6.0",
-    "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^6.0.3"
   }

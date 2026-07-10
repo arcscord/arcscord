@@ -17,7 +17,6 @@ const dependenciesVersions = {
   "@swc-node/core": "^1.14.1",
   "@swc-node/register": "^1.11.1",
   "@types/node": "^26.0.1",
-  "tsc-alias": "^1.8.17",
   "tsconfig-paths": "^4.2.0",
   "typescript": "^6.0.3",
 
@@ -52,14 +51,12 @@ export function generatePackageJson(options: PackageJSONOptions): string {
   const devDependencies: Record<string, string> = isBun
     ? {
         "@types/node": dependenciesVersions["@types/node"],
-        "tsc-alias": dependenciesVersions["tsc-alias"],
         "typescript": dependenciesVersions.typescript,
       }
     : {
         "@swc-node/core": dependenciesVersions["@swc-node/core"],
         "@swc-node/register": dependenciesVersions["@swc-node/register"],
         "@types/node": dependenciesVersions["@types/node"],
-        "tsc-alias": dependenciesVersions["tsc-alias"],
         "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
         "typescript": dependenciesVersions.typescript,
       };

@@ -1,4 +1,4 @@
-import { createTsdownConfig } from "../../scripts/tsdown.config.ts";
+import { createTsdownConfig } from "../../scripts/tsdown.config.mts";
 
 export default createTsdownConfig({
   cjsOptions: {

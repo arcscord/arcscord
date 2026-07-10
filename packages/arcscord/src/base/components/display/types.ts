@@ -2,7 +2,6 @@ import type {
   ActionRowData,
   ButtonBuilder,
   ButtonComponentData,
-  ComponentEmojiResolvable,
   ContainerComponentData,
   FileComponentData,
   InteractionReplyOptions,
@@ -104,10 +103,3 @@ export type MediaGalleryOptions = Omit<MediaGallery, "type">;
 export type FileOptions = Omit<File, "type">;
 
 export type SeparatorOptions = Omit<Separator, "type">;
-
-export type ButtonOptions = Omit<Button, "type">;
-
-export type LinkButtonOptions = Extract<ButtonOptions, { url: string }> & {
-  readonly label?: string;
-  readonly emoji?: ComponentEmojiResolvable;
-};

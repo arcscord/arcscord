@@ -19,7 +19,7 @@
     "skipLibCheck": true
   },
   "exclude": [
-    "**/tsdown.config.ts",
+    "**/tsdown.config.mts",
     "**/vitest.config.mts"
   ]
 }

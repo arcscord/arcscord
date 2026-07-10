@@ -9,24 +9,10 @@ import type {
   MentionableSelectMenuComponentHandler,
   ModalComponentHandler,
   RoleSelectMenuComponentHandler,
-  StringSelectMenuComponentHandler,
   UserSelectMenuComponentHandler,
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentContext } from "#/base/components/interaction/context";
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
-
-/**
- * @internal
- */
-export type OldComponentList = {
-  button: Map<string, ButtonComponentHandler>;
-  stringSelect: Map<string, StringSelectMenuComponentHandler>;
-  userSelect: Map<string, UserSelectMenuComponentHandler>;
-  roleSelect: Map<string, RoleSelectMenuComponentHandler>;
-  mentionableSelect: Map<string, MentionableSelectMenuComponentHandler>;
-  channelSelect: Map<string, ChannelSelectMenuComponentHandler>;
-  modal: Map<string, ModalComponentHandler>;
-};
 
 export type ComponentList = {
   [ComponentType.Button]: Map<string, ButtonComponentHandler>;

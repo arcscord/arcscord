@@ -1,4 +1,12 @@
 {
   "extends": "../../tsconfig.eslint.json",
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["../../packages/arcscord/src/*"],
+      "@arcscord/better-error": ["../../packages/better_error/src/index.ts"],
+      "@arcscord/error": ["../../packages/error/src/index.ts"],
+      "arcscord": ["../../packages/arcscord/src/index.ts"]
+    }
+  },
   "include": ["src"]
 }
