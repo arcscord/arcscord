@@ -17,6 +17,7 @@ export default antfu(
       "CLAUDE.md",
       "AGENTS.md",
       "**/generated/**",
+      "examples/**",
     ],
   },
   {
@@ -59,12 +60,6 @@ export default antfu(
     files: ["test/logger_demo/**"],
     rules: {
       "no-console": "off",
-    },
-  },
-  {
-    files: ["examples/**"],
-    rules: {
-      "pnpm/json-prefer-workspace-settings": "off",
     },
   },
 );

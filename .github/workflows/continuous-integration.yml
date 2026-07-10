@@ -23,9 +23,86 @@ jobs:
           node-version: 24
           cache: pnpm
       - name: Install Dependencies
+        id: install
         run: pnpm install --frozen-lockfile
       - name: Run ESLint
+        id: lint
         run: pnpm lint --fix=false
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## Linting"
+            echo ""
+            echo "| Scope | Command | Result |"
+            echo "| --- | --- | --- |"
+            echo "| Root workspace | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Root workspace | \`pnpm lint --fix=false\` | \`${{ steps.lint.outcome }}\` |"
+            echo ""
+            echo "Example bots are linted in the dedicated **Example Bots** matrix job with their own dependencies."
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  Examples:
+    name: Example Bots (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: ticket_bot
+            path: examples/ticket_bot
+            install: pnpm install --frozen-lockfile --ignore-workspace
+          - name: reminder-bot
+            path: examples/reminder-bot
+            install: pnpm install --frozen-lockfile
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+      - name: Add ESLint problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
+      - name: Add TypeScript problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
+      - name: Use Node.js v24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
+      - name: Install example dependencies
+        id: install
+        working-directory: ${{ matrix.path }}
+        run: ${{ matrix.install }}
+      - name: Typecheck example
+        id: typecheck
+        working-directory: ${{ matrix.path }}
+        run: pnpm typecheck
+      - name: Lint example
+        id: lint
+        working-directory: ${{ matrix.path }}
+        run: pnpm lint
+      - name: Write example summary
+        if: always()
+        working-directory: ${{ matrix.path }}
+        run: |
+          PACKAGE_NAME=$(node -p "require('./package.json').name")
+          {
+            echo "## Example bot: ${{ matrix.name }}"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | \`$PACKAGE_NAME\` |"
+            echo "| Path | \`${{ matrix.path }}\` |"
+            echo "| Node | \`$(node --version)\` |"
+            echo "| pnpm | \`$(pnpm --version)\` |"
+            echo ""
+            echo "| Check | Command | Result |"
+            echo "| --- | --- | --- |"
+            echo "| Install | \`${{ matrix.install }}\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
+            echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   Building:
     name: Build & Typecheck
@@ -45,15 +122,30 @@ jobs:
       - name: Clean pnpm cache
         run: pnpm store prune
       - name: Install Dependencies
+        id: install
         run: pnpm install --frozen-lockfile
       - name: Build code
+        id: build
         run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
         timeout-minutes: 15
       - name: Typecheck code
+        id: typecheck
         run: pnpm typecheck
         timeout-minutes: 10
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## Build & Typecheck"
+            echo ""
+            echo "| Check | Command | Result |"
+            echo "| --- | --- | --- |"
+            echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Build | \`pnpm build\` | \`${{ steps.build.outcome }}\` |"
+            echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
 
   UnitTesting:
     name: Unit Tests
@@ -69,11 +161,26 @@ jobs:
           node-version: 24
           cache: pnpm
       - name: Install Dependencies
+        id: install
         run: pnpm install --frozen-lockfile
       - name: Build code
+        id: build
         run: pnpm build
         env:
           NODE_OPTIONS: --max-old-space-size=4096
         timeout-minutes: 15
       - name: Run unit tests
+        id: test
         run: pnpm test
+      - name: Write summary
+        if: always()
+        run: |
+          {
+            echo "## Unit Tests"
+            echo ""
+            echo "| Check | Command | Result |"
+            echo "| --- | --- | --- |"
+            echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Build | \`pnpm build\` | \`${{ steps.build.outcome }}\` |"
+            echo "| Test | \`pnpm test\` | \`${{ steps.test.outcome }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"
