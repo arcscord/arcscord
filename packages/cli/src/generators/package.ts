@@ -12,7 +12,6 @@ const dependenciesVersions = {
   "@swc-node/register": "^1.10.9",
   "@types/node": "^20.16.13",
   "dotenv": "^16.4.5",
-  "nodemon": "^3.1.7",
   "tsc-alias": "^1.8.10",
   "tsconfig-paths": "^4.2.0",
   "typescript": "^5.7.2",
@@ -35,7 +34,7 @@ export function generatePackageJson(options: PackageJSONOptions): string {
     description: "A discord bot made with arcscord",
     scripts: {
       start: "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-      dev: "npx nodemon --exec node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
+      dev: "node -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
     },
     dependencies: {
       "arcscord": dependenciesVersions.arcscord,
@@ -46,7 +45,6 @@ export function generatePackageJson(options: PackageJSONOptions): string {
       "@swc-node/register": dependenciesVersions["@swc-node/register"],
       "@types/node": dependenciesVersions["@types/node"],
       "dotenv": dependenciesVersions.dotenv,
-      "nodemon": dependenciesVersions.nodemon,
       "tsc-alias": dependenciesVersions["tsc-alias"],
       "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
       "typescript": dependenciesVersions.typescript,

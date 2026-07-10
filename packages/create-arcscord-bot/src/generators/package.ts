@@ -17,7 +17,6 @@ const dependenciesVersions = {
   "@swc-node/core": "^1.14.1",
   "@swc-node/register": "^1.11.1",
   "@types/node": "^26.0.1",
-  "nodemon": "^3.1.14",
   "tsc-alias": "^1.8.17",
   "tsconfig-paths": "^4.2.0",
   "typescript": "^6.0.3",
@@ -43,11 +42,11 @@ export function generatePackageJson(options: PackageJSONOptions): string {
   const scripts: Record<string, string> = isBun
     ? {
         start: "bun src/index.ts",
-        dev: "bun --watch src/index.ts dev debug",
+        dev: "bun src/index.ts dev debug",
       }
     : {
         start: "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-        dev: "npx nodemon --exec \"node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts\" dev debug",
+        dev: "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
       };
 
   const devDependencies: Record<string, string> = isBun
@@ -60,7 +59,6 @@ export function generatePackageJson(options: PackageJSONOptions): string {
         "@swc-node/core": dependenciesVersions["@swc-node/core"],
         "@swc-node/register": dependenciesVersions["@swc-node/register"],
         "@types/node": dependenciesVersions["@types/node"],
-        "nodemon": dependenciesVersions.nodemon,
         "tsc-alias": dependenciesVersions["tsc-alias"],
         "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
         "typescript": dependenciesVersions.typescript,

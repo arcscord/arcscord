@@ -8,7 +8,7 @@
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-    "dev": "npx nodemon --exec \"node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts\" dev debug",
+    "dev": "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
     "db:generate": "prisma generate",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
@@ -32,7 +32,6 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^26.0.1",
     "eslint": "^10.6.0",
-    "nodemon": "^3.1.14",
     "prisma": "^7.0.0",
     "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
