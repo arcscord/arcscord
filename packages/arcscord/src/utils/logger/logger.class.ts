@@ -237,4 +237,4 @@ export class ArcLogger implements LoggerInterface {
  * A default logger instance for easy use.
  * Always an ArcLogger with the default per-level console routing.
  */
-export const defaultLogger = new ArcLogger("main");
+export const defaultLogger: ArcLogger = new ArcLogger("main");

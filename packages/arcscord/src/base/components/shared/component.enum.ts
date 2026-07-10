@@ -136,7 +136,7 @@ export const buttonStyleEnum = {
  * Enum for button style alias with color
  * @enum {number}
  */
-export const buttonColorEnum = {
+export const buttonColorEnum: Record<"blurple" | "grey" | "green" | "red", number> = {
   /**
    * Represents a blurple button color.
    */
@@ -159,7 +159,7 @@ export const buttonColorEnum = {
  * Complete enum for button types, combining styles and colors.
  * @enum {number}
  */
-export const buttonTypeEnum = {
+export const buttonTypeEnum: Record<string, number> = {
   ...buttonStyleEnum,
   ...buttonColorEnum,
 };

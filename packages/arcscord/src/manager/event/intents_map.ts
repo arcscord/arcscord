@@ -29,7 +29,7 @@ const oneOf = (intents: EventIntentAlternatives): EventIntentRequirement => ({ m
  * `ClientEvents` type. Gateway events not exposed by discord.js are intentionally
  * omitted until discord.js exposes matching client events.
  */
-export const intentsMap = {
+export const intentsMap: Record<keyof ClientEvents, EventIntentRequirement> = {
   guildCreate: all("Guilds"),
   guildUpdate: all("Guilds"),
   guildDelete: all("Guilds"),
@@ -135,4 +135,4 @@ export const intentsMap = {
   shardReady: none,
   shardReconnecting: none,
   shardResume: none,
-} satisfies Record<keyof ClientEvents, EventIntentRequirement>;
+};

@@ -51,7 +51,7 @@
   },
   "scripts": {
     "test": "vitest run",
-    "build": "tsup",
+    "build": "tsdown",
     "typecheck": "tsc -p tsconfig.eslint.json",
     "docs": "typedoc"
   },
@@ -73,7 +73,7 @@
     "@types/node": "^26.0.1",
     "tsc-alias": "^1.8.17",
     "tsconfig-paths": "^4.2.0",
-    "tsup": "^8.5.1",
+    "tsdown": "0.22.4",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",
     "vite-tsconfig-paths": "^6.1.1",

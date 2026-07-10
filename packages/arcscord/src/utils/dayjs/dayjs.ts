@@ -7,4 +7,4 @@ dayjs.extend(timezone);
 
 dayjs.tz.setDefault("Europe/Paris");
 
-export const DayJS = dayjs;
+export const DayJS: typeof dayjs = dayjs;

@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es2022",
+    "target": "es2024",
     "module": "commonjs",
-    "baseUrl": ".",
     "paths": {
       "#/*": [
         "./src/*"
@@ -13,9 +12,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "skipLibCheck": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true
+    "skipLibCheck": true
   },
   "include": ["src"],
   "exclude": ["node_modules", "out"]

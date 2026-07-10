@@ -64,7 +64,7 @@ export function formatJsonLog(
 
 export function shouldLog(
   level: LogLevel,
-  configuredLevel = resolveLogLevel(process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL),
+  configuredLevel: LogLevel = resolveLogLevel(process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL),
 ): boolean {
   return logLevelInfos[level].logPriority <= logLevelInfos[configuredLevel].logPriority;
 }

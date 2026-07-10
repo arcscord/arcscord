@@ -1,35 +1,25 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "alwaysStrict": true,
     "declaration": true,
     "declarationMap": true,
     "esModuleInterop": true,
-    "ignoreDeprecations": "6.0",
-    "importHelpers": false,
     "incremental": false,
-    "lib": ["esnext"],
+    "lib": ["ES2024"],
     "module": "ESNext",
     "moduleResolution": "Bundler",
     "newLine": "lf",
-    "noEmitHelpers": false,
     "noFallthroughCasesInSwitch": true,
     "noImplicitReturns": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "preserveConstEnums": true,
-    "pretty": true,
-    "removeComments": false,
     "resolveJsonModule": true,
     "sourceMap": true,
     "strict": true,
-    "target": "ES2020",
-    "useDefineForClassFields": true,
+    "target": "ES2024",
     "skipLibCheck": true
   },
   "exclude": [
-    "**/tsup.config.ts",
+    "**/tsdown.config.ts",
     "**/vitest.config.mts"
   ]
 }

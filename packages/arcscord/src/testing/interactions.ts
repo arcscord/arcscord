@@ -275,7 +275,7 @@ export function createMockButtonInteraction(
 }
 
 /** @deprecated Use createMockButtonInteraction. */
-export const createMockMessageComponentInteraction = createMockButtonInteraction;
+export const createMockMessageComponentInteraction: typeof createMockButtonInteraction = createMockButtonInteraction;
 
 export type MockStringSelectMenuInteractionOptions = MockComponentInteractionOptions & {
   values?: string[];

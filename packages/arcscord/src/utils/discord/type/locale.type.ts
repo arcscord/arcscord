@@ -36,7 +36,7 @@ export type Locale
     | "zh-TW"
     | "ko";
 
-export const supportedDiscordLocales = [
+export const supportedDiscordLocales: readonly Locale[] = [
   "id",
   "da",
   "de",
@@ -69,7 +69,7 @@ export const supportedDiscordLocales = [
   "ja",
   "zh-TW",
   "ko",
-] as const satisfies readonly Locale[];
+];
 
 export const supportedDiscordLocaleSet: ReadonlySet<string> = new Set(supportedDiscordLocales);
 
