@@ -92,6 +92,27 @@ Default: `false`.
 
 ---
 
+### `waitReady`
+
+Defines the default readiness timeout and check interval for the client. This configuration is also used by internal framework calls, such as queued events and `loadHandlers` when command registration must wait for Discord.
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  waitReady: {
+    timeout: 15_000,
+    checkInterval: 100,
+  },
+});
+```
+
+| Option | Type | Default | Description |
+|---|---|---|---|
+| `timeout` | `number` | `30000` | Maximum wait in milliseconds before rejecting. |
+| `checkInterval` | `number` | `50` | Delay in milliseconds between readiness checks. |
+
+---
+
 ### `baseMessages`
 
 Overrides framework-generated messages sent to users. Currently supports one key:
@@ -154,6 +175,24 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 | `client.localeManager` | i18next wrapper used at registration time and per interaction. |
 
 ## Methods
+
+### `waitReady(options?)`
+
+Waits for the Discord client to become ready. Per-call options override the defaults configured through `ArcClientOptions.waitReady`. The promise rejects with `ArcClientReadyTimeoutError` when the effective timeout is reached.
+
+```ts
+await client.waitReady({
+  timeout: 15_000,
+  checkInterval: 100,
+});
+```
+
+| Option | Type | Fallback | Description |
+|---|---|---|---|
+| `timeout` | `number` | `30000` | Maximum wait in milliseconds before rejecting. |
+| `checkInterval` | `number` | `50` | Delay in milliseconds between readiness checks. |
+
+The previous numeric form remains supported: `waitReady(100)` sets `checkInterval` to 100 ms and keeps the globally configured timeout.
 
 ### `loadHandlers(handlers)`
 

@@ -99,6 +99,29 @@ export type ArcClientOptions = ClientOptions & {
    * @default false
    */
   enableInternalTrace?: boolean;
+
+  /**
+   * Default timeout and check interval used by {@link ArcClient.waitReady}.
+   * These defaults also apply to internal framework calls.
+   */
+  waitReady?: WaitReadyOptions;
+};
+
+/**
+ * Options used by {@link ArcClient.waitReady}.
+ */
+export type WaitReadyOptions = {
+  /**
+   * Maximum time to wait for the client to become ready, in milliseconds.
+   * @default 30000
+   */
+  timeout?: number;
+
+  /**
+   * Delay between readiness checks, in milliseconds.
+   * @default 50
+   */
+  checkInterval?: number;
 };
 
 /**

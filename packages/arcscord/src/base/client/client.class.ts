@@ -1,6 +1,6 @@
 import type { Result } from "@arcscord/error";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString } from "discord.js";
-import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions } from "#/base/client/client.type";
+import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions, WaitReadyOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { AnyEventHandler } from "#/base/event/event.type";
@@ -12,6 +12,7 @@ import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
 import { LocaleManager } from "#/manager/locale/locale_manager.class";
+import { ArcClientReadyTimeoutError } from "#/utils/error/class/client_ready_timeout_error";
 import { ArcLogger } from "#/utils/logger/logger.class";
 import { createLogger } from "#/utils/logger/logger.util";
 
@@ -143,19 +144,56 @@ export class ArcClient extends DJSClient {
   }
 
   /**
-   * Waits until the client is ready
+   * Waits until the client is ready.
    *
-   * @param delay - The delay in milliseconds between each check
+   * Passing a number is supported for backward compatibility and configures the
+   * delay between checks. Prefer the options object for new code.
+   *
+   * @param options - Timeout and readiness check interval configuration
    * @returns A promise that resolves when the client is ready
+   * @throws {@link ArcClientReadyTimeoutError} When the timeout is reached
    */
-  waitReady(delay = 50): Promise<void> {
-    return new Promise((resolve) => {
+  waitReady(options: number | WaitReadyOptions = {}): Promise<void> {
+    const callOptions: WaitReadyOptions = typeof options === "number"
+      ? { checkInterval: options }
+      : options;
+    const {
+      timeout = 30_000,
+      checkInterval = 50,
+    } = {
+      ...this.arcOptions.waitReady,
+      ...callOptions,
+    };
+
+    if (!Number.isFinite(timeout) || timeout < 0) {
+      throw new RangeError("waitReady timeout must be a finite, non-negative number");
+    }
+    if (!Number.isFinite(checkInterval) || checkInterval <= 0) {
+      throw new RangeError("waitReady checkInterval must be a finite, positive number");
+    }
+
+    return new Promise((resolve, reject) => {
+      let checkTimer: ReturnType<typeof setTimeout> | undefined;
+
+      const timeoutTimer = setTimeout(() => {
+        if (checkTimer) {
+          clearTimeout(checkTimer);
+        }
+        reject(new ArcClientReadyTimeoutError(timeout));
+      }, timeout);
+
       const checkReady = (): void => {
         if (this.ready) {
-          return resolve();
+          clearTimeout(timeoutTimer);
+          if (checkTimer) {
+            clearTimeout(checkTimer);
+          }
+          resolve();
+          return;
         }
-        setTimeout(checkReady, delay);
+        checkTimer = setTimeout(checkReady, checkInterval);
       };
+
       checkReady();
     });
   }

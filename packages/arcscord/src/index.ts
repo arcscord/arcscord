@@ -5,6 +5,7 @@ export type {
   HandlersList,
   ManagersOptions,
   MessageOptions,
+  WaitReadyOptions,
 } from "./base/client/client.type";
 
 export {
@@ -371,6 +372,7 @@ export { isGuildTextChannel } from "./utils/discord/utils/util.func";
 export type { GuildTextFirstBasedChannel } from "./utils/discord/utils/util.type";
 
 export {
+  ArcClientReadyTimeoutError,
   CommandError,
   CommandValidationError,
   ComponentError,
