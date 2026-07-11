@@ -61,7 +61,7 @@ managers: {
         return;
       }
 
-      client.logger.debug(`Command "${infos.command.build.slash?.name}" returned ${String(value)}`);
+      client.logger.debug(`Command "${infos.command.slash?.name}" returned ${String(value)}`);
     },
   },
 },
@@ -153,7 +153,7 @@ managers: {
         return;
       }
 
-      client.logger.debug(`Command ${infos.command.build.slash?.name ?? "context"} succeeded`);
+      client.logger.debug(`Command ${infos.command.slash?.name ?? "context"} succeeded`);
     },
   },
 },

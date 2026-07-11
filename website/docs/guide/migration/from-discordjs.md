@@ -38,7 +38,6 @@ await client.loadEvents([
     options: { once: true },
     run: (ctx) => {
       ctx.client.logger.info(`Logged in as ${ctx.client.user?.tag}`);
-      return ctx.ok(true);
     },
   }),
 ]);
@@ -137,11 +136,10 @@ export const messageCreateEvent = createEvent({
   name: "messagePrefixLogger",
   run: (ctx, message) => {
     if (message.author.bot) {
-      return ctx.ok(true);
+      return;
     }
 
     ctx.client.logger.debug(`message from ${message.author.username}: ${message.content}`);
-    return ctx.ok(true);
   },
 });
 
@@ -187,7 +185,9 @@ export const riskyCommand = createCommand({
 });
 ```
 
-No `try`/`catch` or manual reply needed: handlers return a `Result`, and
-Arcscord's default `resultHandler` logs the error and replies to the user for
-you. Both are fully overridable — see [Error handling](/guide/error-handling)
-and [Result handler](/guide/result-handler).
+`Result` is optional: a handler may return nothing, `string`, or `true` for a
+successful execution. Return `ok(...)` or `error(...)` only when you need an
+explicit typed result. Arcscord normalizes all of these forms before invoking
+the default `resultHandler`; thrown values are routed there separately. See
+[Error handling](/guide/error-handling) and
+[Result handlers](/guide/result-handler).

@@ -16,9 +16,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 });
 
 const ping = createCommand({
-  build: {
-    slash: { name: "ping", description: "Check if the bot is available" },
-  },
+  slash: { name: "ping", description: "Check if the bot is available" },
   run: ctx => ctx.reply("Pong!"),
 });
 
@@ -39,9 +37,9 @@ const features: Feature[] = [
     to: "/guide/commands",
   },
   {
-    title: "Result-style errors",
+    title: "Flexible error handling",
     description:
-      "Every handler returns a Result<T, E>. No silent throws — successes and failures flow through typed result and error handlers.",
+      "Return nothing for simple handlers, or a typed Result for explicit failures. Returned and thrown errors flow through configurable result handlers.",
     to: "/guide/error-handling",
   },
   {

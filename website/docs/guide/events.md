@@ -17,7 +17,6 @@ export const messageEvent = createEvent({
   name: "messageLogger",
   run: (ctx, msg) => {
     ctx.client.logger.info(`message sent by ${msg.author.username}`);
-    return ctx.ok(true);
   },
 });
 
@@ -55,7 +54,6 @@ export const readyEvent = createEvent({
     ctx.client.logger.info(
       `Logged in as ${ctx.client.user?.tag} — watching ${ctx.client.guilds.cache.size} guild(s)`,
     );
-    return ctx.ok(true);
   },
 });
 ```
@@ -70,11 +68,10 @@ export const messageCreateEvent = createEvent({
   name: "messagePrefixLogger",
   run: (ctx, message) => {
     if (message.author.bot) {
-      return ctx.ok(true);
+      return;
     }
 
     ctx.client.logger.debug(`message from ${message.author.username}: ${message.content}`);
-    return ctx.ok(true);
   },
 });
 ```
@@ -250,7 +247,6 @@ export const queuedMessageEvent = createEvent({
   },
   run: (ctx, msg) => {
     ctx.client.logger.info(msg.id);
-    return ctx.ok(true);
   },
 });
 ```
@@ -274,7 +270,6 @@ export const startupEvent = createEvent({
   },
   run: (ctx) => {
     ctx.client.logger.info("client ready");
-    return ctx.ok(true);
   },
 });
 ```
