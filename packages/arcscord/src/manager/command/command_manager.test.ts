@@ -631,6 +631,45 @@ describe("command manager", () => {
     expect(resultHandler.mock.calls[0]?.[0].exit.value).toBe(true);
   });
 
+  it("passes the owning manager as the second argument to resultHandler", async () => {
+    const resultHandler = vi.fn();
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(resultHandler.mock.calls[0]?.[1]).toBe(managerWithOptions);
+  });
+
+  it("lets a custom resultHandler delegate to manager.defaultResultHandler", async () => {
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, {
+      resultHandler: (infos, manager) => manager.defaultResultHandler(infos),
+    });
+    const defaultSpy = vi.spyOn(managerWithOptions, "defaultResultHandler");
+
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(defaultSpy).toHaveBeenCalledOnce();
+    expect(defaultSpy.mock.calls[0]?.[0].exit.status).toBe("success");
+  });
+
   it("passes status thrown and preserves the raw thrown value", async () => {
     const resultHandler = vi.fn();
     const { client } = createMockClientWithManager();

@@ -1,5 +1,6 @@
 import type { CommandInteraction } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, CommandContext } from "#/base";
+import type { CommandManager } from "#/manager/command/command_manager.class";
 import type { CommandRegistrationConfig } from "#/manager/command/command_registration";
 import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
@@ -58,16 +59,21 @@ export type CommandResultHandlerInfos = BaseCommandResultHandlerInfos & {
 /**
  * Handler called after every command `run()` execution, whether it returned
  * normally or threw.
+ *
+ * Receives the owning {@link CommandManager} as a second argument so a custom
+ * handler can run its own logic and then delegate to the framework default via
+ * `manager.defaultResultHandler(infos)`.
  */
 export type CommandResultHandler = (
   infos: CommandResultHandlerInfos,
+  manager: CommandManager,
 ) => void | Promise<void>;
 
 /**
  * @internal
  */
 export type CommandResultHandlerImplementer = {
-  resultHandler: CommandResultHandler;
+  defaultResultHandler: CommandResultHandler;
 };
 
 /**
@@ -77,10 +83,14 @@ export type CommandManagerOptions = {
   /**
    * Custom result handler called after every `run()` execution.
    *
-   * Receives a normalized `Result` regardless of whether `run()` returned or
-   * threw. Check `infos.status` to distinguish between the two cases.
+   * Receives the normalized `infos.exit` regardless of whether `run()` returned
+   * or threw; check `infos.exit.status` to distinguish the cases. The owning
+   * manager is passed as the second argument, so a custom handler can do its own
+   * work and then delegate to the default behavior with
+   * `return manager.defaultResultHandler(infos)`.
    *
-   * @default logs errors and sends `client.getErrorMessage(...)` to the user
+   * @default {@link CommandManager.defaultResultHandler} — logs errors and sends
+   * `client.getErrorMessage(...)` to the user
    */
   resultHandler?: CommandResultHandler;
 

@@ -97,6 +97,29 @@ Command and component payloads contain `interaction`, the resolved handler, its 
 
 Event result handlers use the same `exit` model and expose the event handler, event name, timestamps, duration, and optional incident ID.
 
+## Delegating to the default handler
+
+A custom result handler receives the owning manager as its **second argument**. Use it to run your own logic and then hand back to the framework default via `manager.defaultResultHandler(infos)`, instead of reimplementing the default logging and error reply:
+
+```ts
+const client = new ArcClient(token, {
+  intents: ["Guilds"],
+  managers: {
+    command: {
+      resultHandler: async (infos, manager) => {
+        // your own side effect (metrics, audit log, ...)
+        await recordCommandUsage(infos.interaction.commandName);
+
+        // then reuse the built-in logging + user-facing error reply
+        return manager.defaultResultHandler(infos);
+      },
+    },
+  },
+});
+```
+
+`defaultResultHandler(infos)` is available on the command, component, and event managers and holds the exact behavior described below.
+
 ## Default behavior
 
 The default command and component handlers:

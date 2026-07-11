@@ -59,7 +59,7 @@ export class ComponentManager extends BaseManager {
     super(client, "component");
 
     this.options = {
-      resultHandler: this.handleResult.bind(this),
+      resultHandler: this.defaultResultHandler.bind(this),
       dispatchDiagnostics: {},
       ...options,
     };
@@ -377,7 +377,7 @@ export class ComponentManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      });
+      }, this);
     }
     if (!this.handleMiddlewareResult(middlewareExit.value, context)) {
       return;
@@ -520,7 +520,7 @@ export class ComponentManager extends BaseManager {
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      });
+      }, this);
     }
     catch (e) {
       const endedAt = Date.now();
@@ -535,7 +535,7 @@ export class ComponentManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      });
+      }, this);
     }
   }
 
@@ -582,7 +582,7 @@ export class ComponentManager extends BaseManager {
 
   /**
    * Sends an error reply to a component interaction, respecting the defer state.
-   * Used by the default `handleResult`.
+   * Used by the default `defaultResultHandler`.
    */
   private async sendFailureReply(incidentId: string, infos: ComponentResultHandlerInfos): Promise<void> {
     const message = this.client.getErrorMessage(incidentId, infos.locale);
@@ -604,8 +604,11 @@ export class ComponentManager extends BaseManager {
   /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
+   *
+   * A custom `resultHandler` can call this to reuse the default behavior after
+   * running its own logic: `return manager.defaultResultHandler(infos)`.
    */
-  async handleResult(infos: ComponentResultHandlerInfos): Promise<void> {
+  async defaultResultHandler(infos: ComponentResultHandlerInfos): Promise<void> {
     const meta = {
       route: infos.component.route,
       interactionId: infos.interaction.id,

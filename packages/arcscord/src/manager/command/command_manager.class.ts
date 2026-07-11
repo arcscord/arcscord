@@ -16,7 +16,6 @@ import type {
 import type { Option, OptionsList } from "#/base/command/option.type";
 import type {
   CommandManagerOptions,
-  CommandResultHandler,
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
 } from "#/manager/command/command_manager.type";
@@ -61,7 +60,7 @@ export class CommandManager
     super(client, "command");
 
     this.options = {
-      resultHandler: this.resultHandler.bind(this),
+      resultHandler: this.defaultResultHandler.bind(this),
       dispatchDiagnostics: {},
       ...options,
       registration: normalizeCommandRegistrationConfig(options?.registration),
@@ -75,10 +74,6 @@ export class CommandManager
         void this.handleAutocomplete(interaction);
       }
     });
-  }
-
-  get handleResult(): CommandResultHandler {
-    return this.options.resultHandler;
   }
 
   /**
@@ -791,7 +786,7 @@ export class CommandManager
     const middlewareExit = await this.runMiddleware(command, context as CommandContext);
     if (middlewareExit.status !== "success") {
       const endedAt = Date.now();
-      return this.handleResult({
+      return this.options.resultHandler({
         exit: middlewareExit,
         interaction,
         command,
@@ -802,7 +797,7 @@ export class CommandManager
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      });
+      }, this);
     }
     if (!middlewareExit.value) {
       return;
@@ -814,7 +809,7 @@ export class CommandManager
       const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
       const rawResult = await run(context as CommandContext);
       const endedAt = Date.now();
-      return this.handleResult({
+      return this.options.resultHandler({
         exit: normalizeHandlerReturn(rawResult),
         interaction,
         command,
@@ -824,11 +819,11 @@ export class CommandManager
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      });
+      }, this);
     }
     catch (e) {
       const endedAt = Date.now();
-      return this.handleResult({
+      return this.options.resultHandler({
         exit: executionDefect(e),
         interaction,
         command,
@@ -839,7 +834,7 @@ export class CommandManager
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      });
+      }, this);
     }
   }
 
@@ -956,7 +951,7 @@ export class CommandManager
 
   /**
    * Sends an error reply to a command interaction, respecting the defer state.
-   * Used by the default `resultHandler`.
+   * Used by the default `defaultResultHandler`.
    */
   private async sendFailureReply(
     incidentId: string,
@@ -981,8 +976,11 @@ export class CommandManager
   /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
+   *
+   * A custom `resultHandler` can call this to reuse the default behavior after
+   * running its own logic: `return manager.defaultResultHandler(infos)`.
    */
-  async resultHandler(infos: CommandResultHandlerInfos): Promise<void> {
+  async defaultResultHandler(infos: CommandResultHandlerInfos): Promise<void> {
     const meta = {
       command: infos.interaction.commandName,
       interactionId: infos.interaction.id,

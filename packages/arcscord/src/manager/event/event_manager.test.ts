@@ -289,6 +289,23 @@ describe("event manager", () => {
     expect(resultHandler.mock.calls[0]?.[0].exit.value).toBe(true);
   });
 
+  it("passes the owning manager as the second argument and supports delegating to defaultResultHandler", async () => {
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler: (infos, m) => m.defaultResultHandler(infos),
+    });
+    const defaultSpy = vi.spyOn(manager, "defaultResultHandler");
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => ok(true),
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    expect(defaultSpy).toHaveBeenCalledOnce();
+    expect(defaultSpy.mock.calls[0]?.[0].exit.status).toBe("success");
+  });
+
   it("sets status to thrown and preserves the raw thrown value", async () => {
     const resultHandler = vi.fn();
     const { client, manager } = createMockClient(["GuildMessages"], {

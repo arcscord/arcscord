@@ -75,6 +75,26 @@ describe("component manager pipeline", () => {
       expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
+    it("passes the owning manager as the second argument and supports delegating to defaultResultHandler", async () => {
+      const client = createMockClient();
+      const manager = new ComponentManager(client, {
+        resultHandler: (infos, m) => m.defaultResultHandler(infos),
+      });
+      const defaultSpy = vi.spyOn(manager, "defaultResultHandler");
+
+      const handler = createButton({
+        route: "greet",
+        build: id => button({ customId: id(), label: "Greet", style: "primary" }),
+        run: vi.fn(async ctx => ctx.ok()),
+      });
+      manager.loadComponent(handler);
+
+      await client._emitMock("interactionCreate", createMockButtonInteraction({ customId: "greet" }));
+      await vi.waitFor(() => expect(defaultSpy).toHaveBeenCalledOnce());
+
+      expect(defaultSpy.mock.calls[0]?.[0].exit.status).toBe("success");
+    });
+
     it("dispatches a modal submit interaction emitted on the client through to resultHandler", async () => {
       const resultHandler = vi.fn();
       const client = createMockClient();

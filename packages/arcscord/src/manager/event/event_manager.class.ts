@@ -37,7 +37,7 @@ export class EventManager extends BaseManager {
     super(client, "event");
 
     this.options = {
-      resultHandler: this.handleResult.bind(this),
+      resultHandler: this.defaultResultHandler.bind(this),
       ...options,
       intentCheck: this.normalizeIntentCheckOptions(options?.intentCheck),
     };
@@ -145,8 +145,11 @@ export class EventManager extends BaseManager {
 
   /**
    * Default result handler. Logs errors; successful runs are silent.
+   *
+   * A custom `resultHandler` can call this to reuse the default behavior after
+   * running its own logic: `return manager.defaultResultHandler(infos)`.
    */
-  async handleResult(infos: EventResultHandlerInfos): Promise<void> {
+  async defaultResultHandler(infos: EventResultHandlerInfos): Promise<void> {
     const meta = {
       handler: infos.event.name,
       event: infos.eventName,
@@ -187,7 +190,7 @@ export class EventManager extends BaseManager {
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      });
+      }, this);
     }
     catch (e) {
       const endedAt = Date.now();
@@ -199,7 +202,7 @@ export class EventManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      });
+      }, this);
     }
   }
 

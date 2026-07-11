@@ -11,6 +11,7 @@ import type {
   UserSelectMenuComponentHandler,
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentContext } from "#/base/components/interaction/context";
+import type { ComponentManager } from "#/manager/component/component_manager.class";
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 
@@ -79,9 +80,14 @@ export type ComponentResultHandlerInfos = BaseComponentResultHandlerInfos & {
 /**
  * Handler called after every component `run()` execution, whether it returned
  * normally or threw.
+ *
+ * Receives the owning {@link ComponentManager} as a second argument so a custom
+ * handler can run its own logic and then delegate to the framework default via
+ * `manager.defaultResultHandler(infos)`.
  */
 export type ComponentResultHandler = (
   infos: ComponentResultHandlerInfos,
+  manager: ComponentManager,
 ) => void | Promise<void>;
 
 /**
@@ -91,10 +97,14 @@ export type ComponentManagerOptions = {
   /**
    * Custom result handler called after every component `run()` execution.
    *
-   * Receives a normalized `Result` regardless of whether `run()` returned or
-   * threw. Check `infos.status` to distinguish between the two cases.
+   * Receives the normalized `infos.exit` regardless of whether `run()` returned
+   * or threw; check `infos.exit.status` to distinguish the cases. The owning
+   * manager is passed as the second argument, so a custom handler can do its own
+   * work and then delegate to the default behavior with
+   * `return manager.defaultResultHandler(infos)`.
    *
-   * @default logs errors and sends `client.getErrorMessage(...)` to the user
+   * @default {@link ComponentManager.defaultResultHandler} — logs errors and
+   * sends `client.getErrorMessage(...)` to the user
    */
   resultHandler?: ComponentResultHandler;
 

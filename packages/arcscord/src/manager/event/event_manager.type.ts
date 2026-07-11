@@ -1,5 +1,6 @@
 import type { ClientEvents } from "discord.js";
 import type { AnyEventHandler } from "#/base/event";
+import type { EventManager } from "#/manager/event/event_manager.class";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { EventIntentCoverageTarget, EventIntentRequirement } from "./intents_map";
 
@@ -30,9 +31,14 @@ export type EventResultHandlerInfos = BaseEventResultHandlerInfos & {
 /**
  * Callback invoked after every event handler runs, receiving the normalized
  * {@link EventResultHandlerInfos} to log or react to the outcome.
+ *
+ * Receives the owning {@link EventManager} as a second argument so a custom
+ * handler can run its own logic and then delegate to the framework default via
+ * `manager.defaultResultHandler(infos)`.
  */
 export type EventResultHandler = (
   infos: EventResultHandlerInfos,
+  manager: EventManager,
 ) => void | Promise<void>;
 
 /** What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`, or `error` (return a loading failure). */
@@ -136,8 +142,13 @@ export type EventManagerOptions = {
   intentCheck?: false | EventIntentCheckOptions;
 
   /**
-   * Set a custom result handler
-   * @default {@link EventManager.handleResult}
+   * Set a custom result handler.
+   *
+   * The owning manager is passed as the second argument, so a custom handler can
+   * do its own work and then delegate to the default behavior with
+   * `return manager.defaultResultHandler(infos)`.
+   *
+   * @default {@link EventManager.defaultResultHandler}
    */
   resultHandler?: EventResultHandler;
 };
