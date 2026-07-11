@@ -10,6 +10,7 @@ export {
 } from "./logger.report";
 export type {
   ErrorReport,
+  ErrorReportRenderOptions,
   SerializedError,
 } from "./logger.report";
 export type {

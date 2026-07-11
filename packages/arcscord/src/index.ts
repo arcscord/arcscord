@@ -177,6 +177,7 @@ export type {
   ChannelSelectMenuContextOptions,
   ComponentContext,
   MentionableSelectMenuContextOptions,
+  ModalContextOptions,
   ModalContextValue,
   RoleSelectMenuContextOptions,
   StringSelectMenuContextOptions,
@@ -203,11 +204,15 @@ export {
   modalUserSelect,
 } from "./base/components/modal";
 export type {
+  BuildModalOptions,
+  DiscordModalTopLevelBuilder,
+  LabeledFieldOptions,
   ModalGroupOverrides,
   ModalNativeSelectOverrides,
   ModalOptionOverride,
   ModalStringSelectOverrides,
   ModalTextInputOverrides,
+  ModalTopLevelComponentInput,
 } from "./base/components/modal/types";
 export {
   button,
@@ -259,6 +264,7 @@ export type {
   ModalCheckboxGroupValue,
   ModalComponentType,
   ModalFieldDefinition,
+  ModalFieldParseInput,
   ModalFields,
   ModalFieldValues,
   ModalFileUploadValue,
@@ -429,6 +435,7 @@ export {
 export type {
   DiagnosticLoggerOptions,
   ErrorReport,
+  ErrorReportRenderOptions,
   LogFunc,
   LoggerConstructor,
   LoggerInterface,
