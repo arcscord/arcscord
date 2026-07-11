@@ -60,10 +60,10 @@
     "i18next": "^26.3.3"
   },
   "peerDependencies": {
-    "typescript": ">=5.0.0"
+    "typescript": ">=5.4.0"
   },
   "devDependencies": {
-    "@types/node": "^26.0.1",
+    "@types/node": "^24.10.0",
     "tsdown": "0.22.4",
     "typedoc": "^0.28.19",
     "typescript": "^6.0.3",

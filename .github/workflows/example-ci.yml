@@ -78,11 +78,11 @@ jobs:
       - name: Add TypeScript problem matcher
         if: steps.changes.outputs.changed == 'true'
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
-      - name: Use Node.js v24
+      - name: Use Node.js v24.11.0
         if: steps.changes.outputs.changed == 'true'
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
           cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
       - name: Install example dependencies

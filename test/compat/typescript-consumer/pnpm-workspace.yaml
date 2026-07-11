@@ -1,0 +1,13 @@
+shellEmulator: true
+confirmModulesPurge: false
+
+trustPolicy: no-downgrade
+
+overrides:
+  arcscord: file:vendor/arcscord.tgz
+
+allowBuilds:
+  esbuild: true
+
+onlyBuiltDependencies:
+  - esbuild

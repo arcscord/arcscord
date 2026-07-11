@@ -5,7 +5,7 @@ description: Install Arcscord and discord.js with pnpm, npm, yarn, or bun, and s
 
 # Installation
 
-Arcscord runs on **Node.js `24.11.0` or newer**, or on **Bun `1.3.0` or newer**. The repository itself uses pnpm + Node.js for development, but projects that consume Arcscord as a library only need a compatible runtime and a package manager — Bun is officially supported as a consumer runtime.
+Arcscord runs on **Node.js `24.11.0` or newer**, or on **Bun `1.3.0` or newer**, and its published types require **TypeScript `5.4.0` or newer**. The repository itself uses pnpm + Node.js and a newer TypeScript compiler for development, but projects that consume Arcscord as a library only need a compatible runtime and package manager — Bun is officially supported as a consumer runtime.
 
 ## Quick start
 

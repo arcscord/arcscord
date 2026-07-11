@@ -39,10 +39,10 @@ jobs:
           PUBLISH_TAG: ${{ inputs.tag }}
       - name: Install pnpm
         uses: pnpm/action-setup@v6
-      - name: Use Node.js v24
+      - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
           registry-url: "https://registry.npmjs.org"
       - name: Install Dependencies

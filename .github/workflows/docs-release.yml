@@ -36,10 +36,10 @@ jobs:
           fetch-depth: 1
       - name: Install pnpm
         uses: pnpm/action-setup@v6
-      - name: Setup NodeJS
+      - name: Setup Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
       - name: Install Dependencies
         run: pnpm install --frozen-lockfile

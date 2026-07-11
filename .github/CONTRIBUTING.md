@@ -12,7 +12,7 @@ Thank you for taking the time to improve Arcscord. This project is a pnpm-based 
 
 Requirements:
 
-- Node.js 24 or newer
+- Node.js 24.11.0 or newer
 - pnpm 10.33.2 or newer
 
 Install dependencies:

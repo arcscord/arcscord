@@ -14,7 +14,7 @@ export type PackageJSONOptions = {
 
 const dependenciesVersions = {
   "discord.js": "^14.26.4",
-  "@types/node": "^26.0.1",
+  "@types/node": "^24.10.0",
   "tsx": "^4.23.0",
   "typescript": "^6.0.3",
 

@@ -17,10 +17,10 @@ jobs:
         uses: pnpm/action-setup@v6
       - name: Add problem matchers
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
-      - name: Use Node.js v24
+      - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
       - name: Install Dependencies
         id: install
@@ -52,10 +52,10 @@ jobs:
         uses: pnpm/action-setup@v6
       - name: Add problem matchers
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
-      - name: Use Node.js v24
+      - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
       - name: Install Dependencies
         id: install
@@ -73,11 +73,21 @@ jobs:
       - name: Pack arcscord for Bun compatibility
         id: pack
         run: pnpm bun:pack --skip-build
+      - name: Pack TypeScript compatibility packages
+        id: pack_typescript
+        run: pnpm typescript:pack --skip-build
       - name: Upload arcscord package
         uses: actions/upload-artifact@v7
         with:
           name: arcscord-package
           path: test/compat/bun-consumer/vendor/arcscord.tgz
+          if-no-files-found: error
+          retention-days: 1
+      - name: Upload TypeScript compatibility packages
+        uses: actions/upload-artifact@v7
+        with:
+          name: typescript-compatibility-packages
+          path: test/compat/typescript-consumer/vendor/*.tgz
           if-no-files-found: error
           retention-days: 1
       - name: Write summary
@@ -92,6 +102,7 @@ jobs:
             echo "| Build | \`pnpm build\` | \`${{ steps.build.outcome }}\` |"
             echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
             echo "| Pack | \`pnpm bun:pack --skip-build\` | \`${{ steps.pack.outcome }}\` |"
+            echo "| TypeScript pack | \`pnpm typescript:pack --skip-build\` | \`${{ steps.pack_typescript.outcome }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
 
   UnitTesting:
@@ -102,10 +113,10 @@ jobs:
         uses: actions/checkout@v7
       - name: Install pnpm
         uses: pnpm/action-setup@v6
-      - name: Use Node.js v24
+      - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
-          node-version: 24
+          node-version: 24.11.0
           cache: pnpm
       - name: Install Dependencies
         id: install
@@ -124,6 +135,33 @@ jobs:
             echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Test | \`pnpm test\` | \`${{ steps.test.outcome }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
+
+  TypeScriptCompatibility:
+    name: TypeScript 5.4 Compatibility
+    needs: Building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Download arcscord package
+        uses: actions/download-artifact@v8
+        with:
+          name: typescript-compatibility-packages
+          path: test/compat/typescript-consumer/vendor
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+      - name: Use Node.js v24.11.0
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+          cache-dependency-path: test/compat/typescript-consumer/pnpm-lock.yaml
+      - name: Install consumer dependencies
+        working-directory: test/compat/typescript-consumer
+        run: pnpm install --frozen-lockfile
+      - name: Typecheck packed declarations
+        working-directory: test/compat/typescript-consumer
+        run: pnpm typecheck
 
   BunCompatibility:
     name: Bun Compatibility
