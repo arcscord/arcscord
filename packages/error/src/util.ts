@@ -5,15 +5,20 @@
  * @returns The converted Error object.
  */
 export function anyToError(obj: unknown): Error {
-  if (obj instanceof Error) {
-    return obj;
-  }
-  if (typeof obj === "string") {
-    return new Error(obj);
-  }
+  try {
+    if (obj instanceof Error) {
+      return obj;
+    }
+    if (typeof obj === "string") {
+      return new Error(obj);
+    }
 
-  if (typeof obj === "object") {
-    return new Error(JSON.stringify(obj));
+    if (typeof obj === "object") {
+      return new Error(JSON.stringify(obj));
+    }
+    return new Error(String(obj));
   }
-  return new Error(String(obj));
+  catch {
+    return new Error(String(obj));
+  }
 }
