@@ -1,5 +1,5 @@
-import { BaseError } from "@arcscord/better-error";
 import { describe, expect, it, vi } from "vitest";
+import { ArcscordError } from "#/utils/error/arcscord_error";
 import { ArcLogger } from "./logger.class";
 import { createErrorReport, renderJsonErrorReport } from "./logger.report";
 import { resolveLogLevel } from "./logger.util";
@@ -76,23 +76,20 @@ describe("arcLogger", () => {
   });
 
   it("serializes errors without dumping raw object properties", () => {
-    const error = new BaseError({
+    const error = new ArcscordError({
+      code: "COMMAND_VALIDATION_FAILED",
       message: "failed",
-      customId: "err_test",
-      debugs: {
-        token: "secret-token",
-        customId: "button:test",
-      },
+      metadata: { rule: "test", token: "secret-token", customId: "button:test" },
     });
 
     const report = createErrorReport(error);
 
     expect(report).toMatchObject({
-      id: "err_test",
       level: "error",
-      message: "baseError: failed",
+      message: "ArcscordError [COMMAND_VALIDATION_FAILED]: failed",
       error: {
-        type: "baseError",
+        type: "ArcscordError",
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
       },
       debug: {
@@ -111,12 +108,10 @@ describe("arcLogger", () => {
         loggerFunc: (...data) => diagnostics.push(...data),
       },
     });
-    const error = new BaseError({
+    const error = new ArcscordError({
+      code: "COMMAND_VALIDATION_FAILED",
       message: "failed",
-      customId: "err_test",
-      debugs: {
-        command: "ping",
-      },
+      metadata: { rule: "test", command: "ping" },
     });
 
     logger.logError(error);
@@ -126,7 +121,6 @@ describe("arcLogger", () => {
     expect(JSON.parse(String(diagnostics[0]))).toMatchObject({
       level: "error",
       process: "test",
-      errorId: "err_test",
       debug: {
         command: "ping",
       },
@@ -137,7 +131,7 @@ describe("arcLogger", () => {
     const consoleOutput: unknown[] = [];
     const logger = new ArcLogger("test", (...data) => consoleOutput.push(...data));
 
-    logger.logError(new BaseError("failed"));
+    logger.logError(new ArcscordError({ code: "COMMAND_VALIDATION_FAILED", message: "failed", metadata: { rule: "test" } }));
 
     expect(consoleOutput).toHaveLength(1);
   });
@@ -148,7 +142,7 @@ describe("arcLogger", () => {
       errorDetail: "short",
     });
 
-    logger.logError(new BaseError("failed"));
+    logger.logError(new ArcscordError({ code: "COMMAND_VALIDATION_FAILED", message: "failed", metadata: { rule: "test" } }));
 
     expect(String(consoleOutput[0])).not.toContain("at ");
   });
@@ -163,7 +157,7 @@ describe("arcLogger", () => {
       },
     });
 
-    logger.logError(new BaseError("failed"));
+    logger.logError(new ArcscordError({ code: "COMMAND_VALIDATION_FAILED", message: "failed", metadata: { rule: "test" } }));
 
     expect(String(consoleOutput[0])).toContain("at ");
   });
@@ -172,7 +166,7 @@ describe("arcLogger", () => {
     const consoleOutput: unknown[] = [];
     const logger = new ArcLogger("test", (...data) => consoleOutput.push(...data));
 
-    logger.logError(new BaseError("failed"));
+    logger.logError(new ArcscordError({ code: "COMMAND_VALIDATION_FAILED", message: "failed", metadata: { rule: "test" } }));
 
     expect(String(consoleOutput[0])).toContain("at ");
   });
@@ -186,7 +180,7 @@ describe("arcLogger", () => {
       },
     });
 
-    logger.logError(new BaseError("failed"));
+    logger.logError(new ArcscordError({ code: "COMMAND_VALIDATION_FAILED", message: "failed", metadata: { rule: "test" } }));
 
     expect(String(consoleOutput[0])).not.toContain("at ");
     expect(String(diagnostics[0])).toContain("at ");
@@ -202,7 +196,11 @@ describe("arcLogger", () => {
       },
     });
 
-    logger.logError(new BaseError({ message: "failed", debugs: { command: "ping" } }), { interactionId: "1" });
+    logger.logError(new ArcscordError({
+      code: "COMMAND_VALIDATION_FAILED",
+      message: "failed",
+      metadata: { rule: "test", command: "ping" },
+    }), { interactionId: "1" });
 
     expect(JSON.parse(String(diagnostics[0]))).toMatchObject({
       debug: { command: "ping", interactionId: "1" },
@@ -210,17 +208,17 @@ describe("arcLogger", () => {
   });
 
   it("renders JSON error reports", () => {
-    const error = new BaseError({
+    const error = new ArcscordError({
+      code: "COMMAND_VALIDATION_FAILED",
       message: "failed",
-      customId: "err_test",
+      metadata: { rule: "test" },
     });
     const report = createErrorReport(error);
 
     expect(JSON.parse(renderJsonErrorReport(report, "test"))).toMatchObject({
       level: "error",
       process: "test",
-      errorId: "err_test",
-      message: "baseError: failed",
+      message: "ArcscordError [COMMAND_VALIDATION_FAILED]: failed",
     });
   });
 

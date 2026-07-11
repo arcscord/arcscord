@@ -6,7 +6,7 @@ import { ok } from "@arcscord/error";
 import { IntentsBitField } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { createEvent } from "../../base/event";
-import { EventError } from "../../utils";
+import { ArcscordError } from "../../utils";
 import { EventManager } from "./event_manager.class";
 import { intentsMap } from "./intents_map";
 
@@ -170,7 +170,7 @@ describe("event manager", () => {
 
     await manager.loadEvent(first);
 
-    await expect(manager.loadEvent(second)).rejects.toThrow(EventError);
+    await expect(manager.loadEvent(second)).rejects.toThrow(ArcscordError);
   });
 
   it("runs before ready by default", async () => {
@@ -266,8 +266,8 @@ describe("event manager", () => {
     await client.emitMock("messageCreate", { id: "message_1" });
 
     expect(resultHandler).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].status).toBe("thrown");
-    expect(resultHandler.mock.calls[0]?.[0].thrownValue).toBeInstanceOf(Error);
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("defect");
+    expect(resultHandler.mock.calls[0]?.[0].exit.defect).toBeInstanceOf(Error);
   });
 
   it("sets status to returned when run() returns ok", async () => {
@@ -283,9 +283,8 @@ describe("event manager", () => {
     }));
     await client.emitMock("messageCreate", { id: "message_1" });
 
-    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
-    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
-    expect(resultHandler.mock.calls[0]?.[0].result[1]).toBe(true);
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
+    expect(resultHandler.mock.calls[0]?.[0].exit.value).toBe(true);
   });
 
   it("sets status to thrown and preserves the raw thrown value", async () => {
@@ -305,8 +304,8 @@ describe("event manager", () => {
     await client.emitMock("messageCreate", { id: "message_1" });
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("thrown");
-    expect(infos.thrownValue).toBe(thrown);
+    expect(infos.exit.status).toBe("defect");
+    expect(infos.exit.defect).toBe(thrown);
     expect("result" in infos).toBe(false);
   });
 
@@ -324,9 +323,8 @@ describe("event manager", () => {
     await client.emitMock("messageCreate", { id: "message_1" });
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("returned");
-    expect(infos.result[0]).toBeNull();
-    expect(infos.result[1]).toBe(true);
+    expect(infos.exit.status).toBe("success");
+    expect(infos.exit.value).toBe(true);
   });
 
   it("normalizes string run() return to ok(string)", async () => {
@@ -343,9 +341,8 @@ describe("event manager", () => {
     await client.emitMock("messageCreate", { id: "message_1" });
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("returned");
-    expect(infos.result[0]).toBeNull();
-    expect(infos.result[1]).toBe("message sent");
+    expect(infos.exit.status).toBe("success");
+    expect(infos.exit.value).toBe("message sent");
   });
 
   it("warns when an all intent requirement is missing", async () => {
@@ -373,7 +370,7 @@ describe("event manager", () => {
     await expect(manager.loadEvent(createEvent({
       event: "guildCreate",
       run: () => ok(true),
-    }))).rejects.toThrow(EventError);
+    }))).rejects.toThrow(ArcscordError);
   });
 
   it("accepts oneOf requirements when one intent is present", async () => {
@@ -457,7 +454,7 @@ describe("event manager", () => {
     await expect(manager.loadEvent(createEvent({
       event: "messageCreate",
       run: () => ok(true),
-    }))).rejects.toThrow(EventError);
+    }))).rejects.toThrow(ArcscordError);
   });
 
   it("ignores configured events during intent checks", async () => {

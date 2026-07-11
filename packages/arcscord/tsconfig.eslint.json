@@ -3,7 +3,6 @@
   "compilerOptions": {
     "paths": {
       "#/*": ["./src/*"],
-      "@arcscord/better-error": ["../better_error/src/index.ts"],
       "@arcscord/error": ["../error/src/index.ts"],
       "arcscord": ["./src/index.ts"],
       "arcscord/testing": ["./src/testing/index.ts"]

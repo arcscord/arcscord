@@ -1,5 +1,6 @@
 import type { ClientEvents } from "discord.js";
-import type { AnyEventHandler, EventHandleResult } from "#/base/event";
+import type { AnyEventHandler } from "#/base/event";
+import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { EventIntentCoverageTarget, EventIntentRequirement } from "./intents_map";
 
 /**
@@ -17,52 +18,14 @@ type BaseEventResultHandlerInfos = {
   eventName: keyof ClientEvents | string;
 };
 
-/**
- * Payload delivered to `resultHandler` when `run()` returned normally
- * (with a `Result`, a raw value, or `void`).
- */
-export type EventReturnedHandlerInfos = BaseEventResultHandlerInfos & {
-  status: "returned";
-  /**
-   * The normalized result of `run()`. May be `ok` or `error` — the author
-   * explicitly returned an error `Result`.
-   */
-  result: EventHandleResult;
+/** Payload received by `resultHandler` after every event execution. */
+export type EventResultHandlerInfos = BaseEventResultHandlerInfos & {
+  exit: ExecutionExit<string | true, unknown>;
+  startedAt: number;
+  endedAt: number;
+  durationMs: number;
+  incidentId?: string;
 };
-
-/**
- * Payload delivered to `resultHandler` when `run()` threw an unhandled exception.
- *
- * There is no `result` field here — the thrown value has not been normalized.
- * Use `thrownValue` directly and construct whatever error type you need.
- * The default handler wraps it in an `EventError`.
- */
-export type EventThrownHandlerInfos = BaseEventResultHandlerInfos & {
-  status: "thrown";
-  /**
-   * The raw value that was thrown by `run()`.
-   * May be any type — an `EventError`, a plain `Error`, a string, etc.
-   */
-  thrownValue: unknown;
-};
-
-/**
- * Payload received by `resultHandler` after every event `run()` execution.
- *
- * Use the `status` discriminant to branch between the two cases:
- * ```ts
- * resultHandler: ({ status, result, event }) => {
- *   if (status === "thrown") {
- *     // infos.thrownValue is the raw thrown value (not wrapped)
- *     return;
- *   }
- *   const [err] = result;
- * }
- * ```
- */
-export type EventResultHandlerInfos
-  = | EventReturnedHandlerInfos
-    | EventThrownHandlerInfos;
 
 /**
  * Callback invoked after every event handler runs, receiving the normalized

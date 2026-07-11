@@ -119,7 +119,7 @@ The second `loadCommands` argument is a group label used internally for tracing 
 await client.loadCommands([adminCommand], "admin");
 ```
 
-`loadCommands` returns a `Result<true, InternalError>`. The first tuple item is `null` on success and an error on failure. `loadHandlers` handles this internally by calling `client.logger.fatalError(err)`.
+`loadCommands` returns a `Result<true, ArcscordError>`. The first tuple item is `null` on success and an error on failure. Inspect `error.code` instead of matching its message. `loadHandlers` handles failures internally by calling `client.logger.fatalError(err)`.
 
 ## Error handling
 

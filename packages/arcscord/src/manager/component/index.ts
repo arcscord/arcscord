@@ -4,6 +4,4 @@ export type {
   ComponentManagerOptions,
   ComponentResultHandler,
   ComponentResultHandlerInfos,
-  ComponentReturnedHandlerInfos,
-  ComponentThrownHandlerInfos,
 } from "./component_manager.type";

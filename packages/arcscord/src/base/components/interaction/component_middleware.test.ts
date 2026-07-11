@@ -1,151 +1,53 @@
 import type { ComponentMiddlewareRun } from "./component_middleware";
 import type { ComponentContext } from "./context";
-import { ok } from "@arcscord/error";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 import { createMockComponentContext } from "#/testing";
 import { ComponentManager } from "../../../manager/component/component_manager.class";
-import { ComponentError } from "../../../utils/error/class/component_error";
 import { ComponentMiddleware } from "./component_middleware";
 
 class TestComponentMiddleware extends ComponentMiddleware {
   readonly name = "test" as const;
-
   run(_ctx: ComponentContext): ComponentMiddlewareRun<{ allowed: true }> {
     return this.next({ allowed: true });
   }
 }
 
 const context = createMockComponentContext();
-
 const runMiddleware = (
   ComponentManager.prototype as unknown as {
-    runMiddleware: (props: unknown, context: ComponentContext) => Promise<[ComponentError | null, object | false | null]>;
+    runMiddleware: (component: unknown, context: ComponentContext) => Promise<{
+      status: string;
+      value?: object | false;
+      failure?: unknown;
+      defect?: unknown;
+    }>;
   }
 ).runMiddleware;
 
 describe("componentMiddleware", () => {
-  it("creates a next result", () => {
+  it("creates discriminated next, cancel and failure results", () => {
     const middleware = new TestComponentMiddleware();
-    const next = { allowed: true };
-
-    expect(middleware.next(next)).toEqual({
-      cancel: null,
-      error: null,
-      next,
-    });
+    expect(middleware.next({ allowed: true })).toEqual({ status: "next", value: { allowed: true } });
+    expect(middleware.cancel()).toEqual({ status: "cancel" });
+    expect(middleware.fail("denied")).toEqual({ status: "failure", failure: "denied" });
   });
 
-  it("creates a cancel result", () => {
-    const middleware = new TestComponentMiddleware();
-    const cancel = Promise.resolve(ok(true as const));
-
-    expect(middleware.cancel(cancel)).toEqual({
-      cancel,
-      error: null,
-      next: null,
-    });
+  it("collects next values", async () => {
+    const exit = await runMiddleware({ use: [new TestComponentMiddleware()] }, context);
+    expect(exit).toEqual({ status: "success", value: { test: { allowed: true } } });
   });
 
-  it("creates an error result", () => {
-    const middleware = new TestComponentMiddleware();
-    const error = new ComponentError({ message: "middleware failed", interaction: context.interaction });
-
-    expect(middleware.error(error)).toEqual({
-      cancel: null,
-      error,
-      next: null,
-    });
-  });
-
-  it("collects next values while middleware continues", async () => {
-    const middleware = new TestComponentMiddleware();
-
-    const [err, additional] = await runMiddleware({ use: [middleware] } as any, context);
-
-    expect(err).toBeNull();
-    expect(additional).toEqual({ test: { allowed: true } });
-  });
-
-  it("returns an error when middleware names are duplicated", async () => {
-    const first = new TestComponentMiddleware();
-    const second = new TestComponentMiddleware();
-    const firstRun = vi.spyOn(first, "run");
-    const secondRun = vi.spyOn(second, "run");
-
-    const [err, additional] = await runMiddleware({ use: [first, second] } as any, context);
-
-    expect(err).toBeInstanceOf(ComponentError);
-    expect(err?.message).toBe("duplicate middleware name \"test\"");
-    expect(additional).toBeNull();
-    expect(firstRun).not.toHaveBeenCalled();
-    expect(secondRun).not.toHaveBeenCalled();
-  });
-
-  it("stops when middleware cancels", async () => {
-    const cancel = new class extends ComponentMiddleware {
-      readonly name = "cancel" as const;
-
-      run(): ComponentMiddlewareRun<NonNullable<unknown>> {
-        return this.cancel(ok(true));
-      }
+  it("preserves explicit failures and distinguishes thrown defects", async () => {
+    const failure = new class extends ComponentMiddleware {
+      readonly name = "failure" as const;
+      run() { return this.fail({ _tag: "Denied" } as const); }
     }();
-    const next = vi.fn();
-
-    const [err, additional] = await runMiddleware({
-      use: [
-        cancel,
-        { name: "next", run: next },
-      ],
-    } as any, context);
-
-    expect(err).toBeNull();
-    expect(additional).toBe(false);
-    expect(next).not.toHaveBeenCalled();
-  });
-
-  it("returns an error when middleware fails", async () => {
-    const middlewareError = new ComponentError({ message: "middleware failed", interaction: context.interaction });
-    const fail = new class extends ComponentMiddleware {
-      readonly name = "fail" as const;
-
-      run(): ComponentMiddlewareRun<NonNullable<unknown>> {
-        return this.error(middlewareError);
-      }
+    const defect = new class extends ComponentMiddleware {
+      readonly name = "defect" as const;
+      run(): ComponentMiddlewareRun<NonNullable<unknown>> { throw new Error("boom"); }
     }();
-    const next = vi.fn();
 
-    const [err, additional] = await runMiddleware({
-      use: [
-        fail,
-        { name: "next", run: next },
-      ],
-    } as any, context);
-
-    expect(err).toBe(middlewareError);
-    expect(additional).toBeNull();
-    expect(next).not.toHaveBeenCalled();
-  });
-
-  it("returns an error when middleware throws", async () => {
-    const fail = new class extends ComponentMiddleware {
-      readonly name = "fail" as const;
-
-      run(): ComponentMiddlewareRun<NonNullable<unknown>> {
-        throw new Error("middleware failed");
-      }
-    }();
-    const next = vi.fn();
-
-    const [err, additional] = await runMiddleware({
-      use: [
-        fail,
-        { name: "next", run: next },
-      ],
-    } as any, context);
-
-    expect(err).toBeInstanceOf(ComponentError);
-    expect(err?.message).toBe("failed to run middleware : middleware failed");
-    expect(additional).toBeNull();
-    expect(next).not.toHaveBeenCalled();
+    expect(await runMiddleware({ use: [failure] }, context)).toMatchObject({ status: "failure", failure: { _tag: "Denied" } });
+    expect(await runMiddleware({ use: [defect] }, context)).toMatchObject({ status: "defect", defect: expect.any(Error) });
   });
 });

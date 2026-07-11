@@ -1,107 +1,54 @@
 import type { CommandContext, CommandRunResult } from "#/base";
-import type { CommandError } from "#/utils/error/class/command_error";
 import type { MaybePromise } from "#/utils/type/util.type";
 
-/**
- * Represents the next middleware to be processed.
- * @template T - The object that the middleware return
- */
+/** Middleware result that continues the chain with a value. */
 export type NextCommandMiddleware<T extends NonNullable<unknown>> = {
-  cancel: null;
-  error: null;
-  next: T;
+  status: "next";
+  value: T;
 };
 
-/**
- * Represents a command middleware that cancels the command.
- */
+/** Middleware result that stops the chain normally. */
 export type CancelCommandMiddleware = {
-  cancel: MaybePromise<CommandRunResult>;
-  error: null;
-  next: null;
+  status: "cancel";
+  result?: MaybePromise<CommandRunResult>;
 };
 
-/**
- * Represents a command middleware that fails the command.
- */
-export type ErrorCommandMiddleware = {
-  cancel: null;
-  error: MaybePromise<CommandError>;
-  next: null;
+/** Middleware result that stops the chain with an expected failure. */
+export type FailedCommandMiddleware<E = unknown> = {
+  status: "failure";
+  failure: MaybePromise<E>;
 };
 
-/**
- * Union type representing the result of a command middleware run.
- * @template T - The object that the middleware return
- */
-export type CommandMiddlewareRun<T extends NonNullable<unknown>>
+/** Discriminated result returned by command middleware. */
+export type CommandMiddlewareRun<T extends NonNullable<unknown>, E = unknown>
   = | NextCommandMiddleware<T>
     | CancelCommandMiddleware
-    | ErrorCommandMiddleware;
+    | FailedCommandMiddleware<E>;
 
-/**
- * Abstract class representing a command middleware.
- */
+/** Base class for command middleware. */
 export abstract class CommandMiddleware {
-  /**
-   * The name of the middleware.
-   *
-   * @remarks add a const after the name, like `name = "example" as const`
-   */
+  /** Stable key used to expose the middleware's `next` value on `ctx.additional`. */
   abstract readonly name: string;
 
-  /**
-   * Run the middleware.
-   * @param ctx - The command context.
-   * @returns The result of the middleware run.
-   */
+  /** Executes the middleware for a command context. */
   abstract run(
     ctx: CommandContext
   ): MaybePromise<CommandMiddlewareRun<NonNullable<unknown>>>;
 
-  /**
-   * Create the next middleware run result.
-   * @template T - The type of the next value.
-   * @param value - The next value to be processed.
-   * @returns The next middleware run result.
-   */
-  next<T extends NonNullable<unknown>>(value: T): CommandMiddlewareRun<T> {
-    return {
-      cancel: null,
-      error: null,
-      next: value,
-    };
+  /** Continues the middleware chain and stores `value` on the command context. */
+  next<T extends NonNullable<unknown>>(value: T): NextCommandMiddleware<T> {
+    return { status: "next", value };
   }
 
-  /**
-   * Create the cancel middleware run result.
-   * @template T - The type of the cancellation result.
-   * @param value - The cancel value.
-   * @returns The cancel middleware run result.
-   */
-  cancel<T extends NonNullable<unknown>>(
-    value: MaybePromise<CommandRunResult>,
-  ): CommandMiddlewareRun<T> {
-    return {
-      cancel: value,
-      error: null,
-      next: null,
-    };
+  /** Stops the chain normally, optionally after awaiting a result-producing operation. */
+  cancel(result?: MaybePromise<CommandRunResult>): CancelCommandMiddleware {
+    return result === undefined
+      ? { status: "cancel" }
+      : { status: "cancel", result };
   }
 
-  /**
-   * Create the error middleware run result.
-   * @template T - The type of the next value when the middleware does not fail.
-   * @param value - The error value.
-   * @returns The error middleware run result.
-   */
-  error<T extends NonNullable<unknown>>(
-    value: MaybePromise<CommandError>,
-  ): CommandMiddlewareRun<T> {
-    return {
-      cancel: null,
-      error: value,
-      next: null,
-    };
+  /** Stops the chain with an expected failure value. */
+  fail<E>(failure: MaybePromise<E>): FailedCommandMiddleware<E> {
+    return { status: "failure", failure };
   }
 }

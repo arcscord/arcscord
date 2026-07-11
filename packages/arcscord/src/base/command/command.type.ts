@@ -7,7 +7,6 @@ import type { BaseCommandDefinition, CommandContext, FullCommandDefinition, Slas
 import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
 import type { OptionsList } from "#/base/command/option.type";
-import type { CommandError } from "#/utils/error/class/command_error";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
 
@@ -15,7 +14,7 @@ import type { MaybePromise } from "#/utils/type/util.type";
  * Normalized internal result of running a command.
  * Used by the manager after normalizing the raw return value of `run()`.
  */
-export type CommandRunResult = Result<string | true, CommandError>;
+export type CommandRunResult<E = unknown> = Result<string | true, E>;
 
 /**
  * All values a `run()` function may return.
@@ -24,13 +23,13 @@ export type CommandRunResult = Result<string | true, CommandError>;
  * the result handler:
  * - `void` / `undefined` → `ok(true)`
  * - `string` or `true` → `ok(value)`
- * - `Result<string | true, CommandError>` → returned as-is
+ * - `Result<string | true, E>` → normalized as an expected failure or success
  */
-export type CommandRunReturn
+export type CommandRunReturn<E = unknown>
   = | void
     | string
     | true
-    | CommandRunResult;
+    | CommandRunResult<E>;
 
 /**
  * @internal
@@ -82,7 +81,7 @@ export type CommandExtras<
    * Command execution function.
    *
    * May return `void`, a plain `string`, `true`, or a full
-   * `Result<string | true, CommandError>`. The manager normalizes all forms
+   * `Result<string | true, E>`. The manager normalizes all forms
    * before calling the result handler.
    *
    * @param ctx - The command context.

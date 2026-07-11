@@ -35,9 +35,8 @@ describe("authorOnlyMiddleware", () => {
     const ctx = withMessageMetadata(createContext({ userId: "user_1" }), "user_1");
 
     expect(middleware.run(ctx)).toEqual({
-      cancel: null,
-      error: null,
-      next: {
+      status: "next",
+      value: {
         status: "author",
       },
     });
@@ -53,9 +52,8 @@ describe("authorOnlyMiddleware", () => {
     } as ComponentContext;
 
     expect(middleware.run(ctx)).toEqual({
-      cancel: null,
-      error: null,
-      next: {
+      status: "next",
+      value: {
         status: "ignore",
       },
     });
@@ -74,10 +72,10 @@ describe("authorOnlyMiddleware", () => {
 
     const result = middleware.run(ctx);
 
-    expect(result.next).toBeNull();
-    expect(result.error).toBeNull();
-    expect(result.cancel).not.toBeNull();
-    await result.cancel;
+    expect(result.status).toBe("cancel");
+    if (result.status !== "cancel")
+      throw new Error("expected cancellation");
+    await result.result;
     expect(ctx.reply).toHaveBeenCalledWith({
       content: "fr:user_2:translated:middleware.author_only",
       flags: MessageFlags.Ephemeral,
@@ -95,8 +93,10 @@ describe("authorOnlyMiddleware", () => {
 
     const result = middleware.run(ctx);
 
-    expect(result.cancel).not.toBeNull();
-    await result.cancel;
+    expect(result.status).toBe("cancel");
+    if (result.status !== "cancel")
+      throw new Error("expected cancellation");
+    await result.result;
     expect(ctx.editReply).toHaveBeenCalledWith({
       content: "Author only",
     });

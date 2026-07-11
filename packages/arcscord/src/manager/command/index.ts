@@ -4,8 +4,6 @@ export type {
   CommandResultHandler,
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
-  CommandReturnedHandlerInfos,
-  CommandThrownHandlerInfos,
 } from "./command_manager.type";
 export type {
   ApplicationCommandRegistration,

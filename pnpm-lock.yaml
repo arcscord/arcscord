@@ -51,9 +51,6 @@ importers:
 
   packages/arcscord:
     dependencies:
-      '@arcscord/better-error':
-        specifier: workspace:^
-        version: link:../better_error
       '@arcscord/error':
         specifier: workspace:^
         version: link:../error

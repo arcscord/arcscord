@@ -19,7 +19,7 @@ export function ok<T>(value: T): ResultOk<T> {
  * @returns The error result.
  * @template E - The type of the error.
  */
-export function error<E extends Error>(err: E): ResultErr<E> {
+export function error<E>(err: E): ResultErr<E> {
   return [err, null];
 }
 
@@ -53,8 +53,8 @@ export async function forceSafe<T>(fn: (...args: unknown[]) => T | Promise<T>): 
  */
 export function multiple<
   TLastSuccess,
-  TLastError extends Error,
-  TErrors extends Error[], // Tuple of all possible error types
+  TLastError,
+  TErrors extends unknown[], // Tuple of all possible error types
 >(
   ...results: [
     ...{ [K in keyof TErrors]: Result<unknown, TErrors[K]> },

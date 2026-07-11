@@ -1,7 +1,8 @@
 import type { CommandInteraction } from "discord.js";
-import type { AnyCommandHandler, AnySubCommandHandler, CommandContext, CommandRunResult } from "#/base";
+import type { AnyCommandHandler, AnySubCommandHandler, CommandContext } from "#/base";
 import type { CommandRegistrationConfig } from "#/manager/command/command_registration";
 import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
+import type { ExecutionExit } from "#/utils/error/execution_exit";
 
 /**
  * Shared fields present in all command result handler payloads.
@@ -35,61 +36,24 @@ type BaseCommandResultHandlerInfos = {
   /**
    * Unix timestamp (ms) when the command started running.
    */
-  start: number;
+  startedAt: number;
 
   /**
    * Unix timestamp (ms) when the command finished running.
    */
-  end: number;
+  endedAt: number;
+
+  /** Total execution duration in milliseconds. */
+  durationMs: number;
+
+  /** Correlation ID generated for an unexpected defect. */
+  incidentId?: string;
 };
 
-/**
- * Payload delivered to `resultHandler` when `run()` returned normally
- * (with a `Result`, a raw value, or `void`).
- */
-export type CommandReturnedHandlerInfos = BaseCommandResultHandlerInfos & {
-  status: "returned";
-  /**
-   * The normalized result of `run()`. May be `ok` or `error` — the author
-   * explicitly returned an error `Result`.
-   */
-  result: CommandRunResult;
+/** Payload received by `resultHandler` after every command execution. */
+export type CommandResultHandlerInfos = BaseCommandResultHandlerInfos & {
+  exit: ExecutionExit<string | true, unknown>;
 };
-
-/**
- * Payload delivered to `resultHandler` when `run()` threw an unhandled
- * exception or a middleware threw.
- *
- * There is no `result` field here — the thrown value has not been normalized.
- * Use `thrownValue` directly and construct whatever error type you need.
- * The default handler wraps it in a `CommandError`.
- */
-export type CommandThrownHandlerInfos = BaseCommandResultHandlerInfos & {
-  status: "thrown";
-  /**
-   * The raw value that was thrown by `run()` or middleware.
-   * May be any type — a `CommandError`, a plain `Error`, a string, etc.
-   */
-  thrownValue: unknown;
-};
-
-/**
- * Payload received by `resultHandler` after every `run()` execution.
- *
- * Use the `status` discriminant to branch between the two cases:
- * ```ts
- * resultHandler: (infos) => {
- *   if (infos.status === "thrown") {
- *     // infos.thrownValue is the raw thrown value (not wrapped)
- *     return;
- *   }
- *   const [err, value] = infos.result;
- * }
- * ```
- */
-export type CommandResultHandlerInfos
-  = | CommandReturnedHandlerInfos
-    | CommandThrownHandlerInfos;
 
 /**
  * Handler called after every command `run()` execution, whether it returned

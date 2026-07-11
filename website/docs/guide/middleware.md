@@ -16,7 +16,7 @@ Every middleware returns one of three results:
 | --- | --- | --- |
 | Continue | `this.next(value)` | Continue to the next middleware or handler and expose `value` in `ctx.additional`. |
 | Cancel | `this.cancel(result)` | Stop the middleware chain and do not run the handler. Use this when the middleware already replied or handled the interaction. |
-| Error | `this.error(error)` | Stop the middleware chain and forward the error to Arcscord's error handler. |
+| Failure | `this.fail(failure)` | Stop the middleware chain and forward an expected failure to the result handler. |
 
 Only one result is active at a time. Returned objects always contain `next`, `cancel`, and `error`, with inactive fields set to `null`.
 
@@ -92,23 +92,23 @@ export const adminCommand = createCommand({
 });
 ```
 
-### Command Errors
+### Command failures
 
-Use `this.error(...)` when the middleware cannot handle the failure by replying.
+Use `this.fail(...)` when the middleware cannot handle the failure by replying. The failure may be any value and is preserved in `ExecutionExit.failure`.
 
 ```ts
 import type { CommandContext, CommandMiddlewareRun } from "arcscord";
-import { CommandError, CommandMiddleware } from "arcscord";
+import { CommandMiddleware } from "arcscord";
 
 class RequiredConfigMiddleware extends CommandMiddleware {
   readonly name = "requiredConfig" as const;
 
-  run(ctx: CommandContext): CommandMiddlewareRun<{ configured: true }> {
+  run(_ctx: CommandContext): CommandMiddlewareRun<{ configured: true }> {
     if (!process.env.REQUIRED_CHANNEL_ID) {
-      return this.error(new CommandError({
-        ctx,
-        message: "Missing REQUIRED_CHANNEL_ID",
-      }));
+      return this.fail({
+        _tag: "MissingConfiguration",
+        key: "REQUIRED_CHANNEL_ID",
+      } as const);
     }
 
     return this.next({ configured: true });
@@ -174,13 +174,13 @@ export const secureButton = createButton({
 });
 ```
 
-### Component Errors
+### Component failures
 
-Use `this.error(...)` with `ComponentError` when the middleware should fail through Arcscord's error handler.
+Use `this.fail(...)` when the middleware should fail through the component result handler.
 
 ```ts
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
-import { ComponentError, ComponentMiddleware } from "arcscord";
+import { ComponentMiddleware } from "arcscord";
 
 class RequiredRouteParamMiddleware extends ComponentMiddleware {
   readonly name = "requiredRouteParam" as const;
@@ -189,10 +189,10 @@ class RequiredRouteParamMiddleware extends ComponentMiddleware {
     const itemId = ctx.params.itemId;
 
     if (!itemId) {
-      return this.error(new ComponentError({
-        interaction: ctx.interaction,
-        message: "Missing itemId route parameter",
-      }));
+      return this.fail({
+        _tag: "MissingRouteParameter",
+        parameter: "itemId",
+      } as const);
     }
 
     return this.next({ itemId });
@@ -250,13 +250,12 @@ return this.cancel(ctx.reply({
 }));
 ```
 
-Use `error` when the framework error handler should receive the failure:
+Use `fail` when the result handler should receive an expected failure:
 
 ```ts
-return this.error(new ComponentError({
-  interaction: ctx.interaction,
-  message: "Unexpected middleware state",
-}));
+return this.fail({
+  _tag: "InvalidMiddlewareState",
+} as const);
 ```
 
 ## Reusable Localized Middleware Messages

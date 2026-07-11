@@ -20,8 +20,8 @@ import type {
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
 } from "#/manager/command/command_manager.type";
+import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { ApplicationCommandRegistration } from "./command_registration";
-import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
@@ -40,9 +40,8 @@ import {
 } from "#/base/command";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { BaseManager } from "#/base/manager/manager.class";
-import { CommandError, CommandValidationError, validateCommands } from "#/utils";
-import { InternalError } from "#/utils/error/class/internal_error";
-import { applyDiagnosticLevel, normalizeRunReturn } from "#/utils/error/run_normalize";
+import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn, validateCommands } from "#/utils";
+import { applyDiagnosticLevel } from "#/utils/error/run_normalize";
 import {
   normalizeCommandRegistrationConfig,
   registerCommands,
@@ -92,9 +91,8 @@ export class CommandManager
   loadCommands(
     commands: Command[],
     group = "globalCommands",
-  ): Result<RESTPostAPIApplicationCommandsJSONBody[], InternalError> {
+  ): Result<RESTPostAPIApplicationCommandsJSONBody[], ArcscordError> {
     const [commandsValidationErr] = validateCommands(commands, this.client, {
-      createError: options => new CommandValidationError(options),
       group,
     });
     if (commandsValidationErr) {
@@ -144,9 +142,11 @@ export class CommandManager
           );
         }
         if (!hasPush) {
-          return error(new InternalError({
+          return error(new ArcscordError({
+            code: arcscordErrorCodes.CommandValidationFailed,
             message: `no builder found for command "${command.constructor.name}" in group "${group}"`,
-            debugs: {
+            metadata: {
+              rule: "command-builder-required",
               group,
             },
           }));
@@ -174,7 +174,7 @@ export class CommandManager
     return ok(commandsBody);
   }
 
-  private validateCommandAutocomplete(command: AnyCommandHandler, group: string): Result<true, InternalError> {
+  private validateCommandAutocomplete(command: AnyCommandHandler, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     if (!hasSlashCommand(command) || !command.slash.options) {
       return this.validateAutocompleteHandlers(command.autocomplete, undefined, command.slash?.name ?? command.message?.name ?? command.user?.name ?? "unknown", group);
     }
@@ -187,7 +187,7 @@ export class CommandManager
     );
   }
 
-  private validateSubCommandListAutocomplete(command: SlashWithSubsCommandDefinition, group: string): Result<true, InternalError> {
+  private validateSubCommandListAutocomplete(command: SlashWithSubsCommandDefinition, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     for (const subCommand of command.subCommands ?? []) {
       const [err] = this.validateSubCommandAutocomplete(subCommand, subCommand.autocomplete, `${command.name}.${subCommand.name}`, group);
       if (err) {
@@ -219,7 +219,7 @@ export class CommandManager
     handlers: Record<string, unknown> | undefined,
     commandName: string,
     group: string,
-  ): Result<true, InternalError> {
+  ): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     return this.validateAutocompleteHandlers(handlers, build.options, commandName, group);
   }
 
@@ -228,7 +228,7 @@ export class CommandManager
     options: OptionsList | undefined,
     commandName: string,
     group: string,
-  ): Result<true, InternalError> {
+  ): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     const autocompleteOptions = Object.entries(options ?? {})
       .filter(([, option]) => this.isAutocompleteOption(option))
       .map(([name]) => name);
@@ -236,9 +236,11 @@ export class CommandManager
 
     for (const optionName of autocompleteOptions) {
       if (!handlers?.[optionName]) {
-        return error(new InternalError({
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.CommandValidationFailed,
           message: `missing autocomplete handler for option "${optionName}" in command "${commandName}"`,
-          debugs: {
+          metadata: {
+            rule: "autocomplete-handler-required",
             group,
             commandName,
             optionName,
@@ -251,9 +253,11 @@ export class CommandManager
     for (const handlerName of handlerNames) {
       const option = options?.[handlerName];
       if (!option) {
-        return error(new InternalError({
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.CommandValidationFailed,
           message: `autocomplete handler "${handlerName}" does not match an option in command "${commandName}"`,
-          debugs: {
+          metadata: {
+            rule: "autocomplete-option-required",
             group,
             commandName,
             handlerName,
@@ -263,9 +267,11 @@ export class CommandManager
       }
 
       if (!this.isAutocompleteOption(option)) {
-        return error(new InternalError({
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.CommandValidationFailed,
           message: `autocomplete handler "${handlerName}" targets an option without autocomplete enabled in command "${commandName}"`,
-          debugs: {
+          metadata: {
+            rule: "autocomplete-enabled",
             group,
             commandName,
             handlerName,
@@ -294,7 +300,7 @@ export class CommandManager
    */
   async pushGlobalCommands(
     commands: RESTPostAPIApplicationCommandsJSONBody[],
-  ): Promise<Result<ApplicationCommandRegistration[], InternalError>> {
+  ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
     return await registerCommands({
       client: this.client,
       logger: this.logger,
@@ -314,7 +320,7 @@ export class CommandManager
   async pushGuildCommands(
     guildId: string,
     commands: RESTPostAPIApplicationCommandsJSONBody[],
-  ): Promise<Result<ApplicationCommandRegistration[], InternalError>> {
+  ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
     return await registerCommands({
       client: this.client,
       logger: this.logger,
@@ -333,9 +339,13 @@ export class CommandManager
    */
   async deleteUnloadedCommands(
     guildId?: string,
-  ): Promise<Result<number, InternalError>> {
+  ): Promise<Result<number, ArcscordError>> {
     if (!this.client.application) {
-      return error(new InternalError("No application found in client"));
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ApplicationUnavailable,
+        message: "No application found in client",
+        metadata: { operation: "deleteUnloadedCommands" },
+      }));
     }
 
     let commands;
@@ -348,9 +358,15 @@ export class CommandManager
     }
     catch (e) {
       return error(
-        new InternalError({
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandRegistrationFailed,
           message: "Failed to fetch applications commands",
-          originalError: anyToError(e),
+          metadata: {
+            scope: guildId ? "guild" : "global",
+            guildId,
+            operation: "fetch",
+          },
+          cause: e,
         }),
       );
     }
@@ -369,9 +385,15 @@ export class CommandManager
         }
         catch (e) {
           return error(
-            new InternalError({
+            new ArcscordError({
+              code: arcscordErrorCodes.CommandRegistrationFailed,
               message: "Failed to delete command",
-              originalError: anyToError(e),
+              metadata: {
+                scope: guildId ? "guild" : "global",
+                guildId,
+                operation: "delete",
+              },
+              cause: e,
             }),
           );
         }
@@ -507,7 +529,7 @@ export class CommandManager
       cmd: AnyCommandHandler | AnySubCommandHandler;
       resolvedName: string;
     },
-    BaseError
+    ArcscordError<"COMMAND_NOT_FOUND" | "COMMAND_RESOLUTION_FAILED">
   > {
     const resolvedCommandName = this.resolveCommandName({
       id: interaction.commandId,
@@ -518,9 +540,11 @@ export class CommandManager
 
     if (!command) {
       return error(
-        new BaseError({
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandNotFound,
           message: `no command found with full id ${resolvedCommandName}`,
-          debugs: {
+          metadata: {
+            interactionId: interaction.id,
             commands: this.commands.keys(),
             commandId: interaction.commandId,
             commandName: interaction.commandName,
@@ -539,8 +563,10 @@ export class CommandManager
 
     if (!interaction.isChatInputCommand() && !interaction.isAutocomplete()) {
       return error(
-        new BaseError({
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandResolutionFailed,
           message: "invalid type get for interaction for handle subCommand",
+          metadata: { commandName: interaction.commandName, interactionType: interaction.type, reason: "invalid-subcommand-interaction-type" },
         }),
       );
     }
@@ -548,11 +574,10 @@ export class CommandManager
     const subCommandName = interaction.options.getSubcommand(false);
     if (!subCommandName) {
       return error(
-        new BaseError({
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandResolutionFailed,
           message: `missing subCommandName in interaction for command ${command.name}`,
-          debugs: {
-            data: interaction.options.data,
-          },
+          metadata: { commandName: command.name, interactionType: interaction.type, reason: "missing-subcommand-name" },
         }),
       );
     }
@@ -563,8 +588,10 @@ export class CommandManager
       const group = command.subCommandsGroups[subCommandGroupName];
       if (!group) {
         return error(
-          new BaseError({
+          new ArcscordError({
+            code: arcscordErrorCodes.CommandResolutionFailed,
             message: `no subCommand group found for ${subCommandGroupName} in command ${command.name}`,
+            metadata: { commandName: command.name, interactionType: interaction.type, reason: "subcommand-group-not-found" },
           }),
         );
       }
@@ -575,8 +602,10 @@ export class CommandManager
 
     if (!cmd) {
       return error(
-        new BaseError({
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandResolutionFailed,
           message: `no subCommand found for ${subCommandName} subCommand for ${command.name}`,
+          metadata: { commandName: command.name, interactionType: interaction.type, reason: "subcommand-not-found" },
         }),
       );
     }
@@ -669,7 +698,11 @@ export class CommandManager
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new BaseError({ message: `invalid command, get slash command interaction for command ${infos.resolvedName}` }),
+          new ArcscordError({
+            code: arcscordErrorCodes.CommandContextCreationFailed,
+            message: `invalid command, get slash command interaction for command ${infos.resolvedName}`,
+            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "slash-context-mismatch" },
+          }),
           { interaction, locale },
         );
       }
@@ -688,7 +721,11 @@ export class CommandManager
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new BaseError({ message: `invalid command, got user command interaction for command ${infos.resolvedName}` }),
+          new ArcscordError({
+            code: arcscordErrorCodes.CommandContextCreationFailed,
+            message: `invalid command, got user command interaction for command ${infos.resolvedName}`,
+            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "user-context-mismatch" },
+          }),
           { interaction, locale },
         );
       }
@@ -706,7 +743,11 @@ export class CommandManager
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new BaseError({ message: `invalid command, got message command interaction for command ${infos.resolvedName}` }),
+          new ArcscordError({
+            code: arcscordErrorCodes.CommandContextCreationFailed,
+            message: `invalid command, got message command interaction for command ${infos.resolvedName}`,
+            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "message-context-mismatch" },
+          }),
           { interaction, locale },
         );
       }
@@ -715,7 +756,11 @@ export class CommandManager
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
-        new BaseError({ message: `invalid interaction type: ${interaction.type}` }),
+        new ArcscordError({
+          code: arcscordErrorCodes.CommandContextCreationFailed,
+          message: `invalid interaction type: ${interaction.type}`,
+          metadata: { interactionId: interaction.id, reason: "unsupported-interaction-type" },
+        }),
         { interaction, locale },
       );
     }
@@ -740,55 +785,60 @@ export class CommandManager
       }
     }
 
-    const start = Date.now();
+    const startedAt = Date.now();
 
     /* Middlewares */
-    const [middlewareErr, middlewareResult] = await this.runMiddleware(command, context as CommandContext);
-    if (middlewareErr) {
+    const middlewareExit = await this.runMiddleware(command, context as CommandContext);
+    if (middlewareExit.status !== "success") {
+      const endedAt = Date.now();
       return this.handleResult({
-        status: "thrown",
-        thrownValue: middlewareErr,
+        exit: middlewareExit,
         interaction,
         command,
         context: context as CommandContext,
         locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
+        incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
       });
     }
-    if (!middlewareResult) {
+    if (!middlewareExit.value) {
       return;
     }
-    context.additional = middlewareResult as typeof context.additional;
+    context.additional = middlewareExit.value as typeof context.additional;
 
     /* Command Run */
     try {
       const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
       const rawResult = await run(context as CommandContext);
+      const endedAt = Date.now();
       return this.handleResult({
-        status: "returned",
-        result: normalizeRunReturn(rawResult),
+        exit: normalizeHandlerReturn(rawResult),
         interaction,
         command,
         context: context as CommandContext,
         locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
       });
     }
     catch (e) {
+      const endedAt = Date.now();
       return this.handleResult({
-        status: "thrown",
-        thrownValue: e,
+        exit: executionDefect(e),
         interaction,
         command,
         context: context as CommandContext,
         locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
+        incidentId: crypto.randomUUID(),
       });
     }
   }
@@ -799,7 +849,6 @@ export class CommandManager
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr) {
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
-      cmdErr.generateId();
       applyDiagnosticLevel(this.logger, level, cmdErr);
       return;
     }
@@ -814,9 +863,10 @@ export class CommandManager
 
     const handler = command.autocomplete[focused.name];
     if (!handler) {
-      const err = new BaseError({
+      const err = new ArcscordError({
+        code: arcscordErrorCodes.AutocompleteExecutionFailed,
         message: `no autocomplete handler found for option "${focused.name}" in command "${infos.resolvedName}"`,
-        debugs: { focused, handlers: Object.keys(command.autocomplete) },
+        metadata: { commandName: infos.resolvedName, focused, handlers: Object.keys(command.autocomplete) },
       });
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
       applyDiagnosticLevel(this.logger, level, err);
@@ -840,17 +890,23 @@ export class CommandManager
       const [acErr] = await handler(context);
       if (acErr) {
         const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
-        applyDiagnosticLevel(this.logger, level, acErr);
+        if (isArcscordError(acErr)) {
+          applyDiagnosticLevel(this.logger, level, acErr);
+        }
+        else if (level !== "ignore") {
+          this.logger.logError(acErr, { commandName: infos.resolvedName });
+        }
         return;
       }
       this.trace(`Autocomplete handled for command ${infos.resolvedName}`);
     }
     catch (e) {
-      const err = new BaseError({
+      const err = new ArcscordError({
+        code: arcscordErrorCodes.AutocompleteExecutionFailed,
         message: `autocomplete threw: ${anyToError(e).message}`,
-        originalError: anyToError(e),
+        metadata: { commandName: infos.resolvedName },
+        cause: e,
       });
-      err.generateId();
       this.logger.logError(err);
     }
   }
@@ -858,18 +914,18 @@ export class CommandManager
   private async runMiddleware(
     command: AnyCommandHandler | AnySubCommandHandler,
     context: CommandContext,
-  ): Promise<Result<object | false, CommandError>> {
+  ): Promise<ExecutionExit<object | false, unknown>> {
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!command.use || command.use.length === 0) {
-      return ok({});
+      return executionSuccess({});
     }
     const middlewareNames = new Set<string>();
     for (const middleware of command.use) {
       if (middlewareNames.has(middleware.name)) {
-        return error(new CommandError({
+        return executionFailure(new ArcscordError({
+          code: arcscordErrorCodes.CommandValidationFailed,
           message: `duplicate middleware name "${middleware.name}"`,
-          ctx: context,
-          debugs: { middlewareName: middleware.name },
+          metadata: { rule: "unique-middleware-name", middlewareName: middleware.name },
         }));
       }
       middlewareNames.add(middleware.name);
@@ -877,39 +933,36 @@ export class CommandManager
     for (const middleware of command.use) {
       try {
         const result = await middleware.run(context);
-        if (result.error) {
-          return error(await result.error);
+        if (result.status === "failure") {
+          return executionFailure(await result.failure);
         }
-        if (result.cancel) {
-          const [err] = await result.cancel;
-          if (err) {
-            return error(err);
+        if (result.status === "cancel") {
+          if (result.result) {
+            const exit = normalizeHandlerReturn(await result.result);
+            if (exit.status !== "success") {
+              return exit;
+            }
           }
-          return ok(false);
+          return executionSuccess(false);
         }
-        additional[middleware.name] = result.next;
+        additional[middleware.name] = result.value;
       }
       catch (e) {
-        return error(new CommandError({
-          message: `failed to run middleware : ${anyToError(e).message}`,
-          ctx: context,
-          originalError: anyToError(e),
-          debugs: { middlewareName: middleware.name },
-        }));
+        return executionDefect(e);
       }
     }
-    return ok(additional);
+    return executionSuccess(additional);
   }
 
   /**
    * Sends an error reply to a command interaction, respecting the defer state.
    * Used by the default `resultHandler`.
    */
-  private async sendInternalError(
-    err: CommandError,
+  private async sendFailureReply(
+    incidentId: string,
     infos: CommandResultHandlerInfos,
   ): Promise<void> {
-    const message = this.client.getErrorMessage(err.id, infos.locale);
+    const message = this.client.getErrorMessage(incidentId, infos.locale);
     try {
       if (infos.defer) {
         await infos.interaction.editReply(message);
@@ -919,7 +972,7 @@ export class CommandManager
       }
     }
     catch (e) {
-      this.logger.error("failed to send internal error message", {
+      this.logger.error("failed to send failure reply", {
         baseError: anyToError(e).message,
       });
     }
@@ -930,29 +983,31 @@ export class CommandManager
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    */
   async resultHandler(infos: CommandResultHandlerInfos): Promise<void> {
-    if (infos.status === "thrown") {
-      const err = new CommandError({
-        message: `failed to run command : ${anyToError(infos.thrownValue).message}`,
-        ctx: infos.context,
-        originalError: anyToError(infos.thrownValue),
-      });
-      err.generateId();
-      this.logger.logError(err);
-      return this.sendInternalError(err, infos);
-    }
-
-    const [err] = infos.result;
-    if (err !== null) {
-      err.generateId();
-      this.logger.logError(err);
-      return this.sendInternalError(err, infos);
-    }
-    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
+    const meta = {
       command: infos.interaction.commandName,
       interactionId: infos.interaction.id,
       guildId: infos.interaction.guildId,
       userId: infos.interaction.user.id,
-      durationMs: infos.end - infos.start,
+      durationMs: infos.durationMs,
+      incidentId: infos.incidentId,
+    };
+    if (infos.exit.status === "defect") {
+      const incidentId = infos.incidentId ?? crypto.randomUUID();
+      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
+      return this.sendFailureReply(incidentId, infos);
+    }
+    if (infos.exit.status === "failure") {
+      const incidentId = crypto.randomUUID();
+      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
+      return this.sendFailureReply(incidentId, infos);
+    }
+    if (infos.exit.status === "interrupted") {
+      this.logger.warn("Command execution interrupted", meta);
+      return;
+    }
+    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
+      ...meta,
+      value: infos.exit.value,
     });
   }
 }

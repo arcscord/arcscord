@@ -1,6 +1,6 @@
-import type { BaseError } from "@arcscord/better-error";
 import type { BaseInteraction, BaseMessageOptions } from "discord.js";
 import type { ArcClient } from "#/base/client/client.class";
+import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { DiagnosticLevel, DispatchErrorConfig, DispatchMessageContext } from "#/utils/error/dispatch.type";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
 import { anyToError } from "@arcscord/error";
@@ -64,14 +64,15 @@ export abstract class BaseManager {
   protected async sendDispatchError(
     config: DispatchErrorConfig | undefined,
     defaultLevel: DiagnosticLevel,
-    err: BaseError,
+    err: ArcscordError,
     replyCtx?: {
       interaction: BaseInteraction;
       locale: string;
     },
   ): Promise<void> {
     const level = config?.level ?? defaultLevel;
-    applyDiagnosticLevel(this.logger, level, err);
+    const incidentId = crypto.randomUUID();
+    applyDiagnosticLevel(this.logger, level, err, { incidentId });
 
     if (!replyCtx) {
       return;
@@ -91,8 +92,7 @@ export abstract class BaseManager {
     let message: BaseMessageOptions;
 
     if (replyConfig === undefined) {
-      err.generateId();
-      message = this.client.getErrorMessage(err.id, locale);
+      message = this.client.getErrorMessage(incidentId, locale);
     }
     else if (typeof replyConfig === "function") {
       const ctx: DispatchMessageContext = {

@@ -12,12 +12,12 @@ import type {
 import type { Option, OptionsList } from "#/base/command/option.type";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils";
-import type { CommandValidationError } from "#/utils/error/class";
-import type { InternalError } from "#/utils/error/class/internal_error";
-import type { ValidationContext } from "./validator.util";
+import type { ValidationContext, ValidationFailure } from "./validator.util";
 import { error, ok } from "@arcscord/error";
 import { isSubCommand } from "#/base/command";
 import { localizationCallbackToMap } from "#/utils/discord/tranformers/localization";
+import { ArcscordError } from "#/utils/error/arcscord_error";
+import { arcscordErrorCodes } from "#/utils/error/codes";
 import {
   validateLocalizations,
   validateLowercase,
@@ -35,14 +35,14 @@ const COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH = 100;
 const COMMAND_STRING_OPTION_MAX_LENGTH = 6000;
 const SLASH_COMMAND_NAME_PATTERN = /^[-_'\p{L}\p{N}\p{Script=Devanagari}\p{Script=Thai}]{1,32}$/u;
 
-type CommandValidationContext = ValidationContext<CommandValidationError>;
+type CommandValidationContext = ValidationContext;
 type NameValidationMode = "slash" | "contextMenu";
 
 export function validateCommands(
   commands: Command[],
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const commandNames = new Map<string, string>();
 
   for (const command of commands) {
@@ -101,7 +101,7 @@ function validateCommandDefinition(
   definition: FullCommandDefinition,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   if (definition.slash) {
     const [err] = validateSlashCommandDefinition(definition.slash, `slash command "${definition.slash.name}"`, client, context);
     if (err) {
@@ -130,7 +130,7 @@ function validateSubCommandListDefinition(
   command: SlashWithSubsCommandDefinition,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [baseErr] = validateBaseCommandDefinition(command, `slash command "${command.name}"`, "slash", client, context);
   if (baseErr) {
     return error(baseErr);
@@ -205,7 +205,7 @@ function validateBaseCommandDefinition(
   mode: NameValidationMode,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   return validateName(command.name, command.nameLocalizations, `${path} name`, mode, client, context);
 }
 
@@ -214,7 +214,7 @@ function validateSlashCommandDefinition(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [baseErr] = validateBaseCommandDefinition(command, path, "slash", client, context);
   if (baseErr) {
     return error(baseErr);
@@ -240,7 +240,7 @@ function validateSubCommandDefinition(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [nameErr] = validateName(command.name, command.nameLocalizations, `${path} name`, "slash", client, context);
   if (nameErr) {
     return error(nameErr);
@@ -267,7 +267,7 @@ function validateSubCommandGroupDefinition(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [nameErr] = validateName(name, groupDefinition.nameLocalizations, `${path} name`, "slash", client, context);
   if (nameErr) {
     return error(nameErr);
@@ -311,7 +311,7 @@ function validateOptions(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const optionNames = new Map<string, string>();
 
   for (const [optionName, option] of Object.entries(options)) {
@@ -349,7 +349,7 @@ function validateOptions(
   return ok(true);
 }
 
-function validateStringOptionLengthBounds(option: Option, path: string, context: CommandValidationContext): Result<true, InternalError> {
+function validateStringOptionLengthBounds(option: Option, path: string, context: CommandValidationContext): Result<true, ValidationFailure> {
   if (option.type !== "string") {
     return ok(true);
   }
@@ -373,7 +373,7 @@ function validateOptionChoices(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   if (!("choices" in option) || !option.choices) {
     return ok(true);
   }
@@ -401,15 +401,19 @@ function validateOptionChoices(
     }
 
     if (option.type === "string" && typeof choice.value === "string" && choice.value.length > COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH) {
-      return error(context.createError({
-        message: `${path} choice "${choice.name}" value must be at most ${COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH} characters`,
-        debugs: {
-          group: context.group,
-          optionName,
-          path,
-          valueLength: choice.value.length,
-          maxLength: COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH,
-        },
+      const message = `${path} choice "${choice.name}" value must be at most ${COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH} characters`;
+      const metadata = {
+        rule: "choice-value-length",
+        group: context.group,
+        optionName,
+        path,
+        valueLength: choice.value.length,
+        maxLength: COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH,
+      };
+      return error(context.createError?.({ message, metadata }) ?? new ArcscordError({
+        code: arcscordErrorCodes.CommandValidationFailed,
+        message,
+        metadata,
       }));
     }
   }
@@ -424,7 +428,7 @@ function validateName(
   mode: NameValidationMode,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_NAME_MAX_LENGTH, context);
   if (lengthErr) {
     return error(lengthErr);
@@ -457,7 +461,7 @@ function validateChoiceName(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_CHOICE_NAME_MAX_LENGTH, context);
   if (lengthErr) {
     return error(lengthErr);
@@ -474,7 +478,7 @@ function validateDescription(
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
-): Result<true, InternalError> {
+): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_DESCRIPTION_MAX_LENGTH, context);
   if (lengthErr) {
     return error(lengthErr);
@@ -485,7 +489,7 @@ function validateDescription(
   });
 }
 
-function validateSlashNameFormat(value: string, path: string, context: CommandValidationContext): Result<true, InternalError> {
+function validateSlashNameFormat(value: string, path: string, context: CommandValidationContext): Result<true, ValidationFailure> {
   const [lowercaseErr] = validateLowercase(value, path, context);
   if (lowercaseErr) {
     return error(lowercaseErr);

@@ -107,9 +107,9 @@ type LoggerInterface = {
   info: (message: string, meta?: DebugValues) => void;
   warn: (message: string, meta?: DebugValues) => void;
   error: (message: string, meta?: DebugValues) => void;
-  logError: (error: BaseError | Error | unknown | unknown[], meta?: DebugValues) => void;
+  logError: (error: unknown | unknown[], meta?: DebugValues) => void;
   fatal: (message: string, meta?: DebugValues) => void;
-  fatalError: (error: BaseError, meta?: DebugValues) => void;
+  fatalError: (error: unknown, meta?: DebugValues) => void;
   log: (level: LogLevel, message: string, meta?: DebugValues) => void;
   child?: (bindings: DebugValues) => LoggerInterface;
 };

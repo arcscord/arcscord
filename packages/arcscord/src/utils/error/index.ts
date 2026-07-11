@@ -1,4 +1,6 @@
-export * from "./class";
+export * from "./arcscord_error";
+export { ArcClientReadyTimeoutError } from "./class/client_ready_timeout_error";
+export * from "./codes";
 export type {
   CommandDispatchDiagnostics,
   ComponentDispatchDiagnostics,
@@ -15,8 +17,5 @@ export {
   stringifyDebugValue,
   stringifyDebugValues,
 } from "./error.util";
-export {
-  applyDiagnosticLevel,
-  isArcscordResult,
-  normalizeRunReturn,
-} from "./run_normalize";
+export * from "./execution_exit";
+export { applyDiagnosticLevel } from "./run_normalize";

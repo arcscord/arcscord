@@ -31,7 +31,7 @@ export {
 export type {
   CancelComponentMiddleware,
   ComponentMiddlewareRun,
-  ErrorComponentMiddleware,
+  FailedComponentMiddleware,
   NextComponentMiddleware,
 } from "./component_middleware";
 export {

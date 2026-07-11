@@ -16,6 +16,13 @@ describe("result functions", () => {
       const result = error(err);
       expect(result).toEqual([err, null]);
     });
+
+    it("should accept a domain failure that does not extend Error", () => {
+      const failure = { _tag: "MissingPermission", permission: "ManageGuild" } as const;
+      const result = error(failure);
+
+      expect(result).toEqual([failure, null]);
+    });
   });
 
   describe("forceSafe function", () => {

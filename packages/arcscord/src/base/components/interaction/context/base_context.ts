@@ -22,17 +22,16 @@ import type { ComponentRunResult, SelectMenuContext } from "#/base/components";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import type { RouteVariablesObject } from "#/base/components/interaction/route";
 import type { ContextDocs } from "#/base/utils";
-import type { ComponentErrorOptions } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";
 import { InteractionContext } from "#/base/utils";
-import { ComponentError } from "#/utils";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
 
 /**
  * @internal
  */
 type MiddlewaresResults<M extends ComponentMiddleware[]> = {
   [K in M[number] as K["name"]]: NonNullable<
-    Awaited<ReturnType<K["run"]>>["next"]
+    Extract<Awaited<ReturnType<K["run"]>>, { status: "next" }>["value"]
   >;
 };
 
@@ -132,7 +131,7 @@ export class BaseComponentContext<
   async reply(
     options: MessagePayload | InteractionReplyOptions | string,
     extraOptions: Omit<InteractionReplyOptions, "content"> = {},
-  ): Promise<ComponentRunResult> {
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.reply(
         typeof options === "string"
@@ -144,10 +143,11 @@ export class BaseComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to reply to interaction : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "reply" },
+          cause: e,
         }),
       );
     }
@@ -161,7 +161,7 @@ export class BaseComponentContext<
   async editReply(
     options: MessagePayload | InteractionEditReplyOptions | string,
     extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
-  ): Promise<ComponentRunResult> {
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.editReply(
         typeof options === "string"
@@ -173,10 +173,11 @@ export class BaseComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to edit reply to interaction : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "editReply" },
+          cause: e,
         }),
       );
     }
@@ -189,7 +190,7 @@ export class BaseComponentContext<
    */
   async deferReply(
     options: InteractionDeferReplyOptions,
-  ): Promise<ComponentRunResult> {
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.deferReply(options);
       this.defer = true;
@@ -197,10 +198,11 @@ export class BaseComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to defer reply to interaction : ${anyToError(e).message}}`,
-          originalError: anyToError(e),
+          metadata: { operation: "deferReply" },
+          cause: e,
         }),
       );
     }
@@ -217,15 +219,11 @@ export class BaseComponentContext<
 
   /**
    * Creates an error result.
-   * @param options The error options.
+   * @param failure The expected failure value.
    * @returns The error result.
    */
-  error(
-    options: Omit<ComponentErrorOptions, "interaction">,
-  ): ComponentRunResult {
-    return error(
-      new ComponentError({ ...options, interaction: this.interaction }),
-    );
+  error<E>(failure: E): ComponentRunResult<E> {
+    return error(failure);
   }
 
   /**
@@ -234,8 +232,8 @@ export class BaseComponentContext<
    * @returns The result of the multiple operations.
    */
   async multiple(
-    ...funcList: Promise<ComponentRunResult>[]
-  ): Promise<ComponentRunResult> {
+    ...funcList: Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     for (const func of funcList) {
       const [err] = await func;
 

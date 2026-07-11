@@ -1,6 +1,7 @@
-import type { BaseError } from "@arcscord/better-error";
+import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { DebugValues } from "#/utils/error/error.type";
 import type { LogLevel } from "#/utils/logger/logger.type";
+import { isArcscordError } from "#/utils/error/arcscord_error";
 import { formatLog, formatShortDebug } from "#/utils/logger/logger.util";
 
 const MAX_DEPTH = 3;
@@ -14,6 +15,7 @@ const MAX_STRING_LENGTH = 800;
  */
 export type SerializedError = {
   type: string;
+  code?: string;
   message: string;
   stack?: string;
   cause?: SerializedError;
@@ -25,20 +27,11 @@ export type SerializedError = {
  * creation — see {@link createErrorReport}.
  */
 export type ErrorReport = {
-  id?: string;
   level: Extract<LogLevel, "error" | "fatal">;
   message: string;
   error: SerializedError;
   debug: DebugValues;
 };
-
-function isBaseError(error: unknown): error is BaseError {
-  return error instanceof Error
-    && "fullMessage" in error
-    && typeof error.fullMessage === "function"
-    && "getDebugsObject" in error
-    && typeof error.getDebugsObject === "function";
-}
 
 function truncateString(value: string): string {
   if (value.length <= MAX_STRING_LENGTH) {
@@ -156,14 +149,11 @@ function stringifyValue(value: unknown): string {
 
 function serializeError(error: unknown): SerializedError {
   if (error instanceof Error) {
-    const cause = error instanceof Error && error.cause
-      ? serializeError(error.cause)
-      : isBaseError(error) && error.originalError
-        ? serializeError(error.originalError)
-        : undefined;
+    const cause = error.cause ? serializeError(error.cause) : undefined;
 
     return {
       type: error.name,
+      code: isArcscordError(error) ? error.code : undefined,
       message: error.message,
       stack: error.stack,
       cause,
@@ -177,18 +167,10 @@ function serializeError(error: unknown): SerializedError {
 }
 
 function serializeDebugs(error: unknown): DebugValues {
-  if (!isBaseError(error)) {
+  if (!isArcscordError(error)) {
     return {};
   }
-
-  const debugs = error.getDebugsObject({
-    id: false,
-    originalErrorDebugs: false,
-    originalErrorStack: false,
-    stack: false,
-  });
-
-  return sanitizeValue(debugs) as DebugValues;
+  return sanitizeValue(error.metadata) as DebugValues;
 }
 
 /**
@@ -196,24 +178,25 @@ function serializeDebugs(error: unknown): DebugValues {
  *
  * Redacts secret-looking keys (`token`, `password`, `authorization`, `secret`,
  * `cookie`), truncates oversized strings/collections, and unwraps
- * {@link BaseError} debug data and cause chains. Reuse it in a custom `logError`
+ * {@link ArcscordError} metadata and native cause chains. Reuse it in a custom `logError`
  * implementation instead of re-implementing sanitization.
  *
  * @param error - The thrown value; if an array is given, its first element is used.
  * @param level - The severity to record on the report. Defaults to `"error"`.
  */
 export function createErrorReport(
-  error: BaseError | Error | unknown | unknown[],
+  error: unknown | unknown[],
   level: Extract<LogLevel, "error" | "fatal"> = "error",
 ): ErrorReport {
   const firstError = Array.isArray(error) ? error[0] : error;
-  const baseError = isBaseError(firstError) ? firstError : undefined;
+  const arcscordError: ArcscordError | undefined = isArcscordError(firstError) ? firstError : undefined;
   const serialized = serializeError(firstError);
 
   return {
-    id: baseError?.id,
     level,
-    message: baseError?.fullMessage() ?? `${serialized.type}: ${serialized.message}`,
+    message: arcscordError
+      ? `${arcscordError.name} [${arcscordError.code}]: ${arcscordError.message}`
+      : `${serialized.type}: ${serialized.message}`,
     error: serialized,
     debug: serializeDebugs(firstError),
   };
@@ -247,10 +230,6 @@ export function renderErrorReport(
   const lines = [
     formatLog(report.level, report.message, processName),
   ];
-
-  if (report.id) {
-    lines.push(formatShortDebug(["errorId", report.id]));
-  }
 
   lines.push(formatShortDebug(["errorType", report.error.type]));
 
@@ -300,7 +279,6 @@ export function renderJsonErrorReport(
     time: new Date().toISOString(),
     level: report.level,
     process: processName,
-    errorId: report.id,
     message: report.message,
     error: includeStack
       ? report.error

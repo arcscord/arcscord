@@ -1,7 +1,6 @@
 import * as console from "node:console";
-import { BaseError } from "@arcscord/better-error";
 import { describe, expect, it } from "vitest";
-import { defaultLogger } from "#/utils";
+import { ArcscordError, defaultLogger } from "#/utils";
 import { formatLog } from "./logger.util";
 
 describe("logs texts", () => {
@@ -24,10 +23,14 @@ describe("logs texts", () => {
 
     try {
       // noinspection ExceptionCaughtLocallyJS
-      throw new BaseError({ message: "oook" });
+      throw new ArcscordError({
+        code: "APPLICATION_UNAVAILABLE",
+        message: "oook",
+        metadata: { operation: "logger-demo" },
+      });
     }
     catch (error) {
-      if (error instanceof BaseError) {
+      if (error instanceof ArcscordError) {
         defaultLogger.logError(error);
       }
     }

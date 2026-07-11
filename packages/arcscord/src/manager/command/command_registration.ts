@@ -7,7 +7,8 @@ import type { ArcClient } from "#/base";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandType, Routes } from "discord-api-types/v10";
-import { InternalError } from "#/utils/error/class/internal_error";
+import { ArcscordError } from "#/utils/error/arcscord_error";
+import { arcscordErrorCodes } from "#/utils/error/codes";
 
 /** A command as registered on Discord (`id`, `name`, `type`) tagged with its `guildId` (`null` for global). */
 export type ApplicationCommandRegistration = Pick<APIApplicationCommand, "id" | "name" | "type"> & {
@@ -115,7 +116,7 @@ export function normalizeCommandRegistrationConfig(
 
 export async function registerCommands(
   options: CommandRegistrationOptions,
-): Promise<Result<ApplicationCommandRegistration[], InternalError>> {
+): Promise<Result<ApplicationCommandRegistration[], ArcscordError<"APPLICATION_UNAVAILABLE" | "COMMAND_REGISTRATION_FAILED">>> {
   const resolvedConfig = {
     ...defaultScopeConfig,
     ...options.config,
@@ -126,7 +127,11 @@ export async function registerCommands(
     if (resolvedConfig.commands === "ignore" && resolvedConfig.unused === "ignore") {
       return ok([]);
     }
-    return error(new InternalError("No application found in client"));
+    return error(new ArcscordError({
+      code: arcscordErrorCodes.ApplicationUnavailable,
+      message: "No application found in client",
+      metadata: { operation: "registerCommands" },
+    }));
   }
 
   try {
@@ -182,11 +187,17 @@ export async function registerCommands(
     return ok(finalCommands.map(apiCommandToResolvedCommand));
   }
   catch (e) {
-    return error(new InternalError({
+    return error(new ArcscordError({
+      code: arcscordErrorCodes.CommandRegistrationFailed,
       message: options.scope === "guild" && options.guildId
         ? `failed to load commands for guild ${options.guildId}`
         : "Failed to load commands globally",
-      originalError: anyToError(e),
+      metadata: {
+        scope: options.scope,
+        guildId: options.guildId,
+        operation: "sync",
+      },
+      cause: anyToError(e),
     }));
   }
 }

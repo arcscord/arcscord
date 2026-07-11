@@ -1,6 +1,5 @@
 import type { ComponentType } from "discord-api-types/v10";
 import type { MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
-import type { ComponentRunResult } from "#/base/components/interaction/component.type";
 import type {
   AnyStringSelectMenuComponentHandler,
   ButtonComponentHandler,
@@ -13,6 +12,7 @@ import type {
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentContext } from "#/base/components/interaction/context";
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
+import type { ExecutionExit } from "#/utils/error/execution_exit";
 
 /** The {@link ComponentManager}'s registry: one `customId → handler` map per component type (buttons, each select-menu kind, and modals). */
 export type ComponentList = {
@@ -52,12 +52,18 @@ type BaseComponentResultHandlerInfos = {
   /**
    * Unix timestamp (ms) when the component started running.
    */
-  start: number;
+  startedAt: number;
 
   /**
    * Unix timestamp (ms) when the component finished running.
    */
-  end: number;
+  endedAt: number;
+
+  /** Total execution duration in milliseconds. */
+  durationMs: number;
+
+  /** Correlation ID generated for an unexpected defect. */
+  incidentId?: string;
 
   /**
    * Detected i18next language for this interaction.
@@ -65,53 +71,10 @@ type BaseComponentResultHandlerInfos = {
   locale: string;
 };
 
-/**
- * Payload delivered to `resultHandler` when `run()` returned normally
- * (with a `Result`, a raw value, or `void`).
- */
-export type ComponentReturnedHandlerInfos = BaseComponentResultHandlerInfos & {
-  status: "returned";
-  /**
-   * The normalized result of `run()`. May be `ok` or `error` — the author
-   * explicitly returned an error `Result`.
-   */
-  result: ComponentRunResult;
+/** Payload received by `resultHandler` after every component execution. */
+export type ComponentResultHandlerInfos = BaseComponentResultHandlerInfos & {
+  exit: ExecutionExit<string | true, unknown>;
 };
-
-/**
- * Payload delivered to `resultHandler` when `run()` threw an unhandled
- * exception or a middleware threw.
- *
- * There is no `result` field here — the thrown value has not been normalized.
- * Use `thrownValue` directly and construct whatever error type you need.
- * The default handler wraps it in a `ComponentError`.
- */
-export type ComponentThrownHandlerInfos = BaseComponentResultHandlerInfos & {
-  status: "thrown";
-  /**
-   * The raw value that was thrown by `run()` or middleware.
-   * May be any type — a `ComponentError`, a plain `Error`, a string, etc.
-   */
-  thrownValue: unknown;
-};
-
-/**
- * Payload received by `resultHandler` after every component `run()` execution.
- *
- * Use the `status` discriminant to branch between the two cases:
- * ```ts
- * resultHandler: (infos) => {
- *   if (infos.status === "thrown") {
- *     // infos.thrownValue is the raw thrown value (not wrapped)
- *     return;
- *   }
- *   const [err, value] = infos.result;
- * }
- * ```
- */
-export type ComponentResultHandlerInfos
-  = | ComponentReturnedHandlerInfos
-    | ComponentThrownHandlerInfos;
 
 /**
  * Handler called after every component `run()` execution, whether it returned

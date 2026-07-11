@@ -53,7 +53,6 @@
     "docs": "typedoc"
   },
   "dependencies": {
-    "@arcscord/better-error": "workspace:^",
     "@arcscord/error": "workspace:^",
     "discord-api-types": "^0.38.49",
     "discord.js": "^14.26.4",

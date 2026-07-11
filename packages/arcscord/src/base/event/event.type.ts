@@ -2,13 +2,12 @@ import type { Result } from "@arcscord/error";
 import type { ClientEvents } from "discord.js";
 import type { EventContext } from "#/base/event/event_context";
 import type { MaybePromise } from "#/utils";
-import type { EventError } from "#/utils/error/class/event_error";
 
 /**
  * Normalized internal result of an event handler.
  * Used by the manager after normalizing the raw return value of `run()`.
  */
-export type EventHandleResult = Result<string | true, EventError>;
+export type EventHandleResult<E = unknown> = Result<string | true, E>;
 
 /**
  * All values an event `run()` function may return.
@@ -17,13 +16,13 @@ export type EventHandleResult = Result<string | true, EventError>;
  * the result handler:
  * - `void` / `undefined` → `ok(true)`
  * - `string` or `true` → `ok(value)`
- * - `Result<string | true, EventError>` → returned as-is
+ * - `Result<string | true, E>` → normalized as an expected failure or success
  */
-export type EventHandleReturn
+export type EventHandleReturn<E = unknown>
   = | void
     | string
     | true
-    | EventHandleResult;
+    | EventHandleResult<E>;
 
 /**
  * Controls how an event received before {@link ArcClient.waitReady} completes
@@ -78,7 +77,7 @@ export type EventHandler<E extends keyof ClientEvents> = {
    * The function to run when the event is triggered.
    *
    * May return `void`, a plain `string`, `true`, or a full
-   * `Result<string | true, EventError>`. The manager normalizes all forms
+   * `Result<string | true, E>`. The manager normalizes all forms
    * before calling the result handler.
    *
    * @param ctx - The event context.

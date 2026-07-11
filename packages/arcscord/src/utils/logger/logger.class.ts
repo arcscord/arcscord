@@ -1,4 +1,3 @@
-import type { BaseError } from "@arcscord/better-error";
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
@@ -122,11 +121,11 @@ export class ArcLogger implements LoggerInterface {
   }
 
   /**
-   * Logs a BaseError instance.
+   * Logs an arbitrary failure or error value.
    * @param error - The error to log.
    * @param meta - Optional extra structured fields to merge alongside the error's own debug values.
    */
-  logError(error: BaseError | unknown | unknown[] | Error, meta?: DebugValues): void {
+  logError(error: unknown | unknown[], meta?: DebugValues): void {
     if (!shouldLog("error", this.logLevel)) {
       return;
     }
@@ -156,11 +155,11 @@ export class ArcLogger implements LoggerInterface {
   }
 
   /**
-   * Logs a BaseError instance as a fatal error
+   * Logs an arbitrary failure or error value as fatal.
    * @param error - The error to log.
    * @param meta - Optional extra structured fields to merge alongside the error's own debug values.
    */
-  fatalError(error: BaseError, meta?: DebugValues): void {
+  fatalError(error: unknown, meta?: DebugValues): void {
     const report = createErrorReport(error, "fatal");
     if (meta) {
       Object.assign(report.debug, meta);

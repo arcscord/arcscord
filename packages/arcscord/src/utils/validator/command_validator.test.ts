@@ -3,7 +3,7 @@ import { ApplicationCommandType } from "discord-api-types/v10";
 import i18next from "i18next";
 import { describe, expect, it, vi } from "vitest";
 import { createCommand, createCommandWithSubs } from "#/base/command/command_func";
-import { CommandValidationError, validateCommands } from "#/utils";
+import { ArcscordError, validateCommands } from "#/utils";
 
 function createMockClient(): ArcClient {
   return {
@@ -20,7 +20,6 @@ function createMockClient(): ArcClient {
 
 function validateTestCommands(commands: Parameters<typeof validateCommands>[0]) {
   return validateCommands(commands, createMockClient(), {
-    createError: options => new CommandValidationError(options),
     group: "globalCommands",
   });
 }
@@ -66,7 +65,6 @@ async function createI18nClient(): Promise<ArcClient> {
 
 async function validateI18nTestCommands(commands: Parameters<typeof validateCommands>[0]) {
   return validateCommands(commands, await createI18nClient(), {
-    createError: options => new CommandValidationError(options),
     group: "globalCommands",
   });
 }
@@ -83,7 +81,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe(`slash command "${"a".repeat(33)}" name must be between 1 and 32 characters (got 33)`);
   });
 
@@ -98,7 +96,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" description must be between 1 and 100 characters (got 101)");
   });
 
@@ -113,7 +111,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"Search anime\" name must be lowercase when letters have lowercase variants");
   });
 
@@ -134,7 +132,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" option \"anime name\" name contains characters that Discord does not allow");
   });
 
@@ -167,7 +165,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" name localization \"fr\" must be lowercase when letters have lowercase variants");
   });
 
@@ -199,7 +197,7 @@ describe("command validator", () => {
 
     const [err] = await validateI18nTestCommands([command]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"reload\" name localization \"en-US\" contains characters that Discord does not allow");
   });
 
@@ -217,7 +215,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" name localization \"xx-XX\" is not a supported Discord locale");
   });
 
@@ -235,7 +233,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" description localization \"fr\" must be between 1 and 100 characters (got 101)");
   });
 
@@ -258,7 +256,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" option \"query\" min_length cannot be greater than max_length");
   });
 
@@ -285,7 +283,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("slash command \"search\" option \"query\" choice \"Long value\" value must be at most 100 characters");
   });
 
@@ -307,7 +305,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([firstCommand, secondCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("duplicate slash command name \"search\" in group \"globalCommands\"");
   });
 
@@ -331,7 +329,7 @@ describe("command validator", () => {
 
     const [err] = validateTestCommands([invalidCommand]);
 
-    expect(err).toBeInstanceOf(CommandValidationError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("duplicate subcommand in slash command \"search\" name \"anime\" in group \"globalCommands\"");
   });
 });

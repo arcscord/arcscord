@@ -1,4 +1,3 @@
-import type { BaseError } from "@arcscord/better-error";
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { logLevels } from "#/utils/logger/logger.enum";
 
@@ -127,7 +126,7 @@ export type LoggerInterface = {
    * @param error - The error to be logged.
    * @param meta - Optional extra structured fields to merge alongside the error's own debug values.
    */
-  logError: (error: BaseError | Error | unknown | unknown[], meta?: DebugValues) => void;
+  logError: (error: unknown | unknown[], meta?: DebugValues) => void;
 
   /**
    * Logs a fatal-severity message. Does not halt execution by itself — a logger's job is to
@@ -143,7 +142,7 @@ export type LoggerInterface = {
    * @param error - The error to be logged.
    * @param meta - Optional extra structured fields to merge alongside the error's own debug values.
    */
-  fatalError: (error: BaseError, meta?: DebugValues) => void;
+  fatalError: (error: unknown, meta?: DebugValues) => void;
 
   /**
    * Logs a message at the specified log level.

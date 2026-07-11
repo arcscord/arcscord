@@ -1,7 +1,7 @@
 import type { ValidationContext } from "./validator.util";
 import { error, ok } from "@arcscord/error";
 import { describe, expect, it } from "vitest";
-import { InternalError } from "#/utils/error/class/internal_error";
+import { ArcscordError } from "#/utils";
 import {
   validateLocalizations,
   validateLowercase,
@@ -13,7 +13,6 @@ import {
 } from "./validator.util";
 
 const context: ValidationContext = {
-  createError: options => new InternalError(options),
   group: "testGroup",
 };
 
@@ -25,13 +24,13 @@ describe("validateRequiredStringLength", () => {
 
   it("rejects a value shorter than the minimum length", () => {
     const [err] = validateRequiredStringLength("", "name", 10, context);
-    expect(err).toBeInstanceOf(InternalError);
+    expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toContain("must be between 1 and 10 characters");
   });
 
   it("rejects a value longer than the maximum length", () => {
     const [err] = validateRequiredStringLength("a".repeat(11), "name", 10, context);
-    expect(err).toBeInstanceOf(InternalError);
+    expect(err).toBeInstanceOf(ArcscordError);
   });
 
   it("accepts a value at the exact min/max boundaries", () => {
@@ -90,7 +89,7 @@ describe("validateNumberBounds", () => {
 
   it("rejects a value above the maximum", () => {
     const [err] = validateNumberBounds(200, "options.length", "min_length", 1, 100, context);
-    expect(err).toBeInstanceOf(InternalError);
+    expect(err).toBeInstanceOf(ArcscordError);
   });
 
   it("accepts a value at the exact bounds", () => {
@@ -134,7 +133,11 @@ describe("validateLocalizations", () => {
   });
 
   it("propagates an error from the per-value validate callback", () => {
-    const validate = () => error(new InternalError("value too long"));
+    const validate = () => error(new ArcscordError({
+      code: "COMMAND_VALIDATION_FAILED",
+      message: "value too long",
+      metadata: { rule: "test" },
+    }));
 
     const [err] = validateLocalizations({ fr: "bonjour" }, "name", context, validate);
     expect(err?.message).toBe("value too long");

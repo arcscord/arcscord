@@ -1,10 +1,8 @@
 import type { ClientEvents } from "discord.js";
 import type { ArcClient, EventHandleResult } from "#/base";
-import type { AnyEventHandler, EventHandler } from "#/base/event/event.type";
+import type { EventHandler } from "#/base/event/event.type";
 import type { ContextDocs } from "#/base/utils";
-import type { EventErrorOptions } from "#/utils";
 import { error, ok } from "@arcscord/error";
-import { EventError } from "#/utils";
 
 /**
  * The context in which an event handler is executed.
@@ -41,11 +39,11 @@ export class EventContext<E extends keyof ClientEvents = keyof ClientEvents> imp
   /**
    * Returns an error result.
    *
-   * @param options - The options for the event error.
+   * @param failure - The expected failure value.
    * @returns An error event handle result.
    */
-  error(options: Omit<EventErrorOptions, "handler">): EventHandleResult {
-    return error(new EventError({ ...options, handler: this.handler as unknown as AnyEventHandler }));
+  error<Failure>(failure: Failure): EventHandleResult<Failure> {
+    return error(failure);
   }
 
   /**

@@ -1,6 +1,6 @@
-import type { BaseError } from "@arcscord/better-error";
 import type { BaseInteraction, BaseMessageOptions } from "discord.js";
 import type i18next from "i18next";
+import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
 import type { MaybePromise } from "#/utils/type/util.type";
 
@@ -21,7 +21,7 @@ export type DispatchMessageContext = {
   /** The Discord interaction that triggered the dispatch error. */
   interaction: BaseInteraction;
   /** The dispatch error that was caught. */
-  error: BaseError;
+  error: ArcscordError;
   /** The detected i18next language for this interaction. */
   locale: string;
   /** A translation function fixed to `locale`, or `undefined` when i18n is disabled. */

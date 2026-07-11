@@ -9,12 +9,10 @@ import type {
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
 } from "./event_manager.type";
-import { anyToError } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
-import { EventError } from "#/utils";
-import { normalizeRunReturn } from "#/utils/error/run_normalize";
+import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerReturn } from "#/utils";
 
 type EventRegistration = {
   event: EventHandlerForRegistry;
@@ -48,7 +46,7 @@ export class EventManager extends BaseManager {
    *
    * @param events - An array of event handlers to load.
    * @returns The number of loaded handlers.
-   * @throws {@link EventError} when a handler name is duplicated or an intent
+   * @throws {@link ArcscordError} when a handler name is duplicated or an intent
    * check is configured to throw.
    */
   async loadEvents(events: AnyEventHandler[]): Promise<number> {
@@ -63,14 +61,15 @@ export class EventManager extends BaseManager {
    * Loads and registers a single event handler.
    *
    * @param event - The event handler to load.
-   * @throws {@link EventError} when the handler name is duplicated or an intent
+   * @throws {@link ArcscordError} when the handler name is duplicated or an intent
    * check is configured to throw.
    */
   async loadEvent<E extends keyof ClientEvents>(event: EventHandler<E>): Promise<void> {
     if (this.events.has(event.name)) {
-      throw new EventError({
+      throw new ArcscordError({
+        code: arcscordErrorCodes.EventHandlerDuplicate,
         message: `duplicate event handler name "${event.name}"`,
-        handler: event as unknown as AnyEventHandler,
+        metadata: { handlerName: event.name, eventName: event.event },
       });
     }
 
@@ -132,21 +131,23 @@ export class EventManager extends BaseManager {
    * Default result handler. Logs errors; successful runs are silent.
    */
   async handleResult(infos: EventResultHandlerInfos): Promise<void> {
-    if (infos.status === "thrown") {
-      const err = new EventError({
-        message: `failed to run event handler: ${anyToError(infos.thrownValue).message}`,
-        handler: infos.event,
-        originalError: anyToError(infos.thrownValue),
-      });
-      err.generateId();
-      this.logger.logError(err);
+    const meta = {
+      handler: infos.event.name,
+      event: infos.eventName,
+      durationMs: infos.durationMs,
+      incidentId: infos.incidentId,
+    };
+    if (infos.exit.status === "defect") {
+      const incidentId = infos.incidentId ?? crypto.randomUUID();
+      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
       return;
     }
-
-    const [err] = infos.result;
-    if (err !== null) {
-      err.generateId();
-      this.logger.logError(err);
+    if (infos.exit.status === "failure") {
+      this.logger.logError(infos.exit.failure, meta);
+      return;
+    }
+    if (infos.exit.status === "interrupted") {
+      this.logger.warn("Event execution interrupted", meta);
     }
   }
 
@@ -154,6 +155,7 @@ export class EventManager extends BaseManager {
     event: EventHandler<E>,
     args: ClientEvents[E],
   ): Promise<void> {
+    const startedAt = Date.now();
     try {
       const context = new EventContext(this.client, event);
       const rawResult = await event.run(context, ...args);
@@ -161,19 +163,26 @@ export class EventManager extends BaseManager {
         handler: event.name,
         event: event.event,
       });
+      const endedAt = Date.now();
       await this.options.resultHandler({
-        status: "returned",
-        result: normalizeRunReturn(rawResult),
+        exit: normalizeHandlerReturn(rawResult),
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
       });
     }
     catch (e) {
+      const endedAt = Date.now();
       await this.options.resultHandler({
-        status: "thrown",
-        thrownValue: e,
+        exit: executionDefect(e),
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
+        incidentId: crypto.randomUUID(),
       });
     }
   }
@@ -219,10 +228,12 @@ export class EventManager extends BaseManager {
       return;
     }
 
-    throw new EventError({
+    throw new ArcscordError({
+      code: arcscordErrorCodes.EventIntentMissing,
       message: issue.message,
-      handler: event as unknown as AnyEventHandler,
-      debugs: {
+      metadata: {
+        handlerName: event.name,
+        eventName: event.event,
         missingIntents: issue.missing,
         presentIntents: issue.present,
       },

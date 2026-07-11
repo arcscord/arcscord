@@ -7,7 +7,7 @@ description: A lightweight extension of the native Error class that adds structu
 
 A lightweight extension of the native `Error` class that adds structured debug context. When something goes wrong deep in a call stack, it is often useful to attach extra information — the file that was being processed, the value that caused the issue, the step that failed — without having to encode everything into the error message string.
 
-`BaseError` accepts a `debugs` object alongside the message, keeping diagnostic data structured and inspectable rather than buried in a formatted string. It also supports error chaining via `originalError`, auto-generated UUIDs for error tracking, and formatted stack traces. It is used throughout the arcscord ecosystem as the base class for all framework errors.
+`BaseError` accepts a `debugs` object alongside the message, keeping diagnostic data structured and inspectable rather than buried in a formatted string. It also supports error chaining via `originalError`, auto-generated UUIDs for error tracking, and formatted stack traces. It is a standalone utility package; the Arcscord framework itself uses the code-based `ArcscordError` type.
 
 ## Install
 

@@ -44,7 +44,7 @@ describe("command manager subcommands", () => {
 
     expect(pingRun).toHaveBeenCalledOnce();
     expect(banRun).not.toHaveBeenCalled();
-    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
   });
 
   it("resolves and runs a subcommand nested in a subcommand group", async () => {
@@ -78,7 +78,7 @@ describe("command manager subcommands", () => {
     await (manager as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 
     expect(banRun).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
   });
 
   it("applies commandNotFound diagnostics when the interaction carries no subcommand name", async () => {

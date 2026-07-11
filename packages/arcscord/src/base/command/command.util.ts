@@ -14,10 +14,21 @@ import type {
   SlashWithSubsCommandDefinition,
 } from "#/base/command/command_definition.type";
 import type { ContextOptions, Option, OptionalContextOption, OptionsList } from "#/base/command/option.type";
-import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandOptionType } from "discord-api-types/v10";
 import { BaseChannel, GuildMember, Role, User } from "discord.js";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
+
+class CommandOptionParsingError extends ArcscordError<"COMMAND_OPTION_PARSING_FAILED"> {
+  constructor(options: { message: string; metadata?: Record<string, unknown>; cause?: unknown }) {
+    super({
+      code: arcscordErrorCodes.CommandOptionParsingFailed,
+      message: options.message,
+      metadata: options.metadata ?? {},
+      cause: options.cause,
+    });
+  }
+}
 
 /**
  * @internal
@@ -180,7 +191,7 @@ export async function parseOptions<T extends OptionsList>(
   interaction: ChatInputCommandInteraction,
   optionsList: T,
   required = true,
-): Promise<Result<ContextOptions<T>, BaseError>> {
+): Promise<Result<ContextOptions<T>, CommandOptionParsingError>> {
   const result: Record<string, OptionalContextOption<Option>> = {};
 
   for (const [name, option] of Object.entries(optionsList)) {
@@ -210,9 +221,9 @@ export async function parseOptions<T extends OptionsList>(
             const roleObj = await interaction.guild?.roles.fetch(role.id);
             if (!roleObj) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Failed to fetch role with id ${role.id} in guild ${interaction.guildId}`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                   },
@@ -224,10 +235,10 @@ export async function parseOptions<T extends OptionsList>(
           }
           catch (e) {
             return error(
-              new BaseError({
+              new CommandOptionParsingError({
                 message: `Failed to fetch role with id ${role.id} in guild ${interaction.guildId}`,
-                originalError: anyToError(e),
-                debugs: {
+                cause: anyToError(e),
+                metadata: {
                   options: interaction.options.data,
                   definer: optionsList,
                 },
@@ -259,9 +270,9 @@ export async function parseOptions<T extends OptionsList>(
             );
             if (!channelObj) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Failed to fetch channel with id ${channel.id} in guild ${interaction.guildId}`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                   },
@@ -273,10 +284,10 @@ export async function parseOptions<T extends OptionsList>(
           }
           catch (e) {
             return error(
-              new BaseError({
+              new CommandOptionParsingError({
                 message: `Failed to fetch channel with id ${channel.id} in guild ${interaction.guildId}`,
-                originalError: anyToError(e),
-                debugs: {
+                cause: anyToError(e),
+                metadata: {
                   options: interaction.options.data,
                   definer: optionsList,
                 },
@@ -310,10 +321,10 @@ export async function parseOptions<T extends OptionsList>(
         }
         // todo handle with partial
         return error(
-          new BaseError({
+          new CommandOptionParsingError({
             message:
               "Current not supported, get ApiRole/ApiMember for mentionable",
-            debugs: {
+            metadata: {
               options: interaction.options.data,
               definer: optionsList,
             },
@@ -360,11 +371,11 @@ export async function parseOptions<T extends OptionsList>(
 
         if (option.min_length !== undefined && value.length < option.min_length) {
           return error(
-            new BaseError({
+            new CommandOptionParsingError({
               message:
                 `Minimum length is required, get ${value.length}, min required is ${option.min_length}`
                 + `for option ${name}`,
-              debugs: {
+              metadata: {
                 options: interaction.options.data,
                 definer: optionsList,
               },
@@ -374,9 +385,9 @@ export async function parseOptions<T extends OptionsList>(
 
         if (option.max_length !== undefined && value.length > option.max_length) {
           return error(
-            new BaseError({
+            new CommandOptionParsingError({
               message: `Maximum length exceeded, get ${value.length}, max ${option.min_length} for option ${name}`,
-              debugs: {
+              metadata: {
                 options: interaction.options.data,
                 definer: optionsList,
               },
@@ -393,9 +404,9 @@ export async function parseOptions<T extends OptionsList>(
                   : choice.value === value)
             ) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Invalid choice for ${name} option received`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                     value,
@@ -410,9 +421,9 @@ export async function parseOptions<T extends OptionsList>(
           else {
             if (!Object.values(option.choices).includes(value)) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Invalid choice for ${name} option received`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                     value,
@@ -447,9 +458,9 @@ export async function parseOptions<T extends OptionsList>(
 
         if (option.min_value !== undefined && value < option.min_value) {
           return error(
-            new BaseError({
+            new CommandOptionParsingError({
               message: `Minimum value is required, get ${value}, min required is ${option.min_value} for option ${name}`,
-              debugs: {
+              metadata: {
                 options: interaction.options.data,
                 definer: optionsList,
               },
@@ -459,9 +470,9 @@ export async function parseOptions<T extends OptionsList>(
 
         if (option.max_value !== undefined && value > option.max_value) {
           return error(
-            new BaseError({
+            new CommandOptionParsingError({
               message: `Maximum value exceeded, get ${value}, max ${option.max_value} for option ${name}`,
-              debugs: {
+              metadata: {
                 options: interaction.options.data,
                 definer: optionsList,
               },
@@ -478,9 +489,9 @@ export async function parseOptions<T extends OptionsList>(
                   : choice.value === value)
             ) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Invalid choice for ${name} option received`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                     value,
@@ -495,9 +506,9 @@ export async function parseOptions<T extends OptionsList>(
           else {
             if (!Object.values(option.choices).includes(value)) {
               return error(
-                new BaseError({
+                new CommandOptionParsingError({
                   message: `Invalid choice for ${name} option received`,
-                  debugs: {
+                  metadata: {
                     options: interaction.options.data,
                     definer: optionsList,
                     value,
@@ -518,9 +529,9 @@ export async function parseOptions<T extends OptionsList>(
   return ok(result as ContextOptions<T>);
 }
 
-function checkRequired(name: string, option: Option, value: NonNullable<unknown> | null): "valid" | BaseError {
+function checkRequired(name: string, option: Option, value: NonNullable<unknown> | null): "valid" | CommandOptionParsingError {
   if (option.required && value === null) {
-    return new BaseError({
+    return new CommandOptionParsingError({
       message: `Option ${name} is required but was not provided.`,
     });
   }

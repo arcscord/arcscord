@@ -31,10 +31,9 @@ import type {
   ContextDocs,
   MessageCommandContextDocs,
 } from "#/base/utils";
-import type { CommandErrorOptions } from "#/utils";
 import { anyToError, error, ok } from "@arcscord/error";
 import { InteractionContextType } from "discord.js";
-import { CommandError } from "#/utils";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
 
 /**
@@ -42,7 +41,7 @@ import { InteractionContext } from "../utils/interaction_context.class";
  */
 type MiddlewaresResults<M extends CommandMiddleware[]> = {
   [K in M[number] as K["name"]]: NonNullable<
-    Awaited<ReturnType<K["run"]>>["next"]
+    Extract<Awaited<ReturnType<K["run"]>>, { status: "next" }>["value"]
   >;
 };
 
@@ -156,7 +155,7 @@ export class BaseCommandContext<
   async reply(
     options: MessagePayload | InteractionReplyOptions | string,
     extraOptions: Omit<InteractionReplyOptions, "content"> = {},
-  ): Promise<CommandRunResult> {
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.reply(
         typeof options === "string"
@@ -167,10 +166,11 @@ export class BaseCommandContext<
     }
     catch (e) {
       return error(
-        new CommandError({
-          ctx: this,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to reply to interaction : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "reply" },
+          cause: e,
         }),
       );
     }
@@ -182,7 +182,7 @@ export class BaseCommandContext<
   async editReply(
     options: MessagePayload | InteractionEditReplyOptions | string,
     extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
-  ): Promise<CommandRunResult> {
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.editReply(
         typeof options === "string"
@@ -193,10 +193,11 @@ export class BaseCommandContext<
     }
     catch (e) {
       return error(
-        new CommandError({
-          ctx: this,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to edit reply to interaction : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "editReply" },
+          cause: e,
         }),
       );
     }
@@ -207,7 +208,7 @@ export class BaseCommandContext<
    */
   async deferReply(
     options: InteractionDeferReplyOptions,
-  ): Promise<CommandRunResult> {
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.deferReply(options);
       this.defer = true;
@@ -215,10 +216,11 @@ export class BaseCommandContext<
     }
     catch (e) {
       return error(
-        new CommandError({
-          ctx: this,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to defer reply to interaction : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "deferReply" },
+          cause: e,
         }),
       );
     }
@@ -227,17 +229,18 @@ export class BaseCommandContext<
   /**
    * send a modal to user that created interaction
    */
-  async showModal(modal: ModalComponentData): Promise<CommandRunResult> {
+  async showModal(modal: ModalComponentData): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.showModal(modal);
       return ok(true);
     }
     catch (e) {
       return error(
-        new CommandError({
-          ctx: this,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to show modal : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "showModal" },
+          cause: e,
         }),
       );
     }
@@ -253,16 +256,16 @@ export class BaseCommandContext<
   /**
    * Create an error result
    */
-  error(options: Omit<CommandErrorOptions, "ctx">): CommandRunResult {
-    return error(new CommandError({ ...options, ctx: this }));
+  error<E>(failure: E): CommandRunResult<E> {
+    return error(failure);
   }
 
   /**
    * Execute multiple functions sequentially, stopping if any function returns an error
    */
   async multiple(
-    ...funcList: Promise<CommandRunResult>[]
-  ): Promise<CommandRunResult> {
+    ...funcList: Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     for (const func of funcList) {
       const [err] = await func;
 

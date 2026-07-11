@@ -4,7 +4,7 @@ import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { AnyEventHandler } from "#/base/event/event.type";
-import type { InternalError } from "#/utils/error/class/internal_error";
+import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
 import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
@@ -224,7 +224,7 @@ export class ArcClient extends DJSClient {
     commands: Command[],
     group = "default",
     guild?: string,
-  ): Promise<Result<true, InternalError>> {
+  ): Promise<Result<true, ArcscordError>> {
     await this.localeManager.ready;
     const [err, data] = this.commandManager.loadCommands(commands, group);
     if (err) {
@@ -262,13 +262,13 @@ export class ArcClient extends DJSClient {
   }
 
   /**
-   * Gets an error message with a specified error ID and locale
+   * Gets an error message with a specified incident ID and locale
    *
-   * @param errorId - The ID of the error
+   * @param incidentId - The execution incident ID
    * @returns The error message
    */
-  getErrorMessage(errorId?: string, locale?: string): BaseMessageOptions {
-    return this.defaultMessages.error(errorId, this.createMessageContext(locale));
+  getErrorMessage(incidentId?: string, locale?: string): BaseMessageOptions {
+    return this.defaultMessages.error(incidentId, this.createMessageContext(locale));
   }
 
   /**

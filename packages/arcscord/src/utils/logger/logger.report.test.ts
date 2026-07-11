@@ -1,5 +1,5 @@
-import { BaseError } from "@arcscord/better-error";
 import { describe, expect, it } from "vitest";
+import { ArcscordError } from "#/utils/error/arcscord_error";
 import { createErrorReport, renderErrorReport } from "./logger.report";
 
 describe("logger.report", () => {
@@ -8,9 +8,10 @@ describe("logger.report", () => {
       const circular: Record<string, unknown> = {};
       circular.self = circular;
 
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: { circular },
+        metadata: { rule: "test", circular },
       });
 
       const report = createErrorReport(error);
@@ -19,11 +20,10 @@ describe("logger.report", () => {
     });
 
     it("truncates nested objects past the max depth", () => {
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: {
-          a: { b: { c: { d: "too deep" } } },
-        },
+        metadata: { rule: "test", a: { b: { c: { d: "too deep" } } } },
       });
 
       const report = createErrorReport(error);
@@ -33,9 +33,10 @@ describe("logger.report", () => {
 
     it("truncates arrays to the max number of items", () => {
       const items = Array.from({ length: 25 }, (_, i) => i);
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: { items },
+        metadata: { rule: "test", items },
       });
 
       const report = createErrorReport(error);
@@ -48,9 +49,10 @@ describe("logger.report", () => {
       const bigObject = Object.fromEntries(
         Array.from({ length: 35 }, (_, i) => [`key${i}`, i]),
       );
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: { bigObject },
+        metadata: { rule: "test", bigObject },
       });
 
       const report = createErrorReport(error);
@@ -61,14 +63,10 @@ describe("logger.report", () => {
     });
 
     it("redacts authorization, password, and cookie keys in addition to token", () => {
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: {
-          authorization: "Bearer secret",
-          password: "hunter2",
-          cookie: "session=abc",
-          safe: "not sensitive",
-        },
+        metadata: { rule: "test", authorization: "Bearer secret", password: "hunter2", cookie: "session=abc", safe: "not sensitive" },
       });
 
       const report = createErrorReport(error);
@@ -82,12 +80,10 @@ describe("logger.report", () => {
     });
 
     it("serializes Map and Set debug values as arrays", () => {
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: {
-          map: new Map([["a", 1], ["b", 2]]),
-          set: new Set([1, 2, 3]),
-        },
+        metadata: { rule: "test", map: new Map([["a", 1], ["b", 2]]), set: new Set([1, 2, 3]) },
       });
 
       const report = createErrorReport(error);
@@ -99,9 +95,10 @@ describe("logger.report", () => {
 
   describe("stringifyValue (via renderErrorReport)", () => {
     it("falls back to String() when JSON.stringify cannot serialize the value", () => {
-      const error = new BaseError({
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
         message: "failed",
-        debugs: { big: 123n },
+        metadata: { rule: "test", big: 123n },
       });
 
       const report = createErrorReport(error);

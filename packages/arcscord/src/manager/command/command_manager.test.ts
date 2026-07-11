@@ -15,7 +15,6 @@ import {
   createMockMessageContextMenuInteraction,
   createMockUserContextMenuInteraction,
 } from "#/testing";
-import { CommandError } from "#/utils";
 import { CommandManager } from "./command_manager.class";
 
 function createMockClientWithManager() {
@@ -628,8 +627,8 @@ describe("command manager", () => {
     );
 
     expect(resultHandler).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
-    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
+    expect(resultHandler.mock.calls[0]?.[0].exit.value).toBe(true);
   });
 
   it("passes status thrown and preserves the raw thrown value", async () => {
@@ -651,8 +650,8 @@ describe("command manager", () => {
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("thrown");
-    expect(infos.thrownValue).toBe(thrown);
+    expect(infos.exit.status).toBe("defect");
+    expect(infos.exit.defect).toBe(thrown);
     expect("result" in infos).toBe(false);
   });
 
@@ -672,9 +671,8 @@ describe("command manager", () => {
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("returned");
-    expect(infos.result[0]).toBeNull();
-    expect(infos.result[1]).toBe(true);
+    expect(infos.exit.status).toBe("success");
+    expect(infos.exit.value).toBe(true);
   });
 
   it("normalizes string run() return to ok(string) in resultHandler", async () => {
@@ -693,9 +691,8 @@ describe("command manager", () => {
     );
 
     const infos = resultHandler.mock.calls[0]?.[0];
-    expect(infos.status).toBe("returned");
-    expect(infos.result[0]).toBeNull();
-    expect(infos.result[1]).toBe("pong!");
+    expect(infos.exit.status).toBe("success");
+    expect(infos.exit.value).toBe("pong!");
   });
 
   it("applies dispatch diagnostics level for commandNotFound", async () => {
@@ -738,7 +735,7 @@ describe("command manager", () => {
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 
     expect(run).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
   });
 
   it("dispatches message context menu interaction to run()", async () => {
@@ -762,7 +759,7 @@ describe("command manager", () => {
     await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
 
     expect(run).toHaveBeenCalledOnce();
-    expect(resultHandler.mock.calls[0]?.[0].result[0]).toBeNull();
+    expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
   });
 
   describe("full interactionCreate pipeline (via client.on)", () => {
@@ -780,7 +777,7 @@ describe("command manager", () => {
       await client._emitMock("interactionCreate", createMockChatInputInteraction());
       await vi.waitFor(() => expect(resultHandler).toHaveBeenCalledOnce());
 
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("dispatches an autocomplete interaction emitted on the client to the focused option handler", async () => {
@@ -853,8 +850,8 @@ describe("command manager", () => {
 
     class ErrorThirdMiddleware extends CommandMiddleware {
       readonly name = "third" as const;
-      run(ctx: CommandContext): CommandMiddlewareRun<NonNullable<unknown>> {
-        return this.error(new CommandError({ message: "third failed", ctx }));
+      run(_ctx: CommandContext): CommandMiddlewareRun<NonNullable<unknown>> {
+        return this.fail(new Error("third failed"));
       }
     }
 
@@ -879,7 +876,7 @@ describe("command manager", () => {
       );
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("stops the pipeline without calling run() or resultHandler when a middleware cancels", async () => {
@@ -903,7 +900,7 @@ describe("command manager", () => {
       expect(resultHandler).not.toHaveBeenCalled();
     });
 
-    it("passes status thrown with the middleware's CommandError when a middleware in the chain errors", async () => {
+    it("passes status thrown with the middleware's ArcscordError when a middleware in the chain errors", async () => {
       const resultHandler = vi.fn();
       const { client } = createMockClientWithManager();
       const managerWithOptions = new CommandManager(client, { resultHandler });
@@ -922,12 +919,12 @@ describe("command manager", () => {
 
       expect(run).not.toHaveBeenCalled();
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBeInstanceOf(CommandError);
-      expect(infos.thrownValue.message).toBe("third failed");
+      expect(infos.exit.status).toBe("failure");
+      expect(infos.exit.failure).toBeInstanceOf(Error);
+      expect(infos.exit.failure.message).toBe("third failed");
     });
 
-    it("wraps a thrown exception from a middleware into a CommandError with status thrown", async () => {
+    it("wraps a thrown exception from a middleware into a ArcscordError with status thrown", async () => {
       const resultHandler = vi.fn();
       const { client } = createMockClientWithManager();
       const managerWithOptions = new CommandManager(client, { resultHandler });
@@ -953,9 +950,9 @@ describe("command manager", () => {
 
       expect(run).not.toHaveBeenCalled();
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBeInstanceOf(CommandError);
-      expect(infos.thrownValue.message).toBe("failed to run middleware : middleware boom");
+      expect(infos.exit.status).toBe("defect");
+      expect(infos.exit.defect).toBeInstanceOf(Error);
+      expect(infos.exit.defect.message).toBe("middleware boom");
     });
   });
 
@@ -966,7 +963,7 @@ describe("command manager", () => {
       ["a plain object", { code: 42 }],
     ];
 
-    it.each(nonErrorThrows)("preserves %s thrown from run() as thrownValue", async (_label, thrown) => {
+    it.each(nonErrorThrows)("preserves %s thrown from run() as a defect", async (_label, thrown) => {
       const resultHandler = vi.fn();
       const { client } = createMockClientWithManager();
       const managerWithOptions = new CommandManager(client, { resultHandler });
@@ -984,8 +981,8 @@ describe("command manager", () => {
       );
 
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBe(thrown);
+      expect(infos.exit.status).toBe("defect");
+      expect(infos.exit.defect).toBe(thrown);
     });
   });
 

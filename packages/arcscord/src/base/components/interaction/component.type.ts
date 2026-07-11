@@ -1,11 +1,10 @@
 import type { Result } from "@arcscord/error";
-import type { ComponentError } from "#/utils";
 
 /**
  * Normalized internal result of running a component.
  * Used by the manager after normalizing the raw return value of `run()`.
  */
-export type ComponentRunResult = Result<true | string, ComponentError>;
+export type ComponentRunResult<E = unknown> = Result<true | string, E>;
 
 /**
  * All values a component `run()` function may return.
@@ -14,10 +13,10 @@ export type ComponentRunResult = Result<true | string, ComponentError>;
  * the result handler:
  * - `void` / `undefined` → `ok(true)`
  * - `string` or `true` → `ok(value)`
- * - `Result<true | string, ComponentError>` → returned as-is
+ * - `Result<true | string, E>` → normalized as an expected failure or success
  */
-export type ComponentRunReturn
+export type ComponentRunReturn<E = unknown>
   = | void
     | string
     | true
-    | ComponentRunResult;
+    | ComponentRunResult<E>;

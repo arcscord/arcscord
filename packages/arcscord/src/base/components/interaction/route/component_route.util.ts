@@ -1,5 +1,5 @@
 import type { IdInitialiseFunction, RouteVariablesObject } from "./component_route.type";
-import { BaseError } from "@arcscord/better-error";
+import { ArcscordError, arcscordErrorCodes } from "#/utils/error";
 
 export type RoutePart = {
   type: "static";
@@ -107,7 +107,11 @@ export function readRouteParts(route: string): RoutePart[] {
 export function compileComponentRoute(route: string): CompiledComponentRoute {
   const invalidReason = validateComponentRoute(route);
   if (invalidReason !== null) {
-    throw new BaseError(`Invalid component route "${route}": ${invalidReason}`);
+    throw new ArcscordError({
+      code: arcscordErrorCodes.ComponentRouteInvalid,
+      message: `Invalid component route "${route}": ${invalidReason}`,
+      metadata: { route, reason: invalidReason },
+    });
   }
 
   const parts = readRouteParts(route);
@@ -191,7 +195,11 @@ export function createRouteId<Route extends string>(
     }).join("/");
 
     if (customId.length > maxComponentCustomIdLength) {
-      throw new BaseError(`Component custom ID generated from route ${route} exceeds ${maxComponentCustomIdLength} characters`);
+      throw new ArcscordError({
+        code: arcscordErrorCodes.ComponentCustomIdTooLong,
+        message: `Component custom ID generated from route ${route} exceeds ${maxComponentCustomIdLength} characters`,
+        metadata: { route, length: customId.length, maximum: maxComponentCustomIdLength },
+      });
     }
 
     return customId;

@@ -25,10 +25,9 @@ import type {
   OptionsList,
 } from "#/base/command/option.type";
 import type { ContextDocs } from "#/base/utils/context.type";
-import type { CommandErrorOptions } from "#/utils";
 import type { MaybePromise } from "#/utils/type/util.type";
 import { anyToError, error, ok } from "@arcscord/error";
-import { CommandError } from "#/utils";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
 
 type BaseAutocompleteOptions = {
@@ -198,7 +197,7 @@ export class AutocompleteContext<
    */
   async sendChoices(
     choices: AutocompleteChoicesFor<Build, Name>,
-  ): Promise<CommandRunResult> {
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       const apiChoices: ApplicationCommandOptionChoiceData[] = [];
 
@@ -237,10 +236,11 @@ export class AutocompleteContext<
     }
     catch (e) {
       return error(
-        new CommandError({
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `Failed to send choices for command, error : ${anyToError(e).message}`,
-          ctx: this,
-          originalError: anyToError(e),
+          metadata: { operation: "autocomplete" },
+          cause: e,
         }),
       );
     }
@@ -258,10 +258,10 @@ export class AutocompleteContext<
   /**
    * return a failed CommandRunResult
    *
-   * @param options - The options for creating the CommandError, excluding the context (`ctx`).
+   * @param failure - The expected failure value.
    */
-  error(options: Omit<CommandErrorOptions, "ctx">): CommandRunResult {
-    return error(new CommandError({ ...options, ctx: this }));
+  error<E>(failure: E): CommandRunResult<E> {
+    return error(failure);
   }
 
   /**
@@ -271,8 +271,8 @@ export class AutocompleteContext<
    * @returns A promise that resolves to CommandRunResult.
    */
   async multiple(
-    ...funcList: Promise<CommandRunResult>[]
-  ): Promise<CommandRunResult> {
+    ...funcList: Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
+  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     for (const func of funcList) {
       const [err] = await func;
 

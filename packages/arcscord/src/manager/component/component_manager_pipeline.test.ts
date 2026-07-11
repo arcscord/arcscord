@@ -36,7 +36,6 @@ import {
   createMockUser,
   createMockUserSelectMenuInteraction,
 } from "#/testing";
-import { ComponentError } from "#/utils";
 import { ComponentManager } from "./component_manager.class";
 
 type ExposedHandleInteraction = {
@@ -72,7 +71,7 @@ describe("component manager pipeline", () => {
       await vi.waitFor(() => expect(resultHandler).toHaveBeenCalledOnce());
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("dispatches a modal submit interaction emitted on the client through to resultHandler", async () => {
@@ -102,7 +101,7 @@ describe("component manager pipeline", () => {
       await vi.waitFor(() => expect(resultHandler).toHaveBeenCalledOnce());
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "hello"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "hello" });
     });
   });
 
@@ -126,7 +125,7 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "a,b"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "a,b" });
     });
 
     it("allows a value declared in a typed string select", async () => {
@@ -151,7 +150,7 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("rejects a value outside the allowed set for a typed string select", async () => {
@@ -231,7 +230,7 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("rejects an invalid value for a typed string select whose build() has never run", async () => {
@@ -310,7 +309,7 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "u1,u2"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "u1,u2" });
     });
 
     it("exposes selected roles for a role select menu", async () => {
@@ -332,7 +331,7 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "r1,r2"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "r1,r2" });
     });
 
     it("exposes separate users/roles and a merged values list for a mentionable select menu", async () => {
@@ -381,12 +380,12 @@ describe("component manager pipeline", () => {
       }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "c1"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "c1" });
     });
   });
 
   describe("modal submission", () => {
-    it("wraps a field parse() failure into a ComponentError with contextCreationFailed diagnostics", async () => {
+    it("wraps a field parse() failure into a ArcscordError with contextCreationFailed diagnostics", async () => {
       const resultHandler = vi.fn();
       const { manager } = createManagerWithClient({ resultHandler });
 
@@ -432,7 +431,7 @@ describe("component manager pipeline", () => {
       await dispatch(manager, createMockButtonInteraction({ customId: "greet/$john%20doe" }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].result).toEqual([null, "john doe"]);
+      expect(resultHandler.mock.calls[0]?.[0].exit).toEqual({ status: "success", value: "john doe" });
     });
 
     it("applies componentNotFound diagnostics when no route matches the customId", async () => {
@@ -647,8 +646,8 @@ describe("component manager pipeline", () => {
 
     class ErrorThirdMiddleware extends ComponentMiddleware {
       readonly name = "third" as const;
-      run(ctx: ComponentContext): ComponentMiddlewareRun<NonNullable<unknown>> {
-        return this.error(new ComponentError({ message: "third failed", interaction: ctx.interaction }));
+      run(_ctx: ComponentContext): ComponentMiddlewareRun<NonNullable<unknown>> {
+        return this.fail(new Error("third failed"));
       }
     }
 
@@ -674,7 +673,7 @@ describe("component manager pipeline", () => {
       await dispatch(manager, createMockButtonInteraction({ customId: "greet" }));
 
       expect(run).toHaveBeenCalledOnce();
-      expect(resultHandler.mock.calls[0]?.[0].status).toBe("returned");
+      expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
     it("stops the pipeline without calling run() or resultHandler when a middleware cancels", async () => {
@@ -693,7 +692,7 @@ describe("component manager pipeline", () => {
       expect(resultHandler).not.toHaveBeenCalled();
     });
 
-    it("passes status thrown with the middleware's ComponentError when a middleware in the chain errors", async () => {
+    it("passes status thrown with the middleware's ArcscordError when a middleware in the chain errors", async () => {
       const resultHandler = vi.fn();
       const { manager } = createManagerWithClient({ resultHandler });
 
@@ -707,12 +706,12 @@ describe("component manager pipeline", () => {
 
       expect(run).not.toHaveBeenCalled();
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBeInstanceOf(ComponentError);
-      expect(infos.thrownValue.message).toBe("third failed");
+      expect(infos.exit.status).toBe("failure");
+      expect(infos.exit.failure).toBeInstanceOf(Error);
+      expect(infos.exit.failure.message).toBe("third failed");
     });
 
-    it("wraps a thrown exception from a middleware into a ComponentError with status thrown", async () => {
+    it("wraps a thrown exception from a middleware into a ArcscordError with status thrown", async () => {
       const resultHandler = vi.fn();
       const { manager } = createManagerWithClient({ resultHandler });
 
@@ -730,9 +729,9 @@ describe("component manager pipeline", () => {
 
       expect(run).not.toHaveBeenCalled();
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBeInstanceOf(ComponentError);
-      expect(infos.thrownValue.message).toBe("failed to run middleware : middleware boom");
+      expect(infos.exit.status).toBe("defect");
+      expect(infos.exit.defect).toBeInstanceOf(Error);
+      expect(infos.exit.defect.message).toBe("middleware boom");
     });
   });
 
@@ -743,7 +742,7 @@ describe("component manager pipeline", () => {
       ["a plain object", { code: 42 }],
     ];
 
-    it.each(nonErrorThrows)("preserves %s thrown from run() as thrownValue", async (_label, thrown) => {
+    it.each(nonErrorThrows)("preserves %s thrown from run() as a defect", async (_label, thrown) => {
       const resultHandler = vi.fn();
       const { manager } = createManagerWithClient({ resultHandler });
 
@@ -759,8 +758,8 @@ describe("component manager pipeline", () => {
       await dispatch(manager, createMockButtonInteraction({ customId: "greet" }));
 
       const infos = resultHandler.mock.calls[0]?.[0];
-      expect(infos.status).toBe("thrown");
-      expect(infos.thrownValue).toBe(thrown);
+      expect(infos.exit.status).toBe("defect");
+      expect(infos.exit.defect).toBe(thrown);
     });
   });
 

@@ -57,7 +57,7 @@ export {
 export type {
   CancelCommandMiddleware,
   CommandMiddlewareRun,
-  ErrorCommandMiddleware,
+  FailedCommandMiddleware,
   NextCommandMiddleware,
 } from "./base/command/command_middleware";
 export type {
@@ -147,7 +147,7 @@ export {
 export type {
   CancelComponentMiddleware,
   ComponentMiddlewareRun,
-  ErrorComponentMiddleware,
+  FailedComponentMiddleware,
   NextComponentMiddleware,
 } from "./base/components/interaction/component_middleware";
 export {
@@ -328,16 +328,12 @@ export type {
   CommandManagerOptions,
   CommandResultHandler,
   CommandResultHandlerInfos,
-  CommandReturnedHandlerInfos,
-  CommandThrownHandlerInfos,
 } from "./manager/command/command_manager.type";
 export type {
   ComponentList,
   ComponentManagerOptions,
   ComponentResultHandler,
   ComponentResultHandlerInfos,
-  ComponentReturnedHandlerInfos,
-  ComponentThrownHandlerInfos,
 } from "./manager/component/component_manager.type";
 
 export type {
@@ -349,8 +345,6 @@ export type {
   EventManagerOptions,
   EventResultHandler,
   EventResultHandlerInfos,
-  EventReturnedHandlerInfos,
-  EventThrownHandlerInfos,
 } from "./manager/event/event_manager.type";
 export type {
   EventIntentAlternatives,
@@ -373,12 +367,26 @@ export type { GuildTextFirstBasedChannel } from "./utils/discord/utils/util.type
 
 export {
   ArcClientReadyTimeoutError,
-  CommandError,
-  CommandValidationError,
-  ComponentError,
-  EventError,
-  InteractionError,
-} from "./utils/error/class";
+  ArcscordError,
+  arcscordErrorCodes,
+  executionDefect,
+  executionFailure,
+  executionInterrupted,
+  executionSuccess,
+  isArcscordError,
+  isArcscordResult,
+  normalizeHandlerReturn,
+} from "./utils/error";
+export type {
+  ArcscordErrorCode,
+  ArcscordErrorMetadata,
+  ArcscordErrorOptions,
+  ExecutionDefect,
+  ExecutionExit,
+  ExecutionFailure,
+  ExecutionInterrupted,
+  ExecutionSuccess,
+} from "./utils/error";
 export type {
   CommandDispatchDiagnostics,
   ComponentDispatchDiagnostics,
@@ -391,10 +399,6 @@ export type {
   DebugValues,
   DebugValueString,
 } from "./utils/error/error.type";
-export {
-  isArcscordResult,
-  normalizeRunReturn,
-} from "./utils/error/run_normalize";
 
 export {
   ArcLogger,
@@ -424,14 +428,6 @@ export type {
   OptionalProperties,
 } from "./utils/type/util.type";
 
-export { BaseError } from "@arcscord/better-error";
-export type {
-  Debugs,
-  DebugStringObject,
-  ErrorOptions,
-  GetDebugOptions,
-  StackFormat,
-} from "@arcscord/better-error";
 export {
   anyToError,
   error,

@@ -12,7 +12,7 @@ import type { ComponentMiddleware } from "#/base/components/interaction/componen
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
 import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
-import { ComponentError } from "#/utils";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
 
 /**
  * MessageComponentContext class.
@@ -45,7 +45,7 @@ export class MessageComponentContext<
    * @param modal - The ModalComponentData instance.
    * @returns A Promise that resolves to a ComponentRunResult.
    */
-  async showModal(modal: ModalComponentData): Promise<ComponentRunResult> {
+  async showModal(modal: ModalComponentData): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.showModal(modal);
       this.hasReply = true;
@@ -53,10 +53,11 @@ export class MessageComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to show modal : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "showModal" },
+          cause: e,
         }),
       );
     }
@@ -66,7 +67,7 @@ export class MessageComponentContext<
    * Defers the update message.
    * @returns A Promise that resolves to a ComponentRunResult.
    */
-  async deferUpdateMessage(): Promise<ComponentRunResult> {
+  async deferUpdateMessage(): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       await this.interaction.deferUpdate();
       this.defer = true;
@@ -74,10 +75,11 @@ export class MessageComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to defer update message : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "deferUpdate" },
+          cause: e,
         }),
       );
     }
@@ -92,7 +94,7 @@ export class MessageComponentContext<
   async updateMessage(
     options: MessageEditOptions,
     withoutInteraction: boolean = false,
-  ): Promise<ComponentRunResult> {
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     try {
       if (this.hasReply || this.defer || withoutInteraction) {
         this.interaction.message.edit(options);
@@ -105,10 +107,11 @@ export class MessageComponentContext<
     }
     catch (e) {
       return error(
-        new ComponentError({
-          interaction: this.interaction,
+        new ArcscordError({
+          code: arcscordErrorCodes.InteractionOperationFailed,
           message: `failed to update message : ${anyToError(e).message}`,
-          originalError: anyToError(e),
+          metadata: { operation: "updateMessage" },
+          cause: e,
         }),
       );
     }
@@ -131,7 +134,7 @@ export class MessageComponentContext<
   disableComponent(
     selection: "component" | "actionRow" | "all" = "all",
     withoutInteraction: boolean = false,
-  ): Promise<ComponentRunResult> {
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
     const components = this.interaction.message.components;
     let newComponents: Array<NonNullable<MessageEditOptions["components"]>[number]> = [];
 

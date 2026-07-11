@@ -212,7 +212,7 @@ If `applicationId` is set, commands are registered immediately over REST without
 
 ### `loadCommands(commands, group?, guild?)`
 
-Registers commands with Discord and loads them into the command manager. Returns `Result<true, InternalError>`.
+Registers commands with Discord and loads them into the command manager. Returns `Result<true, ArcscordError>`; inspect `error.code` to distinguish validation, application, and registration failures.
 
 ```ts
 const [err] = await client.loadCommands([pingCommand, avatarCommand]);

@@ -17,9 +17,8 @@ describe("componentUserAllowListMiddleware", () => {
     });
 
     expect(middleware.run(createContext({ userId: "user_1" }))).toEqual({
-      cancel: null,
-      error: null,
-      next: {
+      status: "next",
+      value: {
         allowed: true,
       },
     });
@@ -33,10 +32,10 @@ describe("componentUserAllowListMiddleware", () => {
 
     const result = middleware.run(ctx);
 
-    expect(result.next).toBeNull();
-    expect(result.error).toBeNull();
-    expect(result.cancel).not.toBeNull();
-    await result.cancel;
+    expect(result.status).toBe("cancel");
+    if (result.status !== "cancel")
+      throw new Error("expected cancellation");
+    await result.result;
     expect(ctx.reply).toHaveBeenCalledWith({
       content: "Not allowed",
       flags: MessageFlags.Ephemeral,
@@ -56,8 +55,10 @@ describe("componentUserAllowListMiddleware", () => {
 
     const result = middleware.run(ctx);
 
-    expect(result.cancel).not.toBeNull();
-    await result.cancel;
+    expect(result.status).toBe("cancel");
+    if (result.status !== "cancel")
+      throw new Error("expected cancellation");
+    await result.result;
     expect(ctx.reply).toHaveBeenCalledWith({
       content: "fr:user_2:translated:middleware.not_allowed",
       flags: MessageFlags.Ephemeral,
@@ -72,8 +73,10 @@ describe("componentUserAllowListMiddleware", () => {
 
     const result = middleware.run(ctx);
 
-    expect(result.cancel).not.toBeNull();
-    await result.cancel;
+    expect(result.status).toBe("cancel");
+    if (result.status !== "cancel")
+      throw new Error("expected cancellation");
+    await result.result;
     expect(ctx.editReply).toHaveBeenCalledWith({
       content: "Not allowed",
     });

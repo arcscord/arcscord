@@ -1,9 +1,10 @@
-import { BaseError } from "@arcscord/better-error";
+import { ArcscordError } from "../arcscord_error";
+import { arcscordErrorCodes } from "../codes";
 
 /**
  * Error thrown when an ArcClient does not become ready before the configured timeout.
  */
-export class ArcClientReadyTimeoutError extends BaseError {
+export class ArcClientReadyTimeoutError extends ArcscordError<"CLIENT_READY_TIMEOUT"> {
   name = "ArcClientReadyTimeoutError";
 
   /**
@@ -13,9 +14,11 @@ export class ArcClientReadyTimeoutError extends BaseError {
 
   constructor(timeout: number) {
     super({
+      code: arcscordErrorCodes.ClientReadyTimeout,
       message: `ArcClient did not become ready within ${timeout}ms`,
-      debugs: { timeout },
+      metadata: { timeoutMs: timeout },
     });
+    this.name = "ArcClientReadyTimeoutError";
     this.timeout = timeout;
   }
 }

@@ -14,8 +14,8 @@ import type { ComponentRunReturn } from "#/base/components/interaction/component
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
 import type { ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { MaybePromise } from "#/utils/type/util.type";
-import { BaseError } from "@arcscord/better-error";
 import { anyToError, error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
@@ -30,8 +30,7 @@ import {
 } from "#/base/components/interaction/context/select_menu_context";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { BaseManager } from "#/base/manager/manager.class";
-import { ComponentError } from "#/utils";
-import { normalizeRunReturn } from "#/utils/error/run_normalize";
+import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, normalizeHandlerReturn } from "#/utils";
 
 type MatchedComponent = {
   component: ComponentHandler;
@@ -95,7 +94,11 @@ export class ComponentManager extends BaseManager {
       : this.components[component.type];
 
     if (componentsList.has(compiledRoute.canonical)) {
-      throw new BaseError(`Duplicate component route ${component.route}`);
+      throw new ArcscordError({
+        code: arcscordErrorCodes.ComponentRouteDuplicate,
+        message: `Duplicate component route ${component.route}`,
+        metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
+      });
     }
 
     this.compiledRoutes.set(component, compiledRoute);
@@ -164,7 +167,7 @@ export class ComponentManager extends BaseManager {
     locale: string,
     params: Record<string, string>,
     component: ComponentHandler,
-  ): Result<ComponentContext, ComponentError> {
+  ): Result<ComponentContext, ArcscordError<"COMPONENT_CONTEXT_CREATION_FAILED">> {
     switch (type) {
       case ComponentType.Button:
         return ok(new ButtonContext(this.client, interaction as ButtonInteraction, { locale, params }));
@@ -216,16 +219,18 @@ export class ComponentManager extends BaseManager {
           }));
         }
         catch (e) {
-          return error(new ComponentError({
+          return error(new ArcscordError({
+            code: arcscordErrorCodes.ComponentContextCreationFailed,
             message: `failed to parse modal values for ${component.route}`,
-            interaction,
-            originalError: anyToError(e),
+            metadata: { interactionId: interaction.id, route: component.route, reason: "modal-value-parsing" },
+            cause: e,
           }));
         }
       default:
-        return error(new ComponentError({
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.ComponentContextCreationFailed,
           message: `Unknown component type: ${type}`,
-          interaction,
+          metadata: { interactionId: interaction.id, route: component.route, reason: "unknown-component-type", type },
         }));
     }
   }
@@ -299,26 +304,28 @@ export class ComponentManager extends BaseManager {
     }
 
     /* Middlewares */
-    const start = Date.now();
-    const [middlewareErr, middlewareResult] = await this.runMiddleware(matched.component, context);
-    if (middlewareErr) {
+    const startedAt = Date.now();
+    const middlewareExit = await this.runMiddleware(matched.component, context);
+    if (middlewareExit.status !== "success") {
+      const endedAt = Date.now();
       return this.options.resultHandler({
-        status: "thrown",
-        thrownValue: middlewareErr,
+        exit: middlewareExit,
         component: matched.component,
         interaction,
         context,
         locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
+        incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
       });
     }
-    if (!this.handleMiddlewareResult(middlewareResult, context)) {
+    if (!this.handleMiddlewareResult(middlewareExit.value, context)) {
       return;
     }
 
-    await this.executeComponent(matched.component, context, start);
+    await this.executeComponent(matched.component, context, startedAt);
   }
 
   /**
@@ -329,7 +336,7 @@ export class ComponentManager extends BaseManager {
   private validateTypedStringSelect(
     component: ComponentHandler,
     interaction: StringSelectMenuInteraction,
-  ): Result<true, ComponentError> {
+  ): Result<true, ArcscordError<"COMPONENT_TYPED_SELECT_INVALID_VALUES">> {
     const typed = component as {
       typedSingleValue?: boolean;
       typedAllowedValues?: ReadonlySet<string>;
@@ -343,10 +350,12 @@ export class ComponentManager extends BaseManager {
       value => !typed.typedAllowedValues!.has(value),
     );
     if (invalidValues.length > 0) {
-      return error(new ComponentError({
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentTypedSelectInvalidValues,
         message: `received invalid values for typed string select ${component.route}`,
-        interaction,
-        debugs: {
+        metadata: {
+          interactionId: interaction.id,
+          route: component.route,
           allowedValues: [...typed.typedAllowedValues],
           invalidValues,
           selectedValues: interaction.values,
@@ -355,10 +364,12 @@ export class ComponentManager extends BaseManager {
     }
 
     if (typed.typedSingleValue && interaction.values.length > 1) {
-      return error(new ComponentError({
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentTypedSelectInvalidValues,
         message: `received multiples values for typed single string select ${component.route}`,
-        interaction,
-        debugs: {
+        metadata: {
+          interactionId: interaction.id,
+          route: component.route,
           allowedValues: [...typed.typedAllowedValues],
           selectedValues: interaction.values,
         },
@@ -371,7 +382,7 @@ export class ComponentManager extends BaseManager {
   private findMatchingComponents(
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
-  ): Result<MatchedComponent[], ComponentError> {
+  ): Result<MatchedComponent[], ArcscordError<"COMPONENT_NOT_FOUND" | "COMPONENT_MULTIPLE_MATCHES">> {
     const components: MatchedComponent[] = [];
     const componentsList = this.components[type];
 
@@ -385,10 +396,12 @@ export class ComponentManager extends BaseManager {
     }
 
     if (components.length === 0) {
-      return error(new ComponentError({
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentNotFound,
         message: `didn't found component with id ${interaction.customId}`,
-        interaction,
-        debugs: {
+        metadata: {
+          interactionId: interaction.id,
+          route: interaction.customId,
           availableRoutes: componentsList.keys(),
           type,
         },
@@ -396,25 +409,27 @@ export class ComponentManager extends BaseManager {
     }
 
     if (components.length > 1) {
-      return error(new ComponentError({
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentMultipleMatches,
         message: `found more than one component that matches with ${interaction.customId}`,
-        interaction,
+        metadata: { interactionId: interaction.id, route: interaction.customId },
       }));
     }
 
     return ok(components);
   }
 
-  private async handlePreReply(component: ComponentHandler, context: ComponentContext): Promise<Result<true, ComponentError>> {
+  private async handlePreReply(component: ComponentHandler, context: ComponentContext): Promise<Result<true, ArcscordError<"COMPONENT_DEFER_FAILED">>> {
     if (component.preReply) {
       const [err] = await context.deferReply({
         flags: component.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
       if (err) {
-        return error(new ComponentError({
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.ComponentDeferFailed,
           message: "Failed to defer reply",
-          interaction: context.interaction,
-          originalError: err,
+          metadata: { interactionId: context.interaction.id, route: component.route },
+          cause: err,
         }));
       }
     }
@@ -430,53 +445,54 @@ export class ComponentManager extends BaseManager {
     return true;
   }
 
-  private async executeComponent(component: ComponentHandler, context: ComponentContext, start: number): Promise<void> {
+  private async executeComponent(component: ComponentHandler, context: ComponentContext, startedAt: number): Promise<void> {
     try {
       // `component.run` and `context` are each unions correlated by construction
       // (see `createContext`'s exhaustive switch), but that link isn't provable
       // statically once both are widened back to their general union types here.
       const rawResult = await (component.run as (ctx: ComponentContext) => MaybePromise<ComponentRunReturn>)(context);
+      const endedAt = Date.now();
       return this.options.resultHandler({
-        status: "returned",
-        result: normalizeRunReturn(rawResult),
+        exit: normalizeHandlerReturn(rawResult),
         component,
         interaction: context.interaction,
         context,
         locale: context.locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
       });
     }
     catch (e) {
+      const endedAt = Date.now();
       return this.options.resultHandler({
-        status: "thrown",
-        thrownValue: e,
+        exit: executionDefect(e),
         component,
         interaction: context.interaction,
         context,
         locale: context.locale,
         defer: context.defer,
-        start,
-        end: Date.now(),
+        startedAt,
+        endedAt,
+        durationMs: endedAt - startedAt,
+        incidentId: crypto.randomUUID(),
       });
     }
   }
 
-  private async runMiddleware(component: ComponentHandler, context: ComponentContext): Promise<Result<object | false, ComponentError>> {
+  private async runMiddleware(component: ComponentHandler, context: ComponentContext): Promise<ExecutionExit<object | false, unknown>> {
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!component.use || component.use.length === 0) {
-      return ok({});
+      return executionSuccess({});
     }
     const middlewareNames = new Set<string>();
     for (const middleware of component.use) {
       if (middlewareNames.has(middleware.name)) {
-        return error(new ComponentError({
+        return executionFailure(new ArcscordError({
+          code: arcscordErrorCodes.CommandValidationFailed,
           message: `duplicate middleware name "${middleware.name}"`,
-          interaction: context.interaction,
-          debugs: {
-            middlewareName: middleware.name,
-          },
+          metadata: { rule: "unique-middleware-name", middlewareName: middleware.name },
         }));
       }
       middlewareNames.add(middleware.name);
@@ -484,39 +500,34 @@ export class ComponentManager extends BaseManager {
     for (const middleware of component.use) {
       try {
         const result = await middleware.run(context);
-        if (result.error) {
-          return error(await result.error);
+        if (result.status === "failure") {
+          return executionFailure(await result.failure);
         }
 
-        if (result.cancel) {
-          const [err] = await result.cancel;
-          if (err) {
-            return error(err);
+        if (result.status === "cancel") {
+          if (result.result) {
+            const exit = normalizeHandlerReturn(await result.result);
+            if (exit.status !== "success") {
+              return exit;
+            }
           }
-          return ok(false);
+          return executionSuccess(false);
         }
-        additional[middleware.name] = result.next;
+        additional[middleware.name] = result.value;
       }
       catch (e) {
-        return error(new ComponentError({
-          message: `failed to run middleware : ${anyToError(e).message}`,
-          interaction: context.interaction,
-          originalError: anyToError(e),
-          debugs: {
-            middlewareName: middleware.name,
-          },
-        }));
+        return executionDefect(e);
       }
     }
-    return ok(additional);
+    return executionSuccess(additional);
   }
 
   /**
    * Sends an error reply to a component interaction, respecting the defer state.
    * Used by the default `handleResult`.
    */
-  private async sendInternalError(err: ComponentError, infos: ComponentResultHandlerInfos): Promise<void> {
-    const message = this.client.getErrorMessage(err.id, infos.locale);
+  private async sendFailureReply(incidentId: string, infos: ComponentResultHandlerInfos): Promise<void> {
+    const message = this.client.getErrorMessage(incidentId, infos.locale);
     try {
       if (infos.defer) {
         await infos.interaction.editReply(message);
@@ -526,7 +537,7 @@ export class ComponentManager extends BaseManager {
       }
     }
     catch (e) {
-      this.logger.error("failed to send internal error message", {
+      this.logger.error("failed to send failure reply", {
         baseError: anyToError(e).message,
       });
     }
@@ -537,28 +548,31 @@ export class ComponentManager extends BaseManager {
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    */
   async handleResult(infos: ComponentResultHandlerInfos): Promise<void> {
-    if (infos.status === "thrown") {
-      const err = new ComponentError({
-        message: `failed to run component with route ${infos.component.route} : ${anyToError(infos.thrownValue).message}`,
-        interaction: infos.interaction,
-        originalError: anyToError(infos.thrownValue),
-      });
-      err.generateId();
-      this.logger.logError(err);
-      return this.sendInternalError(err, infos);
-    }
-
-    const [err] = infos.result;
-    if (err !== null) {
-      err.generateId();
-      this.logger.logError(err);
-      return this.sendInternalError(err, infos);
-    }
-    this.logger.debug(`Component executed: ${infos.component.route}`, {
+    const meta = {
       route: infos.component.route,
       interactionId: infos.interaction.id,
       guildId: infos.interaction.guildId,
       userId: infos.interaction.user.id,
+      durationMs: infos.durationMs,
+      incidentId: infos.incidentId,
+    };
+    if (infos.exit.status === "defect") {
+      const incidentId = infos.incidentId ?? crypto.randomUUID();
+      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
+      return this.sendFailureReply(incidentId, infos);
+    }
+    if (infos.exit.status === "failure") {
+      const incidentId = crypto.randomUUID();
+      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
+      return this.sendFailureReply(incidentId, infos);
+    }
+    if (infos.exit.status === "interrupted") {
+      this.logger.warn("Component execution interrupted", meta);
+      return;
+    }
+    this.logger.debug(`Component executed: ${infos.component.route}`, {
+      ...meta,
+      value: infos.exit.value,
     });
   }
 }
