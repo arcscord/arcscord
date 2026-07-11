@@ -3,7 +3,8 @@
  * under a stable filename (`arcscord.tgz`) so `test/compat/bun-consumer` can
  * install the *packed* package instead of workspace source.
  *
- * Used by the `bun:pack` / `test:bun` root scripts and by the Bun CI workflow.
+ * Used by the `bun:pack` / `test:bun` root scripts and by CI. Pass
+ * `--skip-build` when the workspace was already built in the current job.
  */
 import { execFileSync } from "node:child_process";
 import { mkdir, readdir, rename, rm } from "node:fs/promises";
@@ -21,9 +22,12 @@ function runPnpm(args, cwd) {
   execFileSync(command, args, { cwd: fileURLToPath(cwd), stdio: "inherit" });
 }
 
-// 1. Build the whole workspace (arcscord + its @arcscord/* deps).
-console.log("→ Building workspace...");
-runPnpm(["build"], rootDir);
+// 1. Build the whole workspace (arcscord + its @arcscord/* deps), unless a CI
+// job already built it and only needs the package artifact.
+if (!process.argv.includes("--skip-build")) {
+  console.log("→ Building workspace...");
+  runPnpm(["build"], rootDir);
+}
 
 // 2. Reset the vendor folder and pack arcscord into it.
 console.log("→ Packing arcscord...");
