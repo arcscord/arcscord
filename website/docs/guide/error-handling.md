@@ -11,7 +11,7 @@ run() returns error(value)  -> ExecutionExit.failure
 run() or middleware throws -> ExecutionExit.defect
 ```
 
-Expected failures may be tagged objects, strings, native errors, or application-specific classes. Arcscord does not force handler authors to use a framework error class.
+Expected failures may be plain or tagged objects, strings, native errors, application-specific classes, or any other value. Arcscord imposes neither a failure shape nor a framework error class. A `_tag` field is only a convenient TypeScript convention used in some examples; it is never required.
 
 ## ArcscordError
 
@@ -41,10 +41,13 @@ Incident IDs belong to an execution failure, not to the error object. Default re
 
 ```ts
 return ctx.error({
-  _tag: "MissingPermission",
-  permission: "ManageMessages",
+  _tag: "TicketLimitReached",
+  current: 3,
+  limit: 3,
 });
 ```
+
+The tagged object above is only an example. The same helper accepts any value, such as `ctx.error("ticket limit reached")`, `ctx.error(new DomainError())`, or an untagged object.
 
 Interaction helpers such as `reply`, `editReply`, and `deferReply` return an `ArcscordError` with code `INTERACTION_OPERATION_FAILED` when Discord rejects the operation.
 

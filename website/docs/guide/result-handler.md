@@ -19,14 +19,35 @@ type ExecutionExit<T, E = unknown> =
 - `defect` means the handler or a middleware threw.
 - `interrupted` is reserved for cancellation
 
-Expected failures may be any value; they do not need to extend `Error`:
+Expected failures may be any value; they do not need to extend `Error`. The `_tag` field below is only an example of a convenient TypeScript convention for discriminating application failures. Arcscord does not require it or impose any failure shape:
 
 ```ts
-const denied = { _tag: "MissingPermission", permission: "BanMembers" } as const;
+type TicketLimitReached = {
+  _tag: "TicketLimitReached";
+  current: number;
+  limit: number;
+};
 
-export const ban = createCommand({
-  slash: { name: "ban", description: "Ban a member" },
-  run: ctx => ctx.error(denied),
+function isTicketLimitReached(value: unknown): value is TicketLimitReached {
+  return typeof value === "object"
+    && value !== null
+    && "_tag" in value
+    && value._tag === "TicketLimitReached";
+}
+
+export const ticket = createCommand({
+  slash: { name: "ticket", description: "Open a support ticket" },
+  run: async (ctx) => {
+    const current = await ticketStore.countOpenByUser(ctx.user.id);
+    const limit = 3;
+
+    if (current >= limit) {
+      return ctx.error({ _tag: "TicketLimitReached", current, limit });
+    }
+
+    await ticketStore.open(ctx.user.id);
+    return ctx.ok();
+  },
 });
 ```
 
@@ -47,9 +68,9 @@ const client = new ArcClient(token, {
             return;
 
           case "failure":
-            if (isMissingPermission(infos.exit.failure)) {
+            if (isTicketLimitReached(infos.exit.failure)) {
               await infos.interaction.reply({
-                content: "You do not have the required permission.",
+                content: `You already have ${infos.exit.failure.current} open tickets (limit: ${infos.exit.failure.limit}).`,
                 flags: MessageFlags.Ephemeral,
               });
               return;

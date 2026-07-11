@@ -18,7 +18,7 @@ describe("result functions", () => {
     });
 
     it("should accept a domain failure that does not extend Error", () => {
-      const failure = { _tag: "MissingPermission", permission: "ManageGuild" } as const;
+      const failure = { _tag: "TicketLimitReached", current: 3, limit: 3 } as const;
       const result = error(failure);
 
       expect(result).toEqual([failure, null]);
