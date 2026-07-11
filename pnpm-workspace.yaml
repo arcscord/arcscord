@@ -19,7 +19,6 @@ overrides:
 
 onlyBuiltDependencies:
   - "@prisma/engines"
-  - "@swc/core"
   - better-sqlite3
   - prisma
 peerDependencyRules:
@@ -27,7 +26,6 @@ peerDependencyRules:
     tsconfck>typescript: "6"
 
 allowBuilds:
-  "@swc/core": true
   core-js: false
   esbuild: true
   sharp: true

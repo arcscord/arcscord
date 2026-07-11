@@ -26,7 +26,6 @@
     "@antfu/eslint-config": "^9.1.0",
     "@commitlint/cli": "^21.1.0",
     "@commitlint/config-conventional": "^21.1.0",
-    "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
     "eslint": "^10.6.0",
     "husky": "^9.1.7",

@@ -3,6 +3,6 @@ shellEmulator: true
 trustPolicy: no-downgrade
 
 allowBuilds:
-  "@swc/core": true
+  esbuild: true
 onlyBuiltDependencies:
-  - "@swc/core"
+  - esbuild

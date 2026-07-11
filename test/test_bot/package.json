@@ -8,7 +8,7 @@
   "keywords": [],
   "main": "index.js",
   "scripts": {
-    "start": "node -r dotenv/config -r @swc-node/register -r tsconfig-paths/register src/index.ts debug",
+    "start": "node --import=tsx --env-file-if-exists=.env src/index.ts debug",
     "start:bun": "bun src/index.ts debug",
     "typecheck": "tsc -p tsconfig.eslint.json"
   },
@@ -19,11 +19,8 @@
     "i18next": "^26.3.3"
   },
   "devDependencies": {
-    "@swc-node/core": "^1.14.1",
-    "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
-    "dotenv": "^17.4.2",
-    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   }
 }

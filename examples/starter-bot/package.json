@@ -6,8 +6,8 @@
     "node": ">=24.11.0"
   },
   "scripts": {
-    "start": "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-    "dev": "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
+    "start": "node --import=tsx --env-file-if-exists=.env src/index.ts",
+    "dev": "node --import=tsx --env-file-if-exists=.env src/index.ts dev debug",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."
@@ -18,11 +18,9 @@
   },
   "devDependencies": {
     "@antfu/eslint-config": "^9.1.0",
-    "@swc-node/core": "^1.14.1",
-    "@swc-node/register": "^1.11.1",
     "@types/node": "^26.0.1",
     "eslint": "^10.6.0",
-    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   }
 }

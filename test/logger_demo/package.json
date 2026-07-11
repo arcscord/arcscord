@@ -8,20 +8,18 @@
   "keywords": [],
   "main": "src/index.ts",
   "scripts": {
-    "start": "node -r @swc-node/register -r tsconfig-paths/register src/index.ts",
+    "start": "node --import=tsx src/index.ts",
     "typecheck": "tsc -p tsconfig.eslint.json"
   },
   "dependencies": {
     "arcscord": "workspace:*"
   },
   "devDependencies": {
-    "@swc-node/core": "^1.14.1",
-    "@swc-node/register": "^1.11.1",
     "@types/debug": "^4.1.12",
     "@types/node": "^26.0.1",
     "debug": "^4.4.0",
     "pino": "9.5.0",
-    "tsconfig-paths": "^4.2.0",
+    "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "winston": "^3.17.0"
   }

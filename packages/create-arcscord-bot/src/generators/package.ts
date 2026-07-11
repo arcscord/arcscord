@@ -14,10 +14,8 @@ export type PackageJSONOptions = {
 
 const dependenciesVersions = {
   "discord.js": "^14.26.4",
-  "@swc-node/core": "^1.14.1",
-  "@swc-node/register": "^1.11.1",
   "@types/node": "^26.0.1",
-  "tsconfig-paths": "^4.2.0",
+  "tsx": "^4.23.0",
   "typescript": "^6.0.3",
 
   "eslint": "^10.6.0",
@@ -42,10 +40,12 @@ export function generatePackageJson(options: PackageJSONOptions): string {
     ? {
         start: "bun src/index.ts",
         dev: "bun src/index.ts dev debug",
+        typecheck: "tsc --noEmit",
       }
     : {
-        start: "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts",
-        dev: "node --env-file-if-exists=.env -r @swc-node/register -r tsconfig-paths/register src/index.ts dev debug",
+        start: "node --import=tsx --env-file-if-exists=.env src/index.ts",
+        dev: "node --import=tsx --env-file-if-exists=.env src/index.ts dev debug",
+        typecheck: "tsc --noEmit",
       };
 
   const devDependencies: Record<string, string> = isBun
@@ -54,10 +54,8 @@ export function generatePackageJson(options: PackageJSONOptions): string {
         "typescript": dependenciesVersions.typescript,
       }
     : {
-        "@swc-node/core": dependenciesVersions["@swc-node/core"],
-        "@swc-node/register": dependenciesVersions["@swc-node/register"],
         "@types/node": dependenciesVersions["@types/node"],
-        "tsconfig-paths": dependenciesVersions["tsconfig-paths"],
+        "tsx": dependenciesVersions.tsx,
         "typescript": dependenciesVersions.typescript,
       };
 
@@ -73,6 +71,10 @@ export function generatePackageJson(options: PackageJSONOptions): string {
     devDependencies,
     engines: isBun ? { bun: MINIMUM_BUN_VERSION } : { node: MINIMUM_NODE_VERSION },
   };
+
+  if (options.packageManager === "pnpm") {
+    jsonObj.pnpm = { onlyBuiltDependencies: ["esbuild"] };
+  }
 
   if (options.eslint) {
     (jsonObj.scripts as Record<string, string>).lint = "eslint .";

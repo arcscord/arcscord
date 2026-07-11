@@ -30,7 +30,7 @@ template. A good reading order is:
 
 This folder lives inside the Arcscord monorepo, but it has its own small
 `pnpm-workspace.yaml` so pnpm can approve the native builds needed by Prisma,
-`better-sqlite3` and `@swc/core`. Install dependencies from this directory:
+and `better-sqlite3`. Install dependencies from this directory:
 
 ```sh
 cd examples/ticket_bot
