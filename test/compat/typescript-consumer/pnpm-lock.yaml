@@ -37,7 +37,7 @@ packages:
     resolution: {integrity: sha512-BGObOPlghBOjAGcN23JGJvsKk6oGQQ+jGN5R6TKsSO/KzZR6p9tEM23oshlRq3Zcp6OGvimgUcWJOZ3M9tkOvA==}
 
   '@arcscord/middleware@file:vendor/middleware.tgz':
-    resolution: {integrity: sha512-0NkeeDVcwYPhFIvjdeTDW2yLvFi++2gRVfBSx9cnYmg4Efkjy846H4Ty9M58URgJKHMHIgQ4u/ux9NpTrCBAeA==, tarball: file:vendor/middleware.tgz}
+    resolution: {tarball: file:vendor/middleware.tgz}
     version: 1.0.0-next.1
     peerDependencies:
       discord.js: ^14.26.4
@@ -98,7 +98,7 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   arcscord@file:vendor/arcscord.tgz:
-    resolution: {integrity: sha512-aSkgGyNbWhRWkWhP9Fu2ETxgpPQU7p7IfeTp+o/VJ712vjQlt1p4P9uStyurWvX3q08Re1zXPrHGCmMsJzol9g==, tarball: file:vendor/arcscord.tgz}
+    resolution: {tarball: file:vendor/arcscord.tgz}
     version: 1.0.0-next.2
     peerDependencies:
       typescript: '>=5.4.0'
