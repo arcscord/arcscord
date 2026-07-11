@@ -31,6 +31,27 @@ describe("baseError", () => {
     expect(error.id).toBeDefined();
   });
 
+  it("should generate an ID only one time", () => {
+    const options = {
+      message: "Error with auto-generated ID",
+      autoGenerateId: true,
+    };
+    const error = new BaseError(options);
+    const firstId = error.id;
+    const secondId = error.generateId().id;
+    expect(firstId).toBe(secondId);
+  });
+  it("should generate an new ID if forced", () => {
+    const options = {
+      message: "Error with auto-generated ID",
+      autoGenerateId: true,
+    };
+    const error = new BaseError(options);
+    const firstId = error.id;
+    const secondId = error.generateId(true).id;
+    expect(firstId).not.toBe(secondId);
+  });
+
   it("should return the original error if provided", () => {
     const originalError = new Error("Original error");
     const options = {

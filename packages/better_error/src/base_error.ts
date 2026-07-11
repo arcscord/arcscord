@@ -75,7 +75,10 @@ export class BaseError extends Error {
    *
    * @returns The current object with the generated identifier.
    */
-  generateId(): this {
+  generateId(force: boolean = false): this {
+    if (this._id && !force) {
+      return this;
+    }
     this._id = crypto.randomUUID();
     return this;
   }
