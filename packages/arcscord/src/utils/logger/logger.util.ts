@@ -26,8 +26,9 @@ function formatLocalDate(date: Date): string {
  * Normalizes an arbitrary level string into a valid {@link LogLevel}.
  *
  * Accepts the `"warning"` alias (mapped to `"warn"`) and falls back to `"info"`
- * for any unknown value. Useful when building a custom {@link LoggerInterface}
- * that reads its level from configuration or the environment.
+ * for any unknown value.
+ *
+ * @internal
  */
 export function resolveLogLevel(level?: string): LogLevel {
   if (level === "warning") {
@@ -54,6 +55,8 @@ export function resolveDefaultLogFunc(level: LogLevel): LogFunc {
 /**
  * Normalizes a format string into the supported `"pretty"` / `"json"` union,
  * defaulting to `"pretty"` for any unrecognized value.
+ *
+ * @internal
  */
 export function resolveLogFormat(format?: string): Required<LoggerOptions>["format"] {
   return format === "json" ? "json" : "pretty";
@@ -62,7 +65,8 @@ export function resolveLogFormat(format?: string): Required<LoggerOptions>["form
 /**
  * Resolves whether JSON output should be used, honoring the explicit `format`
  * first and then the `ARCSCORD_LOG_FORMAT` / `LOG_FORMAT` environment variables.
- * Lets a custom logger match {@link ArcLogger}'s format-detection behavior.
+ *
+ * @internal
  */
 export function shouldUseJsonLogs(format?: LoggerOptions["format"]): boolean {
   return resolveLogFormat(format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT) === "json";
@@ -76,6 +80,7 @@ export function shouldUseJsonLogs(format?: LoggerOptions["format"]): boolean {
  * @param message - The log message.
  * @param processName - The process/logger name emitting the entry. Defaults to `"main"`.
  * @param meta - Optional structured metadata; omitted from the output when empty.
+ * @internal
  */
 export function formatJsonLog(
   logLevel: LogLevel,
@@ -96,8 +101,9 @@ export function formatJsonLog(
  * Returns whether an entry at `level` should be emitted given the `configuredLevel`.
  *
  * When `configuredLevel` is omitted it is read from the `ARCSCORD_LOG_LEVEL` /
- * `LOG_LEVEL` environment variables, so a custom {@link LoggerInterface} can reuse
- * arcscord's env-driven level filtering.
+ * `LOG_LEVEL` environment variables.
+ *
+ * @internal
  */
 export function shouldLog(
   level: LogLevel,

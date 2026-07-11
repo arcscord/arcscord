@@ -21,9 +21,6 @@ export {
   commandOptionTypesEnum,
 } from "./base/command/command.enum";
 export type {
-  AnyCommandHandler,
-  AnySubCommandHandler,
-  AutocompleteCommand,
   CommandExtras,
   CommandHandler,
   CommandRunResult,
@@ -36,11 +33,7 @@ export {
   UserCommandContext,
 } from "./base/command/command_context";
 export type {
-  BaseCommandContextBuilderOptions,
   CommandContext,
-  MessageCommandContextBuilderOptions,
-  SlashCommandContextBuilderOptions,
-  UserCommandContextBuilderOptions,
 } from "./base/command/command_context";
 export type {
   BaseCommandDefinition,
@@ -80,12 +73,9 @@ export type {
   ChoiceOptionString,
   ChoiceString,
   CommandOptionType,
-  ContextOption,
-  ContextOptions,
   MentionableOption,
   NumberChoices,
   Option,
-  OptionalContextOption,
   OptionsList,
   RoleOption,
   StringChoices,
@@ -134,7 +124,6 @@ export {
   createTypedStringMenu,
 } from "./base/components/interaction/component_handler.func";
 export type {
-  AnyModalComponentHandler,
   BaseComponentHandler,
   BaseMessageComponentHandler,
   BaseModalSubmitHandler,
@@ -173,15 +162,7 @@ export {
   UserSelectMenuContext,
 } from "./base/components/interaction/context";
 export type {
-  BaseComponentContextOptions,
-  ChannelSelectMenuContextOptions,
   ComponentContext,
-  MentionableSelectMenuContextOptions,
-  ModalContextOptions,
-  ModalContextValue,
-  RoleSelectMenuContextOptions,
-  StringSelectMenuContextOptions,
-  UserSelectMenuContextOptions,
 } from "./base/components/interaction/context";
 export type {
   ComponentBuildArgs,
@@ -277,7 +258,6 @@ export type {
   ModalStringSelectValue,
   ModalTopLevelComponent,
   ModalUserSelectValue,
-  ModalValues,
   PremiumButton,
   RadioGroup,
   RoleSelectMenu,
@@ -292,7 +272,6 @@ export type {
   StringButtonStyle,
   StringComponentType,
   StringSelectMenu,
-  StringSelectMenuValues,
   StringSeparatorSpacingSize,
   TextDisplay,
   TextDisplayInput,
@@ -347,7 +326,6 @@ export type {
 export type {
   CommandManagerOptions,
   CommandResultHandler,
-  CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
   CommandReturnedHandlerInfos,
   CommandThrownHandlerInfos,
@@ -412,10 +390,6 @@ export type {
   DebugValueString,
 } from "./utils/error/error.type";
 export {
-  stringifyDebugValue,
-  stringifyDebugValues,
-} from "./utils/error/error.util";
-export {
   isArcscordResult,
   normalizeRunReturn,
 } from "./utils/error/run_normalize";
@@ -425,13 +399,8 @@ export {
   createErrorReport,
   createLogger,
   defaultLogger,
-  formatJsonLog,
   renderErrorReport,
   renderJsonErrorReport,
-  resolveLogFormat,
-  resolveLogLevel,
-  shouldLog,
-  shouldUseJsonLogs,
 } from "./utils/logger";
 export type {
   DiagnosticLoggerOptions,

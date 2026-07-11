@@ -7,6 +7,7 @@ import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
  *
  * @param key - The debug key.
  * @param value - The debug value to stringify.
+ * @internal
  */
 export function stringifyDebugValue(
   key: string,
@@ -40,6 +41,8 @@ export function stringifyDebugValue(
 /**
  * Applies {@link stringifyDebugValue} to every entry of a {@link DebugValues}
  * object, returning the list of `[key, string]` tuples.
+ *
+ * @internal
  */
 export function stringifyDebugValues(debug: DebugValues): DebugValueString[] {
   return Object.entries(debug).map(([key, value]) =>
