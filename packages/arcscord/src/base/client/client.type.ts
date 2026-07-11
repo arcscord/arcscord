@@ -84,7 +84,7 @@ export type ArcClientOptions = ClientOptions & {
   logger?: ArcClientLoggerOptions;
 
   /**
-   * List of base messages, support locale soon
+   * List of base messages
    */
   baseMessages?: MessageOptions;
 
