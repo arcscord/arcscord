@@ -22,6 +22,13 @@ function formatLocalDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`;
 }
 
+/**
+ * Normalizes an arbitrary level string into a valid {@link LogLevel}.
+ *
+ * Accepts the `"warning"` alias (mapped to `"warn"`) and falls back to `"info"`
+ * for any unknown value. Useful when building a custom {@link LoggerInterface}
+ * that reads its level from configuration or the environment.
+ */
 export function resolveLogLevel(level?: string): LogLevel {
   if (level === "warning") {
     return "warn";
@@ -44,14 +51,32 @@ export function resolveDefaultLogFunc(level: LogLevel): LogFunc {
   return level === "warn" || level === "error" || level === "fatal" ? console.error : console.log;
 }
 
+/**
+ * Normalizes a format string into the supported `"pretty"` / `"json"` union,
+ * defaulting to `"pretty"` for any unrecognized value.
+ */
 export function resolveLogFormat(format?: string): Required<LoggerOptions>["format"] {
   return format === "json" ? "json" : "pretty";
 }
 
+/**
+ * Resolves whether JSON output should be used, honoring the explicit `format`
+ * first and then the `ARCSCORD_LOG_FORMAT` / `LOG_FORMAT` environment variables.
+ * Lets a custom logger match {@link ArcLogger}'s format-detection behavior.
+ */
 export function shouldUseJsonLogs(format?: LoggerOptions["format"]): boolean {
   return resolveLogFormat(format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT) === "json";
 }
 
+/**
+ * Serializes a single log entry to arcscord's structured JSON line
+ * (`time`, `level`, `process`, `message`, and optional `meta`).
+ *
+ * @param logLevel - The level of the entry.
+ * @param message - The log message.
+ * @param processName - The process/logger name emitting the entry. Defaults to `"main"`.
+ * @param meta - Optional structured metadata; omitted from the output when empty.
+ */
 export function formatJsonLog(
   logLevel: LogLevel,
   message: string,
@@ -67,6 +92,13 @@ export function formatJsonLog(
   });
 }
 
+/**
+ * Returns whether an entry at `level` should be emitted given the `configuredLevel`.
+ *
+ * When `configuredLevel` is omitted it is read from the `ARCSCORD_LOG_LEVEL` /
+ * `LOG_LEVEL` environment variables, so a custom {@link LoggerInterface} can reuse
+ * arcscord's env-driven level filtering.
+ */
 export function shouldLog(
   level: LogLevel,
   configuredLevel: LogLevel = resolveLogLevel(process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL),

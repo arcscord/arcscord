@@ -36,6 +36,10 @@ export type Locale
     | "zh-TW"
     | "ko";
 
+/**
+ * Every {@link Locale} supported by the Discord API, in Discord's documented order.
+ * Handy for iterating over all locales (e.g. building localization maps).
+ */
 export const supportedDiscordLocales: readonly Locale[] = [
   "id",
   "da",
@@ -73,6 +77,16 @@ export const supportedDiscordLocales: readonly Locale[] = [
 
 export const supportedDiscordLocaleSet: ReadonlySet<string> = new Set(supportedDiscordLocales);
 
+/**
+ * Type guard narrowing an arbitrary string to a Discord {@link Locale}.
+ *
+ * @example
+ * ```ts
+ * if (isDiscordLocale(input)) {
+ *   // input is now typed as Locale
+ * }
+ * ```
+ */
 export function isDiscordLocale(locale: string): locale is Locale {
   return supportedDiscordLocaleSet.has(locale);
 }

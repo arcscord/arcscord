@@ -85,6 +85,11 @@ type WithI18nOptions = BaseLocaleManagerOptions & {
   customI18n?: never;
 };
 
+/**
+ * Options for the {@link LocaleManager}: supply a ready-made i18next instance
+ * (`customI18n`), let the manager initialize one from `i18nOptions`, or disable
+ * localization entirely with `{ enabled: false }`.
+ */
 export type LocaleManagerOptions = WithCustomI18n | WithI18nOptions | {
   /**
    * Enable or disable the locale manager

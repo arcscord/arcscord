@@ -15,6 +15,20 @@ import { LocaleManager } from "#/manager/locale/locale_manager.class";
 import { ArcLogger } from "#/utils/logger/logger.class";
 import { createLogger } from "#/utils/logger/logger.util";
 
+/**
+ * The arcscord client. Extends the discord.js {@link https://discord.js.org/docs/packages/discord.js/main/Client:Class | Client}
+ * and wires up the command, event, component and locale managers plus the logger,
+ * driving the whole interaction pipeline.
+ *
+ * Configure it through {@link ArcClientOptions} (intents, managers, logger, default
+ * messages). It is the entry point of every bot built with arcscord.
+ *
+ * @example
+ * ```ts
+ * const client = new ArcClient({ intents: [...] });
+ * await client.login(process.env.TOKEN);
+ * ```
+ */
 export class ArcClient extends DJSClient {
   /**
    * The manager for commands
@@ -219,6 +233,12 @@ export class ArcClient extends DJSClient {
     return this.defaultMessages.error(errorId, this.createMessageContext(locale));
   }
 
+  /**
+   * Builds the message context used to resolve default messages, binding the
+   * localization function for `locale` when the locale manager is enabled.
+   *
+   * @param locale - The locale to bind, if any.
+   */
   createMessageContext(locale?: string): BaseMessageContext {
     if (!locale || !this.localeManager.enabled) {
       return { locale };
@@ -230,10 +250,21 @@ export class ArcClient extends DJSClient {
     };
   }
 
+  /**
+   * Adds gateway intents to the client options after construction.
+   *
+   * @param intents - The intents to add.
+   */
   addIntents(intents: BitFieldResolvable<GatewayIntentsString, number>): void {
     this.options.intents = this.options.intents.add(intents);
   }
 
+  /**
+   * Emits an internal trace log, but only when `enableInternalTrace` is set in
+   * the client options. Used by the framework to trace its own lifecycle.
+   *
+   * @param message - The trace message.
+   */
   trace(message: string): void {
     if (this.arcOptions.enableInternalTrace) {
       this.logger.trace(message);

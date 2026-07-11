@@ -1,5 +1,13 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 
+/**
+ * Converts a single debug entry into a `[key, string]` tuple, stringifying the
+ * value (numbers, bigints and booleans via `toString`, objects via a `toJson`
+ * method when present, otherwise `JSON.stringify`).
+ *
+ * @param key - The debug key.
+ * @param value - The debug value to stringify.
+ */
 export function stringifyDebugValue(
   key: string,
   value: unknown,
@@ -29,6 +37,10 @@ export function stringifyDebugValue(
   }
 }
 
+/**
+ * Applies {@link stringifyDebugValue} to every entry of a {@link DebugValues}
+ * object, returning the list of `[key, string]` tuples.
+ */
 export function stringifyDebugValues(debug: DebugValues): DebugValueString[] {
   return Object.entries(debug).map(([key, value]) =>
     stringifyDebugValue(key, value),

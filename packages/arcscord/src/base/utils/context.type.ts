@@ -112,6 +112,7 @@ export type ContextInDm = {
   inDM: () => true;
 };
 
+/** An interaction context that is either inside a guild ({@link ContextInGuild}) or a DM ({@link ContextInDm}). */
 export type ContextInGuildOrDm = ContextInGuild | ContextInDm;
 
 /**
@@ -152,6 +153,10 @@ export type SlashCommandContextDocs = {
   options: unknown;
 };
 
+/**
+ * Documentation-only shape describing the extra members available on a message
+ * command context (rendered in the API reference).
+ */
 export type MessageCommandContextDocs = {
   /**
    * The message that the command target

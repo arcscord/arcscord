@@ -88,6 +88,7 @@ export type CommandExtras<
    * @param ctx - The command context.
    */
   run: {
+    /** Bivariance-preserving wrapper. @internal */
     bivarianceHack: (
       ctx: CommandContext<NoInfer<Build>, Middlewares>,
     ) => MaybePromise<CommandRunReturn>;

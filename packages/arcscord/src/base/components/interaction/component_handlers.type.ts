@@ -25,6 +25,13 @@ import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
 import type { ComponentBuildArgs, IdInitialiseFunction } from "./route";
 
+/**
+ * The routing portion of a component handler shared by every component type:
+ * the `route` pattern (with static and `{dynamic}` segments) matched against
+ * incoming custom ids, and its associated build/id helpers.
+ *
+ * @typeParam Route - The route pattern string used to type the dynamic params.
+ */
 export type RouteComponentHandle<Route extends string> = {
   /**
    * The route of the component.
@@ -49,12 +56,19 @@ export type {
 } from "./route";
 
 /**
+ * Minimal shape a component handler must satisfy to be wrapped by builder options.
+ * @internal
+ */
+type BuildableHandler = { build: (...args: any[]) => unknown };
+
+/**
  * Options accepted by component factory functions before route arguments are resolved.
  */
 export type ComponentBuilderOptions<
-  Handler extends { build: (...args: any[]) => unknown },
+  Handler extends BuildableHandler,
   Options extends unknown[],
 > = Omit<Handler, "build"> & {
+  /** Builds the component, receiving the id initializer and the route arguments. */
   build: (id: IdInitialiseFunction, ...args: Options) => ReturnType<Handler["build"]>;
 };
 
@@ -62,11 +76,13 @@ export type ComponentBuilderOptions<
  * Options accepted by the typed modal factory before route arguments are resolved.
  */
 export type ModalComponentBuilderOptions<
-  Handler extends { build: (...args: any[]) => unknown },
+  Handler extends BuildableHandler,
   Options extends unknown[],
   Fields extends ModalFields,
 > = Omit<Handler, "build" | "fields"> & {
+  /** The typed field definitions of the modal. */
   fields: Fields;
+  /** Builds the modal, receiving the id initializer, the resolved fields and the route arguments. */
   build: (id: IdInitialiseFunction, fields: Fields, ...args: Options) => ReturnType<Handler["build"]>;
 };
 

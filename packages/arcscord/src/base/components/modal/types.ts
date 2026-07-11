@@ -27,6 +27,7 @@ import type {
 
 export type { ModalLabelOverrides } from "../shared/component_definer.type";
 
+/** A discord.js builder accepted at the top level of a modal (`LabelBuilder` or `ModalBuilder`). */
 export type DiscordModalTopLevelBuilder
   = | LabelBuilder
     | ModalBuilder;
@@ -39,6 +40,7 @@ export type DiscordModalFieldBuilder
     | TextInputBuilder
     | UserSelectMenuBuilder;
 
+/** Any value accepted as a top-level component when building a modal: an arcscord definition, raw component data, text input, or a {@link DiscordModalTopLevelBuilder}. */
 export type ModalTopLevelComponentInput
   = | ModalTopLevelComponent
     | LabelComponentData
@@ -54,6 +56,7 @@ export type ModalFieldComponentInput
     | RadioGroupComponentData
     | DiscordModalFieldBuilder;
 
+/** Options passed to {@link buildModal}: the modal `title`, its `customId`, and its top-level `components`. */
 export type BuildModalOptions = {
   title: string;
   customId: string;
@@ -107,6 +110,7 @@ export type FileUploadFieldOptions<
   required?: Required;
 };
 
+/** Shared label options for a modal field wrapped by {@link modalLabel}: the required `label` and an optional `description`. */
 export type LabeledFieldOptions = {
   description?: string;
   label: string;

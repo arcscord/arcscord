@@ -16,6 +16,12 @@ export * from "./message_component_context";
 export * from "./modal_context";
 export * from "./select_menu_context";
 
+/**
+ * Union of every component context (button, modal, and the select-menu variants)
+ * a component handler may receive, parameterized by its `Route`.
+ *
+ * @typeParam Route - The component's route pattern used to type its dynamic params.
+ */
 export type ComponentContext<Route extends string = string>
   = | ButtonContext<ComponentMiddleware[], Route>
     | ModalContext<ComponentMiddleware[], Route>

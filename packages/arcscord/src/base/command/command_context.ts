@@ -294,6 +294,7 @@ export class BaseCommandContext<
     }
   }
 
+  /** Type guard narrowing the context to a guild context (non-null `guild`, `member`, etc.). */
   inGuild(): this is BaseCommandContext<CommandMiddleware[], true> {
     return this.interaction.inGuild();
   }

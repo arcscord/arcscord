@@ -8,6 +8,10 @@ const MAX_ARRAY_ITEMS = 20;
 const MAX_OBJECT_KEYS = 30;
 const MAX_STRING_LENGTH = 800;
 
+/**
+ * Plain, JSON-safe representation of an error and its `cause` chain, produced
+ * while building an {@link ErrorReport}.
+ */
 export type SerializedError = {
   type: string;
   message: string;
@@ -15,6 +19,11 @@ export type SerializedError = {
   cause?: SerializedError;
 };
 
+/**
+ * Sanitized, structured description of an error ready to be rendered or shipped
+ * to an external sink. Secrets are redacted and large values truncated during
+ * creation — see {@link createErrorReport}.
+ */
 export type ErrorReport = {
   id?: string;
   level: Extract<LogLevel, "error" | "fatal">;
@@ -182,6 +191,17 @@ function serializeDebugs(error: unknown): DebugValues {
   return sanitizeValue(debugs) as DebugValues;
 }
 
+/**
+ * Builds a sanitized {@link ErrorReport} from any thrown value.
+ *
+ * Redacts secret-looking keys (`token`, `password`, `authorization`, `secret`,
+ * `cookie`), truncates oversized strings/collections, and unwraps
+ * {@link BaseError} debug data and cause chains. Reuse it in a custom `logError`
+ * implementation instead of re-implementing sanitization.
+ *
+ * @param error - The thrown value; if an array is given, its first element is used.
+ * @param level - The severity to record on the report. Defaults to `"error"`.
+ */
 export function createErrorReport(
   error: BaseError | Error | unknown | unknown[],
   level: Extract<LogLevel, "error" | "fatal"> = "error",
@@ -199,6 +219,7 @@ export function createErrorReport(
   };
 }
 
+/** Options controlling how an {@link ErrorReport} is rendered by {@link renderErrorReport} / {@link renderJsonErrorReport}. */
 export type ErrorReportRenderOptions = {
   /**
    * Whether to include the stack trace and the full cause chain.
@@ -207,6 +228,15 @@ export type ErrorReportRenderOptions = {
   includeStack?: boolean;
 };
 
+/**
+ * Renders an {@link ErrorReport} to a colored, human-readable multi-line string
+ * (matching {@link ArcLogger}'s pretty output), including debug fields and,
+ * unless disabled, the stack trace and cause chain.
+ *
+ * @param report - The report to render.
+ * @param processName - The process/logger name shown in the header.
+ * @param options - Rendering options; see {@link ErrorReportRenderOptions}.
+ */
 export function renderErrorReport(
   report: ErrorReport,
   processName: string,
@@ -250,6 +280,15 @@ export function renderErrorReport(
   return lines.join("\n");
 }
 
+/**
+ * Renders an {@link ErrorReport} as a single structured JSON line suitable for
+ * machine ingestion. When `includeStack` is `false`, the stack and cause chain
+ * are omitted and only the error `type`/`message` are kept.
+ *
+ * @param report - The report to render.
+ * @param processName - The process/logger name recorded in the payload.
+ * @param options - Rendering options; see {@link ErrorReportRenderOptions}.
+ */
 export function renderJsonErrorReport(
   report: ErrorReport,
   processName: string,

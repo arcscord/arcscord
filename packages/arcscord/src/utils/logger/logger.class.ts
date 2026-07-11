@@ -6,6 +6,14 @@ import { stringifyDebugValues } from "#/utils";
 import { createErrorReport, renderErrorReport, renderJsonErrorReport } from "#/utils/logger/logger.report";
 import { colorDebugValue, formatJsonLog, formatLog, formatShortDebug, resolveDefaultLogFunc, resolveLogFormat, resolveLogLevel, shouldLog, shouldUseJsonLogs } from "#/utils/logger/logger.util";
 
+/**
+ * Default {@link LoggerInterface} implementation used by {@link ArcClient}.
+ *
+ * Emits pretty, colored output by default and structured JSON when configured
+ * (via options or the `ARCSCORD_LOG_FORMAT` / `ARCSCORD_LOG_LEVEL` environment
+ * variables), with built-in secret redaction and error-report rendering. Replace
+ * it through `ArcClientOptions.logger.customLogger` to plug in another logging library.
+ */
 export class ArcLogger implements LoggerInterface {
   /**
    * The name of the logger

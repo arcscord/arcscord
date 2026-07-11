@@ -101,6 +101,7 @@ export type SelectMenuComponentType
     | ComponentType.MentionableSelect
     | ComponentType.ChannelSelect;
 
+/** Where a component definition is used: at the top level of a `"message"` or inside a `"modal"`. */
 export type ComponentUsage = "message" | "modal";
 
 type SelectMenuUsageOptions<Usage extends ComponentUsage>
@@ -278,7 +279,9 @@ export type SelectMenu<Usage extends ComponentUsage = ComponentUsage>
     | ChannelSelectMenu<Usage>
     | StringSelectMenu<Usage>;
 
+/** A {@link SelectMenu} narrowed to the `"message"` usage. */
 export type MessageSelectMenu = SelectMenu<"message">;
+/** A {@link SelectMenu} narrowed to the `"modal"` usage. */
 export type ModalSelectMenu = SelectMenu<"modal">;
 
 /**
@@ -483,6 +486,7 @@ export type MessageTopLevelComponent
     | Separator
     | TextDisplay;
 
+/** Union of every resolved component data type allowed at the top level of a message. */
 export type AnyMessageTopLevelComponentData
   = | ContainerComponentData
     | FileComponentData
@@ -491,6 +495,7 @@ export type AnyMessageTopLevelComponentData
     | SeparatorComponentData
     | TextDisplayComponentData;
 
+/** Union of every resolved component data type allowed inside a modal. */
 export type AnyModalComponentData
   = | CheckboxComponentData
     | CheckboxGroupComponentData
@@ -543,8 +548,11 @@ export type ModalLabelOverrides = {
  */
 export type ModalFieldDefinition<Value = unknown, Overrides = ModalLabelOverrides> = {
   readonly __modalField: true;
+  /** Builds the label component data for the field, optionally applying `overrides`. */
   readonly label: (overrides?: Overrides) => LabelComponentData;
+  /** Parses the submitted raw input into the field's typed `Value`. */
   readonly parse: (input: ModalFieldParseInput) => Value;
+  /** Returns a copy of the field definition bound to the given `customId`. */
   readonly withCustomId: (customId: string) => ModalFieldDefinition<Value, Overrides>;
 };
 
@@ -577,6 +585,16 @@ export type ModalStringSelectValue<
     ? Options[number][] | undefined
     : Options[number][];
 
+/**
+ * Resolves the value type produced by a modal select field.
+ *
+ * A single value (or `Value | undefined` when optional) when `MaxValues` is `1`
+ * or unset, otherwise an array (or `Value[] | undefined` when optional).
+ *
+ * @typeParam Value - The resolved element type (e.g. `User`, `Role`, `Attachment`).
+ * @typeParam MaxValues - The field's maximum selectable values.
+ * @typeParam Required - Whether the field is required.
+ */
 export type ModalSelectableValue<
   Value,
   MaxValues extends number | undefined,
@@ -589,36 +607,43 @@ export type ModalSelectableValue<
     ? Value[] | undefined
     : Value[];
 
+/** Parsed value of a modal user-select field: resolved `User`(s), shaped by {@link ModalSelectableValue}. */
 export type ModalUserSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<User, MaxValues, Required>;
 
+/** Parsed value of a modal role-select field: resolved `Role`(s), shaped by {@link ModalSelectableValue}. */
 export type ModalRoleSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<Role, MaxValues, Required>;
 
+/** Parsed value of a modal mentionable-select field: resolved `User | Role`(s), shaped by {@link ModalSelectableValue}. */
 export type ModalMentionableSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<User | Role, MaxValues, Required>;
 
+/** Parsed value of a modal channel-select field: resolved `GuildBasedChannel`(s), shaped by {@link ModalSelectableValue}. */
 export type ModalChannelSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<GuildBasedChannel, MaxValues, Required>;
 
+/** Parsed value of a modal file-upload field: uploaded `Attachment`(s), shaped by {@link ModalSelectableValue}. */
 export type ModalFileUploadValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<Attachment, MaxValues, Required>;
 
+/** Parsed value of a modal radio group: the selected option's `value`, or `undefined` when optional. */
 export type ModalRadioGroupValue<
   Options extends readonly { value: string }[],
   Required extends boolean | undefined,
 > = Required extends false ? Options[number]["value"] | undefined : Options[number]["value"];
 
+/** Parsed value of a modal checkbox group: the array of selected option `value`s. */
 export type ModalCheckboxGroupValue<
   Options extends readonly { value: string }[],
 > = Array<Options[number]["value"]>;

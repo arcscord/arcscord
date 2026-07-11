@@ -49,6 +49,7 @@ type AutocompleteOptionsDef<
       : never
     : never;
 
+/** The union of option names in `T` that are declared with `autocomplete: true`. */
 export type AutocompleteOptionName<T extends OptionsList> = {
   [K in keyof T]: T[K] extends { autocomplete: true } ? K : never;
 }[keyof T] & string;
@@ -70,15 +71,29 @@ type AutocompleteChoices<T extends Option>
       ? NumberChoices
       : never;
 
+/**
+ * Handler for a single autocomplete-enabled option: receives a typed
+ * {@link AutocompleteContext} for the option and returns the choices to display.
+ *
+ * @typeParam Build - The command (or sub-command) definition the option belongs to.
+ * @typeParam Name - The name of the autocomplete option handled.
+ */
 export type AutocompleteHandler<
   Build extends FullCommandDefinition | SubCommandDefinition,
   Name extends AutocompleteOptionName<AutocompleteOptionsDef<Build>>,
 > = {
+  /** Bivariance-preserving wrapper. @internal */
   bivarianceHack: (
     ctx: AutocompleteContext<Build, Name>,
   ) => MaybePromise<CommandRunResult>;
 }["bivarianceHack"];
 
+/**
+ * Map associating each autocomplete-enabled option of a command definition with
+ * its {@link AutocompleteHandler}.
+ *
+ * @typeParam Build - The command (or sub-command) definition.
+ */
 export type AutocompleteHandlers<
   Build extends FullCommandDefinition | SubCommandDefinition,
 > = {

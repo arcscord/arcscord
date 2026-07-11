@@ -9,16 +9,28 @@ import { anyToError, error, ok } from "@arcscord/error";
 import { ApplicationCommandType, Routes } from "discord-api-types/v10";
 import { InternalError } from "#/utils/error/class/internal_error";
 
+/** A command as registered on Discord (`id`, `name`, `type`) tagged with its `guildId` (`null` for global). */
 export type ApplicationCommandRegistration = Pick<APIApplicationCommand, "id" | "name" | "type"> & {
   guildId: string | null;
 };
 
+/**
+ * How local command definitions are pushed to Discord for a scope:
+ * `put` (bulk overwrite), `create` (create/update one by one), `warn` (only log
+ * differences), or `ignore` (do nothing). See {@link CommandRegistrationScopeConfig}.
+ */
 export type CommandRegistrationCommandMode = "put" | "create" | "warn" | "ignore";
 
+/**
+ * How Discord commands absent from the local list are handled:
+ * `delete`, `warn`, or `ignore`. See {@link CommandRegistrationScopeConfig}.
+ */
 export type CommandRegistrationUnusedMode = "delete" | "warn" | "ignore";
 
+/** The scope a command registration applies to: `global` or `guild`. */
 export type CommandRegistrationScope = "global" | "guild";
 
+/** Registration behavior for a single scope: how local commands are pushed (`commands`) and how unused Discord commands are handled (`unused`). */
 export type CommandRegistrationScopeConfig = {
   /**
    * How local command definitions are pushed to Discord.
@@ -43,6 +55,7 @@ export type CommandRegistrationScopeConfig = {
   unused?: CommandRegistrationUnusedMode;
 };
 
+/** Command registration configuration, with a {@link CommandRegistrationScopeConfig} per scope (`global` and `guild`). */
 export type CommandRegistrationConfig = {
   /**
    * Registration behavior for global application commands.
@@ -55,8 +68,10 @@ export type CommandRegistrationConfig = {
   guild?: CommandRegistrationScopeConfig;
 };
 
+/** A {@link CommandRegistrationScopeConfig} with every field resolved (defaults applied). */
 export type RequiredCommandRegistrationScopeConfig = Required<CommandRegistrationScopeConfig>;
 
+/** A {@link CommandRegistrationConfig} with both scopes fully resolved (defaults applied). */
 export type RequiredCommandRegistrationConfig = {
   global: RequiredCommandRegistrationScopeConfig;
   guild: RequiredCommandRegistrationScopeConfig;

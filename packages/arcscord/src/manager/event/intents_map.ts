@@ -1,9 +1,15 @@
 import type { ClientEvents, GatewayIntentsString } from "discord.js";
 
+/** A source an event can be received from when several intents cover it: `guild` or `dm`. */
 export type EventIntentCoverageTarget = "guild" | "dm";
 
+/** Maps each {@link EventIntentCoverageTarget} to the gateway intent that covers it. */
 export type EventIntentAlternatives = Partial<Record<EventIntentCoverageTarget, GatewayIntentsString>>;
 
+/**
+ * The gateway intents an event needs to be received:
+ * `none`, `all` of a list of intents, or `oneOf` a set of coverage alternatives.
+ */
 export type EventIntentRequirement
   = | {
     mode: "none";

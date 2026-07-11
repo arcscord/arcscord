@@ -64,12 +64,18 @@ export type EventResultHandlerInfos
   = | EventReturnedHandlerInfos
     | EventThrownHandlerInfos;
 
+/**
+ * Callback invoked after every event handler runs, receiving the normalized
+ * {@link EventResultHandlerInfos} to log or react to the outcome.
+ */
 export type EventResultHandler = (
   infos: EventResultHandlerInfos,
 ) => void | Promise<void>;
 
+/** What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`, or `throw`. */
 export type EventIntentCheckAction = "off" | "warn" | "throw";
 
+/** Per-{@link EventIntentCoverageTarget} toggle of the coverage expected by the intent check. */
 export type EventIntentCheckCoverage = Partial<Record<EventIntentCoverageTarget, boolean>>;
 
 /**
@@ -113,8 +119,10 @@ export type EventIntentCheckOptions = {
 
 export type RequiredEventIntentCheckOptions = Required<EventIntentCheckOptions>;
 
+/** The kind of issue reported by an intent check: fully `missing` or only `partialCoverage`. */
 export type EventIntentCheckIssueType = "missing" | "partialCoverage";
 
+/** A single diagnostic produced by the event intent check, describing the affected handler and the missing/present intents. */
 export type EventIntentCheckIssue = {
   /**
    * The type of diagnostic emitted by the check.
@@ -152,6 +160,7 @@ export type EventIntentCheckIssue = {
   message: string;
 };
 
+/** Options for the {@link EventManager}, including the gateway-intent coverage check and the result handler. */
 export type EventManagerOptions = {
   /**
    * Checks loaded event handlers against the client gateway intents.

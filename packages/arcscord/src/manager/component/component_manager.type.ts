@@ -14,6 +14,7 @@ import type {
 import type { ComponentContext } from "#/base/components/interaction/context";
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
 
+/** The {@link ComponentManager}'s registry: one `customId → handler` map per component type (buttons, each select-menu kind, and modals). */
 export type ComponentList = {
   [ComponentType.Button]: Map<string, ButtonComponentHandler>;
   [ComponentType.StringSelect]: Map<string, AnyStringSelectMenuComponentHandler>;

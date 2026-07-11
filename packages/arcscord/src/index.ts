@@ -387,6 +387,7 @@ export type {
 
 export { channelTypeEnum } from "./utils/discord/type/channel.enum";
 export type { ChannelType } from "./utils/discord/type/channel.type";
+export { isDiscordLocale, supportedDiscordLocales } from "./utils/discord/type/locale.type";
 export type { Locale, LocaleMap } from "./utils/discord/type/locale.type";
 export { isGuildTextChannel } from "./utils/discord/utils/util.func";
 export type { GuildTextFirstBasedChannel } from "./utils/discord/utils/util.type";

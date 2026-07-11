@@ -2,6 +2,16 @@ import type { APIInteractionGuildMember } from "discord-api-types/v10";
 import type { BaseInteraction, Guild, GuildMember, GuildTextBasedChannel, TextBasedChannel, User } from "discord.js";
 import type { ArcClient } from "../client";
 
+/**
+ * Base class shared by every interaction context (commands and components).
+ *
+ * Exposes the interaction's actor and location — `user`, `guild`, `member`,
+ * `channel` and their ids — plus the {@link ArcClient} instance. The `InGuild`
+ * type parameter narrows the guild-only fields: when `true` they are non-null,
+ * when `false` they are `null`.
+ *
+ * @typeParam InGuild - Whether the interaction is known to originate from a guild.
+ */
 export class InteractionContext<InGuild extends true | false = true | false> {
   /**
    * The user of the context

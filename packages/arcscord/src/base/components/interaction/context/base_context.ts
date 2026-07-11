@@ -36,6 +36,14 @@ type MiddlewaresResults<M extends ComponentMiddleware[]> = {
   >;
 };
 
+/**
+ * Options used to build a {@link BaseComponentContext}: the resolved `locale`,
+ * the route `params` extracted from the custom id, and the `additional` data
+ * accumulated by the component middlewares.
+ *
+ * @typeParam M - The list of component middlewares feeding `additional`.
+ * @typeParam Route - The component's route pattern used to type `params`.
+ */
 export type BaseComponentContextOptions<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,

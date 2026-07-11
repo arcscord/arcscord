@@ -52,6 +52,24 @@ const packages = [
 ];
 
 const arcscordTypedocOptions = {
+  // Fail the docs build on undocumented public exports, broken {@link} targets,
+  // or public API referencing non-exported symbols absent from
+  // `intentionallyNotExported`. `requiredToBeDocumented` scopes the coverage check
+  // to top-level exported declarations (properties/enum members are not required).
+  treatWarningsAsErrors: true,
+  validation: {
+    notExported: true,
+    notDocumented: true,
+    invalidLink: true,
+  },
+  requiredToBeDocumented: [
+    "Enum",
+    "Variable",
+    "Function",
+    "Class",
+    "Interface",
+    "TypeAlias",
+  ],
   externalSymbolLinkMappings: {
     "discord.js": {
       "Client.fetchStickerPacks": "#",
@@ -67,6 +85,7 @@ const arcscordTypedocOptions = {
     "BaseComponentResultHandlerInfos",
     "BaseEventResultHandlerInfos",
     "BaseMessageContext",
+    "BuildableHandler",
     "CommandErrorContext",
     "CommandErrorOptions",
     "ComponentErrorOptions",
