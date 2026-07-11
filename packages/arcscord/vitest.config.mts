@@ -4,7 +4,7 @@ export default createVitestConfig({
   test: {
     typecheck: {
       enabled: true,
-      tsconfig: "tsconfig.json",
+      tsconfig: "tsconfig.eslint.json",
     },
   },
   resolve: {
