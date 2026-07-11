@@ -30,7 +30,7 @@ import {
 } from "#/base/components/interaction/context/select_menu_context";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { BaseManager } from "#/base/manager/manager.class";
-import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, normalizeHandlerReturn } from "#/utils";
+import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn } from "#/utils";
 
 type MatchedComponent = {
   component: ComponentHandler;
@@ -73,32 +73,60 @@ export class ComponentManager extends BaseManager {
   /**
    * Loads an array of component properties and initializes the components.
    *
+   * Loading stops at the first invalid or duplicate route and returns the
+   * failure; every component before it stays loaded.
+   *
    * @param components - components to loads
-   * @returns the number of components loaded
+   * @returns the number of components loaded, or the loading failure.
    */
-  loadComponents(components: ComponentHandler[]): number {
+  loadComponents(
+    components: ComponentHandler[],
+  ): Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">> {
+    let loaded = 0;
     for (const component of components) {
-      this.loadComponent(component);
+      const [err] = this.loadComponent(component);
+      if (err) {
+        return error(err);
+      }
+      loaded++;
     }
-    return components.length;
+    return ok(loaded);
   }
 
   /**
    * Load a single component
    * @param component - component to load
+   * @returns `ok(true)` when loaded, or the route validation/duplication failure.
    */
-  loadComponent(component: ComponentHandler): void {
-    const compiledRoute = compileComponentRoute(component.route);
+  loadComponent(
+    component: ComponentHandler,
+  ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">> {
+    let compiledRoute: CompiledComponentRoute;
+    try {
+      compiledRoute = compileComponentRoute(component.route);
+    }
+    catch (e) {
+      if (isArcscordError(e) && e.code === arcscordErrorCodes.ComponentRouteInvalid) {
+        return error(e as ArcscordError<"COMPONENT_ROUTE_INVALID">);
+      }
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentRouteInvalid,
+        message: `Invalid component route "${component.route}"`,
+        metadata: { route: component.route, reason: anyToError(e).message },
+        cause: e,
+      }));
+    }
+
     const componentsList = component.handlerType === componentHandlerTypeEnum.modal
       ? this.components.modal
       : this.components[component.type];
 
     if (componentsList.has(compiledRoute.canonical)) {
-      throw new ArcscordError({
+      return error(new ArcscordError({
         code: arcscordErrorCodes.ComponentRouteDuplicate,
         message: `Duplicate component route ${component.route}`,
         metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
-      });
+      }));
     }
 
     this.compiledRoutes.set(component, compiledRoute);
@@ -113,6 +141,36 @@ export class ComponentManager extends BaseManager {
     this.trace(
       `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
     );
+
+    return ok(true);
+  }
+
+  /**
+   * Removes a loaded component by its registered route.
+   *
+   * @param route - The component route (customId pattern) used at registration.
+   * @returns `true` when a component was removed.
+   */
+  unloadComponent(route: string): boolean {
+    let canonical: string;
+    try {
+      canonical = compileComponentRoute(route).canonical;
+    }
+    catch {
+      return false;
+    }
+
+    for (const list of Object.values(this.components) as Map<string, ComponentHandler>[]) {
+      const component = list.get(canonical);
+      if (component) {
+        list.delete(canonical);
+        this.compiledRoutes.delete(component);
+        this.trace(`unloaded component with route ${route}`);
+        return true;
+      }
+    }
+
+    return false;
   }
 
   private setComponent<K extends Exclude<keyof ComponentList, "modal">>(

@@ -1,6 +1,17 @@
 import type { ArcClientReadyTimeoutError } from "#/utils/error/class/client_ready_timeout_error";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { button, createButton } from "#/base/components";
+import { ArcscordError } from "#/utils";
 import { ArcClient } from "./client.class";
+
+function duplicateRouteButtons(): ReturnType<typeof createButton>[] {
+  const make = (): ReturnType<typeof createButton> => createButton({
+    route: "same-route",
+    build: id => button({ label: "x", style: "primary", customId: id() }),
+    run: ctx => ctx.ok(),
+  });
+  return [make(), make()];
+}
 
 afterEach(() => {
   vi.useRealTimers();
@@ -129,5 +140,30 @@ describe("arcClient.waitReady", () => {
     const client = new ArcClient("token", { intents: [] });
 
     expect(() => client.waitReady(options)).toThrow(new RegExp(optionName));
+  });
+});
+
+describe("arcClient.loadHandlers", () => {
+  it("returns a per-category report on success", async () => {
+    const client = new ArcClient("token", { intents: [] });
+    const simpleButton = createButton({
+      route: "ready-button",
+      build: id => button({ label: "x", style: "primary", customId: id() }),
+      run: ctx => ctx.ok(),
+    });
+
+    await expect(client.loadHandlers({ components: [simpleButton] })).resolves.toEqual({
+      commands: 0,
+      components: 1,
+      events: 0,
+    });
+  });
+
+  it("throws the first ArcscordError on a loading failure", async () => {
+    const client = new ArcClient("token", { intents: [] });
+
+    await expect(
+      client.loadHandlers({ components: duplicateRouteButtons() }),
+    ).rejects.toBeInstanceOf(ArcscordError);
   });
 });

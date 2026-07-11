@@ -39,10 +39,19 @@ const client = new ArcClient(process.env.TOKEN as string, {
   applicationId: process.env.APPLICATION_ID as string,
 });
 
-client.loadHandlers(handlers);
-
 client.on("clientReady", async () => {
   client.logger.info(`The client is ready!`);
 });
 
-void client.login();
+async function start(): Promise<void> {
+  try {
+    await client.loadHandlers(handlers);
+    await client.login();
+  }
+  catch (err) {
+    client.logger.fatalError(err);
+    process.exitCode = 1;
+  }
+}
+
+void start();

@@ -194,16 +194,32 @@ await client.waitReady({
 
 The previous numeric form remains supported: `waitReady(100)` sets `checkInterval` to 100 ms and keeps the globally configured timeout.
 
-### `loadHandlers(handlers)`
+Loading comes in two tiers with deliberately different error handling:
 
-Convenience method. Loads commands, components, and events in a single call.
+- The **per-category loaders** (`loadCommands`, `loadComponents`, `loadEvents`) are `async` and return an Arcscord [`Result`](./result-handler.md) — `[error, count]`. On failure the first tuple item is an [`ArcscordError`](../reference/error-codes.md) whose `code` identifies the problem. They never throw for expected failures such as a duplicate route or an unmet intent requirement — you inspect the outcome.
+- The **convenience `loadHandlers`** is a bootstrap helper that fails fast: it **throws** the first `ArcscordError` instead of returning it, so a broken startup crashes loudly rather than continuing in a half-wired state. Reach for the per-category loaders when you want to handle the failure yourself.
+
+### `loadHandlers(handlers, logs?)`
+
+Convenience method. Loads events, then components, then commands in a single call. **Throws** the first `ArcscordError` on failure; returns a `HandlersLoadReport` (`{ commands, components, events }` load counts) on success.
 
 ```ts
-await client.loadHandlers({
+// Fail-fast: an unhandled throw crashes the process at startup.
+const report = await client.loadHandlers({
   commands: [avatarCommand, pingCommand],
   components: [simpleButton, profileModal],
   events: [messageEvent],
 });
+// report -> { commands: 2, components: 2, events: 1 }
+
+// Or handle it explicitly:
+try {
+  await client.loadHandlers(handlers);
+}
+catch (err) {
+  client.logger.fatalError(err);
+  process.exit(1);
+}
 ```
 
 If `applicationId` is set, commands are registered immediately over REST without waiting for `clientReady`. Otherwise, `loadHandlers` waits for the client to be ready before pushing commands.
@@ -212,7 +228,7 @@ If `applicationId` is set, commands are registered immediately over REST without
 
 ### `loadCommands(commands, group?, guild?)`
 
-Registers commands with Discord and loads them into the command manager. Returns `Result<true, ArcscordError>`; inspect `error.code` to distinguish validation, application, and registration failures.
+Registers commands with Discord and loads them into the command manager. Returns `Result<number, ArcscordError>` (the count of loaded commands); inspect `error.code` to distinguish validation, application, and registration failures.
 
 ```ts
 const [err] = await client.loadCommands([pingCommand, avatarCommand]);
@@ -230,21 +246,25 @@ The optional `group` parameter is an internal label for the command set (used by
 
 ### `loadComponents(components)`
 
-Loads component handlers into the component manager. Returns the number of loaded handlers.
+Loads component handlers into the component manager. Returns `Result<number, ArcscordError>` (the count of loaded components). Fails with `COMPONENT_ROUTE_DUPLICATE` or `COMPONENT_ROUTE_INVALID`.
 
 ```ts
-client.loadComponents([simpleButton, profileModal, roleMenu]);
+const [err, count] = await client.loadComponents([simpleButton, profileModal, roleMenu]);
 ```
+
+Use `client.componentManager.unloadComponent(route)` to remove a previously loaded component; it returns `true` when a component was removed.
 
 ---
 
 ### `loadEvents(events)`
 
-Registers event handlers and attaches discord.js listeners. Returns the number of loaded handlers.
+Registers event handlers and attaches discord.js listeners. Returns `Result<number, ArcscordError>` (the count of loaded events). Fails with `EVENT_HANDLER_DUPLICATE` or `EVENT_INTENT_MISSING`.
 
 ```ts
-await client.loadEvents([messageEvent, inviteEvent]);
+const [err, count] = await client.loadEvents([messageEvent, inviteEvent]);
 ```
+
+Use `client.eventManager.unloadEvent(name)` to remove a previously loaded event.
 
 ---
 

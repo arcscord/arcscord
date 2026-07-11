@@ -36,6 +36,7 @@ import {
   createMockUser,
   createMockUserSelectMenuInteraction,
 } from "#/testing";
+import { ArcscordError, arcscordErrorCodes } from "#/utils";
 import { ComponentManager } from "./component_manager.class";
 
 type ExposedHandleInteraction = {
@@ -472,7 +473,7 @@ describe("component manager pipeline", () => {
       expect(manager.logger.logError).toHaveBeenCalledOnce();
     });
 
-    it("throws when loading two components with the exact same route", () => {
+    it("returns a failure when loading two components with the exact same route", () => {
       const { manager } = createManagerWithClient();
 
       const buildHandler = (): ReturnType<typeof createButton> => createButton({
@@ -481,8 +482,51 @@ describe("component manager pipeline", () => {
         run: async ctx => ctx.ok(),
       });
 
-      manager.loadComponent(buildHandler());
-      expect(() => manager.loadComponent(buildHandler())).toThrow();
+      const [firstErr] = manager.loadComponent(buildHandler());
+      expect(firstErr).toBeNull();
+
+      const [err] = manager.loadComponent(buildHandler());
+      expect(err).toBeInstanceOf(ArcscordError);
+      expect(err?.code).toBe(arcscordErrorCodes.ComponentRouteDuplicate);
+    });
+
+    it("unloads a loaded component by route", async () => {
+      const { manager } = createManagerWithClient();
+
+      const run = vi.fn(async ctx => ctx.ok());
+      const handler = createButton({
+        route: "unload-me",
+        build: id => button({ customId: id(), label: "A", style: "primary" }),
+        run,
+      });
+
+      const [err] = manager.loadComponent(handler);
+      expect(err).toBeNull();
+      expect(manager.components[ComponentType.Button].has("unload-me")).toBe(true);
+
+      expect(manager.unloadComponent("unload-me")).toBe(true);
+      expect(manager.components[ComponentType.Button].has("unload-me")).toBe(false);
+      expect(manager.unloadComponent("unload-me")).toBe(false);
+
+      await dispatch(manager, createMockButtonInteraction({ customId: "unload-me" }));
+      expect(run).not.toHaveBeenCalled();
+    });
+
+    it("returns a failure instead of throwing on an invalid route", () => {
+      const { manager } = createManagerWithClient();
+
+      // Parameterized route so it is compiled lazily at load time (a static
+      // invalid route would already throw when the handler is created). `build`
+      // is never invoked here — only loading is exercised.
+      const handler = createButton({
+        route: "bad/{1invalid}",
+        build: id => button({ customId: id(), label: "A", style: "primary" }),
+        run: ctx => ctx.ok(),
+      });
+
+      const [err] = manager.loadComponent(handler);
+      expect(err).toBeInstanceOf(ArcscordError);
+      expect(err?.code).toBe(arcscordErrorCodes.ComponentRouteInvalid);
     });
 
     it("applies multipleMatches diagnostics when more than one loaded route matches the customId", async () => {

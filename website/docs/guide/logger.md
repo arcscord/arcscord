@@ -115,7 +115,7 @@ type LoggerInterface = {
 };
 ```
 
-**`fatal`/`fatalError` only log — they never halt execution on their own.** A logger's job is to log, not to decide whether the process should exit. Code that needs to stop after a fatal error has to throw or exit right after calling it, the same way `ArcClient` does internally:
+**`fatal`/`fatalError` only log — they never halt execution on their own.** A logger's job is to log, not to decide whether the process should exit. Code that needs to stop after a fatal error has to throw or exit right after calling it:
 
 ```ts
 this.logger.fatalError(err);

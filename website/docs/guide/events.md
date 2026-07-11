@@ -6,7 +6,7 @@ sidebar_position: 5
 
 Events are declared with `createEvent` and map to Discord.js event names.
 Arcscord does not add gateway intents automatically. Instead, the event manager
-can warn or throw when a loaded event is not covered by the client intents.
+can warn or fail loading when a loaded event is not covered by the client intents.
 Discord documents gateway intents in the [Gateway intents reference](https://discord.com/developers/docs/events/gateway#gateway-intents), and discord.js documents client setup in its [guide](https://discordjs.guide/).
 
 ```ts
@@ -92,11 +92,16 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadEvents([messageEvent, readyEvent]);
 ```
 
-`loadEvents` returns the number of loaded handlers:
+`loadEvents` is async and returns a [`Result`](./result-handler.md) with the number of loaded handlers. Duplicate handler names and unmet intent requirements surface as an `ArcscordError` failure (`EVENT_HANDLER_DUPLICATE` / `EVENT_INTENT_MISSING`) instead of throwing:
 
 ```ts
-const loadedEvents = await client.loadEvents([messageEvent, readyEvent]);
-client.logger.info(`Loaded ${loadedEvents} events`);
+const [err, loadedEvents] = await client.loadEvents([messageEvent, readyEvent]);
+if (err) {
+  client.logger.fatalError(err);
+}
+else {
+  client.logger.info(`Loaded ${loadedEvents} events`);
+}
 ```
 
 For applications that keep commands, components, and events in one generated
@@ -138,7 +143,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
   managers: {
     event: {
       intentCheck: {
-        missing: "throw",
+        missing: "error",
         partialCoverage: "warn",
         coverage: {
           guild: true,

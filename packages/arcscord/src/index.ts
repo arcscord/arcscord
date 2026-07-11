@@ -3,6 +3,7 @@ export type {
   ArcClientLoggerOptions,
   ArcClientOptions,
   HandlersList,
+  HandlersLoadReport,
   ManagersOptions,
   MessageOptions,
   WaitReadyOptions,

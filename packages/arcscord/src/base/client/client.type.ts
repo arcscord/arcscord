@@ -192,3 +192,21 @@ export type HandlersList = {
    */
   events?: AnyEventHandler[];
 };
+
+/**
+ * Number of handlers loaded per category by {@link ArcClient.loadHandlers}.
+ */
+export type HandlersLoadReport = {
+  /**
+   * Number of commands loaded.
+   */
+  commands: number;
+  /**
+   * Number of components loaded.
+   */
+  components: number;
+  /**
+   * Number of events loaded.
+   */
+  events: number;
+};

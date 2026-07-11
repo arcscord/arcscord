@@ -1,3 +1,4 @@
+import type { Result } from "@arcscord/error";
 import type { ClientEvents, GatewayIntentsString } from "discord.js";
 import type { ArcClient } from "#/base/client/client.class";
 import type { AnyEventHandler, EventHandler, EventHandlerForRegistry } from "#/base/event/event.type";
@@ -9,6 +10,7 @@ import type {
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
 } from "./event_manager.type";
+import { error, ok } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
@@ -44,36 +46,48 @@ export class EventManager extends BaseManager {
   /**
    * Loads and registers a list of event handlers.
    *
+   * Loading stops at the first duplicate handler or unmet intent requirement and
+   * returns the failure; every handler before it stays loaded.
+   *
    * @param events - An array of event handlers to load.
-   * @returns The number of loaded handlers.
-   * @throws {@link ArcscordError} when a handler name is duplicated or an intent
-   * check is configured to throw.
+   * @returns The number of loaded handlers, or the loading failure.
    */
-  async loadEvents(events: AnyEventHandler[]): Promise<number> {
+  async loadEvents(
+    events: AnyEventHandler[],
+  ): Promise<Result<number, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
+    let loaded = 0;
     for (const event of events) {
-      await this.loadAnyEvent(event);
+      const [err] = await this.loadAnyEvent(event);
+      if (err) {
+        return error(err);
+      }
+      loaded++;
     }
 
-    return events.length;
+    return ok(loaded);
   }
 
   /**
    * Loads and registers a single event handler.
    *
    * @param event - The event handler to load.
-   * @throws {@link ArcscordError} when the handler name is duplicated or an intent
-   * check is configured to throw.
+   * @returns `ok(true)` when loaded, or the duplication/intent failure.
    */
-  async loadEvent<E extends keyof ClientEvents>(event: EventHandler<E>): Promise<void> {
+  async loadEvent<E extends keyof ClientEvents>(
+    event: EventHandler<E>,
+  ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     if (this.events.has(event.name)) {
-      throw new ArcscordError({
+      return error(new ArcscordError({
         code: arcscordErrorCodes.EventHandlerDuplicate,
         message: `duplicate event handler name "${event.name}"`,
         metadata: { handlerName: event.name, eventName: event.event },
-      });
+      }));
     }
 
-    this.checkIntents(event);
+    const [intentErr] = this.checkIntents(event);
+    if (intentErr) {
+      return error(intentErr);
+    }
 
     this.trace(`bind event ${event.event} for ${event.name} handler !`);
 
@@ -106,6 +120,8 @@ export class EventManager extends BaseManager {
     else {
       this.client.on(event.event, listener);
     }
+
+    return ok(true);
   }
 
   /**
@@ -205,14 +221,16 @@ export class EventManager extends BaseManager {
     };
   }
 
-  private checkIntents<E extends keyof ClientEvents>(event: EventHandler<E>): void {
+  private checkIntents<E extends keyof ClientEvents>(
+    event: EventHandler<E>,
+  ): Result<true, ArcscordError<"EVENT_INTENT_MISSING">> {
     if (this.options.intentCheck === false || this.options.intentCheck.ignore.includes(event.event)) {
-      return;
+      return ok(true);
     }
 
     const issue = this.resolveIntentIssue(event);
     if (!issue) {
-      return;
+      return ok(true);
     }
 
     const action = issue.type === "missing"
@@ -220,15 +238,15 @@ export class EventManager extends BaseManager {
       : this.options.intentCheck.partialCoverage;
 
     if (action === "off") {
-      return;
+      return ok(true);
     }
 
     if (action === "warn") {
       this.logger.warn(issue.message);
-      return;
+      return ok(true);
     }
 
-    throw new ArcscordError({
+    return error(new ArcscordError({
       code: arcscordErrorCodes.EventIntentMissing,
       message: issue.message,
       metadata: {
@@ -237,7 +255,7 @@ export class EventManager extends BaseManager {
         missingIntents: issue.missing,
         presentIntents: issue.present,
       },
-    });
+    }));
   }
 
   private resolveIntentIssue<E extends keyof ClientEvents>(event: EventHandler<E>): EventIntentCheckIssue | null {
@@ -318,8 +336,10 @@ export class EventManager extends BaseManager {
     return null;
   }
 
-  private async loadAnyEvent(event: AnyEventHandler): Promise<void> {
-    await this.loadEvent(event as unknown as EventHandler<keyof ClientEvents>);
+  private async loadAnyEvent(
+    event: AnyEventHandler,
+  ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
+    return this.loadEvent(event as unknown as EventHandler<keyof ClientEvents>);
   }
 
   private getRequirementIntents(

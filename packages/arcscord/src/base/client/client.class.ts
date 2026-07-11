@@ -1,6 +1,6 @@
 import type { Result } from "@arcscord/error";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString } from "discord.js";
-import type { ArcClientOptions, BaseMessageContext, HandlersList, MessageOptions, WaitReadyOptions } from "#/base/client/client.type";
+import type { ArcClientOptions, BaseMessageContext, HandlersList, HandlersLoadReport, MessageOptions, WaitReadyOptions } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { AnyEventHandler } from "#/base/event/event.type";
@@ -224,7 +224,7 @@ export class ArcClient extends DJSClient {
     commands: Command[],
     group = "default",
     guild?: string,
-  ): Promise<Result<true, ArcscordError>> {
+  ): Promise<Result<number, ArcscordError>> {
     await this.localeManager.ready;
     const [err, data] = this.commandManager.loadCommands(commands, group);
     if (err) {
@@ -239,16 +239,18 @@ export class ArcClient extends DJSClient {
     }
 
     this.commandManager.resolveCommands(commands, data2);
-    return ok(true);
+    return ok(commands.length);
   }
 
   /**
    * Loads and registers events
    *
    * @param events - The events to load
-   * @returns The number of loaded event handlers.
+   * @returns The number of loaded event handlers, or the loading failure.
    */
-  loadEvents(events: AnyEventHandler[]): Promise<number> {
+  loadEvents(
+    events: AnyEventHandler[],
+  ): Promise<Result<number, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     return this.eventManager.loadEvents(events);
   }
 
@@ -256,8 +258,11 @@ export class ArcClient extends DJSClient {
    * Loads and registers components
    *
    * @param components - The components to load
+   * @returns The number of loaded components, or the loading failure.
    */
-  loadComponents(components: ComponentHandler[]): number {
+  async loadComponents(
+    components: ComponentHandler[],
+  ): Promise<Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">>> {
     return this.componentManager.loadComponents(components);
   }
 
@@ -310,35 +315,57 @@ export class ArcClient extends DJSClient {
   }
 
   /**
-   * Loads and registers handlers
+   * Loads and registers handlers in one convenience call.
+   *
+   * Events, then components, then commands are loaded in order. Unlike the
+   * per-category loaders — which return a {@link Result} — this bootstrap helper
+   * fails fast: it **throws** the first {@link ArcscordError} so a broken startup
+   * crashes loudly instead of silently continuing. Use the granular
+   * `loadCommands` / `loadComponents` / `loadEvents` when you want to inspect the
+   * failure instead.
    *
    * @param handlers - The handlers to load
+   * @param logs - Whether to emit an info log per loaded category
+   * @returns The per-category load counts.
+   * @throws {@link ArcscordError} on the first loading failure.
    */
-  async loadHandlers(handlers: HandlersList, logs = false): Promise<void> {
+  async loadHandlers(handlers: HandlersList, logs = false): Promise<HandlersLoadReport> {
+    const report: HandlersLoadReport = { commands: 0, components: 0, events: 0 };
+
     if (handlers.events && handlers.events.length > 0) {
-      await this.eventManager.loadEvents(handlers.events);
+      const [err, count] = await this.loadEvents(handlers.events);
+      if (err) {
+        throw err;
+      }
+      report.events = count;
       if (logs) {
-        this.eventManager.logger.info(`Loaded ${handlers.events.length} events`);
+        this.eventManager.logger.info(`Loaded ${count} events`);
       }
     }
     if (handlers.components && handlers.components.length > 0) {
-      this.componentManager.loadComponents(handlers.components);
+      const [err, count] = await this.loadComponents(handlers.components);
+      if (err) {
+        throw err;
+      }
+      report.components = count;
       if (logs) {
-        this.componentManager.logger.info(`Loaded ${handlers.components.length} components`);
+        this.componentManager.logger.info(`Loaded ${count} components`);
       }
     }
     if (handlers.commands && handlers.commands.length > 0) {
       if (!this.ready && !this.arcOptions.applicationId) {
         await this.waitReady();
       }
-      const [err] = await this.loadCommands(handlers.commands);
+      const [err, count] = await this.loadCommands(handlers.commands);
       if (err) {
-        this.logger.fatalError(err);
         throw err;
       }
+      report.commands = count;
       if (logs) {
-        this.commandManager.logger.info(`Loaded ${handlers.commands.length} commands`);
+        this.commandManager.logger.info(`Loaded ${count} commands`);
       }
     }
+
+    return report;
   }
 }

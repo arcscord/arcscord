@@ -6,7 +6,7 @@ import { ok } from "@arcscord/error";
 import { IntentsBitField } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { createEvent } from "../../base/event";
-import { ArcscordError } from "../../utils";
+import { ArcscordError, arcscordErrorCodes } from "../../utils";
 import { EventManager } from "./event_manager.class";
 import { intentsMap } from "./intents_map";
 
@@ -108,7 +108,7 @@ describe("event manager", () => {
       run,
     });
 
-    await expect(manager.loadEvents([event])).resolves.toBe(1);
+    await expect(manager.loadEvents([event])).resolves.toEqual([null, 1]);
     await client.emitMock("messageCreate", { id: "message_1" });
 
     expect(client.on).toHaveBeenCalledWith("messageCreate", expect.any(Function));
@@ -155,7 +155,7 @@ describe("event manager", () => {
     expect((manager as unknown as { events: Map<string, unknown> }).events.has("messageCreate")).toBe(false);
   });
 
-  it("throws when event handler names are duplicated", async () => {
+  it("returns a failure when event handler names are duplicated", async () => {
     const { manager } = createMockClient(["GuildMessages"]);
     const first = createEvent({
       event: "messageCreate",
@@ -170,7 +170,9 @@ describe("event manager", () => {
 
     await manager.loadEvent(first);
 
-    await expect(manager.loadEvent(second)).rejects.toThrow(ArcscordError);
+    const [err] = await manager.loadEvent(second);
+    expect(err).toBeInstanceOf(ArcscordError);
+    expect(err?.code).toBe(arcscordErrorCodes.EventHandlerDuplicate);
   });
 
   it("runs before ready by default", async () => {
@@ -360,30 +362,32 @@ describe("event manager", () => {
     expect(manager.logger.warn).toHaveBeenCalledWith(expect.stringContaining("Guilds"));
   });
 
-  it("throws when a missing intent check is strict", async () => {
+  it("returns a failure when a missing intent check is strict", async () => {
     const { manager } = createMockClient([], {
       intentCheck: {
-        missing: "throw",
+        missing: "error",
       },
     });
 
-    await expect(manager.loadEvent(createEvent({
+    const [err] = await manager.loadEvent(createEvent({
       event: "guildCreate",
       run: () => ok(true),
-    }))).rejects.toThrow(ArcscordError);
+    }));
+    expect(err).toBeInstanceOf(ArcscordError);
+    expect(err?.code).toBe(arcscordErrorCodes.EventIntentMissing);
   });
 
   it("accepts oneOf requirements when one intent is present", async () => {
     const { manager } = createMockClient(["GuildMessages"], {
       intentCheck: {
-        missing: "throw",
+        missing: "error",
       },
     });
 
     await expect(manager.loadEvent(createEvent({
       event: "messageCreate",
       run: () => ok(true),
-    }))).resolves.toBeUndefined();
+    }))).resolves.toEqual([null, true]);
   });
 
   it("warns about partial coverage when enabled", async () => {
@@ -443,7 +447,7 @@ describe("event manager", () => {
   it("still checks missing against every possible oneOf intent", async () => {
     const { manager } = createMockClient([], {
       intentCheck: {
-        missing: "throw",
+        missing: "error",
         coverage: {
           guild: true,
           dm: false,
@@ -451,16 +455,18 @@ describe("event manager", () => {
       },
     });
 
-    await expect(manager.loadEvent(createEvent({
+    const [err] = await manager.loadEvent(createEvent({
       event: "messageCreate",
       run: () => ok(true),
-    }))).rejects.toThrow(ArcscordError);
+    }));
+    expect(err).toBeInstanceOf(ArcscordError);
+    expect(err?.code).toBe(arcscordErrorCodes.EventIntentMissing);
   });
 
   it("ignores configured events during intent checks", async () => {
     const { manager } = createMockClient([], {
       intentCheck: {
-        missing: "throw",
+        missing: "error",
         ignore: ["guildCreate"],
       },
     });
@@ -468,7 +474,7 @@ describe("event manager", () => {
     await expect(manager.loadEvent(createEvent({
       event: "guildCreate",
       run: () => ok(true),
-    }))).resolves.toBeUndefined();
+    }))).resolves.toEqual([null, true]);
   });
 
   it("keeps the intent map aligned with discord.js ClientEvents", () => {

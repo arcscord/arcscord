@@ -35,8 +35,8 @@ export type EventResultHandler = (
   infos: EventResultHandlerInfos,
 ) => void | Promise<void>;
 
-/** What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`, or `throw`. */
-export type EventIntentCheckAction = "off" | "warn" | "throw";
+/** What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`, or `error` (return a loading failure). */
+export type EventIntentCheckAction = "off" | "warn" | "error";
 
 /** Per-{@link EventIntentCoverageTarget} toggle of the coverage expected by the intent check. */
 export type EventIntentCheckCoverage = Partial<Record<EventIntentCoverageTarget, boolean>>;

@@ -23,8 +23,10 @@ export const simpleButton = createButton({
 Load it with the client:
 
 ```ts
-client.loadComponents([simpleButton]);
+await client.loadComponents([simpleButton]);
 ```
+
+See [Loading components](#loading-components) for the full contract.
 
 Then use `build()` anywhere you send a message:
 
@@ -77,6 +79,61 @@ createButton({
 ```
 
 `preReply: true` defers a public reply. `preReply: "ephemeral"` defers an ephemeral one.
+
+## Loading components
+
+Use `client.loadComponents` when you already have an array of component handlers:
+
+```ts
+import { ArcClient } from "arcscord";
+import { profileModal, roleMenu, simpleButton } from "./components";
+
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+});
+
+await client.loadComponents([simpleButton, profileModal, roleMenu]);
+```
+
+`loadComponents` is async and returns a [`Result`](./result-handler.md) with the number of loaded handlers. A duplicate or invalid route surfaces as an `ArcscordError` failure (`COMPONENT_ROUTE_DUPLICATE` / `COMPONENT_ROUTE_INVALID`) instead of throwing:
+
+```ts
+const [err, count] = await client.loadComponents([simpleButton, profileModal]);
+if (err) {
+  client.logger.fatalError(err);
+}
+else {
+  client.logger.info(`Loaded ${count} components`);
+}
+```
+
+For applications that keep commands, components, and events in one generated
+handler list, use `client.loadHandlers` — it loads events first, then components,
+then commands:
+
+```ts
+import handlers from "./handlers";
+
+await client.loadHandlers(handlers, true /* info logs */);
+```
+
+You can also access the manager directly:
+
+```ts
+client.componentManager.loadComponent(simpleButton);
+client.componentManager.loadComponents([simpleButton, profileModal]);
+```
+
+To remove a loaded component, unload it by its registered route:
+
+```ts
+client.componentManager.unloadComponent("simple_button");
+```
+
+`unloadComponent` deletes the handler from the component manager and returns
+`true` when a component was found. Pass the same route string used at
+registration (for parameterized routes, the `{param}` pattern, not a runtime
+custom ID).
 
 ## Detailed pages
 
