@@ -19,6 +19,8 @@ describe("isResult function", () => {
     expect(isResult([1, 2, 3])).toBe(false);
     // two non-null slots cannot be a Result (error slot is never nullish)
     expect(isResult([1, 2])).toBe(false);
+    expect(isResult([undefined, null])).toBe(false);
+    expect(isResult(["error", "value"])).toBe(false);
   });
 });
 
