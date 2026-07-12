@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       arcscord:
-        specifier: 1.0.0-next.1
-        version: 1.0.0-next.1(typescript@6.0.3)
+        specifier: 1.0.0-next.3
+        version: 1.0.0-next.3(discord.js@14.26.4)(typescript@6.0.3)
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.11.1
@@ -42,11 +42,8 @@ importers:
 
 packages:
 
-  '@arcscord/better-error@1.0.5':
-    resolution: {integrity: sha512-5hU+a5DhVRtZUFi1r1q/TwP4up/Vqdnoa26SkYOoTJRMoHTsFL/Tw0+QiZiNSh8u1owHulgKFemK+FnJpro/vw==}
-
-  '@arcscord/error@2.0.2':
-    resolution: {integrity: sha512-BGObOPlghBOjAGcN23JGJvsKk6oGQQ+jGN5R6TKsSO/KzZR6p9tEM23oshlRq3Zcp6OGvimgUcWJOZ3M9tkOvA==}
+  '@arcscord/error@3.0.0':
+    resolution: {integrity: sha512-RQBy2kDP6H6uCUYMvi85M1P9xtDUaSWWcS2uYXhCiVHyLJNpXMyUj/5kDM4DhwpoiJoEHa8U63jbi1UevWLdnA==}
 
   '@discordjs/builders@1.14.1':
     resolution: {integrity: sha512-gSKkhXLqs96TCzk66VZuHHl8z2bQMJFGwrXC0f33ngK+FLNau4hU1PYny3DNJfNdSH+gVMzE85/d5FQ2BpcNwQ==}
@@ -404,10 +401,11 @@ packages:
   ajv@6.15.0:
     resolution: {integrity: sha512-fgFx7Hfoq60ytK2c7DhnF8jIvzYgOMxfugjLOSMHjLIPgenqa7S7oaagATUq99mV6IYvN2tRmC0wnTYX6iPbMw==}
 
-  arcscord@1.0.0-next.1:
-    resolution: {integrity: sha512-Rx9r/Ch6sk2/6KQS9KRoibR9pz72TcA1W0LoXpeJXGFSmVZsXqXMa949pDn9hjsGsFCq0ByWdZQ6+x1fn9xLCg==}
+  arcscord@1.0.0-next.3:
+    resolution: {integrity: sha512-xRwT7db7iyYF5X4d0tanTrl9cCkAZI4N+Ds8A+ntGuNkPLLxhXXBLnYoq5lPvJ+TIw+bip+N172ab3efFPOtMA==}
     peerDependencies:
-      typescript: '>=5.0.0'
+      discord.js: '>=14.26.4'
+      typescript: '>=5.4.0'
 
   balanced-match@4.0.4:
     resolution: {integrity: sha512-BLrgEcRTwX2o6gGxGOCNyMvGSp35YofuYzw9h1IMTRmKqttAZZVU67bdb9Pr2vUHA8+j3i2tJfjO6C6+4myGTA==}
@@ -439,9 +437,6 @@ packages:
   cross-spawn@7.0.6:
     resolution: {integrity: sha512-uV2QOWP2nWzsy2aMp8aRibhi9dlzF5Hgh5SHaB9OiTGEyDTiJJyx0uy51QXdyWbtAHNua4XJzUKca3OzKUd3vA==}
     engines: {node: '>= 8'}
-
-  dayjs@1.11.21:
-    resolution: {integrity: sha512-98IT+HOahAisibz/yjKbzuOBwYcjJ7BCLPzARyHiyEBmRz4fatF+KPJszEHXsGYjUG234aH/cOjW1wwTbKUZlA==}
 
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
@@ -767,9 +762,6 @@ packages:
     resolution: {integrity: sha512-ujeqbceABgwMZxEJnk2HDY2DlnUZ+9oEcb1KzTVfYHio0UE6dG71n60d8D2I4qNvleWrrXpmjpt7vZeF1LnMZQ==}
     engines: {node: '>=6'}
 
-  tintify@1.1.0:
-    resolution: {integrity: sha512-gUFP+yz5UefQuGif27Mt3ME0QPz9fOSx32Zu69IRZa3PbWh73gVagWk/6V5NDjOPTBIo59cWwpZbaLQr5NRfpA==}
-
   tinyglobby@0.2.17:
     resolution: {integrity: sha512-wXR/dYpcqKmfWpEdZjiKJOwCNFndD0DMnrW/cYjVGttEkBfVgcLFHoNrlj47mjOVic9yyNu65alsgF4NQyTa2g==}
     engines: {node: '>=12.0.0'}
@@ -856,9 +848,7 @@ packages:
 
 snapshots:
 
-  '@arcscord/better-error@1.0.5': {}
-
-  '@arcscord/error@2.0.2': {}
+  '@arcscord/error@3.0.0': {}
 
   '@discordjs/builders@1.14.1':
     dependencies:
@@ -1176,19 +1166,13 @@ snapshots:
       json-schema-traverse: 0.4.1
       uri-js: 4.4.1
 
-  arcscord@1.0.0-next.1(typescript@6.0.3):
+  arcscord@1.0.0-next.3(discord.js@14.26.4)(typescript@6.0.3):
     dependencies:
-      '@arcscord/better-error': 1.0.5
-      '@arcscord/error': 2.0.2
-      dayjs: 1.11.21
+      '@arcscord/error': 3.0.0
       discord-api-types: 0.38.49
       discord.js: 14.26.4
       i18next: 26.3.5(typescript@6.0.3)
-      tintify: 1.1.0
       typescript: 6.0.3
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   balanced-match@4.0.4: {}
 
@@ -1225,8 +1209,6 @@ snapshots:
       path-key: 3.1.1
       shebang-command: 2.0.0
       which: 2.0.2
-
-  dayjs@1.11.21: {}
 
   debug@4.4.3:
     dependencies:
@@ -1574,8 +1556,6 @@ snapshots:
       fs-constants: 1.0.0
       inherits: 2.0.4
       readable-stream: 3.6.2
-
-  tintify@1.1.0: {}
 
   tinyglobby@0.2.17:
     dependencies:

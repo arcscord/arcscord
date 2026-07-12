@@ -1,4 +1,4 @@
-import { actionRow, ComponentError, container, createModal, error, modalRadioGroup, modalTextInput, separator, v2Message } from "arcscord";
+import { actionRow, container, createModal, error, modalRadioGroup, modalTextInput, separator, v2Message } from "arcscord";
 import { ChannelType } from "discord.js";
 import { prisma } from "#/utils/prisma";
 import { claimTicketButton } from "./claim_ticket";
@@ -85,10 +85,10 @@ export const ticketOpenModal = createModal({
     if (!channel || channel.type !== ChannelType.GuildText) {
       // Returning an `error(...)` result routes to the component result handler,
       // which logs it and shows the user a generic error message.
-      return error(new ComponentError({
-        interaction: ctx.interaction,
-        message: `Get a open modal in a wrong channel, type (null = no channel): ${channel?.type || null}`,
-      }));
+      return error({
+        _tag: "InvalidTicketChannel",
+        channelType: channel?.type ?? null,
+      } as const);
     }
 
     // Model each ticket as a private thread off the dashboard channel.

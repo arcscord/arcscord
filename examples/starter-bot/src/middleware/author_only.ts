@@ -1,5 +1,5 @@
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
-import { ComponentError, ComponentMiddleware } from "arcscord";
+import { ComponentMiddleware } from "arcscord";
 import { MessageFlags } from "discord.js";
 
 /**
@@ -20,19 +20,13 @@ export class AuthorOnlyMiddleware extends ComponentMiddleware {
     authorOnly: true;
   }> {
     if (!ctx.isMessageComponentContext()) {
-      return this.error(new ComponentError({
-        interaction: ctx.interaction,
-        message: "Middleware `authorOnly` can only be used on message component interactions.",
-      }));
+      return this.fail({ _tag: "AuthorOnlyRequiresMessageComponent" } as const);
     }
 
     const interactionMetadata = ctx.message?.interactionMetadata;
 
     if (!interactionMetadata) {
-      return this.error(new ComponentError({
-        interaction: ctx.interaction,
-        message: "Middleware `authorOnly` can only be used on message component interactions that are replies to a interaction, failed to find meta",
-      }));
+      return this.fail({ _tag: "AuthorOnlyMetadataMissing" } as const);
     }
 
     if (interactionMetadata.user.id !== ctx.user.id) {
