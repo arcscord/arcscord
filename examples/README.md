@@ -34,5 +34,12 @@ pnpm install
 pnpm dev
 ```
 
+> **Version note.** On the `main` branch the examples pin the **latest
+> published** `arcscord` version. For an example that matches a **specific**
+> framework version, check out the branch for that version before installing —
+> its examples pin the matching `arcscord` release. (CI itself typechecks and
+> lints every example against the current repo build via a packed-tarball
+> override, so example breakage from framework changes is caught pre-release.)
+
 See each example's own README for its environment variables, required gateway
 intents, and database setup.

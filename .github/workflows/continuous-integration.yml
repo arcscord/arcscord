@@ -15,6 +15,8 @@ jobs:
         uses: actions/checkout@v7
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
       - name: Add problem matchers
         run: echo "::add-matcher::.github/problemMatchers/eslint.json"
       - name: Use Node.js v24.11.0
@@ -38,8 +40,6 @@ jobs:
             echo "| --- | --- | --- |"
             echo "| Root workspace | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Root workspace | \`pnpm lint --fix=false\` | \`${{ steps.lint.outcome }}\` |"
-            echo ""
-            echo "Example bots are checked by the separate **Example CI** workflow when their folders change."
           } >> "$GITHUB_STEP_SUMMARY"
 
   Building:
@@ -50,6 +50,8 @@ jobs:
         uses: actions/checkout@v7
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
       - name: Add problem matchers
         run: echo "::add-matcher::.github/problemMatchers/tsc.json"
       - name: Use Node.js v24.11.0
@@ -70,24 +72,14 @@ jobs:
         id: typecheck
         run: pnpm typecheck
         timeout-minutes: 10
-      - name: Pack arcscord for Bun compatibility
+      - name: Pack packages for compatibility & example consumers
         id: pack
-        run: pnpm bun:pack --skip-build
-      - name: Pack TypeScript compatibility packages
-        id: pack_typescript
-        run: pnpm typescript:pack --skip-build
-      - name: Upload arcscord package
+        run: pnpm pack:local --skip-build
+      - name: Upload compatibility packages
         uses: actions/upload-artifact@v7
         with:
-          name: arcscord-package
-          path: test/compat/bun-consumer/vendor/arcscord.tgz
-          if-no-files-found: error
-          retention-days: 1
-      - name: Upload TypeScript compatibility packages
-        uses: actions/upload-artifact@v7
-        with:
-          name: typescript-compatibility-packages
-          path: test/compat/typescript-consumer/vendor/*.tgz
+          name: compat-packages
+          path: test/compat/vendor/*.tgz
           if-no-files-found: error
           retention-days: 1
       - name: Write summary
@@ -101,8 +93,9 @@ jobs:
             echo "| Install | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Build | \`pnpm build\` | \`${{ steps.build.outcome }}\` |"
             echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
-            echo "| Pack | \`pnpm bun:pack --skip-build\` | \`${{ steps.pack.outcome }}\` |"
-            echo "| TypeScript pack | \`pnpm typescript:pack --skip-build\` | \`${{ steps.pack_typescript.outcome }}\` |"
+            echo "| Pack | \`pnpm pack:local --skip-build\` | \`${{ steps.pack.outcome }}\` |"
+            echo ""
+            echo "One build feeds the compatibility (\`bun\`/\`typescript\`/\`node\`) and example jobs via the \`compat-packages\` artifact."
           } >> "$GITHUB_STEP_SUMMARY"
 
   UnitTesting:
@@ -113,6 +106,8 @@ jobs:
         uses: actions/checkout@v7
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
       - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
@@ -143,13 +138,15 @@ jobs:
     steps:
       - name: Checkout Project
         uses: actions/checkout@v7
-      - name: Download arcscord package
+      - name: Download compatibility packages
         uses: actions/download-artifact@v8
         with:
-          name: typescript-compatibility-packages
+          name: compat-packages
           path: test/compat/typescript-consumer/vendor
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
       - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:
@@ -158,10 +155,44 @@ jobs:
           cache-dependency-path: test/compat/typescript-consumer/pnpm-lock.yaml
       - name: Install consumer dependencies
         working-directory: test/compat/typescript-consumer
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --no-frozen-lockfile
       - name: Typecheck packed declarations
         working-directory: test/compat/typescript-consumer
         run: pnpm typecheck
+
+  NodeCompatibility:
+    name: Node ESM & CJS Compatibility
+    needs: Building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Download compatibility packages
+        uses: actions/download-artifact@v8
+        with:
+          name: compat-packages
+          path: test/compat/node-consumer/vendor
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
+      - name: Use Node.js v24.11.0
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+          # node-consumer installs non-frozen and commits no lockfile; reuse the
+          # root lock's pnpm store cache (it already holds discord.js et al.).
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install consumer dependencies
+        working-directory: test/compat/node-consumer
+        run: pnpm install --no-frozen-lockfile
+      - name: Run ESM smoke (import)
+        working-directory: test/compat/node-consumer
+        run: pnpm smoke:esm
+      - name: Run CJS smoke (require)
+        working-directory: test/compat/node-consumer
+        run: pnpm smoke:cjs
 
   BunCompatibility:
     name: Bun Compatibility
@@ -170,10 +201,10 @@ jobs:
     steps:
       - name: Checkout Project
         uses: actions/checkout@v7
-      - name: Download arcscord package
+      - name: Download compatibility packages
         uses: actions/download-artifact@v8
         with:
-          name: arcscord-package
+          name: compat-packages
           path: test/compat/bun-consumer/vendor
       - name: Use Bun
         uses: oven-sh/setup-bun@v2
@@ -191,3 +222,89 @@ jobs:
       - name: Run unit tests
         working-directory: test/compat/bun-consumer
         run: bun test
+
+  Examples:
+    name: Example Bot (${{ matrix.name }})
+    needs: Building
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Add new example bots here.
+          - name: ticket_bot
+            path: examples/ticket_bot
+          - name: reminder-bot
+            path: examples/reminder-bot
+          - name: starter-bot
+            path: examples/starter-bot
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Download compatibility packages
+        uses: actions/download-artifact@v8
+        with:
+          name: compat-packages
+          path: vendor-artifact
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
+      - name: Add ESLint problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/eslint.json"
+      - name: Add TypeScript problem matcher
+        run: echo "::add-matcher::.github/problemMatchers/tsc.json"
+      - name: Use Node.js v24.11.0
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+          cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
+      - name: Point example at the local repo build
+        run: node scripts/link-local-arcscord.mjs ${{ matrix.path }} ${{ github.workspace }}/vendor-artifact
+      - name: Install example dependencies
+        id: install
+        working-directory: ${{ matrix.path }}
+        run: pnpm install --no-frozen-lockfile
+      - name: Generate database client
+        id: db_generate
+        working-directory: ${{ matrix.path }}
+        env:
+          DATABASE_URL: file:./prisma/dev.db
+        run: |
+          if node -e "process.exit(require('./package.json').scripts?.['db:generate'] ? 0 : 1)"; then
+            pnpm db:generate
+          else
+            echo "No db:generate script for this example."
+          fi
+      - name: Typecheck example
+        id: typecheck
+        working-directory: ${{ matrix.path }}
+        run: pnpm typecheck
+      - name: Normalize injected override for the linter
+        working-directory: ${{ matrix.path }}
+        # link-local-arcscord.mjs appends an `overrides:` block whose key order and
+        # scalar style don't match the example's YAML lint rules. Auto-fix just that
+        # file with the example's own eslint so `pnpm lint` (which lints every file,
+        # including this CI-only mutation) stays green regardless of the antfu
+        # config version resolved at install time.
+        run: pnpm exec eslint pnpm-workspace.yaml --fix
+      - name: Lint example
+        id: lint
+        working-directory: ${{ matrix.path }}
+        run: pnpm lint
+      - name: Write example summary
+        if: always()
+        run: |
+          {
+            echo "## Example bot: ${{ matrix.name }}"
+            echo ""
+            echo "Tested against the **local repo build** of arcscord (packed tarball override)."
+            echo ""
+            echo "| Check | Command | Result |"
+            echo "| --- | --- | --- |"
+            echo "| Install | \`pnpm install --no-frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Database client | \`pnpm db:generate\` when available | \`${{ steps.db_generate.outcome }}\` |"
+            echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
+            echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
+          } >> "$GITHUB_STEP_SUMMARY"

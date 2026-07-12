@@ -1,0 +1,20 @@
+{
+  "name": "@arcscord/node-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Node consumer that verifies the packed arcscord package loads via both ESM (import) and CJS (require)",
+  "scripts": {
+    "smoke:esm": "node smoke.mjs",
+    "smoke:cjs": "node smoke.cjs",
+    "smoke": "pnpm smoke:esm && pnpm smoke:cjs"
+  },
+  "dependencies": {
+    "arcscord": "file:vendor/arcscord.tgz",
+    "discord.js": "^14.26.4"
+  },
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "packageManager": "pnpm@11.8.0"
+}
