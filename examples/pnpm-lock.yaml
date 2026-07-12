@@ -9,8 +9,8 @@ importers:
   reminder-bot:
     dependencies:
       arcscord:
-        specifier: 1.0.0-next.3
-        version: 1.0.0-next.3(discord.js@14.26.5)(typescript@6.0.3)
+        specifier: ^1.0.1
+        version: 1.0.1(discord.js@14.26.5)(typescript@6.0.3)
       better-sqlite3:
         specifier: ^12.5.0
         version: 12.11.1
@@ -43,8 +43,8 @@ importers:
   starter-bot:
     dependencies:
       arcscord:
-        specifier: 1.0.0-next.3
-        version: 1.0.0-next.3(discord.js@14.26.5)(typescript@6.0.3)
+        specifier: ^1.0.1
+        version: 1.0.1(discord.js@14.26.5)(typescript@6.0.3)
       discord.js:
         specifier: ^14.26.4
         version: 14.26.5
@@ -68,8 +68,8 @@ importers:
   ticket_bot:
     dependencies:
       '@arcscord/middleware':
-        specifier: 1.0.0-next.2
-        version: 1.0.0-next.2(discord.js@14.26.5)(typescript@6.0.3)
+        specifier: ^1.0.0
+        version: 1.0.0(arcscord@1.0.1(discord.js@14.26.5)(typescript@6.0.3))(discord.js@14.26.5)(typescript@6.0.3)
       '@prisma/adapter-better-sqlite3':
         specifier: ^7.0.0
         version: 7.8.0
@@ -77,8 +77,8 @@ importers:
         specifier: ^7.0.0
         version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(better-sqlite3@12.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
       arcscord:
-        specifier: 1.0.0-next.3
-        version: 1.0.0-next.3(discord.js@14.26.5)(typescript@6.0.3)
+        specifier: ^1.0.1
+        version: 1.0.1(discord.js@14.26.5)(typescript@6.0.3)
       discord.js:
         specifier: ^14.26.4
         version: 14.26.5
@@ -177,14 +177,17 @@ packages:
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
 
-  '@arcscord/error@3.0.0':
-    resolution: {integrity: sha512-RQBy2kDP6H6uCUYMvi85M1P9xtDUaSWWcS2uYXhCiVHyLJNpXMyUj/5kDM4DhwpoiJoEHa8U63jbi1UevWLdnA==}
+  '@arcscord/error@4.0.0':
+    resolution: {integrity: sha512-hlfsxuJ6yARM/9f6b1rpipAh+e+F3t5EL/tH4GKarCKMaumJjcjUMDLiihzh9R30dpvzhhC3fsNcjgK0jDN7Nw==}
+    engines: {bun: '>=1.3.0', node: '>=24.11.0'}
 
-  '@arcscord/middleware@1.0.0-next.2':
-    resolution: {integrity: sha512-C0nBWKlPv90hz27tn7k10kv/lMiVYrlyx8a22B5fZFKp8QOdJvqrWdHVqiP9m1n3FHCE6HQz9MO9UGNzsd8XSQ==}
+  '@arcscord/middleware@1.0.0':
+    resolution: {integrity: sha512-5EIuGrhWayVsdlhgP7S/G1yQtqfe3WsjpTZeKuPRewiKygPh+m143fBBMklxdZAvgB2Vz+77Iq9P+ltX2xd6JA==}
+    engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
+      arcscord: ^1.0.1
       discord.js: ^14.26.4
-      typescript: '>=5.4.0'
+      typescript: ^5.4.0 || ^6.0.0
 
   '@babel/helper-string-parser@7.29.7':
     resolution: {integrity: sha512-Pb5ijPrZ89GDH8223L4UP8i6QApWxs04RbPQJTeWDV0/keR2E36MeKnyr6LYmUUvqRRI+Iv87SuF1W6ErINzYw==}
@@ -860,11 +863,12 @@ packages:
     resolution: {integrity: sha512-BJ8/l4R5LRE7hW9WdSuGYrLSHi2ynxeFpDFbH0K/CgNeY/tyhk+vO6TYxXC5r5CpUhNVX310xzPsN/H9lCdfOA==}
     engines: {node: '>=14'}
 
-  arcscord@1.0.0-next.3:
-    resolution: {integrity: sha512-xRwT7db7iyYF5X4d0tanTrl9cCkAZI4N+Ds8A+ntGuNkPLLxhXXBLnYoq5lPvJ+TIw+bip+N172ab3efFPOtMA==}
+  arcscord@1.0.1:
+    resolution: {integrity: sha512-nMV0hfylknkZX6nyKN2GsMPDqSDwgWoVx6xwUORvsgi87oMRpey+6IR66wA3LK+JPGHcvQy95T1ysPPyPhLvBg==}
+    engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
-      discord.js: '>=14.26.4'
-      typescript: '>=5.4.0'
+      discord.js: ^14.26.4
+      typescript: ^5.4.0 || ^6.0.0
 
   are-docs-informative@0.0.2:
     resolution: {integrity: sha512-ixiS0nLNNG5jNQzgZJNoUpBKdo9yTYZMGJ+QgT2jmjR7G7+QHRCc4v6LQ3NgE7EBJq+o0ams3waJwkrlBom8Ig==}
@@ -2232,11 +2236,11 @@ snapshots:
       package-manager-detector: 1.7.0
       tinyexec: 1.2.4
 
-  '@arcscord/error@3.0.0': {}
+  '@arcscord/error@4.0.0': {}
 
-  '@arcscord/middleware@1.0.0-next.2(discord.js@14.26.5)(typescript@6.0.3)':
+  '@arcscord/middleware@1.0.0(arcscord@1.0.1(discord.js@14.26.5)(typescript@6.0.3))(discord.js@14.26.5)(typescript@6.0.3)':
     dependencies:
-      arcscord: 1.0.0-next.3(discord.js@14.26.5)(typescript@6.0.3)
+      arcscord: 1.0.1(discord.js@14.26.5)(typescript@6.0.3)
       discord.js: 14.26.5
       typescript: 6.0.3
 
@@ -2908,9 +2912,9 @@ snapshots:
 
   ansis@4.3.1: {}
 
-  arcscord@1.0.0-next.3(discord.js@14.26.5)(typescript@6.0.3):
+  arcscord@1.0.1(discord.js@14.26.5)(typescript@6.0.3):
     dependencies:
-      '@arcscord/error': 3.0.0
+      '@arcscord/error': 4.0.0
       discord-api-types: 0.38.49
       discord.js: 14.26.5
       i18next: 26.3.6(typescript@6.0.3)
