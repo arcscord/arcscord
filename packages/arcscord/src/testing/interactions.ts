@@ -20,7 +20,7 @@ import type {
 } from "discord.js";
 import { ApplicationCommandType, ComponentType, InteractionContextType } from "discord-api-types/v10";
 import { PermissionsBitField } from "discord.js";
-import { vi } from "vitest";
+import { createMockFunction } from "./mock_function";
 
 // ─── Shared types ────────────────────────────────────────────────────────────
 
@@ -94,9 +94,9 @@ function buildCommandInteractionBase(
     isUserContextMenuCommand: () => options.isUserContextMenuCommand,
     isMessageContextMenuCommand: () => options.isMessageContextMenuCommand,
     isRepliable: () => true,
-    reply: vi.fn(async () => {}),
-    editReply: vi.fn(async () => {}),
-    deferReply: vi.fn(async () => {}),
+    reply: createMockFunction(async () => {}),
+    editReply: createMockFunction(async () => {}),
+    deferReply: createMockFunction(async () => {}),
     toJSON: () => ({}),
   };
 }
@@ -112,12 +112,12 @@ function buildComponentInteractionBase(options: MockComponentInteractionOptions)
       ? new PermissionsBitField(options.memberPermissions)
       : null,
     user: createMockUser(options.user),
-    reply: vi.fn(async () => {}),
-    editReply: vi.fn(async () => {}),
-    deferReply: vi.fn(async () => {}),
-    deferUpdate: vi.fn(async () => {}),
-    showModal: vi.fn(async () => {}),
-    update: vi.fn(async () => {}),
+    reply: createMockFunction(async () => {}),
+    editReply: createMockFunction(async () => {}),
+    deferReply: createMockFunction(async () => {}),
+    deferUpdate: createMockFunction(async () => {}),
+    showModal: createMockFunction(async () => {}),
+    update: createMockFunction(async () => {}),
     isRepliable: () => true,
     isMessageComponent: () => true,
     isModalSubmit: () => false,
@@ -442,9 +442,9 @@ export type MockAutocompleteInteractionOptions = {
  */
 export function createMockAutocompleteInteraction(options: MockAutocompleteInteractionOptions = {}): {
   interaction: AutocompleteInteraction;
-  respond: ReturnType<typeof vi.fn>;
+  respond: (...args: unknown[]) => unknown;
 } {
-  const respond = vi.fn();
+  const respond = createMockFunction();
   const focused = options.focusedOption ?? { name: "option", value: "" };
 
   const interaction = {

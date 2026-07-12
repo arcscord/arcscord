@@ -55,7 +55,9 @@ describe("arcLogger", () => {
 
   it("renders meta fields as extra lines in pretty mode", () => {
     const output: unknown[] = [];
-    const logger = new ArcLogger("test", (...data) => output.push(...data));
+    const logger = new ArcLogger("test", (...data) => output.push(...data), {
+      format: "pretty",
+    });
 
     logger.info("started", { userId: "42" });
 
