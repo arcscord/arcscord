@@ -108,14 +108,21 @@ export abstract class BaseManager {
       message = this.client.getErrorMessage(incidentId, locale);
     }
     else if (typeof replyConfig === "function") {
-      const ctx: DispatchMessageContext = {
-        interaction,
-        error: err,
-        locale,
-        t: this.client.createMessageContext(locale).t,
-        logger: this.logger,
-      };
-      message = await replyConfig(ctx);
+      try {
+        const ctx: DispatchMessageContext = {
+          interaction,
+          error: err,
+          locale,
+          t: this.client.createMessageContext(locale).t,
+          logger: this.logger,
+        };
+        message = await replyConfig(ctx);
+      }
+      catch (error) {
+        return this.logger.error("failed to call distatchMessageContext function", {
+          baseError: anyToError(error),
+        });
+      }
     }
     else {
       message = replyConfig;
