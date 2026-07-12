@@ -1,0 +1,2285 @@
+{
+	"schemaVersion": "2.0",
+	"id": 0,
+	"name": "@arcscord/error",
+	"variant": "project",
+	"kind": 1,
+	"flags": {},
+	"children": [
+		{
+			"id": 29,
+			"name": "MultipleCallback",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "A lazy producer of a "
+					},
+					{
+						"kind": "code",
+						"text": "`Result`"
+					},
+					{
+						"kind": "text",
+						"text": ", sync or async, run by "
+					},
+					{
+						"kind": "inline-tag",
+						"tag": "@link",
+						"text": "multiple",
+						"target": 17
+					},
+					{
+						"kind": "text",
+						"text": "."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 52,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L52"
+				}
+			],
+			"typeParameters": [
+				{
+					"id": 32,
+					"name": "T",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {}
+				},
+				{
+					"id": 33,
+					"name": "E",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"type": {
+						"type": "reference",
+						"target": 34,
+						"name": "NonNullish",
+						"package": "@arcscord/error"
+					}
+				}
+			],
+			"type": {
+				"type": "reflection",
+				"declaration": {
+					"id": 30,
+					"name": "__type",
+					"variant": "declaration",
+					"kind": 65536,
+					"flags": {},
+					"signatures": [
+						{
+							"id": 31,
+							"name": "__type",
+							"variant": "signature",
+							"kind": 4096,
+							"flags": {},
+							"type": {
+								"type": "union",
+								"types": [
+									{
+										"type": "reference",
+										"target": 35,
+										"typeArguments": [
+											{
+												"type": "reference",
+												"target": 32,
+												"name": "T",
+												"package": "@arcscord/error",
+												"refersToTypeParameter": true
+											},
+											{
+												"type": "reference",
+												"target": 33,
+												"name": "E",
+												"package": "@arcscord/error",
+												"refersToTypeParameter": true
+											}
+										],
+										"name": "Result",
+										"package": "@arcscord/error"
+									},
+									{
+										"type": "reference",
+										"target": {
+											"packageName": "typescript",
+											"packagePath": "lib/lib.es5.d.ts",
+											"qualifiedName": "Promise"
+										},
+										"typeArguments": [
+											{
+												"type": "reference",
+												"target": 35,
+												"typeArguments": [
+													{
+														"type": "reference",
+														"target": 32,
+														"name": "T",
+														"package": "@arcscord/error",
+														"refersToTypeParameter": true
+													},
+													{
+														"type": "reference",
+														"target": 33,
+														"name": "E",
+														"package": "@arcscord/error",
+														"refersToTypeParameter": true
+													}
+												],
+												"name": "Result",
+												"package": "@arcscord/error"
+											}
+										],
+										"name": "Promise",
+										"package": "typescript"
+									}
+								]
+							}
+						}
+					]
+				}
+			}
+		},
+		{
+			"id": 34,
+			"name": "NonNullish",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "Any value except "
+					},
+					{
+						"kind": "code",
+						"text": "`null`"
+					},
+					{
+						"kind": "text",
+						"text": " and "
+					},
+					{
+						"kind": "code",
+						"text": "`undefined`"
+					},
+					{
+						"kind": "text",
+						"text": " — the contract for an error slot.\n\nAn error "
+					},
+					{
+						"kind": "code",
+						"text": "`Result`"
+					},
+					{
+						"kind": "text",
+						"text": " must always carry a meaningful, non-nullish error value,\notherwise it becomes indistinguishable from a success ("
+					},
+					{
+						"kind": "code",
+						"text": "`[null, ...]`"
+					},
+					{
+						"kind": "text",
+						"text": ")."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "type.ts",
+					"line": 7,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/type.ts#L7"
+				}
+			],
+			"type": {
+				"type": "reference",
+				"target": {
+					"packageName": "typescript",
+					"packagePath": "lib/lib.es5.d.ts",
+					"qualifiedName": "NonNullable"
+				},
+				"typeArguments": [
+					{
+						"type": "intrinsic",
+						"name": "unknown"
+					}
+				],
+				"name": "NonNullable",
+				"package": "typescript"
+			}
+		},
+		{
+			"id": 35,
+			"name": "Result",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "A type that encapsulates either a successful value or an error."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "type.ts",
+					"line": 15,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/type.ts#L15"
+				}
+			],
+			"typeParameters": [
+				{
+					"id": 36,
+					"name": "T",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "The type of the successful value."
+							}
+						]
+					}
+				},
+				{
+					"id": 37,
+					"name": "E",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "The type of the error value (never "
+							},
+							{
+								"kind": "code",
+								"text": "`null`"
+							},
+							{
+								"kind": "text",
+								"text": "/"
+							},
+							{
+								"kind": "code",
+								"text": "`undefined`"
+							},
+							{
+								"kind": "text",
+								"text": ")."
+							}
+						]
+					},
+					"type": {
+						"type": "reference",
+						"target": 34,
+						"name": "NonNullish",
+						"package": "@arcscord/error"
+					},
+					"default": {
+						"type": "reference",
+						"target": 34,
+						"name": "NonNullish",
+						"package": "@arcscord/error"
+					}
+				}
+			],
+			"type": {
+				"type": "union",
+				"types": [
+					{
+						"type": "reference",
+						"target": 38,
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 36,
+								"name": "T",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						],
+						"name": "ResultOk",
+						"package": "@arcscord/error"
+					},
+					{
+						"type": "reference",
+						"target": 40,
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 37,
+								"name": "E",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						],
+						"name": "ResultErr",
+						"package": "@arcscord/error"
+					}
+				]
+			}
+		},
+		{
+			"id": 40,
+			"name": "ResultErr",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "A type representing a result that contains an error."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "type.ts",
+					"line": 29,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/type.ts#L29"
+				}
+			],
+			"typeParameters": [
+				{
+					"id": 41,
+					"name": "E",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "The type of the error (never "
+							},
+							{
+								"kind": "code",
+								"text": "`null`"
+							},
+							{
+								"kind": "text",
+								"text": "/"
+							},
+							{
+								"kind": "code",
+								"text": "`undefined`"
+							},
+							{
+								"kind": "text",
+								"text": ")."
+							}
+						]
+					},
+					"type": {
+						"type": "reference",
+						"target": 34,
+						"name": "NonNullish",
+						"package": "@arcscord/error"
+					},
+					"default": {
+						"type": "reference",
+						"target": 34,
+						"name": "NonNullish",
+						"package": "@arcscord/error"
+					}
+				}
+			],
+			"type": {
+				"type": "tuple",
+				"elements": [
+					{
+						"type": "namedTupleMember",
+						"name": "error",
+						"isOptional": false,
+						"element": {
+							"type": "reference",
+							"target": 41,
+							"name": "E",
+							"package": "@arcscord/error",
+							"refersToTypeParameter": true
+						}
+					},
+					{
+						"type": "namedTupleMember",
+						"name": "value",
+						"isOptional": false,
+						"element": {
+							"type": "literal",
+							"value": null
+						}
+					}
+				]
+			}
+		},
+		{
+			"id": 38,
+			"name": "ResultOk",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "A type representing a successful result containing a value of type T."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "type.ts",
+					"line": 22,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/type.ts#L22"
+				}
+			],
+			"typeParameters": [
+				{
+					"id": 39,
+					"name": "T",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "The type of the successful value."
+							}
+						]
+					}
+				}
+			],
+			"type": {
+				"type": "tuple",
+				"elements": [
+					{
+						"type": "namedTupleMember",
+						"name": "error",
+						"isOptional": false,
+						"element": {
+							"type": "literal",
+							"value": null
+						}
+					},
+					{
+						"type": "namedTupleMember",
+						"name": "value",
+						"isOptional": false,
+						"element": {
+							"type": "reference",
+							"target": 39,
+							"name": "T",
+							"package": "@arcscord/error",
+							"refersToTypeParameter": true
+						}
+					}
+				]
+			}
+		},
+		{
+			"id": 46,
+			"name": "anyToError",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "util.ts",
+					"line": 30,
+					"character": 16,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/util.ts#L30"
+				}
+			],
+			"signatures": [
+				{
+					"id": 47,
+					"name": "anyToError",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Converts any value to an Error object."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "The converted Error object."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "util.ts",
+							"line": 30,
+							"character": 16,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/util.ts#L30"
+						}
+					],
+					"parameters": [
+						{
+							"id": 48,
+							"name": "obj",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The value to be converted."
+									}
+								]
+							},
+							"type": {
+								"type": "intrinsic",
+								"name": "unknown"
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": {
+							"packageName": "typescript",
+							"packagePath": "lib/lib.es5.d.ts",
+							"qualifiedName": "Error"
+						},
+						"name": "Error",
+						"package": "typescript"
+					}
+				}
+			]
+		},
+		{
+			"id": 5,
+			"name": "error",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 27,
+					"character": 16,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L27"
+				}
+			],
+			"signatures": [
+				{
+					"id": 6,
+					"name": "error",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Creates an error result.\n\nThe error value must be non-nullish: "
+							},
+							{
+								"kind": "code",
+								"text": "`null`"
+							},
+							{
+								"kind": "text",
+								"text": "/"
+							},
+							{
+								"kind": "code",
+								"text": "`undefined`"
+							},
+							{
+								"kind": "text",
+								"text": " are rejected both at\ncompile time (via the "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "NonNullish",
+								"target": 34
+							},
+							{
+								"kind": "text",
+								"text": " constraint) and at runtime, because a\n"
+							},
+							{
+								"kind": "code",
+								"text": "`[null, null]`"
+							},
+							{
+								"kind": "text",
+								"text": " tuple would be read as a success by every consumer."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "The error result."
+									}
+								]
+							},
+							{
+								"tag": "@throws",
+								"content": [
+									{
+										"kind": "text",
+										"text": "When "
+									},
+									{
+										"kind": "code",
+										"text": "`err`"
+									},
+									{
+										"kind": "text",
+										"text": " is "
+									},
+									{
+										"kind": "code",
+										"text": "`null`"
+									},
+									{
+										"kind": "text",
+										"text": " or "
+									},
+									{
+										"kind": "code",
+										"text": "`undefined`"
+									},
+									{
+										"kind": "text",
+										"text": "."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "func.ts",
+							"line": 27,
+							"character": 16,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L27"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 7,
+							"name": "E",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The type of the error."
+									}
+								]
+							},
+							"type": {
+								"type": "reflection",
+								"declaration": {
+									"id": 8,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {}
+								}
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 9,
+							"name": "err",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The error value (never "
+									},
+									{
+										"kind": "code",
+										"text": "`null`"
+									},
+									{
+										"kind": "text",
+										"text": "/"
+									},
+									{
+										"kind": "code",
+										"text": "`undefined`"
+									},
+									{
+										"kind": "text",
+										"text": ")."
+									}
+								]
+							},
+							"type": {
+								"type": "reference",
+								"target": 7,
+								"name": "E",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 40,
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 7,
+								"name": "E",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						],
+						"name": "ResultErr",
+						"package": "@arcscord/error"
+					}
+				}
+			]
+		},
+		{
+			"id": 10,
+			"name": "forceSafe",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 41,
+					"character": 22,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L41"
+				}
+			],
+			"signatures": [
+				{
+					"id": 11,
+					"name": "forceSafe",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Executes a given function and returns a Result wrapping the result or an error."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "A promise that resolves to a Result."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "func.ts",
+							"line": 41,
+							"character": 22,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L41"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 12,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The type of the result value."
+									}
+								]
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 13,
+							"name": "fn",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The function to be executed."
+									}
+								]
+							},
+							"type": {
+								"type": "reflection",
+								"declaration": {
+									"id": 14,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {},
+									"signatures": [
+										{
+											"id": 15,
+											"name": "__type",
+											"variant": "signature",
+											"kind": 4096,
+											"flags": {},
+											"parameters": [
+												{
+													"id": 16,
+													"name": "args",
+													"variant": "param",
+													"kind": 32768,
+													"flags": {
+														"isRest": true
+													},
+													"type": {
+														"type": "array",
+														"elementType": {
+															"type": "intrinsic",
+															"name": "unknown"
+														}
+													}
+												}
+											],
+											"type": {
+												"type": "union",
+												"types": [
+													{
+														"type": "reference",
+														"target": 12,
+														"name": "T",
+														"package": "@arcscord/error",
+														"refersToTypeParameter": true
+													},
+													{
+														"type": "reference",
+														"target": {
+															"packageName": "typescript",
+															"packagePath": "lib/lib.es5.d.ts",
+															"qualifiedName": "Promise"
+														},
+														"typeArguments": [
+															{
+																"type": "reference",
+																"target": 12,
+																"name": "T",
+																"package": "@arcscord/error",
+																"refersToTypeParameter": true
+															}
+														],
+														"name": "Promise",
+														"package": "typescript"
+													}
+												]
+											}
+										}
+									]
+								}
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": {
+							"packageName": "typescript",
+							"packagePath": "lib/lib.es5.d.ts",
+							"qualifiedName": "Promise"
+						},
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 35,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 12,
+										"name": "T",
+										"package": "@arcscord/error",
+										"refersToTypeParameter": true
+									},
+									{
+										"type": "reference",
+										"target": {
+											"packageName": "typescript",
+											"packagePath": "lib/lib.es5.d.ts",
+											"qualifiedName": "Error"
+										},
+										"name": "Error",
+										"package": "typescript"
+									}
+								],
+								"name": "Result",
+								"package": "@arcscord/error"
+							}
+						],
+						"name": "Promise",
+						"package": "typescript"
+					}
+				}
+			]
+		},
+		{
+			"id": 42,
+			"name": "isResult",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "util.ts",
+					"line": 14,
+					"character": 16,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/util.ts#L14"
+				}
+			],
+			"signatures": [
+				{
+					"id": 43,
+					"name": "isResult",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Checks whether a value has the shape of a "
+							},
+							{
+								"kind": "code",
+								"text": "`Result`"
+							},
+							{
+								"kind": "text",
+								"text": " tuple.\n\nA "
+							},
+							{
+								"kind": "code",
+								"text": "`Result`"
+							},
+							{
+								"kind": "text",
+								"text": " is a two-element tuple where at least one slot is "
+							},
+							{
+								"kind": "code",
+								"text": "`null`"
+							},
+							{
+								"kind": "text",
+								"text": "\n("
+							},
+							{
+								"kind": "code",
+								"text": "`ResultOk`"
+							},
+							{
+								"kind": "text",
+								"text": " is "
+							},
+							{
+								"kind": "code",
+								"text": "`[null, value]`"
+							},
+							{
+								"kind": "text",
+								"text": ", "
+							},
+							{
+								"kind": "code",
+								"text": "`ResultErr`"
+							},
+							{
+								"kind": "text",
+								"text": " is "
+							},
+							{
+								"kind": "code",
+								"text": "`[error, null]`"
+							},
+							{
+								"kind": "text",
+								"text": "). Since an error\nvalue is never nullish, this reliably distinguishes a "
+							},
+							{
+								"kind": "code",
+								"text": "`Result`"
+							},
+							{
+								"kind": "text",
+								"text": " — including\n"
+							},
+							{
+								"kind": "code",
+								"text": "`ok(null)`"
+							},
+							{
+								"kind": "text",
+								"text": " — from any other two-element array."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "code",
+										"text": "`true`"
+									},
+									{
+										"kind": "text",
+										"text": " if "
+									},
+									{
+										"kind": "code",
+										"text": "`value`"
+									},
+									{
+										"kind": "text",
+										"text": " is a "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": " tuple."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "util.ts",
+							"line": 14,
+							"character": 16,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/util.ts#L14"
+						}
+					],
+					"parameters": [
+						{
+							"id": 44,
+							"name": "value",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The value to test."
+									}
+								]
+							},
+							"type": {
+								"type": "intrinsic",
+								"name": "unknown"
+							}
+						}
+					],
+					"type": {
+						"type": "predicate",
+						"name": "value",
+						"asserts": false,
+						"targetType": {
+							"type": "reference",
+							"target": 35,
+							"typeArguments": [
+								{
+									"type": "intrinsic",
+									"name": "unknown"
+								},
+								{
+									"type": "reflection",
+									"declaration": {
+										"id": 45,
+										"name": "__type",
+										"variant": "declaration",
+										"kind": 65536,
+										"flags": {}
+									}
+								}
+							],
+							"name": "Result",
+							"package": "@arcscord/error"
+						}
+					}
+				}
+			]
+		},
+		{
+			"id": 17,
+			"name": "multiple",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 71,
+					"character": 22,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L71"
+				}
+			],
+			"signatures": [
+				{
+					"id": 18,
+					"name": "multiple",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Runs a list of "
+							},
+							{
+								"kind": "code",
+								"text": "`Result`"
+							},
+							{
+								"kind": "text",
+								"text": "-producing callbacks sequentially, short-circuiting on\nthe first failure. Each callback runs only if every previous one succeeded, so\nlater operations are skipped as soon as one returns an error.\n\nThis function does not catch callback throws. If a callback throws or returns\na rejected promise, that value propagates through the returned promise and\nlater callbacks are not executed. Wrap a callback with "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "forceSafe",
+								"target": 10
+							},
+							{
+								"kind": "text",
+								"text": " when\nits throws should be returned as a "
+							},
+							{
+								"kind": "code",
+								"text": "`ResultErr`"
+							},
+							{
+								"kind": "text",
+								"text": " instead."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "A "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": " with the last success value or the first encountered error.\n\nThe success type is inferred as the success type of the last callback. The\nerror type is unified across all callbacks. Callback throws are not represented\nin the "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": " type because they propagate through the returned promise."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "func.ts",
+							"line": 71,
+							"character": 22,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L71"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 19,
+							"name": "TLastSuccess",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {}
+						},
+						{
+							"id": 20,
+							"name": "TLastError",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"type": {
+								"type": "reflection",
+								"declaration": {
+									"id": 21,
+									"name": "__type",
+									"variant": "declaration",
+									"kind": 65536,
+									"flags": {}
+								}
+							}
+						},
+						{
+							"id": 22,
+							"name": "TErrors",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"type": {
+								"type": "array",
+								"elementType": {
+									"type": "reflection",
+									"declaration": {
+										"id": 23,
+										"name": "__type",
+										"variant": "declaration",
+										"kind": 65536,
+										"flags": {}
+									}
+								}
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 24,
+							"name": "callbacks",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {
+								"isRest": true
+							},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "Callbacks producing "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": "s, possibly of different types."
+									}
+								]
+							},
+							"type": {
+								"type": "tuple",
+								"elements": [
+									{
+										"type": "rest",
+										"elementType": {
+											"type": "array",
+											"elementType": {
+												"type": "mapped",
+												"parameter": "K",
+												"parameterType": {
+													"type": "union",
+													"types": [
+														{
+															"type": "intrinsic",
+															"name": "string"
+														},
+														{
+															"type": "intrinsic",
+															"name": "number"
+														},
+														{
+															"type": "intrinsic",
+															"name": "symbol"
+														}
+													]
+												},
+												"templateType": {
+													"type": "reference",
+													"target": 29,
+													"typeArguments": [
+														{
+															"type": "intrinsic",
+															"name": "unknown"
+														},
+														{
+															"type": "indexedAccess",
+															"indexType": {
+																"type": "reference",
+																"target": {
+																	"packageName": "@arcscord/error",
+																	"packagePath": "src/func.ts",
+																	"qualifiedName": "K"
+																},
+																"name": "K",
+																"package": "@arcscord/error",
+																"refersToTypeParameter": true
+															},
+															"objectType": {
+																"type": "reference",
+																"target": 22,
+																"name": "TErrors",
+																"package": "@arcscord/error",
+																"refersToTypeParameter": true
+															}
+														}
+													],
+													"name": "MultipleCallback",
+													"package": "@arcscord/error"
+												}
+											}
+										}
+									},
+									{
+										"type": "reference",
+										"target": 29,
+										"typeArguments": [
+											{
+												"type": "reference",
+												"target": 19,
+												"name": "TLastSuccess",
+												"package": "@arcscord/error",
+												"refersToTypeParameter": true
+											},
+											{
+												"type": "reference",
+												"target": 20,
+												"name": "TLastError",
+												"package": "@arcscord/error",
+												"refersToTypeParameter": true
+											}
+										],
+										"name": "MultipleCallback",
+										"package": "@arcscord/error"
+									}
+								]
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": {
+							"packageName": "typescript",
+							"packagePath": "lib/lib.es5.d.ts",
+							"qualifiedName": "Promise"
+						},
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 35,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 19,
+										"name": "TLastSuccess",
+										"package": "@arcscord/error",
+										"refersToTypeParameter": true
+									},
+									{
+										"type": "union",
+										"types": [
+											{
+												"type": "reference",
+												"target": 20,
+												"name": "TLastError",
+												"package": "@arcscord/error",
+												"refersToTypeParameter": true
+											},
+											{
+												"type": "indexedAccess",
+												"indexType": {
+													"type": "intrinsic",
+													"name": "number"
+												},
+												"objectType": {
+													"type": "reference",
+													"target": 22,
+													"name": "TErrors",
+													"package": "@arcscord/error",
+													"refersToTypeParameter": true
+												}
+											}
+										]
+									}
+								],
+								"name": "Result",
+								"package": "@arcscord/error"
+							}
+						],
+						"name": "Promise",
+						"package": "typescript"
+					}
+				}
+			]
+		},
+		{
+			"id": 25,
+			"name": "multipleParallel",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 126,
+					"character": 22,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L126"
+				}
+			],
+			"signatures": [
+				{
+					"id": 26,
+					"name": "multipleParallel",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Runs a list of "
+							},
+							{
+								"kind": "code",
+								"text": "`Result`"
+							},
+							{
+								"kind": "text",
+								"text": "-producing callbacks **in parallel** (like "
+							},
+							{
+								"kind": "code",
+								"text": "`Promise.all`"
+							},
+							{
+								"kind": "text",
+								"text": ")\nand collects every success value into a tuple. Unlike "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "multiple",
+								"target": 17
+							},
+							{
+								"kind": "text",
+								"text": ", all\ncallbacks start at once and are all awaited — nothing is short-circuited.\n\nOn success, resolves with "
+							},
+							{
+								"kind": "code",
+								"text": "`ok([...values])`"
+							},
+							{
+								"kind": "text",
+								"text": " in callback order. If any callback\nfails (returns an error), resolves with the **first error by position**. Every\ncallback still runs to completion, matching "
+							},
+							{
+								"kind": "code",
+								"text": "`Promise.all`"
+							},
+							{
+								"kind": "text",
+								"text": " execution semantics.\n\nThis function does not catch callback throws. If a callback throws or returns\na rejected promise, that value propagates through the returned promise. Wrap a\ncallback with "
+							},
+							{
+								"kind": "inline-tag",
+								"tag": "@link",
+								"text": "forceSafe",
+								"target": 10
+							},
+							{
+								"kind": "text",
+								"text": " when its throws should be returned as a\n"
+							},
+							{
+								"kind": "code",
+								"text": "`ResultErr`"
+							},
+							{
+								"kind": "text",
+								"text": " instead."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "A "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": " with the tuple of all success values, or the first error.\n\nThe success type is inferred as the tuple of each callback's success type. The\nerror type is unified across all callbacks. Callback throws are not represented\nin the "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": " type because they propagate through the returned promise."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "func.ts",
+							"line": 126,
+							"character": 22,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L126"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 27,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"type": {
+								"type": "typeOperator",
+								"operator": "readonly",
+								"target": {
+									"type": "array",
+									"elementType": {
+										"type": "reference",
+										"target": {
+											"packageName": "@arcscord/error",
+											"packagePath": "src/func.ts",
+											"qualifiedName": "AnyMultipleCallback"
+										},
+										"name": "AnyMultipleCallback",
+										"package": "@arcscord/error"
+									}
+								}
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 28,
+							"name": "callbacks",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {
+								"isRest": true
+							},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "Callbacks producing "
+									},
+									{
+										"kind": "code",
+										"text": "`Result`"
+									},
+									{
+										"kind": "text",
+										"text": "s, run concurrently."
+									}
+								]
+							},
+							"type": {
+								"type": "reference",
+								"target": 27,
+								"name": "T",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": {
+							"packageName": "typescript",
+							"packagePath": "lib/lib.es5.d.ts",
+							"qualifiedName": "Promise"
+						},
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 35,
+								"typeArguments": [
+									{
+										"type": "mapped",
+										"parameter": "K",
+										"parameterType": {
+											"type": "union",
+											"types": [
+												{
+													"type": "intrinsic",
+													"name": "string"
+												},
+												{
+													"type": "intrinsic",
+													"name": "number"
+												},
+												{
+													"type": "intrinsic",
+													"name": "symbol"
+												}
+											]
+										},
+										"templateType": {
+											"type": "reference",
+											"target": {
+												"packageName": "@arcscord/error",
+												"packagePath": "src/func.ts",
+												"qualifiedName": "CallbackValue"
+											},
+											"typeArguments": [
+												{
+													"type": "indexedAccess",
+													"indexType": {
+														"type": "reference",
+														"target": {
+															"packageName": "@arcscord/error",
+															"packagePath": "src/func.ts",
+															"qualifiedName": "K"
+														},
+														"name": "K",
+														"package": "@arcscord/error",
+														"refersToTypeParameter": true
+													},
+													"objectType": {
+														"type": "reference",
+														"target": 27,
+														"name": "T",
+														"package": "@arcscord/error",
+														"refersToTypeParameter": true
+													}
+												}
+											],
+											"name": "CallbackValue",
+											"package": "@arcscord/error"
+										},
+										"readonlyModifier": "-"
+									},
+									{
+										"type": "reference",
+										"target": {
+											"packageName": "@arcscord/error",
+											"packagePath": "src/func.ts",
+											"qualifiedName": "CallbackError"
+										},
+										"typeArguments": [
+											{
+												"type": "indexedAccess",
+												"indexType": {
+													"type": "intrinsic",
+													"name": "number"
+												},
+												"objectType": {
+													"type": "reference",
+													"target": 27,
+													"name": "T",
+													"package": "@arcscord/error",
+													"refersToTypeParameter": true
+												}
+											}
+										],
+										"name": "CallbackError",
+										"package": "@arcscord/error"
+									}
+								],
+								"name": "Result",
+								"package": "@arcscord/error"
+							}
+						],
+						"name": "Promise",
+						"package": "typescript"
+					}
+				}
+			]
+		},
+		{
+			"id": 1,
+			"name": "ok",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "func.ts",
+					"line": 11,
+					"character": 16,
+					"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L11"
+				}
+			],
+			"signatures": [
+				{
+					"id": 2,
+					"name": "ok",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Wraps a value in a Result with a success status."
+							}
+						],
+						"blockTags": [
+							{
+								"tag": "@returns",
+								"content": [
+									{
+										"kind": "text",
+										"text": "The Result object with success status and wrapped value."
+									}
+								]
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "func.ts",
+							"line": 11,
+							"character": 16,
+							"url": "https://github.com/arcscord/arcscord/blob/5f7eb915a27b0dc6033903eded444db7b4505ac4/packages/error/src/func.ts#L11"
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 3,
+							"name": "T",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The type of value to be wrapped."
+									}
+								]
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 4,
+							"name": "value",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"comment": {
+								"summary": [
+									{
+										"kind": "text",
+										"text": "The value to be wrapped."
+									}
+								]
+							},
+							"type": {
+								"type": "reference",
+								"target": 3,
+								"name": "T",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 38,
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 3,
+								"name": "T",
+								"package": "@arcscord/error",
+								"refersToTypeParameter": true
+							}
+						],
+						"name": "ResultOk",
+						"package": "@arcscord/error"
+					}
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"title": "Type Aliases",
+			"children": [
+				29,
+				34,
+				35,
+				40,
+				38
+			]
+		},
+		{
+			"title": "Functions",
+			"children": [
+				46,
+				5,
+				10,
+				42,
+				17,
+				25,
+				1
+			]
+		}
+	],
+	"packageName": "@arcscord/error",
+	"packageVersion": "4.0.0",
+	"readme": [
+		{
+			"kind": "text",
+			"text": "# @arcscord/error\n\n[![npm version](https://badge.fury.io/js/@arcscord%2Ferror.svg)](https://www.npmjs.com/package/@arcscord/error)\n[![Discord](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)\n\nResult-style error handling for TypeScript, inspired by Go. Instead of throwing exceptions, functions return a "
+		},
+		{
+			"kind": "code",
+			"text": "`Result<T, E>`"
+		},
+		{
+			"kind": "text",
+			"text": " tuple: either "
+		},
+		{
+			"kind": "code",
+			"text": "`[null, value]`"
+		},
+		{
+			"kind": "text",
+			"text": " on success or "
+		},
+		{
+			"kind": "code",
+			"text": "`[error, null]`"
+		},
+		{
+			"kind": "text",
+			"text": " on failure. The caller destructs the tuple and handles the error explicitly — no try/catch, no silent propagation.\n\nThis pattern makes error paths visible in function signatures and forces you to handle failures at the call site. It pairs well with TypeScript's discriminated unions: the type of "
+		},
+		{
+			"kind": "code",
+			"text": "`value`"
+		},
+		{
+			"kind": "text",
+			"text": " is only accessible when "
+		},
+		{
+			"kind": "code",
+			"text": "`error`"
+		},
+		{
+			"kind": "text",
+			"text": " is "
+		},
+		{
+			"kind": "code",
+			"text": "`null`"
+		},
+		{
+			"kind": "text",
+			"text": ", so the compiler guides you toward correct handling.\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "`@arcscord/error`"
+		},
+		{
+			"kind": "text",
+			"text": " is used by the entire arcscord ecosystem. \n\n## Install\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```sh\npnpm add @arcscord/error\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n## Example\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```ts\nimport type { Result } from \"@arcscord/error\";\nimport { error, ok } from \"@arcscord/error\";\n\nfunction divide(a: number, b: number): Result<number, Error> {\n  if (b === 0)\n    return error(new Error(\"Division by zero\"));\n  return ok(a / b);\n}\n\nconst [err, result] = divide(10, 2);\nif (err !== null) {\n  console.error(err.message);\n}\nelse {\n  console.log(result); // 5\n}\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nCheck the error slot with an explicit "
+		},
+		{
+			"kind": "code",
+			"text": "`!== null`"
+		},
+		{
+			"kind": "text",
+			"text": " rather than a truthy "
+		},
+		{
+			"kind": "code",
+			"text": "`if (err)`"
+		},
+		{
+			"kind": "text",
+			"text": ". Error values are guaranteed non-nullish — "
+		},
+		{
+			"kind": "code",
+			"text": "`error(null)`"
+		},
+		{
+			"kind": "text",
+			"text": " and "
+		},
+		{
+			"kind": "code",
+			"text": "`error(undefined)`"
+		},
+		{
+			"kind": "text",
+			"text": " are rejected at compile time and throw at runtime — so "
+		},
+		{
+			"kind": "code",
+			"text": "`err !== null`"
+		},
+		{
+			"kind": "text",
+			"text": " reliably distinguishes failure from success, even when the error value is falsy ("
+		},
+		{
+			"kind": "code",
+			"text": "`0`"
+		},
+		{
+			"kind": "text",
+			"text": ", "
+		},
+		{
+			"kind": "code",
+			"text": "`\"\"`"
+		},
+		{
+			"kind": "text",
+			"text": ").\n\n## Links\n\n- [Documentation](https://arcscord.dev/packages/error)\n- [API reference](https://arcscord.dev/api?package=error)\n\n## License\n\nMIT"
+		}
+	],
+	"symbolIdMap": {
+		"0": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/index.ts",
+			"qualifiedName": ""
+		},
+		"1": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "ok"
+		},
+		"2": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "ok"
+		},
+		"3": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "T"
+		},
+		"4": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "value"
+		},
+		"5": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "error"
+		},
+		"6": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "error"
+		},
+		"7": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "E"
+		},
+		"8": {
+			"packageName": "@arcscord/arcscord",
+			"packagePath": "",
+			"qualifiedName": "__type"
+		},
+		"9": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "err"
+		},
+		"10": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "forceSafe"
+		},
+		"11": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "forceSafe"
+		},
+		"12": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "T"
+		},
+		"13": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "fn"
+		},
+		"14": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "__type"
+		},
+		"15": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "__type"
+		},
+		"16": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "args"
+		},
+		"17": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "multiple"
+		},
+		"18": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "multiple"
+		},
+		"19": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "TLastSuccess"
+		},
+		"20": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "TLastError"
+		},
+		"21": {
+			"packageName": "@arcscord/arcscord",
+			"packagePath": "",
+			"qualifiedName": "__type"
+		},
+		"22": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "TErrors"
+		},
+		"23": {
+			"packageName": "@arcscord/arcscord",
+			"packagePath": "",
+			"qualifiedName": "__type"
+		},
+		"24": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "callbacks"
+		},
+		"25": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "multipleParallel"
+		},
+		"26": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "multipleParallel"
+		},
+		"27": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "T"
+		},
+		"28": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "callbacks"
+		},
+		"29": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "MultipleCallback"
+		},
+		"30": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "__type"
+		},
+		"31": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "__type"
+		},
+		"32": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "T"
+		},
+		"33": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/func.ts",
+			"qualifiedName": "E"
+		},
+		"34": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "NonNullish"
+		},
+		"35": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "Result"
+		},
+		"36": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "T"
+		},
+		"37": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "E"
+		},
+		"38": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "ResultOk"
+		},
+		"39": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "T"
+		},
+		"40": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "ResultErr"
+		},
+		"41": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/type.ts",
+			"qualifiedName": "E"
+		},
+		"42": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "isResult"
+		},
+		"43": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "isResult"
+		},
+		"44": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "value"
+		},
+		"45": {
+			"packageName": "@arcscord/arcscord",
+			"packagePath": "",
+			"qualifiedName": "__type"
+		},
+		"46": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "anyToError"
+		},
+		"47": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "anyToError"
+		},
+		"48": {
+			"packageName": "@arcscord/error",
+			"packagePath": "src/util.ts",
+			"qualifiedName": "obj"
+		}
+	},
+	"files": {
+		"entries": {
+			"1": "packages/error/src/index.ts",
+			"2": "packages/error/README.md",
+			"3": "packages/error"
+		},
+		"reflections": {
+			"1": 0,
+			"2": 0,
+			"3": 0
+		}
+	}
+}
