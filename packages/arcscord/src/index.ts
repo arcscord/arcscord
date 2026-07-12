@@ -298,13 +298,9 @@ export { EventContext } from "./base/event/event_context";
 
 export { BaseManager } from "./base/manager/manager.class";
 export type {
-  CommandContextDocs,
-  ContextDocs,
   ContextInDm,
   ContextInGuild,
   ContextInGuildOrDm,
-  MessageCommandContextDocs,
-  SlashCommandContextDocs,
 } from "./base/utils/context.type";
 export {
   InteractionContext,
