@@ -140,7 +140,12 @@ function blockTagText(reflection: TypeDocReflection | undefined, tag: string): s
 }
 
 function topLevelSymbols(api: TypeDocReflection | null): TypeDocReflection[] {
-  return (api?.children ?? [])
+  const children = api?.children ?? [];
+  const directSymbols = children.filter(child => child.kind && TOP_LEVEL_KINDS.has(child.kind));
+  const entryPoint = children.find(child => child.kind === 2 && child.name === "index");
+  const symbols = directSymbols.length > 0 ? directSymbols : entryPoint?.children ?? [];
+
+  return symbols
     .filter(child => child.kind && TOP_LEVEL_KINDS.has(child.kind))
     .sort((a, b) => {
       const groupDiff = kindName(a).localeCompare(kindName(b));
