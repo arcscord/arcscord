@@ -1,13 +1,13 @@
 /**
  * Points a standalone example at the *local repo build* of arcscord (and
  * `@arcscord/middleware`) instead of the published npm version, by injecting a
- * pnpm `overrides:` block into the example's `pnpm-workspace.yaml`.
+ * pnpm `overrides:` block into the shared examples workspace.
  *
  * The example's committed `package.json` keeps the published version spec (so a
  * user who clones the branch gets a runnable example against the release); this
- * override is applied only in CI on the ephemeral checkout, before running
- * `pnpm install --no-frozen-lockfile` (non-frozen because the override changes
- * resolution for arcscord/middleware).
+ * override is applied only in CI on the ephemeral checkout, before running an
+ * install without a lockfile (because the override changes resolution for
+ * arcscord/middleware).
  *
  * Usage: node scripts/link-local-arcscord.mjs <exampleDir> <tarballDir>
  *   <exampleDir>  path to the example (e.g. examples/starter-bot)
@@ -51,15 +51,8 @@ if (overrides.length === 0) {
   process.exit(0);
 }
 
-const workspacePath = path.join(exampleDir, "pnpm-workspace.yaml");
-let workspace = "";
-try {
-  workspace = await readFile(workspacePath, "utf8");
-}
-catch {
-  // No workspace file yet: pnpm still needs one so it treats the example as its
-  // own root rather than walking up into the monorepo workspace.
-}
+const workspacePath = path.join(exampleDir, "..", "pnpm-workspace.yaml");
+const workspace = await readFile(workspacePath, "utf8");
 
 if (/^overrides:/m.test(workspace)) {
   throw new Error(

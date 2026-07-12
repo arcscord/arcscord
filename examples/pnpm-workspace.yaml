@@ -1,7 +1,11 @@
+packages:
+  - "*"
+
 minimumReleaseAgeExclude:
   - "@arcscord/error"
   - "@arcscord/middleware"
   - arcscord
+
 shellEmulator: true
 trustPolicy: no-downgrade
 
@@ -10,6 +14,7 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   prisma: true
+
 onlyBuiltDependencies:
   - "@prisma/engines"
   - better-sqlite3

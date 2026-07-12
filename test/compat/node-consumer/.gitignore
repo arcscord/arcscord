@@ -1,5 +1,2 @@
 node_modules/
 vendor/
-# Installed non-frozen from the local tarball; no need to commit (CI caches on
-# the root lock). Committing it would only add another stale-prone lockfile.
-pnpm-lock.yaml

@@ -152,10 +152,12 @@ jobs:
         with:
           node-version: 24.11.0
           cache: pnpm
-          cache-dependency-path: test/compat/typescript-consumer/pnpm-lock.yaml
+          # Compatibility consumers intentionally have no lockfile. Reuse the
+          # complete workspace lock for the pnpm store cache.
+          cache-dependency-path: pnpm-lock.yaml
       - name: Install consumer dependencies
         working-directory: test/compat/typescript-consumer
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --lockfile=false
       - name: Typecheck packed declarations
         working-directory: test/compat/typescript-consumer
         run: pnpm typecheck
@@ -186,7 +188,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install consumer dependencies
         working-directory: test/compat/node-consumer
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --lockfile=false
       - name: Run ESM smoke (import)
         working-directory: test/compat/node-consumer
         run: pnpm smoke:esm
@@ -212,7 +214,7 @@ jobs:
           bun-version-file: .bun-version
       - name: Install consumer dependencies
         working-directory: test/compat/bun-consumer
-        run: bun install
+        run: bun install --no-save
       - name: Typecheck consumer
         working-directory: test/compat/bun-consumer
         run: bun run typecheck
@@ -259,13 +261,13 @@ jobs:
         with:
           node-version: 24.11.0
           cache: pnpm
-          cache-dependency-path: ${{ matrix.path }}/pnpm-lock.yaml
+          cache-dependency-path: examples/pnpm-lock.yaml
       - name: Point example at the local repo build
         run: node scripts/link-local-arcscord.mjs ${{ matrix.path }} ${{ github.workspace }}/vendor-artifact
       - name: Install example dependencies
         id: install
         working-directory: ${{ matrix.path }}
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install --lockfile=false
       - name: Generate database client
         id: db_generate
         working-directory: ${{ matrix.path }}
@@ -281,14 +283,6 @@ jobs:
         id: typecheck
         working-directory: ${{ matrix.path }}
         run: pnpm typecheck
-      - name: Normalize injected override for the linter
-        working-directory: ${{ matrix.path }}
-        # link-local-arcscord.mjs appends an `overrides:` block whose key order and
-        # scalar style don't match the example's YAML lint rules. Auto-fix just that
-        # file with the example's own eslint so `pnpm lint` (which lints every file,
-        # including this CI-only mutation) stays green regardless of the antfu
-        # config version resolved at install time.
-        run: pnpm exec eslint pnpm-workspace.yaml --fix
       - name: Lint example
         id: lint
         working-directory: ${{ matrix.path }}
@@ -303,7 +297,7 @@ jobs:
             echo ""
             echo "| Check | Command | Result |"
             echo "| --- | --- | --- |"
-            echo "| Install | \`pnpm install --no-frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Install | \`pnpm install --lockfile=false\` | \`${{ steps.install.outcome }}\` |"
             echo "| Database client | \`pnpm db:generate\` when available | \`${{ steps.db_generate.outcome }}\` |"
             echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
             echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
