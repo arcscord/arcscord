@@ -786,7 +786,7 @@ export class CommandManager
     const middlewareExit = await this.runMiddleware(command, context as CommandContext);
     if (middlewareExit.status !== "success") {
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: middlewareExit,
         interaction,
         command,
@@ -797,7 +797,8 @@ export class CommandManager
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      }, this);
+      }, this));
+      return;
     }
     if (!middlewareExit.value) {
       return;
@@ -809,7 +810,7 @@ export class CommandManager
       const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
       const rawResult = await run(context as CommandContext);
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: normalizeHandlerReturn(rawResult),
         interaction,
         command,
@@ -819,11 +820,11 @@ export class CommandManager
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      }, this);
+      }, this));
     }
     catch (e) {
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: executionDefect(e),
         interaction,
         command,
@@ -834,7 +835,7 @@ export class CommandManager
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      }, this);
+      }, this));
     }
   }
 

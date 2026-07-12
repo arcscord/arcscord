@@ -46,6 +46,19 @@ export abstract class BaseManager {
   }
 
   /**
+   * Runs a manager result handler without letting a broken custom handler
+   * escape into Discord.js' event emitter as an unhandled rejection.
+   */
+  protected async runResultHandler(handler: () => void | Promise<void>): Promise<void> {
+    try {
+      await handler();
+    }
+    catch (e) {
+      this.logger.logError(e, { source: "resultHandler" });
+    }
+  }
+
+  /**
    * Applies a dispatch error config: logs at the configured level and
    * optionally sends an ephemeral reply to the user.
    *

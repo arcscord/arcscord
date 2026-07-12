@@ -108,7 +108,7 @@ export class EventManager extends BaseManager {
           }
           catch (e) {
             const endedAt = Date.now();
-            await this.options.resultHandler({
+            await this.runResultHandler(() => this.options.resultHandler({
               exit: executionDefect(e),
               event: event as unknown as AnyEventHandler,
               eventName: event.event,
@@ -116,7 +116,7 @@ export class EventManager extends BaseManager {
               endedAt,
               durationMs: endedAt - receivedAt,
               incidentId: crypto.randomUUID(),
-            }, this);
+            }, this));
             return;
           }
         }
@@ -195,18 +195,18 @@ export class EventManager extends BaseManager {
         event: event.event,
       });
       const endedAt = Date.now();
-      await this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: normalizeHandlerReturn(rawResult),
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      }, this);
+      }, this));
     }
     catch (e) {
       const endedAt = Date.now();
-      await this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: executionDefect(e),
         event: event as unknown as AnyEventHandler,
         eventName: event.event,
@@ -214,7 +214,7 @@ export class EventManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      }, this);
+      }, this));
     }
   }
 

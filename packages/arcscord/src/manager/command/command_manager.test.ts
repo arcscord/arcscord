@@ -670,6 +670,29 @@ describe("command manager", () => {
     expect(defaultSpy.mock.calls[0]?.[0].exit.status).toBe("success");
   });
 
+  it("awaits and logs a rejected resultHandler without running it twice", async () => {
+    const handlerError = new Error("result handler boom");
+    const resultHandler = vi.fn().mockRejectedValue(handlerError);
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, { resultHandler });
+
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await expect((managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    )).resolves.toBeUndefined();
+
+    expect(resultHandler).toHaveBeenCalledOnce();
+    expect(managerWithOptions.logger.logError).toHaveBeenCalledWith(
+      handlerError,
+      { source: "resultHandler" },
+    );
+  });
+
   it("passes status thrown and preserves the raw thrown value", async () => {
     const resultHandler = vi.fn();
     const { client } = createMockClientWithManager();

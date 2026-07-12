@@ -95,6 +95,30 @@ describe("component manager pipeline", () => {
       expect(defaultSpy.mock.calls[0]?.[0].exit.status).toBe("success");
     });
 
+    it("awaits and logs a rejected resultHandler without running it twice", async () => {
+      const handlerError = new Error("result handler boom");
+      const resultHandler = vi.fn().mockRejectedValue(handlerError);
+      const { manager } = createManagerWithClient({ resultHandler });
+
+      const handler = createButton({
+        route: "greet",
+        build: id => button({ customId: id(), label: "Greet", style: "primary" }),
+        run: async ctx => ctx.ok(),
+      });
+      manager.loadComponent(handler);
+
+      await expect(dispatch(
+        manager,
+        createMockButtonInteraction({ customId: "greet" }),
+      )).resolves.toBeUndefined();
+
+      expect(resultHandler).toHaveBeenCalledOnce();
+      expect(manager.logger.logError).toHaveBeenCalledWith(
+        handlerError,
+        { source: "resultHandler" },
+      );
+    });
+
     it("dispatches a modal submit interaction emitted on the client through to resultHandler", async () => {
       const resultHandler = vi.fn();
       const client = createMockClient();

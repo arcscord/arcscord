@@ -366,7 +366,7 @@ export class ComponentManager extends BaseManager {
     const middlewareExit = await this.runMiddleware(matched.component, context);
     if (middlewareExit.status !== "success") {
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: middlewareExit,
         component: matched.component,
         interaction,
@@ -377,7 +377,8 @@ export class ComponentManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      }, this);
+      }, this));
+      return;
     }
     if (!this.handleMiddlewareResult(middlewareExit.value, context)) {
       return;
@@ -510,7 +511,7 @@ export class ComponentManager extends BaseManager {
       // statically once both are widened back to their general union types here.
       const rawResult = await (component.run as (ctx: ComponentContext) => MaybePromise<ComponentRunReturn>)(context);
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: normalizeHandlerReturn(rawResult),
         component,
         interaction: context.interaction,
@@ -520,11 +521,11 @@ export class ComponentManager extends BaseManager {
         startedAt,
         endedAt,
         durationMs: endedAt - startedAt,
-      }, this);
+      }, this));
     }
     catch (e) {
       const endedAt = Date.now();
-      return this.options.resultHandler({
+      await this.runResultHandler(() => this.options.resultHandler({
         exit: executionDefect(e),
         component,
         interaction: context.interaction,
@@ -535,7 +536,7 @@ export class ComponentManager extends BaseManager {
         endedAt,
         durationMs: endedAt - startedAt,
         incidentId: crypto.randomUUID(),
-      }, this);
+      }, this));
     }
   }
 

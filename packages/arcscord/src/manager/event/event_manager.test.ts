@@ -285,6 +285,28 @@ describe("event manager", () => {
     expect(resultHandler).toHaveBeenCalledOnce();
   });
 
+  it("logs a rejected result handler without running it twice", async () => {
+    const handlerError = new Error("result handler boom");
+    const resultHandler = vi.fn().mockRejectedValue(handlerError);
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run: () => ok(true),
+    }));
+
+    await expect(client.emitMock("messageCreate", { id: "message_1" })).resolves.toBeUndefined();
+
+    expect(resultHandler).toHaveBeenCalledOnce();
+    expect(manager.logger.logError).toHaveBeenCalledWith(
+      handlerError,
+      { source: "resultHandler" },
+    );
+  });
+
   it("logs thrown event errors through the result handler", async () => {
     const resultHandler = vi.fn();
     const { client, manager } = createMockClient(["GuildMessages"], {
