@@ -513,7 +513,7 @@ export class CommandManager
           === ApplicationCommandType.ChatInput && cmd.name === name,
       );
       if (!apiCommand) {
-        this.trace(`slash commands "${name}" not found in API`);
+        this.trace(`slash command "${name}" not found in API`);
       }
       else {
         this.trace(`resolve slash command ${name} (${apiCommand.id}) !`);

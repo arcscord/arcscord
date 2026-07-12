@@ -22,7 +22,7 @@ export type ArcClientLoggerOptions = {
   /**
    * Change the logger used by the framework, need a constructor, not a class !
    *
-   * Only update logger builds in Client, defaultLogger don't are updated !
+   * Only loggers created by ArcClient are updated; defaultLogger is not updated.
    * @default {@link ArcLogger}
    */
   customLogger?: LoggerConstructor;
@@ -169,7 +169,7 @@ export type BaseMessageContext = {
  */
 export type MessageOptions = {
   /**
-   * Message if an internal error happen
+   * Message shown when an internal error occurs.
    * @param errId the error id
    */
   error?: (errId?: string, context?: BaseMessageContext) => BaseMessageOptions;

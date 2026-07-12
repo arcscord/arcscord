@@ -111,7 +111,7 @@ export class ArcClient extends DJSClient {
                 .setTitle("Internal Error.")
                 .setColor("Orange")
                 .setDescription(
-                  `A internal error happen, error id ${errId}, please contact bot owner if error repeat`,
+                  `An internal error occurred. Error ID: ${errId}. Please contact the bot owner if the error recurs.`,
                 ),
             ],
           };

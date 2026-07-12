@@ -431,7 +431,7 @@ export class ComponentManager extends BaseManager {
     if (typed.typedSingleValue && interaction.values.length > 1) {
       return error(new ArcscordError({
         code: arcscordErrorCodes.ComponentTypedSelectInvalidValues,
-        message: `received multiples values for typed single string select ${component.route}`,
+        message: `received multiple values for typed single-string select ${component.route}`,
         metadata: {
           interactionId: interaction.id,
           route: component.route,
@@ -463,7 +463,7 @@ export class ComponentManager extends BaseManager {
     if (components.length === 0) {
       return error(new ArcscordError({
         code: arcscordErrorCodes.ComponentNotFound,
-        message: `didn't found component with id ${interaction.customId}`,
+        message: `component with ID ${interaction.customId} was not found`,
         metadata: {
           interactionId: interaction.id,
           route: interaction.customId,
