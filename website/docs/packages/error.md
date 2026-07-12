@@ -76,10 +76,10 @@ return error({ _tag: "TicketLimitReached" }); // [object, null]
 
 ### `multiple(...callbacks)`
 
-Runs a list of Result-producing callbacks **sequentially** and short-circuits on the first failure. Each callback runs only if every previous one succeeded, so later operations are skipped as soon as one fails or throws. Returns a `Promise`.
+Runs a list of Result-producing callbacks **sequentially** and short-circuits on the first failure. Each callback runs only if every previous one succeeded, so later operations are skipped as soon as one returns an error. Returns a `Promise`.
 
 ```ts
-import { multiple, ok } from "@arcscord/error";
+import { forceSafe, multiple, ok } from "@arcscord/error";
 
 const [err, val] = await multiple(
   () => ok("hello"),
@@ -90,7 +90,13 @@ const [err, val] = await multiple(
 // err is the first error encountered (or null)
 ```
 
-Passing callbacks — rather than already-computed Results — is what lets `multiple` skip the remaining work. If a callback throws, the throw is wrapped into `error(anyToError(e))` and the remaining callbacks are not executed.
+Passing callbacks — rather than already-computed Results — is what lets `multiple` skip the remaining work. `multiple` does not catch exceptions: if a callback throws or returns a rejected promise, its value propagates through the returned promise and the remaining callbacks are not executed. To return a thrown value as a `ResultErr`, wrap that callback with `forceSafe`:
+
+```ts
+const [err] = await multiple(
+  () => forceSafe(() => JSON.parse(rawInput)),
+);
+```
 
 ### `multipleParallel(...callbacks)`
 
@@ -108,7 +114,7 @@ const [err, values] = await multipleParallel(
 // err is the first error encountered by position (or null)
 ```
 
-Choose `multipleParallel` when the operations are independent and you want them running concurrently; choose `multiple` when they must run one after another and later ones should be skipped on the first failure. As with `multiple`, a thrown value is wrapped into `error(anyToError(e))`; every callback still runs to completion, matching `Promise.all` semantics.
+Choose `multipleParallel` when the operations are independent and you want them running concurrently; choose `multiple` when they must run one after another and later ones should be skipped on the first failure. `multipleParallel` does not catch exceptions: if a callback throws or returns a rejected promise, its value propagates through the returned promise. To return a thrown value as a `ResultErr`, wrap that callback with `forceSafe`. Other callbacks may already be running, matching `Promise.all` semantics.
 
 ### `forceSafe(fn)`
 

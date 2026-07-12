@@ -47,6 +47,16 @@ it("multiple returns a Promise of the last success and the unified error", () =>
   expectTypeOf(result).toEqualTypeOf<Promise<Result<string, Error>>>();
 });
 
+it("multiple does not add Error to callback result types", () => {
+  type TicketLimitReached = { _tag: "TicketLimitReached" };
+
+  const result = multiple(
+    (): Result<number, TicketLimitReached> => ok(1),
+  );
+
+  expectTypeOf(result).toEqualTypeOf<Promise<Result<number, TicketLimitReached>>>();
+});
+
 it("multipleParallel returns a Promise of the tuple of all success values", () => {
   const result = multipleParallel(
     (): Result<number, Error> => ok(1),
@@ -64,4 +74,14 @@ it("multipleParallel preserves custom error types", () => {
   );
 
   expectTypeOf(result).toEqualTypeOf<Promise<Result<[number, string], Error | TicketLimitReached>>>();
+});
+
+it("multipleParallel does not add Error to callback result types", () => {
+  type TicketLimitReached = { _tag: "TicketLimitReached" };
+
+  const result = multipleParallel(
+    (): Result<number, TicketLimitReached> => ok(1),
+  );
+
+  expectTypeOf(result).toEqualTypeOf<Promise<Result<[number], TicketLimitReached>>>();
 });

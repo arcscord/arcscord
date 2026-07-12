@@ -1,6 +1,6 @@
 import type { Result } from "../";
 import { describe, expect, it, vi } from "vitest";
-import { error, multiple, multipleParallel, ok } from "../";
+import { error, forceSafe, multiple, multipleParallel, ok } from "../";
 
 class CustomError extends Error {}
 class AnotherError extends Error {}
@@ -51,16 +51,26 @@ describe("multiple", () => {
     expect(later).not.toHaveBeenCalled();
   });
 
-  it("should wrap a thrown value into an error and interrupt the rest", async () => {
+  it("should propagate a thrown value and interrupt the rest", async () => {
     const later = vi.fn((): Result<boolean, Error> => ok(true));
+    await expect(
+      multiple(
+        (): Result<number, Error> => {
+          throw new Error("boom");
+        },
+        later,
+      ),
+    ).rejects.toThrow("boom");
+    expect(later).not.toHaveBeenCalled();
+  });
+
+  it("should return a thrown value as an error when a callback uses forceSafe", async () => {
     const result = await multiple(
-      (): Result<number, Error> => {
+      () => forceSafe((): number => {
         throw new Error("boom");
-      },
-      later,
+      }),
     );
     expect(result).toEqual(error(new Error("boom")));
-    expect(later).not.toHaveBeenCalled();
   });
 
   it("should handle a single erroring callback", async () => {
@@ -110,11 +120,24 @@ describe("multipleParallel", () => {
     expect(result).toEqual(error(new CustomError("first")));
   });
 
-  it("should wrap a thrown value into an error", async () => {
+  it("should propagate a thrown value", async () => {
+    const later = vi.fn((): Result<boolean, Error> => ok(true));
+    await expect(
+      multipleParallel(
+        (): Result<number, Error> => {
+          throw new Error("boom");
+        },
+        later,
+      ),
+    ).rejects.toThrow("boom");
+    expect(later).toHaveBeenCalledTimes(1);
+  });
+
+  it("should return a thrown value as an error when a callback uses forceSafe", async () => {
     const result = await multipleParallel(
-      (): Result<number, Error> => {
+      () => forceSafe((): number => {
         throw new Error("boom");
-      },
+      }),
       (): Result<boolean, Error> => ok(true),
     );
     expect(result).toEqual(error(new Error("boom")));

@@ -54,16 +54,19 @@ export type MultipleCallback<T, E extends NonNullish> = () => Result<T, E> | Pro
 /**
  * Runs a list of `Result`-producing callbacks sequentially, short-circuiting on
  * the first failure. Each callback runs only if every previous one succeeded, so
- * later operations are skipped as soon as one returns an error or throws.
+ * later operations are skipped as soon as one returns an error.
  *
- * If a callback throws, the throw is wrapped into `error(anyToError(e))` (like
- * {@link forceSafe}) and the remaining callbacks are not executed.
+ * This function does not catch callback throws. If a callback throws or returns
+ * a rejected promise, that value propagates through the returned promise and
+ * later callbacks are not executed. Wrap a callback with {@link forceSafe} when
+ * its throws should be returned as a `ResultErr` instead.
  *
  * @param callbacks - Callbacks producing `Result`s, possibly of different types.
  * @returns A `Result` with the last success value or the first encountered error.
  *
  * The success type is inferred as the success type of the last callback. The
- * error type is unified across all callbacks (plus `Error` from wrapped throws).
+ * error type is unified across all callbacks. Callback throws are not represented
+ * in the `Result` type because they propagate through the returned promise.
  */
 export async function multiple<
   TLastSuccess,
@@ -74,16 +77,10 @@ export async function multiple<
     ...{ [K in keyof TErrors]: MultipleCallback<unknown, TErrors[K]> },
     MultipleCallback<TLastSuccess, TLastError>,
   ]
-): Promise<Result<TLastSuccess, TErrors[number] | TLastError | Error>> {
+): Promise<Result<TLastSuccess, TErrors[number] | TLastError>> {
   let last: Result<unknown, NonNullish> = ok(true);
   for (const callback of callbacks) {
-    let result: Result<unknown, NonNullish>;
-    try {
-      result = await callback();
-    }
-    catch (e) {
-      return error(anyToError(e));
-    }
+    const result = await callback();
     if (result[0] !== null) {
       return result as ResultErr<TErrors[number] | TLastError>;
     }
@@ -111,34 +108,30 @@ type CallbackError<C> = Extract<CallbackResult<C>, ResultErr<NonNullish>> extend
  * callbacks start at once and are all awaited — nothing is short-circuited.
  *
  * On success, resolves with `ok([...values])` in callback order. If any callback
- * fails (returns an error, or throws — throws are wrapped via {@link anyToError}),
- * resolves with the **first error by position**. Every callback still runs to
- * completion, matching `Promise.all` execution semantics.
+ * fails (returns an error), resolves with the **first error by position**. Every
+ * callback still runs to completion, matching `Promise.all` execution semantics.
+ *
+ * This function does not catch callback throws. If a callback throws or returns
+ * a rejected promise, that value propagates through the returned promise. Wrap a
+ * callback with {@link forceSafe} when its throws should be returned as a
+ * `ResultErr` instead.
  *
  * @param callbacks - Callbacks producing `Result`s, run concurrently.
  * @returns A `Result` with the tuple of all success values, or the first error.
  *
  * The success type is inferred as the tuple of each callback's success type. The
- * error type is unified across all callbacks (plus `Error` from wrapped throws).
+ * error type is unified across all callbacks. Callback throws are not represented
+ * in the `Result` type because they propagate through the returned promise.
  */
 export async function multipleParallel<T extends readonly AnyMultipleCallback[]>(
   ...callbacks: T
-): Promise<Result<{ -readonly [K in keyof T]: CallbackValue<T[K]> }, CallbackError<T[number]> | Error>> {
-  const results = await Promise.all(
-    callbacks.map(async (callback): Promise<Result<unknown, NonNullish>> => {
-      try {
-        return await callback();
-      }
-      catch (e) {
-        return error(anyToError(e));
-      }
-    }),
-  );
+): Promise<Result<{ -readonly [K in keyof T]: CallbackValue<T[K]> }, CallbackError<T[number]>>> {
+  const results = await Promise.all(callbacks.map(callback => Promise.resolve().then(callback)));
 
   const values: unknown[] = [];
   for (const [err, value] of results) {
     if (err !== null) {
-      return error(err) as ResultErr<CallbackError<T[number]> | Error>;
+      return error(err) as ResultErr<CallbackError<T[number]>>;
     }
     values.push(value);
   }
