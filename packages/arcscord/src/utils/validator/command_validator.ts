@@ -52,7 +52,7 @@ export function validateCommands(
   for (const command of commands) {
     if (!isSubCommand(command)) {
       const [validationErr] = validateCommandDefinition(command, client, context);
-      if (validationErr) {
+      if (validationErr !== null) {
         return error(validationErr);
       }
 
@@ -74,7 +74,7 @@ export function validateCommands(
           `${type} command`,
           withCommandName(context, definition.name),
         );
-        if (duplicateErr) {
+        if (duplicateErr !== null) {
           return error(duplicateErr);
         }
       }
@@ -82,7 +82,7 @@ export function validateCommands(
     else {
       const commandContext = withCommandName(context, command.name);
       const [validationErr] = validateSubCommandListDefinition(command, client, commandContext);
-      if (validationErr) {
+      if (validationErr !== null) {
         return error(validationErr);
       }
 
@@ -93,7 +93,7 @@ export function validateCommands(
         "slash command",
         commandContext,
       );
-      if (duplicateErr) {
+      if (duplicateErr !== null) {
         return error(duplicateErr);
       }
     }
@@ -110,7 +110,7 @@ function validateCommandDefinition(
   if (definition.slash) {
     const commandContext = withCommandName(context, definition.slash.name);
     const [err] = validateSlashCommandDefinition(definition.slash, `slash command "${definition.slash.name}"`, client, commandContext);
-    if (err) {
+    if (err !== null) {
       return error(err);
     }
   }
@@ -118,7 +118,7 @@ function validateCommandDefinition(
   if (definition.message) {
     const commandContext = withCommandName(context, definition.message.name);
     const [err] = validateBaseCommandDefinition(definition.message, `message command "${definition.message.name}"`, "contextMenu", client, commandContext);
-    if (err) {
+    if (err !== null) {
       return error(err);
     }
   }
@@ -126,7 +126,7 @@ function validateCommandDefinition(
   if (definition.user) {
     const commandContext = withCommandName(context, definition.user.name);
     const [err] = validateBaseCommandDefinition(definition.user, `user command "${definition.user.name}"`, "contextMenu", client, commandContext);
-    if (err) {
+    if (err !== null) {
       return error(err);
     }
   }
@@ -140,7 +140,7 @@ function validateSubCommandListDefinition(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [baseErr] = validateBaseCommandDefinition(command, `slash command "${command.name}"`, "slash", client, context);
-  if (baseErr) {
+  if (baseErr !== null) {
     return error(baseErr);
   }
 
@@ -151,7 +151,7 @@ function validateSubCommandListDefinition(
     client,
     context,
   );
-  if (descriptionErr) {
+  if (descriptionErr !== null) {
     return error(descriptionErr);
   }
 
@@ -166,7 +166,7 @@ function validateSubCommandListDefinition(
       `subcommand in slash command "${command.name}"`,
       subCommandContext,
     );
-    if (duplicateErr) {
+    if (duplicateErr !== null) {
       return error(duplicateErr);
     }
 
@@ -176,7 +176,7 @@ function validateSubCommandListDefinition(
       client,
       subCommandContext,
     );
-    if (subCommandErr) {
+    if (subCommandErr !== null) {
       return error(subCommandErr);
     }
   }
@@ -190,7 +190,7 @@ function validateSubCommandListDefinition(
       `subcommand group in slash command "${command.name}"`,
       groupContext,
     );
-    if (duplicateErr) {
+    if (duplicateErr !== null) {
       return error(duplicateErr);
     }
 
@@ -201,7 +201,7 @@ function validateSubCommandListDefinition(
       client,
       groupContext,
     );
-    if (groupErr) {
+    if (groupErr !== null) {
       return error(groupErr);
     }
   }
@@ -226,18 +226,18 @@ function validateSlashCommandDefinition(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [baseErr] = validateBaseCommandDefinition(command, path, "slash", client, context);
-  if (baseErr) {
+  if (baseErr !== null) {
     return error(baseErr);
   }
 
   const [descriptionErr] = validateDescription(command.description, command.descriptionLocalizations, `${path} description`, client, context);
-  if (descriptionErr) {
+  if (descriptionErr !== null) {
     return error(descriptionErr);
   }
 
   if (command.options) {
     const [optionsErr] = validateOptions(command.options, `${path} option`, client, context);
-    if (optionsErr) {
+    if (optionsErr !== null) {
       return error(optionsErr);
     }
   }
@@ -252,18 +252,18 @@ function validateSubCommandDefinition(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [nameErr] = validateName(command.name, command.nameLocalizations, `${path} name`, "slash", client, context);
-  if (nameErr) {
+  if (nameErr !== null) {
     return error(nameErr);
   }
 
   const [descriptionErr] = validateDescription(command.description, command.descriptionLocalizations, `${path} description`, client, context);
-  if (descriptionErr) {
+  if (descriptionErr !== null) {
     return error(descriptionErr);
   }
 
   if (command.options) {
     const [optionsErr] = validateOptions(command.options, `${path} option`, client, context);
-    if (optionsErr) {
+    if (optionsErr !== null) {
       return error(optionsErr);
     }
   }
@@ -279,12 +279,12 @@ function validateSubCommandGroupDefinition(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [nameErr] = validateName(name, groupDefinition.nameLocalizations, `${path} name`, "slash", client, context);
-  if (nameErr) {
+  if (nameErr !== null) {
     return error(nameErr);
   }
 
   const [descriptionErr] = validateDescription(groupDefinition.description, groupDefinition.descriptionLocalizations, `${path} description`, client, context);
-  if (descriptionErr) {
+  if (descriptionErr !== null) {
     return error(descriptionErr);
   }
 
@@ -302,7 +302,7 @@ function validateSubCommandGroupDefinition(
       `${path} subcommand`,
       subCommandContext,
     );
-    if (duplicateErr) {
+    if (duplicateErr !== null) {
       return error(duplicateErr);
     }
 
@@ -312,7 +312,7 @@ function validateSubCommandGroupDefinition(
       client,
       subCommandContext,
     );
-    if (subCommandErr) {
+    if (subCommandErr !== null) {
       return error(subCommandErr);
     }
   }
@@ -331,30 +331,30 @@ function validateOptions(
   for (const [optionName, option] of Object.entries(options)) {
     const optionPath = `${path} "${optionName}"`;
     const [duplicateErr] = validateUniqueName(optionNames, optionName, optionName, `${path}s`, context);
-    if (duplicateErr) {
+    if (duplicateErr !== null) {
       return error(duplicateErr);
     }
 
     const [nameErr] = validateName(optionName, option.nameLocalizations, `${optionPath} name`, "slash", client, context);
-    if (nameErr) {
+    if (nameErr !== null) {
       return error(nameErr);
     }
 
     const [descriptionErr] = validateDescription(option.description, option.descriptionLocalizations, `${optionPath} description`, client, context);
-    if (descriptionErr) {
+    if (descriptionErr !== null) {
       return error(descriptionErr);
     }
 
     if (option.type === "string") {
       const [lengthErr] = validateStringOptionLengthBounds(option, optionPath, context);
-      if (lengthErr) {
+      if (lengthErr !== null) {
         return error(lengthErr);
       }
     }
 
     if ("choices" in option && option.choices) {
       const [choicesErr] = validateOptionChoices(optionName, option, optionPath, client, context);
-      if (choicesErr) {
+      if (choicesErr !== null) {
         return error(choicesErr);
       }
     }
@@ -369,12 +369,12 @@ function validateStringOptionLengthBounds(option: Option, path: string, context:
   }
 
   const [minErr] = validateNumberBounds(option.min_length, path, "min_length", 0, COMMAND_STRING_OPTION_MAX_LENGTH, context);
-  if (minErr) {
+  if (minErr !== null) {
     return error(minErr);
   }
 
   const [maxErr] = validateNumberBounds(option.max_length, path, "max_length", 1, COMMAND_STRING_OPTION_MAX_LENGTH, context);
-  if (maxErr) {
+  if (maxErr !== null) {
     return error(maxErr);
   }
 
@@ -405,12 +405,12 @@ function validateOptionChoices(
 
   for (const choice of choices) {
     const [duplicateErr] = validateUniqueName(choiceNames, choice.name, choice.name, `${path} choice`, context);
-    if (duplicateErr) {
+    if (duplicateErr !== null) {
       return error(duplicateErr);
     }
 
     const [nameErr] = validateChoiceName(choice.name, choice.nameLocalizations, `${path} choice "${choice.name}" name`, client, context);
-    if (nameErr) {
+    if (nameErr !== null) {
       return error(nameErr);
     }
 
@@ -445,20 +445,20 @@ function validateName(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_NAME_MAX_LENGTH, context);
-  if (lengthErr) {
+  if (lengthErr !== null) {
     return error(lengthErr);
   }
 
   if (mode === "slash") {
     const [formatErr] = validateSlashNameFormat(value, path, context);
-    if (formatErr) {
+    if (formatErr !== null) {
       return error(formatErr);
     }
   }
 
   return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
     const [localeLengthErr] = validateRequiredStringLength(localeValue, localePath, COMMAND_NAME_MAX_LENGTH, context);
-    if (localeLengthErr) {
+    if (localeLengthErr !== null) {
       return error(localeLengthErr);
     }
 
@@ -478,7 +478,7 @@ function validateChoiceName(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_CHOICE_NAME_MAX_LENGTH, context);
-  if (lengthErr) {
+  if (lengthErr !== null) {
     return error(lengthErr);
   }
 
@@ -495,7 +495,7 @@ function validateDescription(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   const [lengthErr] = validateRequiredStringLength(value, path, COMMAND_DESCRIPTION_MAX_LENGTH, context);
-  if (lengthErr) {
+  if (lengthErr !== null) {
     return error(lengthErr);
   }
 
@@ -506,7 +506,7 @@ function validateDescription(
 
 function validateSlashNameFormat(value: string, path: string, context: CommandValidationContext): Result<true, ValidationFailure> {
   const [lowercaseErr] = validateLowercase(value, path, context);
-  if (lowercaseErr) {
+  if (lowercaseErr !== null) {
     return error(lowercaseErr);
   }
 

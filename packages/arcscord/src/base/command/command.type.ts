@@ -1,4 +1,4 @@
-import type { Result } from "@arcscord/error";
+import type { NonNullish, Result } from "@arcscord/error";
 import type {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
@@ -14,7 +14,7 @@ import type { MaybePromise } from "#/utils/type/util.type";
  * Normalized internal result of running a command.
  * Used by the manager after normalizing the raw return value of `run()`.
  */
-export type CommandRunResult<E = unknown> = Result<string | true, E>;
+export type CommandRunResult<E extends NonNullish = NonNullish> = Result<string | true, E>;
 
 /**
  * All values a `run()` function may return.
@@ -25,7 +25,7 @@ export type CommandRunResult<E = unknown> = Result<string | true, E>;
  * - `string` or `true` → `ok(value)`
  * - `Result<string | true, E>` → normalized as an expected failure or success
  */
-export type CommandRunReturn<E = unknown>
+export type CommandRunReturn<E extends NonNullish = NonNullish>
   = | void
     | string
     | true

@@ -14,9 +14,12 @@ describe("execution exits", () => {
     expect(normalizeHandlerReturn(error(failure))).toEqual({ status: "failure", failure });
   });
 
-  it("recognizes both valid Result tuple variants", () => {
+  it("recognizes valid Result tuple variants", () => {
     expect(isArcscordResult([null, true])).toBe(true);
     expect(isArcscordResult([{ _tag: "Denied" }, null])).toBe(true);
-    expect(isArcscordResult([null, null])).toBe(false);
+    // `[null, null]` is a valid `ok(null)` — at least one slot is null.
+    expect(isArcscordResult([null, null])).toBe(true);
+    // Two non-null slots cannot be a Result (error slot is never nullish).
+    expect(isArcscordResult([1, 2])).toBe(false);
   });
 });

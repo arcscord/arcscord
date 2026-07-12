@@ -186,7 +186,7 @@ export function validateLocalizations(
     }
 
     const [err] = validate(value, `${path} localization "${locale}"`);
-    if (err) {
+    if (err !== null) {
       return error(err);
     }
   }

@@ -431,10 +431,12 @@ export {
   anyToError,
   error,
   forceSafe,
+  isResult,
   multiple,
   ok,
 } from "@arcscord/error";
 export type {
+  NonNullish,
   Result,
   ResultErr,
   ResultOk,

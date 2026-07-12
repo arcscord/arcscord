@@ -86,7 +86,7 @@ export class ComponentManager extends BaseManager {
     let loaded = 0;
     for (const component of components) {
       const [err] = this.loadComponent(component);
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
       loaded++;
@@ -119,7 +119,7 @@ export class ComponentManager extends BaseManager {
     }
 
     const [middlewareValidationErr] = validateComponentMiddlewareNames(component.use, component.route);
-    if (middlewareValidationErr) {
+    if (middlewareValidationErr !== null) {
       return error(middlewareValidationErr);
     }
 
@@ -312,7 +312,7 @@ export class ComponentManager extends BaseManager {
 
     /* Route matching */
     const [matchErr, matchedComponents] = this.findMatchingComponents(interaction, type);
-    if (matchErr) {
+    if (matchErr !== null) {
       /* findMatchingComponents returns an error for both "not found" and "multiple matches" */
       const isMultiple = matchErr.code === arcscordErrorCodes.ComponentMultipleMatches;
       return this.sendDispatchError(
@@ -333,7 +333,7 @@ export class ComponentManager extends BaseManager {
         matched.component,
         interaction as StringSelectMenuInteraction,
       );
-      if (validationErr) {
+      if (validationErr !== null) {
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.typedSelectInvalidValues,
           "error",
@@ -345,7 +345,7 @@ export class ComponentManager extends BaseManager {
 
     /* Context creation */
     const [ctxErr, context] = this.createContext(interaction, type, locale, matched.params, matched.component);
-    if (ctxErr) {
+    if (ctxErr !== null) {
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
@@ -356,7 +356,7 @@ export class ComponentManager extends BaseManager {
 
     /* Defer */
     const [deferErr] = await this.handlePreReply(matched.component, context);
-    if (deferErr) {
+    if (deferErr !== null) {
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.deferFailed,
         "warn",
@@ -487,7 +487,7 @@ export class ComponentManager extends BaseManager {
       const [err] = await context.deferReply({
         flags: component.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
-      if (err) {
+      if (err !== null) {
         return error(new ArcscordError({
           code: arcscordErrorCodes.ComponentDeferFailed,
           message: "Failed to defer reply",

@@ -227,14 +227,14 @@ export class ArcClient extends DJSClient {
   ): Promise<Result<number, ArcscordError>> {
     await this.localeManager.ready;
     const [err, data] = this.commandManager.loadCommands(commands, group);
-    if (err) {
+    if (err !== null) {
       return error(err);
     }
     const [err2, data2] = guild
       ? await this.commandManager.pushGuildCommands(guild, data)
       : await this.commandManager.pushGlobalCommands(data);
 
-    if (err2) {
+    if (err2 !== null) {
       return error(err2);
     }
 
@@ -334,7 +334,7 @@ export class ArcClient extends DJSClient {
 
     if (handlers.events && handlers.events.length > 0) {
       const [err, count] = await this.loadEvents(handlers.events);
-      if (err) {
+      if (err !== null) {
         throw err;
       }
       report.events = count;
@@ -344,7 +344,7 @@ export class ArcClient extends DJSClient {
     }
     if (handlers.components && handlers.components.length > 0) {
       const [err, count] = await this.loadComponents(handlers.components);
-      if (err) {
+      if (err !== null) {
         throw err;
       }
       report.components = count;
@@ -357,7 +357,7 @@ export class ArcClient extends DJSClient {
         await this.waitReady();
       }
       const [err, count] = await this.loadCommands(handlers.commands);
-      if (err) {
+      if (err !== null) {
         throw err;
       }
       report.commands = count;

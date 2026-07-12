@@ -1,3 +1,4 @@
+import type { NonNullish } from "@arcscord/error";
 import type { ClientEvents } from "discord.js";
 import type { ArcClient, EventHandleResult } from "#/base";
 import type { EventHandler } from "#/base/event/event.type";
@@ -42,7 +43,7 @@ export class EventContext<E extends keyof ClientEvents = keyof ClientEvents> imp
    * @param failure - The expected failure value.
    * @returns An error event handle result.
    */
-  error<Failure>(failure: Failure): EventHandleResult<Failure> {
+  error<Failure extends NonNullish>(failure: Failure): EventHandleResult<Failure> {
     return error(failure);
   }
 
@@ -58,7 +59,7 @@ export class EventContext<E extends keyof ClientEvents = keyof ClientEvents> imp
     for (const func of funcList) {
       const [err] = await func;
 
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }

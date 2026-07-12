@@ -1,4 +1,4 @@
-import type { Result } from "@arcscord/error";
+import type { NonNullish, Result } from "@arcscord/error";
 import type { ClientEvents } from "discord.js";
 import type { EventContext } from "#/base/event/event_context";
 import type { MaybePromise } from "#/utils";
@@ -7,7 +7,7 @@ import type { MaybePromise } from "#/utils";
  * Normalized internal result of an event handler.
  * Used by the manager after normalizing the raw return value of `run()`.
  */
-export type EventHandleResult<E = unknown> = Result<string | true, E>;
+export type EventHandleResult<E extends NonNullish = NonNullish> = Result<string | true, E>;
 
 /**
  * All values an event `run()` function may return.
@@ -18,7 +18,7 @@ export type EventHandleResult<E = unknown> = Result<string | true, E>;
  * - `string` or `true` → `ok(value)`
  * - `Result<string | true, E>` → normalized as an expected failure or success
  */
-export type EventHandleReturn<E = unknown>
+export type EventHandleReturn<E extends NonNullish = NonNullish>
   = | void
     | string
     | true

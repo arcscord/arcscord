@@ -1,3 +1,4 @@
+import type { NonNullish } from "@arcscord/error";
 import type {
   ApplicationCommandOptionChoiceData,
   AutocompleteFocusedOption,
@@ -260,7 +261,7 @@ export class AutocompleteContext<
    *
    * @param failure - The expected failure value.
    */
-  error<E>(failure: E): CommandRunResult<E> {
+  error<E extends NonNullish>(failure: E): CommandRunResult<E> {
     return error(failure);
   }
 
@@ -276,7 +277,7 @@ export class AutocompleteContext<
     for (const func of funcList) {
       const [err] = await func;
 
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }

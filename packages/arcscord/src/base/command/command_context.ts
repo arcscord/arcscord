@@ -1,3 +1,4 @@
+import type { NonNullish } from "@arcscord/error";
 import type { APIInteractionGuildMember } from "discord-api-types/v10";
 import type {
   ChatInputCommandInteraction,
@@ -256,7 +257,7 @@ export class BaseCommandContext<
   /**
    * Create an error result
    */
-  error<E>(failure: E): CommandRunResult<E> {
+  error<E extends NonNullish>(failure: E): CommandRunResult<E> {
     return error(failure);
   }
 
@@ -269,7 +270,7 @@ export class BaseCommandContext<
     for (const func of funcList) {
       const [err] = await func;
 
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }

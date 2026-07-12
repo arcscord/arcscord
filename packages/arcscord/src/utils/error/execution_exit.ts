@@ -1,4 +1,5 @@
-import type { Result } from "@arcscord/error";
+import type { NonNullish, Result } from "@arcscord/error";
+import { isResult } from "@arcscord/error";
 
 /** Successful handler execution. */
 export type ExecutionSuccess<T> = {
@@ -40,26 +41,24 @@ export function executionDefect(defect: unknown): ExecutionDefect {
 }
 
 /** Normalizes raw handler values and Arcscord Result tuples to an {@link ExecutionExit}. */
-export function normalizeHandlerReturn<T, E>(
+export function normalizeHandlerReturn<T, E extends NonNullish>(
   value: void | T | Result<T, E>,
 ): ExecutionExit<T | true, E> {
   if (value === undefined || value === null) {
     return executionSuccess(true);
   }
-  if (isArcscordResult(value)) {
+  if (isResult(value)) {
     const [failure, success] = value;
     return failure === null
       ? executionSuccess(success as T)
-      : executionFailure(failure);
+      : executionFailure(failure as E);
   }
   return executionSuccess(value as T);
 }
 
-/** Returns whether a value has the shape of an Arcscord Result tuple. */
-export function isArcscordResult(value: unknown): value is Result<unknown, unknown> {
-  if (!Array.isArray(value) || value.length !== 2) {
-    return false;
-  }
-  const [failure, success] = value as [unknown, unknown];
-  return (failure === null) !== (success === null);
-}
+/**
+ * Returns whether a value has the shape of an Arcscord Result tuple.
+ *
+ * @deprecated Use `isResult` from `@arcscord/error` instead.
+ */
+export const isArcscordResult = isResult;

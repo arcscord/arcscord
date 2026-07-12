@@ -91,7 +91,7 @@ export class CommandManager
     const [commandsValidationErr] = validateCommands(commands, this.client, {
       group,
     });
-    if (commandsValidationErr) {
+    if (commandsValidationErr !== null) {
       return error(commandsValidationErr);
     }
 
@@ -105,12 +105,12 @@ export class CommandManager
       if (!isSubCommand(command)) {
         const commandName = command.slash?.name ?? command.message?.name ?? command.user?.name ?? "unknown";
         const [middlewareValidationErr] = validateCommandMiddlewareNames(command.use, commandName, group);
-        if (middlewareValidationErr) {
+        if (middlewareValidationErr !== null) {
           return error(middlewareValidationErr);
         }
 
         const [validationErr] = this.validateCommandAutocomplete(command, group);
-        if (validationErr) {
+        if (validationErr !== null) {
           return error(validationErr);
         }
 
@@ -158,12 +158,12 @@ export class CommandManager
       }
       else {
         const [middlewareValidationErr] = this.validateSubCommandListMiddlewareNames(command, group);
-        if (middlewareValidationErr) {
+        if (middlewareValidationErr !== null) {
           return error(middlewareValidationErr);
         }
 
         const [validationErr] = this.validateSubCommandListAutocomplete(command, group);
-        if (validationErr) {
+        if (validationErr !== null) {
           return error(validationErr);
         }
 
@@ -185,7 +185,7 @@ export class CommandManager
   private validateSubCommandListMiddlewareNames(command: SlashWithSubsCommandDefinition, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     for (const subCommand of command.subCommands ?? []) {
       const [err] = validateCommandMiddlewareNames(subCommand.use, `${command.name}.${subCommand.name}`, group);
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }
@@ -193,7 +193,7 @@ export class CommandManager
     for (const [groupName, subCommandGroup] of Object.entries(command.subCommandsGroups ?? {})) {
       for (const subCommand of subCommandGroup.subCommands) {
         const [err] = validateCommandMiddlewareNames(subCommand.use, `${command.name}.${groupName}.${subCommand.name}`, group);
-        if (err) {
+        if (err !== null) {
           return error(err);
         }
       }
@@ -218,7 +218,7 @@ export class CommandManager
   private validateSubCommandListAutocomplete(command: SlashWithSubsCommandDefinition, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
     for (const subCommand of command.subCommands ?? []) {
       const [err] = this.validateSubCommandAutocomplete(subCommand, subCommand.autocomplete, `${command.name}.${subCommand.name}`, group);
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }
@@ -232,7 +232,7 @@ export class CommandManager
             `${command.name}.${groupName}.${subCommand.name}`,
             group,
           );
-          if (err) {
+          if (err !== null) {
             return error(err);
           }
         }
@@ -655,7 +655,7 @@ export class CommandManager
 
     /* Resolve command from registry */
     const [cmdErr, infos] = this.getCommand(interaction);
-    if (cmdErr) {
+    if (cmdErr !== null) {
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.commandNotFound,
         "error",
@@ -674,7 +674,7 @@ export class CommandManager
           ? await parseOptions<typeof command.options>(interaction, command.options)
           : [null, null];
 
-        if (optErr) {
+        if (optErr !== null) {
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -699,7 +699,7 @@ export class CommandManager
           ? await parseOptions<typeof command.slash.options>(interaction, command.slash.options)
           : [null, null];
 
-        if (optErr) {
+        if (optErr !== null) {
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -801,7 +801,7 @@ export class CommandManager
         flags: command.preReply === "ephemeral" ? MessageFlags.Ephemeral : undefined,
       });
 
-      if (deferErr) {
+      if (deferErr !== null) {
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.deferFailed,
           "warn",
@@ -872,7 +872,7 @@ export class CommandManager
 
   private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
     const [cmdErr, infos] = this.getCommand(interaction);
-    if (cmdErr) {
+    if (cmdErr !== null) {
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
       applyDiagnosticLevel(this.logger, level, cmdErr);
       return;
@@ -913,7 +913,7 @@ export class CommandManager
 
     try {
       const [acErr] = await handler(context);
-      if (acErr) {
+      if (acErr !== null) {
         const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
         if (isArcscordError(acErr)) {
           applyDiagnosticLevel(this.logger, level, acErr);

@@ -1,3 +1,4 @@
+import type { NonNullish } from "@arcscord/error";
 import type {
   InteractionDeferReplyOptions,
   InteractionEditReplyOptions,
@@ -222,7 +223,7 @@ export class BaseComponentContext<
    * @param failure The expected failure value.
    * @returns The error result.
    */
-  error<E>(failure: E): ComponentRunResult<E> {
+  error<E extends NonNullish>(failure: E): ComponentRunResult<E> {
     return error(failure);
   }
 
@@ -237,7 +238,7 @@ export class BaseComponentContext<
     for (const func of funcList) {
       const [err] = await func;
 
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
     }

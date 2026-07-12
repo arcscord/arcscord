@@ -58,7 +58,7 @@ export class EventManager extends BaseManager {
     let loaded = 0;
     for (const event of events) {
       const [err] = await this.loadAnyEvent(event);
-      if (err) {
+      if (err !== null) {
         return error(err);
       }
       loaded++;
@@ -85,7 +85,7 @@ export class EventManager extends BaseManager {
     }
 
     const [intentErr] = this.checkIntents(event);
-    if (intentErr) {
+    if (intentErr !== null) {
       return error(intentErr);
     }
 
