@@ -303,8 +303,6 @@ export class ComponentManager extends BaseManager {
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
   ): Promise<void> {
-    await this.client.localeManager.ready;
-
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
       user: interaction.user,

@@ -645,8 +645,6 @@ export class CommandManager
   }
 
   private async handleInteraction(interaction: CommandInteraction): Promise<void> {
-    await this.client.localeManager.ready;
-
     /* Locale — resolved first so dispatch error replies are translated */
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
@@ -873,8 +871,6 @@ export class CommandManager
   }
 
   private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
-    await this.client.localeManager.ready;
-
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr) {
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
