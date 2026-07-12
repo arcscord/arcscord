@@ -313,7 +313,7 @@ jobs:
           {
             echo "## Example bot: ${{ matrix.name }}"
             echo ""
-            echo "Tested against the **local repo build** of arcscord (packed tarball override)."
+            echo "Tested against the **local repo builds** of arcscord and @arcscord/error (packed tarball overrides)."
             echo ""
             echo "| Check | Command | Result |"
             echo "| --- | --- | --- |"

@@ -1,7 +1,8 @@
 /**
- * Points a standalone example at the *local repo build* of arcscord (and
- * `@arcscord/middleware`) instead of the published npm version, by injecting a
- * pnpm `overrides:` block into the shared examples workspace.
+ * Points a standalone example at the *local repo builds* of arcscord (and its
+ * `@arcscord/error` dependency, plus `@arcscord/middleware`) instead of the
+ * published npm versions, by injecting a pnpm `overrides:` block into the
+ * shared examples workspace.
  *
  * The example's committed `package.json` keeps the published version spec (so a
  * user who clones the branch gets a runnable example against the release); this
@@ -11,8 +12,8 @@
  *
  * Usage: node scripts/link-local-arcscord.mjs <exampleDir> <tarballDir>
  *   <exampleDir>  path to the example (e.g. examples/starter-bot)
- *   <tarballDir>  dir holding arcscord.tgz / middleware.tgz (staging or the
- *                 downloaded CI artifact)
+ *   <tarballDir>  dir holding error.tgz / arcscord.tgz / middleware.tgz
+ *                 (staging or the downloaded CI artifact)
  */
 import { readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -30,16 +31,20 @@ const tarballDir = path.resolve(tarballArg);
 // Local packages that can shadow their published counterparts, mapped to the
 // stable tarball name produced by scripts/pack-local.mjs.
 const localPackages = {
-  "arcscord": "arcscord.tgz",
-  "@arcscord/middleware": "middleware.tgz",
+  "@arcscord/error": {
+    tarball: "error.tgz",
+    transitiveOf: ["arcscord", "@arcscord/middleware"],
+  },
+  "arcscord": { tarball: "arcscord.tgz" },
+  "@arcscord/middleware": { tarball: "middleware.tgz" },
 };
 
 const pkg = JSON.parse(await readFile(path.join(exampleDir, "package.json"), "utf8"));
 const declared = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const overrides = [];
-for (const [name, tarball] of Object.entries(localPackages)) {
-  if (declared[name]) {
+for (const [name, { tarball, transitiveOf = [] }] of Object.entries(localPackages)) {
+  if (declared[name] || transitiveOf.some(dependency => declared[dependency])) {
     // Absolute file: path so resolution is independent of the workspace cwd.
     const tarballPath = path.join(tarballDir, tarball);
     overrides.push(`  "${name}": "file:${tarballPath}"`);
