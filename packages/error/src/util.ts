@@ -12,9 +12,13 @@ import type { NonNullish, Result } from "./type";
  * @returns `true` if `value` is a `Result` tuple.
  */
 export function isResult(value: unknown): value is Result<unknown, NonNullish> {
-  return Array.isArray(value)
-    && value.length === 2
-    && (value[0] === null || value[1] === null);
+  if (!Array.isArray(value) || value.length !== 2) {
+    return false;
+  }
+  const [err, result] = value;
+
+  return err === null
+    || (err !== undefined && result === null);
 }
 
 /**
