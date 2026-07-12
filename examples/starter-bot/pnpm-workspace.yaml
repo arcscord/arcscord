@@ -1,3 +1,6 @@
+minimumReleaseAgeExclude:
+  - "@arcscord/error"
+  - arcscord
 shellEmulator: true
 
 trustPolicy: no-downgrade

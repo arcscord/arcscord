@@ -1,7 +1,7 @@
 minimumReleaseAgeExclude:
-  - "@arcscord/error@3.0.0"
-  - "@arcscord/middleware@1.0.0-next.2"
-  - arcscord@1.0.0-next.3
+  - "@arcscord/error"
+  - "@arcscord/middleware"
+  - arcscord
 shellEmulator: true
 trustPolicy: no-downgrade
 
