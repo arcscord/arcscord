@@ -36,14 +36,13 @@
     "typecheck": "tsc -p tsconfig.eslint.json",
     "docs": "typedoc"
   },
-  "dependencies": {
-    "arcscord": "workspace:^"
-  },
   "peerDependencies": {
+    "arcscord": "workspace:^",
     "discord.js": "^14.26.4",
     "typescript": ">=5.4.0"
   },
   "devDependencies": {
+    "arcscord": "workspace:^",
     "discord.js": "^14.26.4",
     "tsdown": "0.22.4",
     "typescript": "^6.0.3"

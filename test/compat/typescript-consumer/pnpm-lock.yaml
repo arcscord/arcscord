@@ -13,7 +13,7 @@ importers:
     dependencies:
       '@arcscord/middleware':
         specifier: file:vendor/middleware.tgz
-        version: file:vendor/middleware.tgz(discord.js@14.26.5)(typescript@5.4.2)
+        version: file:vendor/middleware.tgz(arcscord@file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2))(discord.js@14.26.5)(typescript@5.4.2)
       arcscord:
         specifier: file:vendor/arcscord.tgz
         version: file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2)
@@ -34,10 +34,11 @@ packages:
     resolution: {integrity: sha512-RQBy2kDP6H6uCUYMvi85M1P9xtDUaSWWcS2uYXhCiVHyLJNpXMyUj/5kDM4DhwpoiJoEHa8U63jbi1UevWLdnA==}
 
   '@arcscord/middleware@file:vendor/middleware.tgz':
-    resolution: {integrity: sha512-MVOtFhRVk45RfgtszamsfiUS0IbcwJWQYWHvSfZ4BbPN0D7+tWVQWITrY4P2a1PVZSdpMXKBWxlV3J3RVsfPvg==, tarball: file:vendor/middleware.tgz}
-    version: 1.0.0-next.2
+    resolution: {integrity: sha512-s6RtFUtHnB60m+YBcjvctGHtSnZQf6W8fWT+k43quJ4Csl4Ak98V4uM20MTSuSMjvHvp9h6eitMLrqyae3q/IQ==, tarball: file:vendor/middleware.tgz}
+    version: 1.0.0-next.3
     engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
+      arcscord: ^1.0.0-next.4
       discord.js: ^14.26.4
       typescript: '>=5.4.0'
 
@@ -96,8 +97,8 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   arcscord@file:vendor/arcscord.tgz:
-    resolution: {integrity: sha512-Ls2VXlZB+ISiFJZo0bguhnOzAKqfThmIN+SxRWx8y8tZ44IZAuKXFWumZJKEXOn5w74xeSmMS0CxAO8497KLUw==, tarball: file:vendor/arcscord.tgz}
-    version: 1.0.0-next.3
+    resolution: {integrity: sha512-rpCMRBikhF3YYCPCZuthHTeHyTpbJ3DURobe7CPfrDCx+BZyYF64g518QsI9A3MMl8uCrBAONW2qanLR6Dsweg==, tarball: file:vendor/arcscord.tgz}
+    version: 1.0.0-next.4
     engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
       discord.js: '>=14.26.4'
@@ -164,7 +165,7 @@ snapshots:
 
   '@arcscord/error@3.0.0': {}
 
-  '@arcscord/middleware@file:vendor/middleware.tgz(discord.js@14.26.5)(typescript@5.4.2)':
+  '@arcscord/middleware@file:vendor/middleware.tgz(arcscord@file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2))(discord.js@14.26.5)(typescript@5.4.2)':
     dependencies:
       arcscord: file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2)
       discord.js: 14.26.5
