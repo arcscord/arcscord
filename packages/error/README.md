@@ -7,7 +7,7 @@ Result-style error handling for TypeScript, inspired by Go. Instead of throwing 
 
 This pattern makes error paths visible in function signatures and forces you to handle failures at the call site. It pairs well with TypeScript's discriminated unions: the type of `value` is only accessible when `error` is `null`, so the compiler guides you toward correct handling.
 
-`@arcscord/error` is used by the entire arcscord ecosystem. All `run()` handlers return `Result<string | true, XxxError>`, and the framework uses the error value to decide how to respond to the user.
+`@arcscord/error` is used by the entire arcscord ecosystem. 
 
 ## Install
 

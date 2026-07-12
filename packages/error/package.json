@@ -1,6 +1,6 @@
 {
   "name": "@arcscord/error",
-  "version": "2.0.2",
+  "version": "3.0.0",
   "description": "A custom error handling system",
   "author": "Arcoz0308",
   "license": "MIT",
