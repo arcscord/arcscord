@@ -1,5 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { anyToError } from "../";
+import { anyToError, error, isResult, ok } from "../";
+
+describe("isResult function", () => {
+  it("returns true for ok results, including ok(null)", () => {
+    expect(isResult(ok(42))).toBe(true);
+    expect(isResult(ok(null))).toBe(true);
+  });
+
+  it("returns true for error results", () => {
+    expect(isResult(error(new Error("boom")))).toBe(true);
+    expect(isResult(error({ _tag: "Denied" }))).toBe(true);
+  });
+
+  it("returns false for non-Result values", () => {
+    expect(isResult(null)).toBe(false);
+    expect(isResult("done")).toBe(false);
+    expect(isResult([1])).toBe(false);
+    expect(isResult([1, 2, 3])).toBe(false);
+    // two non-null slots cannot be a Result (error slot is never nullish)
+    expect(isResult([1, 2])).toBe(false);
+  });
+});
 
 describe("anyToError function", () => {
   it("should return the same Error object if input is an Error", () => {

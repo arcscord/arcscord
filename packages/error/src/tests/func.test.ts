@@ -23,6 +23,16 @@ describe("result functions", () => {
 
       expect(result).toEqual([failure, null]);
     });
+
+    it("should reject null as an error value", () => {
+      // @ts-expect-error null is not a valid error value
+      expect(() => error(null)).toThrow(TypeError);
+    });
+
+    it("should reject undefined as an error value", () => {
+      // @ts-expect-error undefined is not a valid error value
+      expect(() => error(undefined)).toThrow(TypeError);
+    });
   });
 
   describe("forceSafe function", () => {

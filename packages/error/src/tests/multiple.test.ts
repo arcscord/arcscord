@@ -1,69 +1,81 @@
 import type { Result } from "../";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { error, multiple, ok } from "../";
 
 class CustomError extends Error {}
 class AnotherError extends Error {}
 
 describe("multiple", () => {
-  it("should return the last success if all results are successful", () => {
-    const result = multiple(
-      ok(1) as Result<number, Error>,
-      ok("two") as Result<string, Error>,
-      ok(true) as Result<boolean, CustomError>,
+  it("should return the last success if all callbacks are successful", async () => {
+    const result = await multiple(
+      (): Result<number, Error> => ok(1),
+      (): Result<string, Error> => ok("two"),
+      (): Result<boolean, CustomError> => ok(true),
     );
     expect(result).toEqual(ok(true));
   });
 
-  it("should return the first encountered error if any results are errors", () => {
-    const result = multiple(
-      ok(1) as Result<number, Error>,
-      error(new CustomError("error occurred")) as Result<null, CustomError>,
-      ok(true) as Result<boolean, AnotherError>,
+  it("should return the first encountered error if any callback errors", async () => {
+    const result = await multiple(
+      (): Result<number, Error> => ok(1),
+      (): Result<null, CustomError> => error(new CustomError("error occurred")),
+      (): Result<boolean, AnotherError> => ok(true),
     );
     expect(result).toEqual(error(new CustomError("error occurred")));
   });
 
-  it("should return the first encountered error among multiple errors", () => {
-    const result = multiple(
-      ok(1) as Result<number, Error>,
-      error(new CustomError("first error")) as Result<null, CustomError>,
-      error(new AnotherError("second error")) as Result<null, AnotherError>,
+  it("should return the first encountered error among multiple errors", async () => {
+    const result = await multiple(
+      (): Result<number, Error> => ok(1),
+      (): Result<null, CustomError> => error(new CustomError("first error")),
+      (): Result<null, AnotherError> => error(new AnotherError("second error")),
     );
     expect(result).toEqual(error(new CustomError("first error")));
   });
 
-  it("should handle a mixture of success and error results correctly", () => {
-    const result = multiple(
-      ok(1) as Result<number, CustomError>,
-      error(new AnotherError("another error")) as Result<null, AnotherError>,
-      ok(true) as Result<boolean, Error>,
+  it("should await async callbacks", async () => {
+    const result = await multiple(
+      async (): Promise<Result<number, Error>> => ok(1),
+      (): Result<boolean, CustomError> => ok(true),
     );
-    expect(result).toEqual(error(new AnotherError("another error")));
+    expect(result).toEqual(ok(true));
   });
 
-  it("should return the last success in case of no errors", () => {
-    const result = multiple(
-      ok("initial") as Result<string, Error>,
-      ok(42) as Result<number, Error>,
-      ok({ key: "value" }) as Result<object, CustomError>,
+  it("should not run later callbacks once one errors", async () => {
+    const later = vi.fn((): Result<boolean, Error> => ok(true));
+    const result = await multiple(
+      (): Result<null, CustomError> => error(new CustomError("stop here")),
+      later,
     );
-    expect(result).toEqual(ok({ key: "value" }));
+    expect(result).toEqual(error(new CustomError("stop here")));
+    expect(later).not.toHaveBeenCalled();
   });
 
-  it("should return the specific error type when only one type of error is present", () => {
-    const result = multiple(
-      error(new CustomError("single error type")) as Result<null, CustomError>,
+  it("should wrap a thrown value into an error and interrupt the rest", async () => {
+    const later = vi.fn((): Result<boolean, Error> => ok(true));
+    const result = await multiple(
+      (): Result<number, Error> => {
+        throw new Error("boom");
+      },
+      later,
+    );
+    expect(result).toEqual(error(new Error("boom")));
+    expect(later).not.toHaveBeenCalled();
+  });
+
+  it("should handle a single erroring callback", async () => {
+    const result = await multiple(
+      (): Result<null, CustomError> => error(new CustomError("single error type")),
     );
     expect(result).toEqual(error(new CustomError("single error type")));
   });
 
-  it("should handle the last result being an error", () => {
-    const result = multiple(
-      ok(1) as Result<number, CustomError>,
-      ok("two") as Result<string, AnotherError>,
-      ok(true) as Result<boolean, Error>,
-      error(new CustomError("last error")) as Result<null, CustomError>,
+  it("should handle the last callback being an error", async () => {
+    const result = await multiple(
+      (): Result<number, CustomError> => ok(1),
+      (): Result<string, AnotherError> => ok("two"),
+      (): Result<boolean, Error> => ok(true),
+      (): Result<null, CustomError> => error(new CustomError("last error")),
     );
     expect(result).toEqual(error(new CustomError("last error")));
   });

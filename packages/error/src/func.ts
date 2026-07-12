@@ -1,4 +1,4 @@
-import type { Result, ResultErr, ResultOk } from "./type";
+import type { NonNullish, Result, ResultErr, ResultOk } from "./type";
 import { anyToError } from "./util";
 
 /**
@@ -15,11 +15,19 @@ export function ok<T>(value: T): ResultOk<T> {
 /**
  * Creates an error result.
  *
- * @param err - The error value.
+ * The error value must be non-nullish: `null`/`undefined` are rejected both at
+ * compile time (via the {@link NonNullish} constraint) and at runtime, because a
+ * `[null, null]` tuple would be read as a success by every consumer.
+ *
+ * @param err - The error value (never `null`/`undefined`).
  * @returns The error result.
  * @template E - The type of the error.
+ * @throws {TypeError} When `err` is `null` or `undefined`.
  */
-export function error<E>(err: E): ResultErr<E> {
+export function error<E extends NonNullish>(err: E): ResultErr<E> {
+  if (err === null || err === undefined) {
+    throw new TypeError("error() expects a non-nullish error value");
+  }
   return [err, null];
 }
 
@@ -40,40 +48,47 @@ export async function forceSafe<T>(fn: (...args: unknown[]) => T | Promise<T>): 
   }
 }
 
+/** A lazy producer of a `Result`, sync or async, run by {@link multiple}. */
+export type MultipleCallback<T, E extends NonNullish> = () => Result<T, E> | Promise<Result<T, E>>;
+
 /**
- * A function that handles multiple `Result` values of different types.
- * If all results are successful, returns the success value of the last result.
- * If any result is an error, the first encountered error is returned.
+ * Runs a list of `Result`-producing callbacks sequentially, short-circuiting on
+ * the first failure. Each callback runs only if every previous one succeeded, so
+ * later operations are skipped as soon as one returns an error or throws.
  *
- * @param results - A list of `Result`s which can have different types for success and errors.
- * @returns A `Result` containing the last success or the first error.
+ * If a callback throws, the throw is wrapped into `error(anyToError(e))` (like
+ * {@link forceSafe}) and the remaining callbacks are not executed.
  *
- * The success result type is inferred as the success type of the last argument.
- * The error result type is unified across all arguments.
+ * @param callbacks - Callbacks producing `Result`s, possibly of different types.
+ * @returns A `Result` with the last success value or the first encountered error.
+ *
+ * The success type is inferred as the success type of the last callback. The
+ * error type is unified across all callbacks (plus `Error` from wrapped throws).
  */
-export function multiple<
+export async function multiple<
   TLastSuccess,
-  TLastError,
-  TErrors extends unknown[], // Tuple of all possible error types
+  TLastError extends NonNullish,
+  TErrors extends NonNullish[], // Tuple of all possible error types
 >(
-  ...results: [
-    ...{ [K in keyof TErrors]: Result<unknown, TErrors[K]> },
-    Result<TLastSuccess, TLastError>,
+  ...callbacks: [
+    ...{ [K in keyof TErrors]: MultipleCallback<unknown, TErrors[K]> },
+    MultipleCallback<TLastSuccess, TLastError>,
   ]
-): Result<TLastSuccess, TErrors[number] | TLastError> {
-  for (const result of results) {
-    const [err] = result;
-    if (err !== null) {
-      return error(err);
+): Promise<Result<TLastSuccess, TErrors[number] | TLastError | Error>> {
+  let last: Result<unknown, NonNullish> = ok(true);
+  for (const callback of callbacks) {
+    let result: Result<unknown, NonNullish>;
+    try {
+      result = await callback();
     }
+    catch (e) {
+      return error(anyToError(e));
+    }
+    if (result[0] !== null) {
+      return result as ResultErr<TErrors[number] | TLastError>;
+    }
+    last = result;
   }
 
-  // If no errors, return last successful value
-  const [lastErr, lastValue] = results[results.length - 1];
-
-  if (lastErr !== null) {
-    return error(lastErr);
-  }
-
-  return ok(lastValue as TLastSuccess);
+  return last as ResultOk<TLastSuccess>;
 }
