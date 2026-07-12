@@ -1,6 +1,6 @@
 {
   "name": "create-arcscord-bot",
-  "version": "1.0.0-next.5",
+  "version": "1.0.0",
   "description": "Scaffold a new Arcscord bot",
   "author": "Arcoz0308",
   "license": "MIT",
