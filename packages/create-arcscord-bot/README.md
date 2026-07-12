@@ -33,9 +33,10 @@ pnpm create arcscord-bot my-bot -- --package-manager npm --eslint arcscord --i18
 After scaffolding, the project is yours — Arcscord imposes no structure, organize it however
 you like.
 
-The `arcscord` version pinned in generated projects is set automatically when
-create-arcscord-bot is published (to the latest release at that moment), so it always matches
-the version the templates were tested against.
+The committed `arcscord` dependency range used by generated projects matches the
+release line against which the templates were tested. Patch and minor Arcscord
+updates are accepted automatically; a new major is adopted only after the
+templates have been validated and the range has been updated in the CLI source.
 
 ## Local development
 

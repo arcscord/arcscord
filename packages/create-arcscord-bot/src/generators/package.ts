@@ -1,5 +1,5 @@
 import type { PackageManagerType } from "../types.js";
-import { ARCSCORD_VERSION } from "../arcscord-version.js";
+import { ARCSCORD_VERSION_RANGE } from "../arcscord-version.js";
 
 export const MINIMUM_NODE_VERSION = ">=24.11.0";
 export const MINIMUM_BUN_VERSION = ">=1.3.0";
@@ -65,7 +65,7 @@ export function generatePackageJson(options: PackageJSONOptions): string {
     description: "A discord bot made with arcscord",
     scripts,
     dependencies: {
-      "arcscord": ARCSCORD_VERSION,
+      "arcscord": ARCSCORD_VERSION_RANGE,
       "discord.js": dependenciesVersions["discord.js"],
     },
     devDependencies,
