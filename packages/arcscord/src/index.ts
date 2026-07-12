@@ -374,7 +374,6 @@ export {
   executionFailure,
   executionSuccess,
   isArcscordError,
-  isArcscordResult,
   normalizeHandlerReturn,
 } from "./utils/error";
 export type {

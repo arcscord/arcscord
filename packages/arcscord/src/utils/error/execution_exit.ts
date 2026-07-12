@@ -55,10 +55,3 @@ export function normalizeHandlerReturn<T, E extends NonNullish>(
   }
   return executionSuccess(value as T);
 }
-
-/**
- * Returns whether a value has the shape of an Arcscord Result tuple.
- *
- * @deprecated Use `isResult` from `@arcscord/error` instead.
- */
-export const isArcscordResult = isResult;
