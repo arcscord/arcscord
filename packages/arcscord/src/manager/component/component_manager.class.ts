@@ -310,7 +310,7 @@ export class ComponentManager extends BaseManager {
     const [matchErr, matchedComponents] = this.findMatchingComponents(interaction, type);
     if (matchErr) {
       /* findMatchingComponents returns an error for both "not found" and "multiple matches" */
-      const isMultiple = matchErr.message.includes("more than one");
+      const isMultiple = matchErr.code === arcscordErrorCodes.ComponentMultipleMatches;
       return this.sendDispatchError(
         isMultiple
           ? this.options.dispatchDiagnostics.multipleMatches
