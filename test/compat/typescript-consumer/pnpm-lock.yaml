@@ -30,12 +30,13 @@ importers:
 
 packages:
 
-  '@arcscord/error@2.0.2':
-    resolution: {integrity: sha512-BGObOPlghBOjAGcN23JGJvsKk6oGQQ+jGN5R6TKsSO/KzZR6p9tEM23oshlRq3Zcp6OGvimgUcWJOZ3M9tkOvA==}
+  '@arcscord/error@3.0.0':
+    resolution: {integrity: sha512-RQBy2kDP6H6uCUYMvi85M1P9xtDUaSWWcS2uYXhCiVHyLJNpXMyUj/5kDM4DhwpoiJoEHa8U63jbi1UevWLdnA==}
 
   '@arcscord/middleware@file:vendor/middleware.tgz':
-    resolution: {tarball: file:vendor/middleware.tgz}
-    version: 1.0.0-next.1
+    resolution: {integrity: sha512-MVOtFhRVk45RfgtszamsfiUS0IbcwJWQYWHvSfZ4BbPN0D7+tWVQWITrY4P2a1PVZSdpMXKBWxlV3J3RVsfPvg==, tarball: file:vendor/middleware.tgz}
+    version: 1.0.0-next.2
+    engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
       discord.js: ^14.26.4
       typescript: '>=5.4.0'
@@ -95,8 +96,9 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   arcscord@file:vendor/arcscord.tgz:
-    resolution: {tarball: file:vendor/arcscord.tgz}
-    version: 1.0.0-next.2
+    resolution: {integrity: sha512-Ls2VXlZB+ISiFJZo0bguhnOzAKqfThmIN+SxRWx8y8tZ44IZAuKXFWumZJKEXOn5w74xeSmMS0CxAO8497KLUw==, tarball: file:vendor/arcscord.tgz}
+    version: 1.0.0-next.3
+    engines: {bun: '>=1.3.0', node: '>=24.11.0'}
     peerDependencies:
       discord.js: '>=14.26.4'
       typescript: '>=5.4.0'
@@ -160,7 +162,7 @@ packages:
 
 snapshots:
 
-  '@arcscord/error@2.0.2': {}
+  '@arcscord/error@3.0.0': {}
 
   '@arcscord/middleware@file:vendor/middleware.tgz(discord.js@14.26.5)(typescript@5.4.2)':
     dependencies:
@@ -240,7 +242,7 @@ snapshots:
 
   arcscord@file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2):
     dependencies:
-      '@arcscord/error': 2.0.2
+      '@arcscord/error': 3.0.0
       discord-api-types: 0.38.49
       discord.js: 14.26.5
       i18next: 26.3.6(typescript@5.4.2)

@@ -3,20 +3,14 @@ confirmModulesPurge: false
 
 trustPolicy: no-downgrade
 
-# The arcscord/middleware deps are freshly-built local `file:` tarballs whose
-# bytes (and version) change across builds. Skip the content-addressable store
-# name/version check so a repacked tarball can't trip
+# The arcscord dep is a freshly-built local `file:` tarball whose bytes (and
+# version) change across builds. Skip the content-addressable store name/version
+# check so a repacked tarball can't trip
 # ERR_PNPM_UNEXPECTED_PKG_CONTENT_IN_STORE against a stale store entry.
 strictStorePkgContentCheck: false
 
 overrides:
   arcscord: file:vendor/arcscord.tgz
-
-allowBuilds:
-  esbuild: true
-
-onlyBuiltDependencies:
-  - esbuild
 
 # arcscord pulls @arcscord/error from the registry; allow the just-published
 # version through pnpm's minimum-release-age gate (mirrors the examples).
