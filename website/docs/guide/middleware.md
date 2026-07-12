@@ -231,7 +231,9 @@ For best type inference, define middleware names with `as const`.
 readonly name = "userScope" as const;
 ```
 
-Middleware names must be unique inside a single `use` array. Arcscord rejects duplicate names before running any middleware, because duplicate names would overwrite the same `ctx.additional[name]` entry.
+Middleware names must be unique inside a single `use` array. Arcscord rejects duplicate names when commands or components are loaded, because duplicate names would overwrite the same `ctx.additional[name]` entry. Command duplicates return `COMMAND_VALIDATION_FAILED`; component duplicates return `COMPONENT_VALIDATION_FAILED`.
+
+For command middleware duplicates, the error message identifies the complete command path and `error.metadata.commandName` contains the same value, such as `admin.ban` or `admin.moderation.ban`. Component errors identify their route in both the message and `error.metadata.route`.
 
 ## Choosing `next`, `cancel`, or `fail`
 

@@ -41,6 +41,7 @@ import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transf
 import { BaseManager } from "#/base/manager/manager.class";
 import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn, validateCommands } from "#/utils";
 import { applyDiagnosticLevel } from "#/utils/error/run_normalize";
+import { validateCommandMiddlewareNames } from "#/utils/validator/middleware_validator";
 import {
   normalizeCommandRegistrationConfig,
   registerCommands,
@@ -102,6 +103,12 @@ export class CommandManager
 
     for (const command of commands) {
       if (!isSubCommand(command)) {
+        const commandName = command.slash?.name ?? command.message?.name ?? command.user?.name ?? "unknown";
+        const [middlewareValidationErr] = validateCommandMiddlewareNames(command.use, commandName, group);
+        if (middlewareValidationErr) {
+          return error(middlewareValidationErr);
+        }
+
         const [validationErr] = this.validateCommandAutocomplete(command, group);
         if (validationErr) {
           return error(validationErr);
@@ -139,9 +146,10 @@ export class CommandManager
         if (!hasPush) {
           return error(new ArcscordError({
             code: arcscordErrorCodes.CommandValidationFailed,
-            message: `no builder found for command "${command.constructor.name}" in group "${group}"`,
+            message: `no builder found for command "${commandName}" in group "${group}"`,
             metadata: {
               rule: "command-builder-required",
+              commandName,
               group,
             },
           }));
@@ -149,6 +157,11 @@ export class CommandManager
         totalCommands++;
       }
       else {
+        const [middlewareValidationErr] = this.validateSubCommandListMiddlewareNames(command, group);
+        if (middlewareValidationErr) {
+          return error(middlewareValidationErr);
+        }
+
         const [validationErr] = this.validateSubCommandListAutocomplete(command, group);
         if (validationErr) {
           return error(validationErr);
@@ -167,6 +180,26 @@ export class CommandManager
     );
 
     return ok(commandsBody);
+  }
+
+  private validateSubCommandListMiddlewareNames(command: SlashWithSubsCommandDefinition, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
+    for (const subCommand of command.subCommands ?? []) {
+      const [err] = validateCommandMiddlewareNames(subCommand.use, `${command.name}.${subCommand.name}`, group);
+      if (err) {
+        return error(err);
+      }
+    }
+
+    for (const [groupName, subCommandGroup] of Object.entries(command.subCommandsGroups ?? {})) {
+      for (const subCommand of subCommandGroup.subCommands) {
+        const [err] = validateCommandMiddlewareNames(subCommand.use, `${command.name}.${groupName}.${subCommand.name}`, group);
+        if (err) {
+          return error(err);
+        }
+      }
+    }
+
+    return ok(true);
   }
 
   private validateCommandAutocomplete(command: AnyCommandHandler, group: string): Result<true, ArcscordError<"COMMAND_VALIDATION_FAILED">> {
@@ -480,7 +513,7 @@ export class CommandManager
           === ApplicationCommandType.ChatInput && cmd.name === name,
       );
       if (!apiCommand) {
-        this.trace(`slash commands "${name}" not found in API`);
+        this.trace(`slash command "${name}" not found in API`);
       }
       else {
         this.trace(`resolve slash command ${name} (${apiCommand.id}) !`);
@@ -914,17 +947,6 @@ export class CommandManager
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!command.use || command.use.length === 0) {
       return executionSuccess({});
-    }
-    const middlewareNames = new Set<string>();
-    for (const middleware of command.use) {
-      if (middlewareNames.has(middleware.name)) {
-        return executionFailure(new ArcscordError({
-          code: arcscordErrorCodes.CommandValidationFailed,
-          message: `duplicate middleware name "${middleware.name}"`,
-          metadata: { rule: "unique-middleware-name", middlewareName: middleware.name },
-        }));
-      }
-      middlewareNames.add(middleware.name);
     }
     for (const middleware of command.use) {
       try {

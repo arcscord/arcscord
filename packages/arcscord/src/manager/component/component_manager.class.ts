@@ -31,6 +31,7 @@ import {
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { BaseManager } from "#/base/manager/manager.class";
 import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn } from "#/utils";
+import { validateComponentMiddlewareNames } from "#/utils/validator/middleware_validator";
 
 type MatchedComponent = {
   component: ComponentHandler;
@@ -81,7 +82,7 @@ export class ComponentManager extends BaseManager {
    */
   loadComponents(
     components: ComponentHandler[],
-  ): Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">> {
+  ): Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
     let loaded = 0;
     for (const component of components) {
       const [err] = this.loadComponent(component);
@@ -100,7 +101,7 @@ export class ComponentManager extends BaseManager {
    */
   loadComponent(
     component: ComponentHandler,
-  ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">> {
+  ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
     let compiledRoute: CompiledComponentRoute;
     try {
       compiledRoute = compileComponentRoute(component.route);
@@ -115,6 +116,11 @@ export class ComponentManager extends BaseManager {
         metadata: { route: component.route, reason: anyToError(e).message },
         cause: e,
       }));
+    }
+
+    const [middlewareValidationErr] = validateComponentMiddlewareNames(component.use, component.route);
+    if (middlewareValidationErr) {
+      return error(middlewareValidationErr);
     }
 
     const componentsList = component.handlerType === componentHandlerTypeEnum.modal
@@ -425,7 +431,7 @@ export class ComponentManager extends BaseManager {
     if (typed.typedSingleValue && interaction.values.length > 1) {
       return error(new ArcscordError({
         code: arcscordErrorCodes.ComponentTypedSelectInvalidValues,
-        message: `received multiples values for typed single string select ${component.route}`,
+        message: `received multiple values for typed single-string select ${component.route}`,
         metadata: {
           interactionId: interaction.id,
           route: component.route,
@@ -457,7 +463,7 @@ export class ComponentManager extends BaseManager {
     if (components.length === 0) {
       return error(new ArcscordError({
         code: arcscordErrorCodes.ComponentNotFound,
-        message: `didn't found component with id ${interaction.customId}`,
+        message: `component with ID ${interaction.customId} was not found`,
         metadata: {
           interactionId: interaction.id,
           route: interaction.customId,
@@ -544,17 +550,6 @@ export class ComponentManager extends BaseManager {
     const additional: Record<string, NonNullable<unknown>> = {};
     if (!component.use || component.use.length === 0) {
       return executionSuccess({});
-    }
-    const middlewareNames = new Set<string>();
-    for (const middleware of component.use) {
-      if (middlewareNames.has(middleware.name)) {
-        return executionFailure(new ArcscordError({
-          code: arcscordErrorCodes.CommandValidationFailed,
-          message: `duplicate middleware name "${middleware.name}"`,
-          metadata: { rule: "unique-middleware-name", middlewareName: middleware.name },
-        }));
-      }
-      middlewareNames.add(middleware.name);
     }
     for (const middleware of component.use) {
       try {

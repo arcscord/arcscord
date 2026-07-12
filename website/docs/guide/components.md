@@ -95,7 +95,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadComponents([simpleButton, profileModal, roleMenu]);
 ```
 
-`loadComponents` is async and returns a [`Result`](./result-handler.md) with the number of loaded handlers. A duplicate or invalid route surfaces as an `ArcscordError` failure (`COMPONENT_ROUTE_DUPLICATE` / `COMPONENT_ROUTE_INVALID`) instead of throwing:
+`loadComponents` is async and returns a [`Result`](./result-handler.md) with the number of loaded handlers. An invalid component definition or a duplicate/invalid route surfaces as an `ArcscordError` failure (`COMPONENT_VALIDATION_FAILED`, `COMPONENT_ROUTE_DUPLICATE`, or `COMPONENT_ROUTE_INVALID`) instead of throwing:
 
 ```ts
 const [err, count] = await client.loadComponents([simpleButton, profileModal]);

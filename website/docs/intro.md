@@ -32,3 +32,10 @@ Full bots you can clone and run, in the [`examples/`](https://github.com/arcscor
 - [`starter-bot`](https://github.com/arcscord/arcscord/tree/main/examples/starter-bot): the smallest end-to-end bot — typed commands, a self-updating button, a middleware, and an event.
 - [`reminder-bot`](https://github.com/arcscord/arcscord/tree/main/examples/reminder-bot): personal reminders in SQLite with a background scheduler and subcommands.
 - [`ticket_bot`](https://github.com/arcscord/arcscord/tree/main/examples/ticket_bot): a full ticket system with Prisma, i18n, modals, and a custom result handler.
+
+:::note Examples track the latest version
+The examples on the `main` branch always pin the **latest published** Arcscord
+version. To follow an example that matches a **specific** framework version,
+check out the branch for that version (e.g. `git switch <version-branch>`)
+before installing — its examples pin the matching `arcscord` release.
+:::

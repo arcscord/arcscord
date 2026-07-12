@@ -15,6 +15,7 @@ import {
   createMockMessageContextMenuInteraction,
   createMockUserContextMenuInteraction,
 } from "#/testing";
+import { arcscordErrorCodes } from "#/utils";
 import { CommandManager } from "./command_manager.class";
 
 function createMockClientWithManager() {
@@ -609,6 +610,65 @@ describe("command manager", () => {
     const [err] = manager.loadCommands([invalidCommand]);
 
     expect(err?.message).toBe("missing autocomplete handler for option \"query\" in command \"search.anime\"");
+  });
+
+  it("rejects duplicate middleware names when loading commands", () => {
+    const { manager } = createMockClientWithManager();
+    class DuplicateMiddleware extends CommandMiddleware {
+      readonly name = "duplicate" as const;
+      run(): CommandMiddlewareRun<{ valid: true }> {
+        return this.next({ valid: true });
+      }
+    }
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      use: [new DuplicateMiddleware(), new DuplicateMiddleware()],
+      run: ctx => ctx.ok(),
+    });
+
+    const [err] = manager.loadCommands([command]);
+
+    expect(err).toMatchObject({
+      code: arcscordErrorCodes.CommandValidationFailed,
+      message: "duplicate middleware name \"duplicate\" in command \"ping\"",
+      metadata: {
+        rule: "unique-middleware-name",
+        middlewareName: "duplicate",
+        commandName: "ping",
+        group: "globalCommands",
+      },
+    });
+  });
+
+  it("rejects duplicate middleware names when loading subcommands", () => {
+    const { manager } = createMockClientWithManager();
+    class DuplicateMiddleware extends CommandMiddleware {
+      readonly name = "duplicate" as const;
+      run(): CommandMiddlewareRun<{ valid: true }> {
+        return this.next({ valid: true });
+      }
+    }
+    const command = {
+      name: "tools",
+      description: "Tools",
+      subCommands: [{
+        name: "ping",
+        description: "Ping",
+        use: [new DuplicateMiddleware(), new DuplicateMiddleware()],
+        run: vi.fn(),
+      }],
+    } as unknown as Command;
+
+    const [err] = manager.loadCommands([command]);
+
+    expect(err).toMatchObject({
+      code: arcscordErrorCodes.CommandValidationFailed,
+      message: "duplicate middleware name \"duplicate\" in command \"tools.ping\"",
+      metadata: {
+        commandName: "tools.ping",
+        group: "globalCommands",
+      },
+    });
   });
 
   it("passes status returned when run() returns ok", async () => {

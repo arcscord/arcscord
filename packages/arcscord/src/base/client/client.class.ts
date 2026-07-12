@@ -111,7 +111,7 @@ export class ArcClient extends DJSClient {
                 .setTitle("Internal Error.")
                 .setColor("Orange")
                 .setDescription(
-                  `A internal error happen, error id ${errId}, please contact bot owner if error repeat`,
+                  `An internal error occurred. Error ID: ${errId}. Please contact the bot owner if the error recurs.`,
                 ),
             ],
           };
@@ -262,7 +262,7 @@ export class ArcClient extends DJSClient {
    */
   async loadComponents(
     components: ComponentHandler[],
-  ): Promise<Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">>> {
+  ): Promise<Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">>> {
     return this.componentManager.loadComponents(components);
   }
 

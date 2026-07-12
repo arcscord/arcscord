@@ -12,6 +12,7 @@ export type ValidationErrorFactory = (options: {
 }) => ValidationFailure;
 
 export type ValidationContext = {
+  commandName?: string;
   createError?: ValidationErrorFactory;
   group?: string;
 };
@@ -25,6 +26,7 @@ function validationError(
 ): Result<true, ValidationFailure> {
   const metadata = {
     rule: String(debugs.rule ?? "validation"),
+    ...("commandName" in context ? { commandName: context.commandName } : {}),
     ...("group" in context ? { group: context.group } : {}),
     ...debugs,
   };

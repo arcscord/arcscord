@@ -39,6 +39,8 @@ jobs:
           PUBLISH_TAG: ${{ inputs.tag }}
       - name: Install pnpm
         uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
       - name: Use Node.js v24.11.0
         uses: actions/setup-node@v6
         with:

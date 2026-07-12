@@ -83,6 +83,10 @@ describe("command validator", () => {
 
     expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe(`slash command "${"a".repeat(33)}" name must be between 1 and 32 characters (got 33)`);
+    expect(err?.metadata).toMatchObject({
+      commandName: "a".repeat(33),
+      group: "globalCommands",
+    });
   });
 
   it("rejects slash command descriptions longer than Discord allows", () => {
@@ -331,5 +335,34 @@ describe("command validator", () => {
 
     expect(err).toBeInstanceOf(ArcscordError);
     expect(err?.message).toBe("duplicate subcommand in slash command \"search\" name \"anime\" in group \"globalCommands\"");
+    expect(err?.metadata).toMatchObject({
+      commandName: "search.anime",
+      group: "globalCommands",
+    });
+  });
+
+  it("includes the complete grouped subcommand path in validation metadata", () => {
+    const invalidCommand = createCommandWithSubs({
+      name: "admin",
+      description: "Admin commands",
+      subCommandsGroups: {
+        moderation: {
+          description: "Moderation commands",
+          subCommands: [{
+            name: "Ban User",
+            description: "Ban a user",
+            run: vi.fn(),
+          }],
+        },
+      },
+    });
+
+    const [err] = validateTestCommands([invalidCommand]);
+
+    expect(err).toBeInstanceOf(ArcscordError);
+    expect(err?.metadata).toMatchObject({
+      commandName: "admin.moderation.Ban User",
+      group: "globalCommands",
+    });
   });
 });

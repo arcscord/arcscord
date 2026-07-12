@@ -71,7 +71,7 @@
       },
       "ticket_created": {
         "title": "Ticket #{{ticketId}}",
-        "description": "{{- userMention}} a crée un ticket !",
+        "description": "{{- userMention}} a créé un ticket !",
         "category_label": "Catégorie",
         "category": {
           "support": "Support",

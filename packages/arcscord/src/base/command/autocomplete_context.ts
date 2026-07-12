@@ -247,7 +247,7 @@ export class AutocompleteContext<
   }
 
   /**
-   * Returns a successfully CommandRunResult
+   * Returns a successful CommandRunResult.
    *
    * @param value A value to pass to the command. Can be a string or true.
    */
@@ -256,7 +256,7 @@ export class AutocompleteContext<
   }
 
   /**
-   * return a failed CommandRunResult
+   * Returns a failed CommandRunResult.
    *
    * @param failure - The expected failure value.
    */
