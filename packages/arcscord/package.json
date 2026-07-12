@@ -1,6 +1,6 @@
 {
   "name": "arcscord",
-  "version": "1.0.0-next.4",
+  "version": "1.0.0-next.5",
   "description": "A Discord.js framework with a slash-command-first, fully typed API.",
   "author": "Arcoz0308",
   "license": "MIT",
