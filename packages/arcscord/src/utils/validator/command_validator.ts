@@ -15,7 +15,7 @@ import type { LocaleMap } from "#/utils";
 import type { ValidationContext, ValidationFailure } from "./validator.util";
 import { error, ok } from "@arcscord/error";
 import { isSubCommand } from "#/base/command";
-import { localizationCallbackToMap } from "#/utils/discord/tranformers/localization";
+import { localizationCallbackToMap } from "#/utils/discord/transformers/localization";
 import { ArcscordError } from "#/utils/error/arcscord_error";
 import { arcscordErrorCodes } from "#/utils/error/codes";
 import {

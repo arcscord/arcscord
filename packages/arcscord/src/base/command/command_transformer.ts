@@ -16,8 +16,8 @@ import {
   integrationTypeToAPI,
   localizationToAPI,
   optionListToAPI,
-} from "#/utils/discord/tranformers/command";
-import { permissionToAPI } from "#/utils/discord/tranformers/permission";
+} from "#/utils/discord/transformers/command";
+import { permissionToAPI } from "#/utils/discord/transformers/permission";
 
 export function commandToAPI(definer: FullCommandDefinition, client: ArcClient): APICommandObject {
   const obj: APICommandObject = {};
