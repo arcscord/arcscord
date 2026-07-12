@@ -532,6 +532,7 @@ describe("component manager pipeline", () => {
       const [err] = manager.loadComponent(buildHandler());
       expect(err).toBeInstanceOf(ArcscordError);
       expect(err?.code).toBe(arcscordErrorCodes.ComponentRouteDuplicate);
+      expect(err?.metadata).toMatchObject({ route: "duplicate-route" });
     });
 
     it("unloads a loaded component by route", async () => {
@@ -571,6 +572,7 @@ describe("component manager pipeline", () => {
       const [err] = manager.loadComponent(handler);
       expect(err).toBeInstanceOf(ArcscordError);
       expect(err?.code).toBe(arcscordErrorCodes.ComponentRouteInvalid);
+      expect(err?.metadata).toMatchObject({ route: "bad/{1invalid}" });
     });
 
     it("applies multipleMatches diagnostics when more than one loaded route matches the customId", async () => {
@@ -762,6 +764,23 @@ describe("component manager pipeline", () => {
 
       expect(run).toHaveBeenCalledOnce();
       expect(resultHandler.mock.calls[0]?.[0].exit.status).toBe("success");
+    });
+
+    it("rejects duplicate middleware names when loading components", () => {
+      const { manager } = createManagerWithClient();
+      const run = vi.fn(async ctx => ctx.ok());
+
+      const [err] = manager.loadComponent(buttonWithMiddlewares(
+        [new FirstMiddleware(), new FirstMiddleware()],
+        run,
+      ));
+
+      expect(err).toMatchObject({
+        code: arcscordErrorCodes.ComponentValidationFailed,
+        message: "duplicate middleware name \"first\" in component \"greet\"",
+        metadata: { rule: "unique-middleware-name", middlewareName: "first", route: "greet" },
+      });
+      expect(manager.components[ComponentType.Button]).toHaveLength(0);
     });
 
     it("stops the pipeline without calling run() or resultHandler when a middleware cancels", async () => {

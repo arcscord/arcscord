@@ -5,6 +5,7 @@ export const arcscordErrorCodes = {
   CommandValidationFailed: "COMMAND_VALIDATION_FAILED",
   CommandRegistrationFailed: "COMMAND_REGISTRATION_FAILED",
   CommandResolutionFailed: "COMMAND_RESOLUTION_FAILED",
+  ComponentValidationFailed: "COMPONENT_VALIDATION_FAILED",
   ComponentRouteInvalid: "COMPONENT_ROUTE_INVALID",
   ComponentRouteDuplicate: "COMPONENT_ROUTE_DUPLICATE",
   ComponentCustomIdTooLong: "COMPONENT_CUSTOM_ID_TOO_LONG",
@@ -45,6 +46,11 @@ export type ArcscordErrorMetadata = {
     commandName?: string;
     interactionType?: number;
     reason: string;
+  };
+  COMPONENT_VALIDATION_FAILED: {
+    rule: string;
+    route?: string;
+    [key: string]: unknown;
   };
   COMPONENT_ROUTE_INVALID: { route: string; reason: string };
   COMPONENT_ROUTE_DUPLICATE: { route: string; canonicalRoute: string };

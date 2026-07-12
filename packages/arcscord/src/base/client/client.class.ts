@@ -262,7 +262,7 @@ export class ArcClient extends DJSClient {
    */
   async loadComponents(
     components: ComponentHandler[],
-  ): Promise<Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID">>> {
+  ): Promise<Result<number, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">>> {
     return this.componentManager.loadComponents(components);
   }
 

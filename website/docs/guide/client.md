@@ -246,7 +246,7 @@ The optional `group` parameter is an internal label for the command set (used by
 
 ### `loadComponents(components)`
 
-Loads component handlers into the component manager. Returns `Result<number, ArcscordError>` (the count of loaded components). Fails with `COMPONENT_ROUTE_DUPLICATE` or `COMPONENT_ROUTE_INVALID`.
+Loads component handlers into the component manager. Returns `Result<number, ArcscordError>` (the count of loaded components). Fails with `COMPONENT_VALIDATION_FAILED`, `COMPONENT_ROUTE_DUPLICATE`, or `COMPONENT_ROUTE_INVALID`.
 
 ```ts
 const [err, count] = await client.loadComponents([simpleButton, profileModal, roleMenu]);

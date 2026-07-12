@@ -6,9 +6,10 @@
 |---|---|---|
 | `CLIENT_READY_TIMEOUT` | Client readiness timed out | `timeoutMs` |
 | `APPLICATION_UNAVAILABLE` | Discord application data was unavailable | `operation` |
-| `COMMAND_VALIDATION_FAILED` | A command definition is invalid | `rule`, `path`, `group` |
+| `COMMAND_VALIDATION_FAILED` | A command definition is invalid | `rule`, `path`, `commandName`, `group` |
 | `COMMAND_REGISTRATION_FAILED` | Discord command synchronization failed | `scope`, `guildId`, `operation` |
 | `COMMAND_RESOLUTION_FAILED` | An interaction could not be resolved to a command surface | `commandName`, `reason` |
+| `COMPONENT_VALIDATION_FAILED` | A component definition is invalid | `rule`, `route` |
 | `COMPONENT_ROUTE_INVALID` | A component route is malformed | `route`, `reason` |
 | `COMPONENT_ROUTE_DUPLICATE` | Two components use the same canonical route | `route`, `canonicalRoute` |
 | `COMPONENT_CUSTOM_ID_TOO_LONG` | A generated custom ID exceeds Discord's limit | `route`, `length`, `maximum` |
@@ -25,3 +26,5 @@
 | `COMPONENT_TYPED_SELECT_INVALID_VALUES` | Typed select values violated their declaration | selected/allowed values |
 | `COMPONENT_DEFER_FAILED` | Component pre-reply failed | dispatch context |
 | `AUTOCOMPLETE_EXECUTION_FAILED` | Autocomplete dispatch or response failed | command context |
+
+All command-loading errors with `COMMAND_VALIDATION_FAILED` include `commandName` and `group`. For subcommands, `commandName` is the complete path, such as `admin.ban` or `admin.moderation.ban`. All component-loading validation errors identify the component through `route`, including `COMPONENT_VALIDATION_FAILED`, `COMPONENT_ROUTE_INVALID`, and `COMPONENT_ROUTE_DUPLICATE`.

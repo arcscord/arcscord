@@ -38,6 +38,10 @@ const SLASH_COMMAND_NAME_PATTERN = /^[-_'\p{L}\p{N}\p{Script=Devanagari}\p{Scrip
 type CommandValidationContext = ValidationContext;
 type NameValidationMode = "slash" | "contextMenu";
 
+function withCommandName(context: CommandValidationContext, commandName: string): CommandValidationContext {
+  return { ...context, commandName };
+}
+
 export function validateCommands(
   commands: Command[],
   client: ArcClient,
@@ -68,7 +72,7 @@ export function validateCommands(
           `${type}:${definition.name}`,
           definition.name,
           `${type} command`,
-          context,
+          withCommandName(context, definition.name),
         );
         if (duplicateErr) {
           return error(duplicateErr);
@@ -76,7 +80,8 @@ export function validateCommands(
       }
     }
     else {
-      const [validationErr] = validateSubCommandListDefinition(command, client, context);
+      const commandContext = withCommandName(context, command.name);
+      const [validationErr] = validateSubCommandListDefinition(command, client, commandContext);
       if (validationErr) {
         return error(validationErr);
       }
@@ -86,7 +91,7 @@ export function validateCommands(
         `slash:${command.name}`,
         command.name,
         "slash command",
-        context,
+        commandContext,
       );
       if (duplicateErr) {
         return error(duplicateErr);
@@ -103,21 +108,24 @@ function validateCommandDefinition(
   context: CommandValidationContext,
 ): Result<true, ValidationFailure> {
   if (definition.slash) {
-    const [err] = validateSlashCommandDefinition(definition.slash, `slash command "${definition.slash.name}"`, client, context);
+    const commandContext = withCommandName(context, definition.slash.name);
+    const [err] = validateSlashCommandDefinition(definition.slash, `slash command "${definition.slash.name}"`, client, commandContext);
     if (err) {
       return error(err);
     }
   }
 
   if (definition.message) {
-    const [err] = validateBaseCommandDefinition(definition.message, `message command "${definition.message.name}"`, "contextMenu", client, context);
+    const commandContext = withCommandName(context, definition.message.name);
+    const [err] = validateBaseCommandDefinition(definition.message, `message command "${definition.message.name}"`, "contextMenu", client, commandContext);
     if (err) {
       return error(err);
     }
   }
 
   if (definition.user) {
-    const [err] = validateBaseCommandDefinition(definition.user, `user command "${definition.user.name}"`, "contextMenu", client, context);
+    const commandContext = withCommandName(context, definition.user.name);
+    const [err] = validateBaseCommandDefinition(definition.user, `user command "${definition.user.name}"`, "contextMenu", client, commandContext);
     if (err) {
       return error(err);
     }
@@ -150,12 +158,13 @@ function validateSubCommandListDefinition(
   const topLevelNames = new Map<string, string>();
 
   for (const subCommand of command.subCommands ?? []) {
+    const subCommandContext = withCommandName(context, `${command.name}.${subCommand.name}`);
     const [duplicateErr] = validateUniqueName(
       topLevelNames,
       subCommand.name,
       subCommand.name,
       `subcommand in slash command "${command.name}"`,
-      context,
+      subCommandContext,
     );
     if (duplicateErr) {
       return error(duplicateErr);
@@ -165,7 +174,7 @@ function validateSubCommandListDefinition(
       subCommand,
       `subcommand "${command.name}.${subCommand.name}"`,
       client,
-      context,
+      subCommandContext,
     );
     if (subCommandErr) {
       return error(subCommandErr);
@@ -173,12 +182,13 @@ function validateSubCommandListDefinition(
   }
 
   for (const [groupName, subCommandGroup] of Object.entries(command.subCommandsGroups ?? {})) {
+    const groupContext = withCommandName(context, `${command.name}.${groupName}`);
     const [duplicateErr] = validateUniqueName(
       topLevelNames,
       groupName,
       groupName,
       `subcommand group in slash command "${command.name}"`,
-      context,
+      groupContext,
     );
     if (duplicateErr) {
       return error(duplicateErr);
@@ -189,7 +199,7 @@ function validateSubCommandListDefinition(
       subCommandGroup,
       `subcommand group "${command.name}.${groupName}"`,
       client,
-      context,
+      groupContext,
     );
     if (groupErr) {
       return error(groupErr);
@@ -281,12 +291,16 @@ function validateSubCommandGroupDefinition(
   const subCommandNames = new Map<string, string>();
 
   for (const subCommand of groupDefinition.subCommands) {
+    const commandName = context.commandName
+      ? `${context.commandName}.${subCommand.name}`
+      : subCommand.name;
+    const subCommandContext = withCommandName(context, commandName);
     const [duplicateErr] = validateUniqueName(
       subCommandNames,
       subCommand.name,
       subCommand.name,
       `${path} subcommand`,
-      context,
+      subCommandContext,
     );
     if (duplicateErr) {
       return error(duplicateErr);
@@ -296,7 +310,7 @@ function validateSubCommandGroupDefinition(
       subCommand,
       `${path} subcommand "${subCommand.name}"`,
       client,
-      context,
+      subCommandContext,
     );
     if (subCommandErr) {
       return error(subCommandErr);
@@ -404,6 +418,7 @@ function validateOptionChoices(
       const message = `${path} choice "${choice.name}" value must be at most ${COMMAND_STRING_CHOICE_VALUE_MAX_LENGTH} characters`;
       const metadata = {
         rule: "choice-value-length",
+        commandName: context.commandName,
         group: context.group,
         optionName,
         path,
