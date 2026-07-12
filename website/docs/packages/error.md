@@ -92,6 +92,24 @@ const [err, val] = await multiple(
 
 Passing callbacks — rather than already-computed Results — is what lets `multiple` skip the remaining work. If a callback throws, the throw is wrapped into `error(anyToError(e))` and the remaining callbacks are not executed.
 
+### `multipleParallel(...callbacks)`
+
+Like [`multiple`](#multiplecallbacks), but runs every callback **in parallel** (think `Promise.all`) and collects **all** success values into a tuple. All callbacks start at once and are awaited — nothing is short-circuited.
+
+```ts
+import { multipleParallel } from "@arcscord/error";
+
+const [err, values] = await multipleParallel(
+  () => fetchUser(id),
+  () => fetchSettings(id),
+  () => fetchStats(id),
+);
+// values is [User, Settings, Stats] (a typed tuple, in callback order)
+// err is the first error encountered by position (or null)
+```
+
+Choose `multipleParallel` when the operations are independent and you want them running concurrently; choose `multiple` when they must run one after another and later ones should be skipped on the first failure. As with `multiple`, a thrown value is wrapped into `error(anyToError(e))`; every callback still runs to completion, matching `Promise.all` semantics.
+
 ### `forceSafe(fn)`
 
 Executes a function and wraps its result in a `Result`, catching any thrown value. Works with both sync and async functions.

@@ -1,6 +1,6 @@
 import type { NonNullish, Result, ResultErr, ResultOk } from "../";
 import { expectTypeOf, it } from "vitest";
-import { error, isResult, multiple, ok } from "../";
+import { error, isResult, multiple, multipleParallel, ok } from "../";
 
 it("ok wraps any value, including null and undefined", () => {
   expectTypeOf(ok(42)).toEqualTypeOf<ResultOk<number>>();
@@ -45,4 +45,23 @@ it("multiple returns a Promise of the last success and the unified error", () =>
     async (): Promise<Result<string, Error>> => ok("two"),
   );
   expectTypeOf(result).toEqualTypeOf<Promise<Result<string, Error>>>();
+});
+
+it("multipleParallel returns a Promise of the tuple of all success values", () => {
+  const result = multipleParallel(
+    (): Result<number, Error> => ok(1),
+    (): Result<string, Error> => ok("two"),
+  );
+  expectTypeOf(result).toEqualTypeOf<Promise<Result<[number, string], Error>>>();
+});
+
+it("multipleParallel preserves custom error types", () => {
+  type TicketLimitReached = { _tag: "TicketLimitReached" };
+
+  const result = multipleParallel(
+    (): Result<number, Error> => ok(1),
+    (): Result<string, TicketLimitReached> => error({ _tag: "TicketLimitReached" } as const),
+  );
+
+  expectTypeOf(result).toEqualTypeOf<Promise<Result<[number, string], Error | TicketLimitReached>>>();
 });

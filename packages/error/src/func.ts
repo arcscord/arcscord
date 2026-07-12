@@ -92,3 +92,56 @@ export async function multiple<
 
   return last as ResultOk<TLastSuccess>;
 }
+
+/** Any callback accepted by {@link multipleParallel}, sync or async. @internal */
+type AnyMultipleCallback = () => Result<unknown, NonNullish> | Promise<Result<unknown, NonNullish>>;
+
+/** The awaited `Result` produced by a {@link multipleParallel} callback. @internal */
+type CallbackResult<C> = C extends () => infer R ? Awaited<R> : never;
+
+/** The success value type of a {@link multipleParallel} callback. @internal */
+type CallbackValue<C> = Extract<CallbackResult<C>, ResultOk<unknown>> extends ResultOk<infer V> ? V : never;
+
+/** The error type of a {@link multipleParallel} callback. @internal */
+type CallbackError<C> = Extract<CallbackResult<C>, ResultErr<NonNullish>> extends ResultErr<infer E> ? E : never;
+
+/**
+ * Runs a list of `Result`-producing callbacks **in parallel** (like `Promise.all`)
+ * and collects every success value into a tuple. Unlike {@link multiple}, all
+ * callbacks start at once and are all awaited — nothing is short-circuited.
+ *
+ * On success, resolves with `ok([...values])` in callback order. If any callback
+ * fails (returns an error, or throws — throws are wrapped via {@link anyToError}),
+ * resolves with the **first error by position**. Every callback still runs to
+ * completion, matching `Promise.all` execution semantics.
+ *
+ * @param callbacks - Callbacks producing `Result`s, run concurrently.
+ * @returns A `Result` with the tuple of all success values, or the first error.
+ *
+ * The success type is inferred as the tuple of each callback's success type. The
+ * error type is unified across all callbacks (plus `Error` from wrapped throws).
+ */
+export async function multipleParallel<T extends readonly AnyMultipleCallback[]>(
+  ...callbacks: T
+): Promise<Result<{ -readonly [K in keyof T]: CallbackValue<T[K]> }, CallbackError<T[number]> | Error>> {
+  const results = await Promise.all(
+    callbacks.map(async (callback): Promise<Result<unknown, NonNullish>> => {
+      try {
+        return await callback();
+      }
+      catch (e) {
+        return error(anyToError(e));
+      }
+    }),
+  );
+
+  const values: unknown[] = [];
+  for (const [err, value] of results) {
+    if (err !== null) {
+      return error(err) as ResultErr<CallbackError<T[number]> | Error>;
+    }
+    values.push(value);
+  }
+
+  return ok(values as { -readonly [K in keyof T]: CallbackValue<T[K]> });
+}

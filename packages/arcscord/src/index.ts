@@ -432,6 +432,7 @@ export {
   forceSafe,
   isResult,
   multiple,
+  multipleParallel,
   ok,
 } from "@arcscord/error";
 export type {
