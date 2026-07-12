@@ -33,6 +33,7 @@ const packages = [
     dir: "packages/arcscord",
     slug: "arcscord",
     tsconfig: "packages/arcscord/tsconfig.json",
+    docsEntryPoints: ["src/base/utils/context.type.ts"],
   },
   {
     dir: "packages/middleware",
@@ -122,6 +123,16 @@ const arcscordTypedocOptions = {
   ],
 };
 
+const errorTypedocOptions = {
+  // Implementation-only aliases used to keep `multipleParallel`'s public
+  // signature readable. They are intentionally not part of the package API.
+  intentionallyNotExported: [
+    "AnyMultipleCallback",
+    "CallbackError",
+    "CallbackValue",
+  ],
+};
+
 const apiRoot = join(outputRoot, "website/static/api");
 const typedocConfigRoot = join(outputRoot, "website/.typedoc");
 mkdirSync(apiRoot, { recursive: true });
@@ -162,10 +173,14 @@ for (const pkg of packages) {
     }, null, 2)}\n`);
     writeFileSync(typedocConfig, `${JSON.stringify({
       $schema: "https://typedoc.org/schema.json",
-      entryPoints: [join(sourceRoot, pkg.dir, "src/index.ts")],
+      entryPoints: [
+        join(sourceRoot, pkg.dir, "src/index.ts"),
+        ...(pkg.docsEntryPoints ?? []).map(entryPoint => join(sourceRoot, pkg.dir, entryPoint)),
+      ],
       entryPointStrategy: "resolve",
       excludeInternal: true,
       ...(pkg.slug === "arcscord" ? arcscordTypedocOptions : {}),
+      ...(pkg.slug === "error" ? errorTypedocOptions : {}),
       includeVersion: true,
       json: outFile,
       name: packageJson.name,

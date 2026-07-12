@@ -17,7 +17,7 @@ export type ContextDocs = {
 
   /**
    * ResolvedName of the command by Arcscord
-   * @see {@link CommandManager.resolveCommandName}
+   * @see {@link index!CommandManager#resolveCommandName}
    */
   resolvedCommandName: string;
 
