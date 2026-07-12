@@ -627,10 +627,6 @@ export class ComponentManager extends BaseManager {
       this.logger.logError(infos.exit.failure, { ...meta, incidentId });
       return this.sendFailureReply(incidentId, infos);
     }
-    if (infos.exit.status === "interrupted") {
-      this.logger.warn("Component execution interrupted", meta);
-      return;
-    }
     this.logger.debug(`Component executed: ${infos.component.route}`, {
       ...meta,
       value: infos.exit.value,

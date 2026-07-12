@@ -999,10 +999,6 @@ export class CommandManager
       this.logger.logError(infos.exit.failure, { ...meta, incidentId });
       return this.sendFailureReply(incidentId, infos);
     }
-    if (infos.exit.status === "interrupted") {
-      this.logger.warn("Command execution interrupted", meta);
-      return;
-    }
     this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
       ...meta,
       value: infos.exit.value,

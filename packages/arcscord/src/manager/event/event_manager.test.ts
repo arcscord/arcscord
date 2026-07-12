@@ -216,6 +216,39 @@ describe("event manager", () => {
     expect(run).toHaveBeenCalledOnce();
   });
 
+  it("reports waitReady rejections as defects for queued events", async () => {
+    const resultHandler = vi.fn();
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      resultHandler,
+    });
+    client.ready = false;
+    const waitError = new Error("ready timeout");
+    vi.mocked(client.waitReady).mockRejectedValueOnce(waitError);
+    const run = vi.fn(async () => ok(true as const));
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      options: {
+        beforeReady: "queue",
+      },
+      run,
+    }));
+
+    await expect(client.emitMock("messageCreate", { id: "message_1" })).resolves.toBeUndefined();
+
+    expect(run).not.toHaveBeenCalled();
+    expect(resultHandler).toHaveBeenCalledOnce();
+    expect(resultHandler).toHaveBeenCalledWith(expect.objectContaining({
+      exit: {
+        status: "defect",
+        defect: waitError,
+      },
+      eventName: "messageCreate",
+      incidentId: expect.any(String),
+    }), manager);
+  });
+
   it("drops events before ready when beforeReady is drop", async () => {
     const { client, manager } = createMockClient(["GuildMessages"]);
     client.ready = false;

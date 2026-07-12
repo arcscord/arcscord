@@ -13,6 +13,12 @@ Provides guards for user allowlists, component author checks, and Discord permis
 pnpm add @arcscord/middleware
 ```
 
+`arcscord` and `discord.js` are peer dependencies. Add them too if the project does not already provide them:
+
+```sh
+pnpm add arcscord discord.js @arcscord/middleware
+```
+
 ## Example
 
 ```ts

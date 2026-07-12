@@ -18,7 +18,7 @@ Every middleware returns one of three results:
 | Cancel | `this.cancel(result)` | Stop the middleware chain and do not run the handler. Use this when the middleware already replied or handled the interaction. |
 | Failure | `this.fail(failure)` | Stop the middleware chain and forward an expected failure to the result handler. |
 
-Only one result is active at a time. Returned objects always contain `next`, `cancel`, and `error`, with inactive fields set to `null`.
+Each helper returns a discriminated object whose `status` is `"next"`, `"cancel"`, or `"failure"`.
 
 ## Execution Flow
 
@@ -36,11 +36,11 @@ The flow is:
 1. Arcscord creates the command or component context.
 2. Each middleware runs in order.
 3. `next(value)` stores the value under `ctx.additional[middleware.name]`.
-4. `cancel(result)` stops execution after the cancel result resolves successfully.
-5. `error(error)` stops execution and calls the configured error handler.
+4. `cancel(result)` awaits its optional result, then stops execution. If that result returns an error `Result`, it becomes an expected failure.
+5. `fail(failure)` awaits its value, stops execution, and forwards that expected failure to the configured result handler.
 6. If every middleware continues, Arcscord runs the command or component handler.
 
-If a middleware throws, Arcscord converts it to a command or component error and forwards it through the same error path.
+If middleware execution or a cancelled operation throws, Arcscord forwards it to the result handler as an `ExecutionExit` defect.
 
 ## Command Middleware
 
@@ -233,7 +233,7 @@ readonly name = "userScope" as const;
 
 Middleware names must be unique inside a single `use` array. Arcscord rejects duplicate names before running any middleware, because duplicate names would overwrite the same `ctx.additional[name]` entry.
 
-## Choosing `next`, `cancel`, or `error`
+## Choosing `next`, `cancel`, or `fail`
 
 Use `next` when the handler should continue:
 

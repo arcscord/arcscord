@@ -92,6 +92,7 @@ export class EventManager extends BaseManager {
     this.trace(`bind event ${event.event} for ${event.name} handler !`);
 
     const listener = async (...args: ClientEvents[E]): Promise<void> => {
+      const receivedAt = Date.now();
       if (event.options?.once) {
         this.events.delete(event.name);
       }
@@ -102,7 +103,22 @@ export class EventManager extends BaseManager {
           return;
         }
         if (beforeReady === "queue") {
-          await this.client.waitReady();
+          try {
+            await this.client.waitReady();
+          }
+          catch (e) {
+            const endedAt = Date.now();
+            await this.options.resultHandler({
+              exit: executionDefect(e),
+              event: event as unknown as AnyEventHandler,
+              eventName: event.event,
+              startedAt: receivedAt,
+              endedAt,
+              durationMs: endedAt - receivedAt,
+              incidentId: crypto.randomUUID(),
+            }, this);
+            return;
+          }
         }
       }
 
@@ -163,10 +179,6 @@ export class EventManager extends BaseManager {
     }
     if (infos.exit.status === "failure") {
       this.logger.logError(infos.exit.failure, meta);
-      return;
-    }
-    if (infos.exit.status === "interrupted") {
-      this.logger.warn("Event execution interrupted", meta);
     }
   }
 

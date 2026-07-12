@@ -372,7 +372,6 @@ export {
   arcscordErrorCodes,
   executionDefect,
   executionFailure,
-  executionInterrupted,
   executionSuccess,
   isArcscordError,
   isArcscordResult,
@@ -385,7 +384,6 @@ export type {
   ExecutionDefect,
   ExecutionExit,
   ExecutionFailure,
-  ExecutionInterrupted,
   ExecutionSuccess,
 } from "./utils/error";
 export type {

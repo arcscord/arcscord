@@ -7,7 +7,7 @@ description: Ready-to-use middleware classes for Arcscord commands and component
 
 `@arcscord/middleware` provides ready-to-use middleware classes for Arcscord commands and components.
 
-This package does not define the middleware system itself. The core middleware API, execution flow, `next`, `cancel`, `error`, and custom middleware examples are documented in the [middleware guide](/guide/middleware).
+This package does not define the middleware system itself. The core middleware API, execution flow, `next`, `cancel`, `fail`, and custom middleware examples are documented in the [middleware guide](/guide/middleware).
 
 Links:
 
@@ -22,10 +22,10 @@ Links:
 pnpm add @arcscord/middleware
 ```
 
-If your project does not already depend on Arcscord, install it too:
+`arcscord` and `discord.js` are peer dependencies. If your project does not already provide them, install all three packages together:
 
 ```bash
-pnpm add arcscord @arcscord/middleware
+pnpm add arcscord discord.js @arcscord/middleware
 ```
 
 ## Exports

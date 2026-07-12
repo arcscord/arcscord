@@ -18,18 +18,11 @@ export type ExecutionDefect = {
   defect: unknown;
 };
 
-/** Cancelled or interrupted handler execution. */
-export type ExecutionInterrupted = {
-  status: "interrupted";
-  reason?: unknown;
-};
-
 /** Normalized outcome of a command, component, event, or middleware execution. */
 export type ExecutionExit<T, E = unknown>
   = | ExecutionSuccess<T>
     | ExecutionFailure<E>
-    | ExecutionDefect
-    | ExecutionInterrupted;
+    | ExecutionDefect;
 
 /** Creates a successful execution exit. */
 export function executionSuccess<T>(value: T): ExecutionSuccess<T> {
@@ -44,13 +37,6 @@ export function executionFailure<E>(failure: E): ExecutionFailure<E> {
 /** Creates an unexpected-defect execution exit. */
 export function executionDefect(defect: unknown): ExecutionDefect {
   return { status: "defect", defect };
-}
-
-/** Creates an interrupted execution exit. */
-export function executionInterrupted(reason?: unknown): ExecutionInterrupted {
-  return reason === undefined
-    ? { status: "interrupted" }
-    : { status: "interrupted", reason };
 }
 
 /** Normalizes raw handler values and Arcscord Result tuples to an {@link ExecutionExit}. */

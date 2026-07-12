@@ -57,9 +57,6 @@ importers:
       discord-api-types:
         specifier: ^0.38.49
         version: 0.38.49
-      discord.js:
-        specifier: ^14.26.4
-        version: 14.26.4
       i18next:
         specifier: ^26.3.3
         version: 26.3.3(typescript@6.0.3)
@@ -67,6 +64,9 @@ importers:
       '@types/node':
         specifier: ^24.10.0
         version: 24.13.3
+      discord.js:
+        specifier: ^14.26.4
+        version: 14.26.4
       tsdown:
         specifier: 0.22.4
         version: 0.22.4(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.0)(typescript@6.0.3)
@@ -140,10 +140,10 @@ importers:
       arcscord:
         specifier: workspace:^
         version: link:../arcscord
+    devDependencies:
       discord.js:
         specifier: ^14.26.4
         version: 14.26.4
-    devDependencies:
       tsdown:
         specifier: 0.22.4
         version: 0.22.4(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.0)(typescript@6.0.3)

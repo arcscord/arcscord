@@ -10,14 +10,12 @@ Every command, component, and event execution is normalized to an `ExecutionExit
 type ExecutionExit<T, E = unknown> =
   | { status: "success"; value: T }
   | { status: "failure"; failure: E }
-  | { status: "defect"; defect: unknown }
-  | { status: "interrupted"; reason?: unknown };
+  | { status: "defect"; defect: unknown };
 ```
 
 - `success` means the handler returned normally.
 - `failure` means it explicitly returned an error `Result`.
 - `defect` means the handler or a middleware threw.
-- `interrupted` is reserved for cancellation
 
 Expected failures may be any value; they do not need to extend `Error`. The `_tag` field below is only an example of a convenient TypeScript convention for discriminating application failures. Arcscord does not require it or impose any failure shape:
 
@@ -83,9 +81,6 @@ const client = new ArcClient(token, {
               incidentId: infos.incidentId,
             });
             return;
-
-          case "interrupted":
-            client.logger.warn("Command interrupted");
         }
       },
     },
@@ -126,9 +121,8 @@ The default command and component handlers:
 
 - log successes at debug level;
 - log explicit failures and reply with the configured internal-error message;
-- log defects with an incident ID and include that ID in the user-facing message;
-- log interruptions without attempting an automatic reply.
+- log defects with an incident ID and include that ID in the user-facing message.
 
-The default event handler logs failures, defects, and interruptions but never sends a Discord reply.
+The default event handler logs failures and defects but never sends a Discord reply.
 
 The result handler is the only API that controls logging, recovery, and user replies. 
