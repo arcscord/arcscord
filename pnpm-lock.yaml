@@ -140,10 +140,10 @@ importers:
       arcscord:
         specifier: workspace:^
         version: link:../arcscord
-    devDependencies:
       discord.js:
         specifier: ^14.26.4
         version: 14.26.4
+    devDependencies:
       tsdown:
         specifier: 0.22.4
         version: 0.22.4(oxc-resolver@11.19.1(@emnapi/core@1.11.1)(@emnapi/runtime@1.11.1))(tsx@4.23.0)(typescript@6.0.3)

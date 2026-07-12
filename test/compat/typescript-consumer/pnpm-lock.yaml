@@ -16,7 +16,7 @@ importers:
         version: file:vendor/middleware.tgz(discord.js@14.26.5)(typescript@5.4.2)
       arcscord:
         specifier: file:vendor/arcscord.tgz
-        version: file:vendor/arcscord.tgz(typescript@5.4.2)
+        version: file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2)
       discord.js:
         specifier: ^14.26.4
         version: 14.26.5
@@ -30,14 +30,11 @@ importers:
 
 packages:
 
-  '@arcscord/better-error@1.0.5':
-    resolution: {integrity: sha512-5hU+a5DhVRtZUFi1r1q/TwP4up/Vqdnoa26SkYOoTJRMoHTsFL/Tw0+QiZiNSh8u1owHulgKFemK+FnJpro/vw==}
-
   '@arcscord/error@2.0.2':
     resolution: {integrity: sha512-BGObOPlghBOjAGcN23JGJvsKk6oGQQ+jGN5R6TKsSO/KzZR6p9tEM23oshlRq3Zcp6OGvimgUcWJOZ3M9tkOvA==}
 
   '@arcscord/middleware@file:vendor/middleware.tgz':
-    resolution: {tarball: file:vendor/middleware.tgz}
+    resolution: {integrity: sha512-ZSMG0/M9nSwd8gyraEarQeasvWj9zGLuIh/WpKxKj6gX2iYwB4jm0EOhiFXUmTOrgElqeh2KvuzYF9sApKksrQ==, tarball: file:vendor/middleware.tgz}
     version: 1.0.0-next.1
     peerDependencies:
       discord.js: ^14.26.4
@@ -98,9 +95,10 @@ packages:
     engines: {node: '>=v14.0.0', npm: '>=7.0.0'}
 
   arcscord@file:vendor/arcscord.tgz:
-    resolution: {tarball: file:vendor/arcscord.tgz}
+    resolution: {integrity: sha512-EusnVaXPy1JspSsAL+4vvyB2W4Ey0VIokaiRQoDzIbKAZ6V4pb3295ffqe3rt/QtyicSQdTTCOU6k9hpvXSW6A==, tarball: file:vendor/arcscord.tgz}
     version: 1.0.0-next.2
     peerDependencies:
+      discord.js: '>=14.26.4'
       typescript: '>=5.4.0'
 
   discord-api-types@0.38.49:
@@ -162,18 +160,13 @@ packages:
 
 snapshots:
 
-  '@arcscord/better-error@1.0.5': {}
-
   '@arcscord/error@2.0.2': {}
 
   '@arcscord/middleware@file:vendor/middleware.tgz(discord.js@14.26.5)(typescript@5.4.2)':
     dependencies:
-      arcscord: file:vendor/arcscord.tgz(typescript@5.4.2)
+      arcscord: file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2)
       discord.js: 14.26.5
       typescript: 5.4.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   '@discordjs/builders@1.14.1':
     dependencies:
@@ -245,17 +238,13 @@ snapshots:
 
   '@vladfrangu/async_event_emitter@2.4.7': {}
 
-  arcscord@file:vendor/arcscord.tgz(typescript@5.4.2):
+  arcscord@file:vendor/arcscord.tgz(discord.js@14.26.5)(typescript@5.4.2):
     dependencies:
-      '@arcscord/better-error': 1.0.5
       '@arcscord/error': 2.0.2
       discord-api-types: 0.38.49
       discord.js: 14.26.5
       i18next: 26.3.6(typescript@5.4.2)
       typescript: 5.4.2
-    transitivePeerDependencies:
-      - bufferutil
-      - utf-8-validate
 
   discord-api-types@0.38.49: {}
 
