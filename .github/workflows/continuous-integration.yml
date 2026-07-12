@@ -157,7 +157,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install consumer dependencies
         working-directory: test/compat/typescript-consumer
-        run: pnpm install --lockfile=false
+        run: pnpm install --no-lockfile
       - name: Typecheck packed declarations
         working-directory: test/compat/typescript-consumer
         run: pnpm typecheck
@@ -188,7 +188,7 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - name: Install consumer dependencies
         working-directory: test/compat/node-consumer
-        run: pnpm install --lockfile=false
+        run: pnpm install --no-lockfile
       - name: Run ESM smoke (import)
         working-directory: test/compat/node-consumer
         run: pnpm smoke:esm
@@ -225,9 +225,29 @@ jobs:
         working-directory: test/compat/bun-consumer
         run: bun test
 
+  ExamplesLockfile:
+    name: Examples Lockfile
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@v7
+      - name: Install pnpm
+        uses: pnpm/action-setup@v6
+        with:
+          version: 11.8.0
+      - name: Use Node.js v24.11.0
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+          cache-dependency-path: examples/pnpm-lock.yaml
+      - name: Verify examples lockfile
+        working-directory: examples
+        run: pnpm --filter '*' install --frozen-lockfile --lockfile-only
+
   Examples:
     name: Example Bot (${{ matrix.name }})
-    needs: Building
+    needs: [Building, ExamplesLockfile]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -266,8 +286,8 @@ jobs:
         run: node scripts/link-local-arcscord.mjs ${{ matrix.path }} ${{ github.workspace }}/vendor-artifact
       - name: Install example dependencies
         id: install
-        working-directory: ${{ matrix.path }}
-        run: pnpm install --lockfile=false
+        working-directory: examples
+        run: pnpm --filter '${{ matrix.name }}' install --no-lockfile
       - name: Generate database client
         id: db_generate
         working-directory: ${{ matrix.path }}
@@ -281,12 +301,12 @@ jobs:
           fi
       - name: Typecheck example
         id: typecheck
-        working-directory: ${{ matrix.path }}
-        run: pnpm typecheck
+        working-directory: examples
+        run: pnpm --filter '${{ matrix.name }}' typecheck
       - name: Lint example
         id: lint
-        working-directory: ${{ matrix.path }}
-        run: pnpm lint
+        working-directory: examples
+        run: pnpm --filter '${{ matrix.name }}' lint
       - name: Write example summary
         if: always()
         run: |
@@ -297,8 +317,8 @@ jobs:
             echo ""
             echo "| Check | Command | Result |"
             echo "| --- | --- | --- |"
-            echo "| Install | \`pnpm install --lockfile=false\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Install | \`pnpm --filter '${{ matrix.name }}' install --no-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Database client | \`pnpm db:generate\` when available | \`${{ steps.db_generate.outcome }}\` |"
-            echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
-            echo "| Lint | \`pnpm lint\` | \`${{ steps.lint.outcome }}\` |"
+            echo "| Typecheck | \`pnpm --filter '${{ matrix.name }}' typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
+            echo "| Lint | \`pnpm --filter '${{ matrix.name }}' lint\` | \`${{ steps.lint.outcome }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"

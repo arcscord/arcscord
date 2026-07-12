@@ -5,8 +5,8 @@
  *
  * The example's committed `package.json` keeps the published version spec (so a
  * user who clones the branch gets a runnable example against the release); this
- * override is applied only in CI on the ephemeral checkout, before running an
- * install without a lockfile (because the override changes resolution for
+ * override is applied only in CI on the ephemeral checkout, before running
+ * `pnpm install --no-lockfile` (because the override changes resolution for
  * arcscord/middleware).
  *
  * Usage: node scripts/link-local-arcscord.mjs <exampleDir> <tarballDir>
