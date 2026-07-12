@@ -119,9 +119,11 @@ export abstract class BaseManager {
         message = await replyConfig(ctx);
       }
       catch (error) {
-        return this.logger.error("failed to call distatchMessageContext function", {
-          baseError: anyToError(error),
+        this.logger.logError(error, {
+          source: "dispatchMessageCallback",
+          incidentId,
         });
+        message = this.client.getErrorMessage(incidentId, locale);
       }
     }
     else {
