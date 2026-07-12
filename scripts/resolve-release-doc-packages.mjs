@@ -7,8 +7,14 @@ const sourceRoot = sourceRootArgIndex === -1
   ? process.cwd()
   : resolve(process.cwd(), process.argv[sourceRootArgIndex + 1]);
 const releaseRef = process.env.RELEASE_REF_NAME ?? "";
-const releaseVersion = releaseRef
-  .replace(/^refs\/tags\//, "")
+const normalizedReleaseRef = releaseRef.replace(/^refs\/tags\//, "");
+const packageSeparatorIndex = normalizedReleaseRef.lastIndexOf("@");
+const releasePackageName = packageSeparatorIndex > 0
+  ? normalizedReleaseRef.slice(0, packageSeparatorIndex)
+  : undefined;
+const releaseVersion = (releasePackageName
+  ? normalizedReleaseRef.slice(packageSeparatorIndex + 1)
+  : normalizedReleaseRef)
   .replace(/^v/, "");
 
 // When no release ref is provided (manual run), switch to detection mode:
@@ -31,7 +37,7 @@ const resolved = packages.map((pkg) => {
 
 const matches = detectMode
   ? resolved.filter(pkg => !existsSync(join(sourceRoot, "website/static/api", pkg.slug, `${pkg.version}.json`)))
-  : resolved.filter(pkg => pkg.version === releaseVersion);
+  : resolved.filter(pkg => pkg.version === releaseVersion && (!releasePackageName || pkg.name === releasePackageName));
 
 if (matches.length === 0) {
   if (detectMode) {
