@@ -262,23 +262,6 @@ export class BaseCommandContext<
   }
 
   /**
-   * Execute multiple functions sequentially, stopping if any function returns an error
-   */
-  async multiple(
-    ...funcList: Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
-  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    for (const func of funcList) {
-      const [err] = await func;
-
-      if (err !== null) {
-        return error(err);
-      }
-    }
-
-    return ok(true);
-  }
-
-  /**
    * @internal
    */
   #interactionContextConverter(

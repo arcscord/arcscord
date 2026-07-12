@@ -264,24 +264,4 @@ export class AutocompleteContext<
   error<E extends NonNullish>(failure: E): CommandRunResult<E> {
     return error(failure);
   }
-
-  /**
-   * Executes multiple functions in sequence, returning an error if any fail.
-   *
-   * @param funcList - The list of functions to execute.
-   * @returns A promise that resolves to CommandRunResult.
-   */
-  async multiple(
-    ...funcList: Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
-  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    for (const func of funcList) {
-      const [err] = await func;
-
-      if (err !== null) {
-        return error(err);
-      }
-    }
-
-    return ok(true);
-  }
 }

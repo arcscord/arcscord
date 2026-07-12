@@ -228,25 +228,6 @@ export class BaseComponentContext<
   }
 
   /**
-   * Runs multiple functions sequentially and stops on the first error.
-   * @param funcList The list of functions to run.
-   * @returns The result of the multiple operations.
-   */
-  async multiple(
-    ...funcList: Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>>[]
-  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    for (const func of funcList) {
-      const [err] = await func;
-
-      if (err !== null) {
-        return error(err);
-      }
-    }
-
-    return ok(true);
-  }
-
-  /**
    * Checks if the current context is a button context.
    * @returns True if it is a button context, false otherwise.
    */
