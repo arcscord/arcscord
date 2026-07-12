@@ -25,6 +25,12 @@ const stagingDir = new URL("test/compat/vendor/", rootDir);
 // Publishable packages to pack. `prefix` is how `pnpm pack` names the tarball
 // before we normalize it to the stable `target` name.
 const packages = {
+  error: {
+    directory: new URL("packages/error/", rootDir),
+    prefix: "arcscord-error",
+    target: "error.tgz",
+    installedName: "@arcscord/error",
+  },
   arcscord: {
     directory: new URL("packages/arcscord/", rootDir),
     prefix: "arcscord",
@@ -41,9 +47,9 @@ const packages = {
 
 // Which packages each consumer fixture installs from its own `vendor/`.
 const consumers = [
-  { dir: "test/compat/bun-consumer/", packages: ["arcscord"] },
-  { dir: "test/compat/typescript-consumer/", packages: ["arcscord", "middleware"] },
-  { dir: "test/compat/node-consumer/", packages: ["arcscord"] },
+  { dir: "test/compat/bun-consumer/", packages: ["error", "arcscord"] },
+  { dir: "test/compat/typescript-consumer/", packages: ["error", "arcscord", "middleware"] },
+  { dir: "test/compat/node-consumer/", packages: ["error", "arcscord"] },
 ];
 
 function runPnpm(args, cwd) {

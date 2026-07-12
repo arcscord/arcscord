@@ -10,10 +10,9 @@ trustPolicy: no-downgrade
 strictStorePkgContentCheck: false
 
 overrides:
+  "@arcscord/error": file:vendor/error.tgz
   arcscord: file:vendor/arcscord.tgz
 
-# arcscord pulls @arcscord/error from the registry; allow the just-published
-# version through pnpm's minimum-release-age gate (mirrors the examples).
+# Keep the error package aligned with the packed Arcscord declarations.
 minimumReleaseAgeExclude:
-  - "@arcscord/error"
   - arcscord
