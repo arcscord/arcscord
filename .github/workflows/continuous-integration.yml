@@ -281,6 +281,14 @@ jobs:
         id: typecheck
         working-directory: ${{ matrix.path }}
         run: pnpm typecheck
+      - name: Normalize injected override for the linter
+        working-directory: ${{ matrix.path }}
+        # link-local-arcscord.mjs appends an `overrides:` block whose key order and
+        # scalar style don't match the example's YAML lint rules. Auto-fix just that
+        # file with the example's own eslint so `pnpm lint` (which lints every file,
+        # including this CI-only mutation) stays green regardless of the antfu
+        # config version resolved at install time.
+        run: pnpm exec eslint pnpm-workspace.yaml --fix
       - name: Lint example
         id: lint
         working-directory: ${{ matrix.path }}
