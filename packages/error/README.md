@@ -28,13 +28,15 @@ function divide(a: number, b: number): Result<number, Error> {
 }
 
 const [err, result] = divide(10, 2);
-if (err) {
+if (err !== null) {
   console.error(err.message);
 }
 else {
   console.log(result); // 5
 }
 ```
+
+Check the error slot with an explicit `!== null` rather than a truthy `if (err)`. Error values are guaranteed non-nullish — `error(null)` and `error(undefined)` are rejected at compile time and throw at runtime — so `err !== null` reliably distinguishes failure from success, even when the error value is falsy (`0`, `""`).
 
 ## Links
 

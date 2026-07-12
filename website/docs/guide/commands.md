@@ -30,7 +30,7 @@ Load commands after the client is ready:
 await client.waitReady();
 const [err] = await client.loadCommands([pingCommand]);
 
-if (err) {
+if (err !== null) {
   client.logger.logError(err);
 }
 ```

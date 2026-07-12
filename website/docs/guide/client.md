@@ -232,7 +232,7 @@ Registers commands with Discord and loads them into the command manager. Returns
 
 ```ts
 const [err] = await client.loadCommands([pingCommand, avatarCommand]);
-if (err) {
+if (err !== null) {
   client.logger.fatalError(err);
 }
 

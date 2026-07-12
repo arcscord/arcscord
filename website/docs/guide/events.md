@@ -96,7 +96,7 @@ await client.loadEvents([messageEvent, readyEvent]);
 
 ```ts
 const [err, loadedEvents] = await client.loadEvents([messageEvent, readyEvent]);
-if (err) {
+if (err !== null) {
   client.logger.fatalError(err);
 }
 else {

@@ -15,7 +15,7 @@ Register commands with `client.loadCommands`. Without extra options, Discord.js 
 await client.waitReady();
 const [err] = await client.loadCommands([pingCommand, avatarCommand]);
 
-if (err) {
+if (err !== null) {
   client.logger.logError(err);
 }
 ```
@@ -32,7 +32,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 
 const [err] = await client.loadCommands([pingCommand, avatarCommand]);
 
-if (err) {
+if (err !== null) {
   client.logger.logError(err);
 }
 

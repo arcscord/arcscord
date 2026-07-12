@@ -21,7 +21,9 @@ pnpm add @arcscord/error
 type Result<T, E> = [error: null, value: T] | [error: E, value: null];
 ```
 
-A `Result` is a 2-tuple. The first element is either `null` (success) or an error. The second element is either the value (success) or `null`. You always destructure both and check the error first.
+A `Result` is a 2-tuple. The first element is either `null` (success) or an error. The second element is either the value (success) or `null`. You always destructure both and check the error first with an explicit `!== null` — never a truthy `if (err)`, which would misread a falsy-but-valid error such as `0` or `""` as success.
+
+The error slot is guaranteed to be non-nullish (see [`error`](#errorerr)), so `err !== null` reliably discriminates success from failure.
 
 ```ts
 import type { Result } from "@arcscord/error";
@@ -33,7 +35,7 @@ function divide(a: number, b: number): Result<number, Error> {
 }
 
 const [err, result] = divide(10, 2);
-if (err) {
+if (err !== null) {
   console.error(err.message);
 } else {
   console.log(result); // 5 — TypeScript knows result is number here
@@ -65,22 +67,30 @@ return error(new Error("something went wrong"));   // [Error, null]
 return error(new MyCustomError({ message: "..." })); // [MyCustomError, null]
 ```
 
-### `multiple(...results)`
-
-Checks multiple Results at once. Returns the last success value if all succeed, or the first error encountered.
+`error` **rejects `null` and `undefined`** — an error Result must carry a meaningful value. This is enforced at compile time and at runtime (it throws a `TypeError`), because `[null, null]` would be indistinguishable from a success. Any other value is accepted, including strings, numbers, and plain domain objects:
 
 ```ts
-import { multiple, ok, error } from "@arcscord/error";
-
-const a: Result<string, Error> = ok("hello");
-const b: Result<number, TypeError> = ok(42);
-
-const [err, val] = multiple(a, b);
-// val is 42 (the last success value)
-// err is Error | TypeError
+return error("failed");                    // [string, null]
+return error({ _tag: "TicketLimitReached" }); // [object, null]
 ```
 
-Useful when you need to run several operations and fail fast on the first error.
+### `multiple(...callbacks)`
+
+Runs a list of Result-producing callbacks **sequentially** and short-circuits on the first failure. Each callback runs only if every previous one succeeded, so later operations are skipped as soon as one fails or throws. Returns a `Promise`.
+
+```ts
+import { multiple, ok } from "@arcscord/error";
+
+const [err, val] = await multiple(
+  () => ok("hello"),
+  async () => saveUser(user), // only runs if the previous callback succeeded
+  () => ok(42),
+);
+// val is 42 (the last success value)
+// err is the first error encountered (or null)
+```
+
+Passing callbacks — rather than already-computed Results — is what lets `multiple` skip the remaining work. If a callback throws, the throw is wrapped into `error(anyToError(e))` and the remaining callbacks are not executed.
 
 ### `forceSafe(fn)`
 
@@ -96,6 +106,19 @@ const [err, data] = await forceSafe(() => JSON.parse(rawInput));
 Any non-Error thrown value (string, object, etc.) is converted to an `Error` automatically via `anyToError`.
 
 ## Utilities
+
+### `isResult(value)`
+
+Type guard that checks whether a value has the shape of a `Result` tuple. Useful when normalizing a value that may already be a `Result` or may be a raw value.
+
+```ts
+import { isResult, ok } from "@arcscord/error";
+
+isResult(ok(42));   // true
+isResult(ok(null)); // true — [null, null] is a valid ok(null)
+isResult("done");   // false
+isResult([1, 2]);   // false — a Result always has at least one null slot
+```
 
 ### `anyToError(value)`
 

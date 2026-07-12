@@ -99,7 +99,7 @@ await client.loadComponents([simpleButton, profileModal, roleMenu]);
 
 ```ts
 const [err, count] = await client.loadComponents([simpleButton, profileModal]);
-if (err) {
+if (err !== null) {
   client.logger.fatalError(err);
 }
 else {
