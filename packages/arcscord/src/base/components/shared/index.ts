@@ -55,6 +55,8 @@ export type {
   StringComponentType,
   StringSelectMenu,
   StringSelectMenuValues,
+  TypedSelectMenuOptionOverride,
+  TypedSelectMenuOptionOverrides,
   TypedSelectMenuOptions,
   UserSelectMenu,
 } from "./component_definer.type";

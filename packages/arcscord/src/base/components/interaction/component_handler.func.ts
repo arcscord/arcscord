@@ -19,7 +19,9 @@ import type { StringSelectMenuContext } from "#/base/components/interaction/cont
 import type { RouteVariablesObject } from "#/base/components/interaction/route";
 import type {
   ModalFields,
+  SelectOptions,
   StringSelectMenu,
+  TypedSelectMenuOptionOverrides,
   TypedSelectMenuOptions,
 } from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
@@ -28,6 +30,7 @@ import { createRouteId, hasComponentRouteParams } from "#/base/components/intera
 import { withModalFieldIds } from "#/base/components/modal/builders";
 import { stringSelectMenu } from "#/base/components/shared/builders";
 import { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
+import { selectMenuOptionsToAPI } from "#/base/components/shared/to_api";
 
 type HandlerOptions<T> = T extends unknown ? Omit<T, "handlerType"> : never;
 
@@ -48,7 +51,7 @@ function createRouteBuildResolver<Route extends string, Options extends unknown[
 }
 
 type TypedStringMenuOptions<
-  Options extends string[],
+  Options extends unknown[],
   Middleware extends ComponentMiddleware[],
   Route extends string,
   Values extends TypedSelectMenuOptions,
@@ -68,7 +71,10 @@ type TypedStringMenuOptions<
   build: (
     id: IdInitialiseFunction,
     ...args: Options
-  ) => Omit<StringSelectMenu<"message">, "maxValues" | "minValues" | "options" | "type">;
+  ) => Omit<StringSelectMenu<"message">, "maxValues" | "minValues" | "options" | "type"> & {
+    /** Presentation-only overrides applied to the static options for this build. */
+    optionOverrides?: TypedSelectMenuOptionOverrides<Values>;
+  };
   run: (
     ctx: StringSelectMenuContext<
       Middleware,
@@ -78,6 +84,31 @@ type TypedStringMenuOptions<
     >,
   ) => Promise<ComponentRunResult>;
 };
+
+function applyTypedSelectMenuOptionOverrides<Values extends TypedSelectMenuOptions>(
+  values: Values,
+  overrides?: TypedSelectMenuOptionOverrides<Values>,
+): TypedSelectMenuOptions | SelectOptions[] {
+  if (!overrides) {
+    return values;
+  }
+
+  const keys = Object.keys(values) as Array<keyof Values>;
+  return selectMenuOptionsToAPI(values).map((option, index) => {
+    const override = overrides[keys[index]];
+    if (!override) {
+      return option;
+    }
+
+    return {
+      ...option,
+      ...(override.label !== undefined ? { label: override.label } : {}),
+      ...(override.description !== undefined ? { description: override.description } : {}),
+      ...(override.emoji !== undefined ? { emoji: override.emoji } : {}),
+      ...(override.default !== undefined ? { default: override.default } : {}),
+    };
+  }) as SelectOptions[];
+}
 
 /**
  * Create a select menu
@@ -154,6 +185,10 @@ export function createSelectMenu<
  * > `as const`) collapses `ctx.values` back to `string` and voids the type
  * > safety this helper provides.
  *
+ * Return `optionOverrides` from `build()` to change labels, descriptions,
+ * emoji or default states per build without changing the statically declared
+ * values. Overrides are keyed by the keys of `values`.
+ *
  * @param options - The properties to configure the typed string select menu
  * @returns The complete set of properties for the typed string select menu
  * @example
@@ -171,8 +206,12 @@ export function createSelectMenu<
  *     },
  *   },
  *   maxValues: 2,
- *   build: id => ({
+ *   build: (id, labels: { fun: string; happy: string }) => ({
  *     customId: id(),
+ *     optionOverrides: {
+ *       fun: { label: labels.fun },
+ *       happy: { label: labels.happy },
+ *     },
  *   }),
  *   run: (ctx) => {
  *     const selectedValues: Array<keyof typeof typedStringSelectValues> = ctx.values;
@@ -183,7 +222,7 @@ export function createSelectMenu<
  * ```
  */
 export function createTypedStringMenu<
-  Options extends string[],
+  Options extends unknown[],
   Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
   const Values extends TypedSelectMenuOptions = TypedSelectMenuOptions,
@@ -204,10 +243,10 @@ export function createTypedStringMenu<
     ...options,
     build: (...args: ComponentBuildArgs<Route, Options>): ActionRowData<StringSelectMenuComponentData> => {
       const [buildId, buildArgs] = resolveRouteBuild(...args);
-      const menu = options.build(buildId, ...buildArgs);
+      const { optionOverrides, ...menu } = options.build(buildId, ...buildArgs);
       return stringSelectMenu({
         ...menu,
-        options: options.values,
+        options: applyTypedSelectMenuOptionOverrides(options.values, optionOverrides),
         maxValues: options.maxValues,
         minValues: options.minValues,
       });

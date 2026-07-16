@@ -219,6 +219,23 @@ export type TypedSelectMenuOptions = Record<
 >;
 
 /**
+ * Presentation-only overrides for an option of a typed string select menu.
+ *
+ * The option value is intentionally excluded so the keys declared in
+ * {@link TypedSelectMenuOptions} remain the source of truth for typing and
+ * runtime validation.
+ */
+export type TypedSelectMenuOptionOverride = Partial<Omit<SelectOptions, "value">>;
+
+/**
+ * Per-option presentation overrides keyed by the values declared on a typed
+ * string select menu.
+ */
+export type TypedSelectMenuOptionOverrides<Values extends TypedSelectMenuOptions> = {
+  readonly [Value in keyof Values]?: TypedSelectMenuOptionOverride;
+};
+
+/**
  * Type for a string select menu.
  */
 export type StringSelectMenu<Usage extends ComponentUsage = ComponentUsage> = BaseSelectMenu<Usage> & {
