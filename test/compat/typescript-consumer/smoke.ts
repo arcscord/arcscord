@@ -1,3 +1,4 @@
+import type { TypedSelectMenuOptionOverride, TypedSelectMenuOptionOverrides } from "arcscord";
 import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import {
@@ -113,15 +114,32 @@ const modal = createModal({
   },
 });
 
+const statusValues = {
+  open: { label: "Open" },
+  closed: { label: "Closed" },
+  archived: { label: "Archived" },
+} as const;
+const archivedOverride: TypedSelectMenuOptionOverride = {
+  emoji: "📦",
+  default: false,
+};
+const statusOverrides: TypedSelectMenuOptionOverrides<typeof statusValues> = {
+  archived: archivedOverride,
+};
+
 const multiSelect = createTypedStringMenu({
   route: "compat/select/{scope}",
-  values: {
-    open: { label: "Open" },
-    closed: { label: "Closed" },
-    archived: { label: "Archived" },
-  } as const,
+  values: statusValues,
   maxValues: 2,
-  build: id => ({ customId: id(), placeholder: "Choose statuses" }),
+  build: (id, labels: { open: string; closed: string }) => ({
+    customId: id(),
+    placeholder: "Choose statuses",
+    optionOverrides: {
+      ...statusOverrides,
+      open: { label: labels.open },
+      closed: { label: labels.closed },
+    },
+  }),
   run: async (ctx) => {
     expectExactType<IsExact<typeof ctx.params, { scope: string }>>(true);
     expectExactType<IsExact<typeof ctx.values, ("open" | "closed" | "archived")[]>>(true);
@@ -150,7 +168,7 @@ const singleSelect = createTypedStringMenu({
 });
 
 modal.build({ requestId: "request-1" });
-multiSelect.build({ scope: "all" });
+multiSelect.build({ scope: "all" }, { open: "Available", closed: "Resolved" });
 singleSelect.build();
 
 const client = new ArcClient("", { intents: [GatewayIntentBits.Guilds] });

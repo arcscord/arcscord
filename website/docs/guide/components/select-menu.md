@@ -129,6 +129,7 @@ Or pass a plain `string` as the value — it becomes the label.
 | `customId` | `string` | Yes | Must be `id()`. |
 | `placeholder` | `string` | No | Placeholder text. |
 | `disabled` | `boolean` | No | Disabled state. |
+| `optionOverrides` | `TypedSelectMenuOptionOverrides<typeof values>` | No | Presentation overrides keyed by the static option values. |
 
 ```ts
 import { createTypedStringMenu } from "arcscord";
@@ -159,6 +160,78 @@ When `maxValues` is `1`, `ctx.values` is the single selected key (a string). Whe
 :::warning `values` must be static
 You must declare `values` as a static object literal asserted with `as const`, passed directly to `createTypedStringMenu` (not inside `build`). Its keys define both the `ctx.values` type **and** the set of values accepted at runtime — a selection outside that set (for example coming from an outdated message whose options no longer match) is rejected before `run` is called. Building `values` dynamically (or dropping `as const`) collapses `ctx.values` back to `string` and removes the type safety this helper provides.
 :::
+
+### Dynamic option presentation & i18next
+
+The keys in `values` must stay static, but their presentation can vary for each call to `build`.
+Return `optionOverrides` from `build` to replace an option's `label`, `description`, `emoji`, or
+`default` state. Overrides are merged with the static definition, so omitted properties keep their
+original values.
+
+`optionOverrides` is keyed by the keys of `values`. TypeScript rejects undeclared keys and does not
+offer a `value` property: changing presentation can therefore never change `ctx.values` typing or
+the runtime set used to validate interactions. The static object is not mutated, so the same handler
+can safely be built for several users or locales.
+
+```ts
+import { createTypedStringMenu } from "arcscord";
+
+const values = {
+  great: { label: "Great", description: "Feeling awesome", emoji: "🎉" },
+  okay: { label: "Okay", description: "Doing fine" },
+  bad: { label: "Bad", description: "Having a rough day" },
+} as const;
+
+type MoodPresentation = {
+  placeholder: string;
+  great: string;
+  greatDescription: string;
+  okay: string;
+  bad: string;
+  defaultMood: "great" | "okay" | "bad";
+};
+
+export const localizedMoodMenu = createTypedStringMenu({
+  route: "localized_mood",
+  values,
+  maxValues: 1,
+  build: (id, presentation: MoodPresentation) => ({
+    customId: id(),
+    placeholder: presentation.placeholder,
+    optionOverrides: {
+      great: {
+        label: presentation.great,
+        description: presentation.greatDescription,
+        emoji: "✨",
+        default: presentation.defaultMood === "great",
+      },
+      okay: {
+        label: presentation.okay,
+        default: presentation.defaultMood === "okay",
+      },
+      bad: {
+        label: presentation.bad,
+        default: presentation.defaultMood === "bad",
+      },
+    },
+  }),
+  run: async ctx => ctx.reply(`Mood: ${ctx.values}`),
+});
+```
+
+Resolve translations where `ctx.t` is available, then pass one object to `build`, just as with a
+typed modal:
+
+```ts
+localizedMoodMenu.build({
+  placeholder: ctx.t($ => $.mood.placeholder),
+  great: ctx.t($ => $.mood.great.label),
+  greatDescription: ctx.t($ => $.mood.great.description),
+  okay: ctx.t($ => $.mood.okay.label),
+  bad: ctx.t($ => $.mood.bad.label),
+  defaultMood: "okay",
+})
+```
 
 ## User select
 

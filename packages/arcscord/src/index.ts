@@ -280,6 +280,8 @@ export type {
   TextInput,
   TextInputStyle,
   Thumbnail,
+  TypedSelectMenuOptionOverride,
+  TypedSelectMenuOptionOverrides,
   TypedSelectMenuOptions,
   TypedTextInput,
   UserSelectMenu,

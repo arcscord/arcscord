@@ -1,7 +1,7 @@
 import { expectTypeOf, it } from "vitest";
 import { buildModal, modalTextInput } from "../modal";
 import { button as buttonComponent } from "../shared/builders";
-import { createButton, createModal } from "./component_handler.func";
+import { createButton, createModal, createTypedStringMenu } from "./component_handler.func";
 
 it("types ctx.params from a static route (no params)", () => {
   createButton({
@@ -78,5 +78,72 @@ it("types modal ctx.params from route", () => {
       expectTypeOf(ctx.params.type).toEqualTypeOf<string>();
       return ctx.ok();
     },
+  });
+});
+
+it("types typed string select option overrides without changing build arguments or values", () => {
+  const menu = createTypedStringMenu({
+    route: "status/{scope}",
+    values: {
+      open: { label: "Open" },
+      closed: { label: "Closed" },
+    } as const,
+    build: (id, labels: { open: string; closed: string }) => ({
+      customId: id(),
+      optionOverrides: {
+        open: {
+          label: labels.open,
+          description: "Available",
+          emoji: "✅",
+          default: true,
+        },
+        closed: {
+          label: labels.closed,
+          default: false,
+        },
+      },
+    }),
+    run: async (ctx) => {
+      expectTypeOf(ctx.values).toEqualTypeOf<("open" | "closed")[]>();
+      return ctx.ok();
+    },
+  });
+
+  expectTypeOf(menu.build).parameters.toEqualTypeOf<[{ scope: string }, { open: string; closed: string }]>();
+});
+
+it("rejects undeclared typed string select override keys", () => {
+  createTypedStringMenu({
+    route: "status",
+    values: {
+      open: { label: "Open" },
+    } as const,
+    build: id => ({
+      customId: id(),
+      optionOverrides: {
+        // @ts-expect-error Only keys declared in values can be overridden.
+        missing: { label: "Missing" },
+      },
+    }),
+    run: async ctx => ctx.ok(),
+  });
+});
+
+it("rejects value overrides for typed string select options", () => {
+  createTypedStringMenu({
+    route: "status",
+    values: {
+      open: { label: "Open" },
+    } as const,
+    build: id => ({
+      customId: id(),
+      optionOverrides: {
+        open: {
+          // @ts-expect-error Option values stay fixed and cannot be overridden.
+          value: "closed",
+        },
+      },
+    }),
+    run: async ctx => ctx.ok(),
   });
 });

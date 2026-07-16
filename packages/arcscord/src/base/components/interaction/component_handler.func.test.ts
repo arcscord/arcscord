@@ -2,7 +2,7 @@ import { ComponentType } from "discord-api-types/v10";
 import { describe, expect, it } from "vitest";
 import { buildModal, modalStringSelect, modalTextInput } from "../modal";
 import { button as buttonComponent } from "../shared/builders";
-import { createButton, createModal } from "./component_handler.func";
+import { createButton, createModal, createTypedStringMenu } from "./component_handler.func";
 
 describe("component handler builders", () => {
   it("keeps static route build arguments unchanged", () => {
@@ -145,6 +145,98 @@ describe("component handler builders", () => {
       customId: "ticket/edit/$42",
       title: "Modifier",
     });
+  });
+
+  it("applies typed string select presentation overrides per build without changing values", () => {
+    const values = {
+      fun: {
+        label: "Fun",
+        description: "Static fun description",
+        emoji: "🙂",
+        default: true,
+      },
+      happy: {
+        label: "Happy",
+        description: "Static happy description",
+        emoji: "😊",
+        default: true,
+      },
+    } as const;
+    const menu = createTypedStringMenu({
+      route: "mood/{locale}",
+      values,
+      build: (id, labels: { fun: string; funDescription: string; happy: string }) => ({
+        customId: id(),
+        optionOverrides: {
+          fun: {
+            label: labels.fun,
+            description: labels.funDescription,
+            emoji: "🔥",
+            default: false,
+          },
+          happy: {
+            label: labels.happy,
+            default: false,
+          },
+        },
+      }),
+      run: async ctx => ctx.ok(ctx.values.join(",")),
+    });
+
+    expect(menu.build({ locale: "fr" }, {
+      fun: "Amusant",
+      funDescription: "Description FR",
+      happy: "Heureux",
+    })).toMatchObject({
+      components: [{
+        customId: "mood/$fr",
+        options: [
+          {
+            label: "Amusant",
+            value: "fun",
+            description: "Description FR",
+            emoji: "🔥",
+            default: false,
+          },
+          {
+            label: "Heureux",
+            value: "happy",
+            description: "Static happy description",
+            emoji: "😊",
+            default: false,
+          },
+        ],
+      }],
+    });
+
+    expect(menu.build({ locale: "en" }, {
+      fun: "Playful",
+      funDescription: "English description",
+      happy: "Cheerful",
+    })).toMatchObject({
+      components: [{
+        customId: "mood/$en",
+        options: [
+          { label: "Playful", value: "fun", description: "English description" },
+          { label: "Cheerful", value: "happy", description: "Static happy description" },
+        ],
+      }],
+    });
+    expect(values).toEqual({
+      fun: {
+        label: "Fun",
+        description: "Static fun description",
+        emoji: "🙂",
+        default: true,
+      },
+      happy: {
+        label: "Happy",
+        description: "Static happy description",
+        emoji: "😊",
+        default: true,
+      },
+    });
+    expect([...(menu.typedAllowedValues ?? [])]).toEqual(["fun", "happy"]);
   });
 
   it("supports untyped modal builders without field definitions", () => {

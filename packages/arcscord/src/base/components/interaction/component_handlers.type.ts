@@ -158,7 +158,7 @@ export type ButtonComponentHandler<
  * Properties for a string select menu component.
  */
 export type StringSelectMenuComponentHandler<
-  Options extends string[] = string[],
+  Options extends unknown[] = string[],
   Middleware extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
   Typed extends TypedSelectMenuOptions | undefined = undefined,
