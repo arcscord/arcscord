@@ -7,6 +7,7 @@
  * building a component, registering an event handler and the logger.
  */
 import process from "node:process";
+import { container, v2Message } from "@arcscord/components";
 import {
   ArcClient,
   button,
@@ -19,6 +20,7 @@ import {
 const client = new ArcClient("smoke-token", {
   intents: [],
 });
+const standaloneMessage = v2Message(container("standalone"));
 
 // 2. Build a slash command.
 const pingCommand = createCommand({
@@ -53,6 +55,9 @@ client.logger.info("bun smoke: client ready");
 
 if (!(client instanceof ArcClient)) {
   throw new TypeError("ArcClient instantiation failed");
+}
+if (standaloneMessage.components.length !== 1) {
+  throw new Error("standalone components build failed");
 }
 if (pingCommand.slash?.name !== "ping") {
   throw new Error("command build failed");

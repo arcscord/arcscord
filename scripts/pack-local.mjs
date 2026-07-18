@@ -31,6 +31,12 @@ const packages = {
     target: "error.tgz",
     installedName: "@arcscord/error",
   },
+  components: {
+    directory: new URL("packages/components/", rootDir),
+    prefix: "arcscord-components",
+    target: "components.tgz",
+    installedName: "@arcscord/components",
+  },
   arcscord: {
     directory: new URL("packages/arcscord/", rootDir),
     prefix: "arcscord",
@@ -47,9 +53,9 @@ const packages = {
 
 // Which packages each consumer fixture installs from its own `vendor/`.
 const consumers = [
-  { dir: "test/compat/bun-consumer/", packages: ["error", "arcscord"] },
-  { dir: "test/compat/typescript-consumer/", packages: ["error", "arcscord", "middleware"] },
-  { dir: "test/compat/node-consumer/", packages: ["error", "arcscord"] },
+  { dir: "test/compat/bun-consumer/", packages: ["error", "components", "arcscord"] },
+  { dir: "test/compat/typescript-consumer/", packages: ["error", "components", "arcscord", "middleware"] },
+  { dir: "test/compat/node-consumer/", packages: ["error", "components", "arcscord"] },
 ];
 
 function runPnpm(args, cwd) {

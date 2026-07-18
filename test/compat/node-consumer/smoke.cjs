@@ -10,6 +10,7 @@
 
 const assert = require("node:assert/strict");
 const process = require("node:process");
+const { container, v2Message } = require("@arcscord/components");
 const {
   ArcClient,
   button,
@@ -19,6 +20,7 @@ const {
 } = require("arcscord");
 
 const client = new ArcClient("smoke-token", { intents: [] });
+assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components CJS failed");
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 

@@ -8,6 +8,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@arcscord/components": "file:vendor/components.tgz",
     "@arcscord/error": "file:vendor/error.tgz",
     "@arcscord/middleware": "file:vendor/middleware.tgz",
     "arcscord": "file:vendor/arcscord.tgz",

@@ -10,6 +10,7 @@ trustPolicy: no-downgrade
 strictStorePkgContentCheck: false
 
 overrides:
+  "@arcscord/components": file:vendor/components.tgz
   "@arcscord/error": file:vendor/error.tgz
   arcscord: file:vendor/arcscord.tgz
 
@@ -21,4 +22,5 @@ onlyBuiltDependencies:
 
 # Keep the error package aligned with the packed Arcscord declarations.
 minimumReleaseAgeExclude:
+  - "@arcscord/components"
   - arcscord

@@ -3,6 +3,11 @@ packages/core:
       - any-glob-to-any-file:
           - packages/arcscord/*
           - packages/arcscord/**/*
+packages/components:
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/components/*
+          - packages/components/**/*
 packages/better-error:
   - changed-files:
       - any-glob-to-any-file:

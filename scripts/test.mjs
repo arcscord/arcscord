@@ -8,6 +8,7 @@ const vitest = path.join(root, "node_modules/vitest/vitest.mjs");
 const targets = [
   ["arcscord", "packages/arcscord"],
   ["@arcscord/better-error", "packages/better_error"],
+  ["@arcscord/components", "packages/components"],
   ["@arcscord/error", "packages/error"],
   ["@arcscord/middleware", "packages/middleware"],
   ["scripts", "scripts/tests"],

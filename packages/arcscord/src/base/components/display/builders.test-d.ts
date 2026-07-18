@@ -1,5 +1,27 @@
+import type {
+  AnyMessageTopLevelComponentData,
+  ComponentInContainer,
+  Container,
+  ContainerChild,
+  ContainerComponentInput,
+  File,
+  FileComponentInput,
+  MediaGallery,
+  MediaGalleryComponentInput,
+  MessageTopLevelComponent,
+  MessageV2Child,
+  MessageV2Component,
+  Section,
+  SectionComponentInput,
+  Separator,
+  SeparatorComponentInput,
+  TextDisplay,
+  TextDisplayInput,
+  Thumbnail,
+  ThumbnailInput,
+} from "arcscord";
 import type { InteractionEditReplyOptions, InteractionReplyOptions, MessageEditOptions } from "discord.js";
-import { describe, it } from "vitest";
+import { describe, expectTypeOf, it } from "vitest";
 import { v2Message } from "./builders";
 
 // These assignments mirror the real call sites (`ctx.reply`, `ctx.editReply`,
@@ -24,5 +46,20 @@ describe("v2Message return types", () => {
   it("reply-only options still produce a reply payload", () => {
     const reply: InteractionReplyOptions = v2Message({ ephemeral: true }, "Hello");
     void reply;
+  });
+});
+
+describe("legacy Arcscord Components V2 aliases", () => {
+  it("redirects deprecated aliases to their modern Arcscord types", () => {
+    expectTypeOf<AnyMessageTopLevelComponentData>().toEqualTypeOf<MessageV2Component>();
+    expectTypeOf<ComponentInContainer>().toEqualTypeOf<ContainerChild>();
+    expectTypeOf<Container>().toEqualTypeOf<ContainerComponentInput>();
+    expectTypeOf<File>().toEqualTypeOf<FileComponentInput>();
+    expectTypeOf<MediaGallery>().toEqualTypeOf<MediaGalleryComponentInput>();
+    expectTypeOf<MessageTopLevelComponent>().toEqualTypeOf<MessageV2Child>();
+    expectTypeOf<Section>().toEqualTypeOf<SectionComponentInput>();
+    expectTypeOf<Separator>().toEqualTypeOf<SeparatorComponentInput>();
+    expectTypeOf<TextDisplay>().toEqualTypeOf<TextDisplayInput>();
+    expectTypeOf<Thumbnail>().toEqualTypeOf<ThumbnailInput>();
   });
 });

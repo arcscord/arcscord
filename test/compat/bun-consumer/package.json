@@ -9,11 +9,13 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@arcscord/components": "file:vendor/components.tgz",
     "@arcscord/error": "file:vendor/error.tgz",
     "arcscord": "file:vendor/arcscord.tgz",
     "discord.js": "^14.26.4"
   },
   "overrides": {
+    "@arcscord/components": "file:vendor/components.tgz",
     "@arcscord/error": "file:vendor/error.tgz"
   },
   "devDependencies": {

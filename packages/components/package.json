@@ -1,0 +1,63 @@
+{
+  "name": "@arcscord/components",
+  "version": "1.0.0",
+  "description": "Standalone typed helpers for Discord Components V2 messages.",
+  "author": "Arcoz0308",
+  "license": "MIT",
+  "homepage": "https://arcscord.dev/packages/components",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arcscord/arcscord.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arcscord/arcscord/issues"
+  },
+  "keywords": [
+    "arcscord",
+    "discord",
+    "discord.js",
+    "components-v2",
+    "typescript"
+  ],
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/esm/index.d.mts",
+      "default": "./dist/esm/index.mjs"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.cjs"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.eslint.json",
+    "docs": "typedoc"
+  },
+  "dependencies": {
+    "discord-api-types": "^0.38.49"
+  },
+  "peerDependencies": {
+    "discord.js": "^14.26.4",
+    "typescript": "^5.4.0 || ^6.0.0"
+  },
+  "devDependencies": {
+    "discord.js": "^14.26.4",
+    "tsdown": "0.22.4",
+    "typedoc": "^0.28.19",
+    "typescript": "^6.0.3",
+    "vitest": "4.1.9"
+  },
+  "engines": {
+    "node": ">=24.11.0",
+    "bun": ">=1.3.0"
+  },
+  "files": [
+    "dist/cjs/",
+    "dist/esm/"
+  ]
+}

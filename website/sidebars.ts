@@ -62,6 +62,7 @@ const sidebars: SidebarsConfig = {
       label: "External packages",
       items: [
         "packages/arcscord",
+        "packages/components",
         "packages/middleware",
         "packages/error",
         "packages/better-error",

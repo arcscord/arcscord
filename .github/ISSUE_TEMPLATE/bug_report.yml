@@ -15,6 +15,7 @@ body:
       description: Which package is affected?
       options:
         - arcscord
+        - "@arcscord/components"
         - "@arcscord/middleware"
         - "@arcscord/error"
         - "@arcscord/better-error"

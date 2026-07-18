@@ -13,6 +13,7 @@ export function createVitestConfig(options: ViteUserConfig = {}) {
       ...options.resolve,
       alias: {
         "@arcscord/better-error": new URL("../packages/better_error/src/index.ts", import.meta.url).pathname,
+        "@arcscord/components": new URL("../packages/components/src/index.ts", import.meta.url).pathname,
         "@arcscord/error": new URL("../packages/error/src/index.ts", import.meta.url).pathname,
         ...optionAlias,
       },

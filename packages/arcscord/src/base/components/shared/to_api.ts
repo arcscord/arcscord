@@ -1,3 +1,4 @@
+import type { TextDisplayInput } from "@arcscord/components";
 import type {
   APIButtonComponent,
   APISelectMenuComponent,
@@ -7,22 +8,16 @@ import type {
   ChannelSelectMenuBuilder,
   CheckboxComponentData,
   CheckboxGroupComponentData,
-  ContainerComponentData,
   SelectMenuDefaultValueType as DJSSelectMenuDefaultValueType,
-  FileComponentData,
   FileUploadComponentData,
   LabelComponentData,
-  MediaGalleryComponentData,
   MentionableSelectMenuBuilder,
   RadioGroupComponentData,
   RoleSelectMenuBuilder,
-  SectionComponentData,
   SelectMenuComponentOptionData,
-  SeparatorComponentData,
   StringSelectMenuBuilder,
   TextDisplayComponentData,
   TextInputComponentData,
-  ThumbnailComponentData,
   UserSelectMenuBuilder,
 } from "discord.js";
 import type {
@@ -30,29 +25,19 @@ import type {
   Button,
   Checkbox,
   CheckboxGroup,
-  ComponentInContainer,
   ComponentInLabel,
-  Container,
-  File,
   FileUpload,
   Label,
-  MediaGallery,
   ModalSelectMenu,
   RadioGroup,
-  Section,
   SelectMenu,
   SelectOptions,
-  Separator,
-  TextDisplay,
-  TextDisplayInput,
   TextInput,
-  Thumbnail,
   TypedSelectMenuOptions,
 } from "#/base/components/shared/component_definer.type";
 import { ComponentType } from "discord-api-types/v10";
 import {
   buttonTypeEnum,
-  separatorSpacingSizeEnum,
   textInputStyleEnum,
 } from "#/base/components/shared/component.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
@@ -324,92 +309,11 @@ export function textDisplayToAPI(textDisplay: TextDisplayInput): TextDisplayComp
     };
   }
 
+  const display = "toJSON" in textDisplay ? textDisplay.toJSON() : textDisplay;
   return {
     type: ComponentType.TextDisplay,
-    id: textDisplay.id,
-    content: textDisplay.content,
-  };
-}
-
-export function thumbnailToAPI(thumbnail: Thumbnail): ThumbnailComponentData {
-  return {
-    type: ComponentType.Thumbnail,
-    id: thumbnail.id,
-    media: thumbnail.media,
-    description: thumbnail.description,
-    spoiler: thumbnail.spoiler,
-  };
-}
-
-export function sectionToAPI(section: Section): SectionComponentData {
-  return {
-    type: ComponentType.Section,
-    id: section.id,
-    components: section.components.map(textDisplayToAPI),
-    accessory: section.accessory.type === ComponentType.Button
-      ? buttonToAPI(section.accessory)
-      : thumbnailToAPI(section.accessory),
-  };
-}
-
-export function mediaGalleryToAPI(mediaGallery: MediaGallery): MediaGalleryComponentData {
-  return {
-    type: ComponentType.MediaGallery,
-    id: mediaGallery.id,
-    items: mediaGallery.items,
-  };
-}
-
-export function fileToAPI(file: File): FileComponentData {
-  return {
-    type: ComponentType.File,
-    id: file.id,
-    file: file.file,
-    spoiler: file.spoiler,
-  };
-}
-
-export function separatorToAPI(separator: Separator): SeparatorComponentData {
-  return {
-    type: ComponentType.Separator,
-    id: separator.id,
-    divider: separator.divider,
-    spacing: typeof separator.spacing === "string"
-      ? separatorSpacingSizeEnum[separator.spacing]
-      : separator.spacing,
-  };
-}
-
-export function componentInContainerToAPI(component: ComponentInContainer): ContainerComponentData["components"][number] {
-  if (typeof component === "string") {
-    return textDisplayToAPI(component);
-  }
-
-  switch (component.type) {
-    case ComponentType.ActionRow:
-      return component as ContainerComponentData["components"][number];
-    case ComponentType.File:
-      return fileToAPI(component as File);
-    case ComponentType.MediaGallery:
-      return mediaGalleryToAPI(component as MediaGallery);
-    case ComponentType.Section:
-      return sectionToAPI(component as Section);
-    case ComponentType.Separator:
-      return separatorToAPI(component as Separator);
-    case ComponentType.TextDisplay:
-      return textDisplayToAPI(component as TextDisplay);
-    default:
-      throw new TypeError(`Unsupported container component type: ${component.type}`);
-  }
-}
-
-export function containerToAPI(container: Container): ContainerComponentData {
-  return {
-    type: ComponentType.Container,
-    id: container.id,
-    components: container.components.map(componentInContainerToAPI),
-    accentColor: container.accentColor ?? undefined,
-    spoiler: container.spoiler,
+    id: display.id,
+    content: display.content,
   };
 }
 

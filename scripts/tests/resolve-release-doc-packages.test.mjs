@@ -10,6 +10,7 @@ const script = fileURLToPath(new URL("../resolve-release-doc-packages.mjs", impo
 
 const packages = [
   { dir: "packages/arcscord", name: "arcscord", version: "3.0.0" },
+  { dir: "packages/components", name: "@arcscord/components", version: "1.0.0" },
   { dir: "packages/middleware", name: "@arcscord/middleware", version: "1.0.0" },
   { dir: "packages/error", name: "@arcscord/error", version: "3.0.0" },
   { dir: "packages/better_error", name: "@arcscord/better-error", version: "1.0.0" },
@@ -48,6 +49,13 @@ describe("release documentation package resolver", () => {
 
     assert.equal(result.status, 0);
     assert.match(result.stdout, /snapshots: better-error/);
+  });
+
+  it("resolves the components package release tag", () => {
+    const result = resolveRelease("@arcscord/components@v1.0.0");
+
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /snapshots: components/);
   });
 
   it("keeps resolving version-only release tags", () => {
