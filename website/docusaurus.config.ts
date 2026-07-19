@@ -49,7 +49,7 @@ const config: Config = {
       tagName: "meta",
       attributes: {
         name: "theme-color",
-        content: "#377bc3",
+        content: "#05010f",
       },
     },
     {
@@ -92,13 +92,12 @@ const config: Config = {
       { name: "twitter:card", content: "summary_large_image" },
     ],
     navbar: {
-      title: "Arcscord",
       logo: {
-        alt: "Arcscord logo",
-        src: "img/logo.webp",
-        srcDark: "img/logo.webp",
-        width: 25,
-        height: 32,
+        alt: "Arcscord — Home",
+        src: "img/brand-wordmark.webp",
+        srcDark: "img/brand-wordmark.webp",
+        width: 126,
+        height: 20,
       },
       items: [
         { type: "docSidebar", sidebarId: "guideSidebar", position: "left", label: "Guide" },

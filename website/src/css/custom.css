@@ -1,31 +1,125 @@
-:root {
-  --ifm-color-primary: #377bc3;
-  --ifm-color-primary-dark: #2f6caf;
-  --ifm-color-primary-darker: #2a609c;
-  --ifm-color-primary-darkest: #214d7d;
-  --ifm-color-primary-light: #5f87df;
-  --ifm-color-primary-lighter: #8298ed;
-  --ifm-color-primary-lightest: #aec0f6;
-  --ifm-code-font-size: 95%;
-  --arcscord-blue: #377bc3;
-  --arcscord-periwinkle: #8298ed;
-  --arcscord-sky: #b7d0f1;
-  --arcscord-leaf: #7cff00;
-  --arcscord-bow: #8a4b22;
-  --arcscord-ink: #172033;
-  --ifm-navbar-background-color: #f8fbff;
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter/Inter-VariableFont_opsz,wght.ttf") format("truetype-variations");
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
 }
 
-[data-theme="dark"] {
-  --ifm-color-primary: #8298ed;
-  --ifm-color-primary-dark: #6f86df;
-  --ifm-color-primary-darker: #607ad2;
-  --ifm-color-primary-darkest: #3f5cb5;
-  --ifm-color-primary-light: #9bacf2;
-  --ifm-color-primary-lighter: #b7c5f7;
-  --ifm-color-primary-lightest: #dbe3ff;
-  --ifm-background-color: #0f1522;
-  --ifm-navbar-background-color: #121a2a;
+@font-face {
+  font-family: "Inter";
+  src: url("../../assets/fonts/inter/Inter-Italic-VariableFont_opsz,wght.ttf") format("truetype-variations");
+  font-style: italic;
+  font-weight: 100 900;
+  font-display: swap;
+}
+
+:root {
+  --ifm-color-primary: #1c70cd;
+  --ifm-color-primary-dark: #1965b9;
+  --ifm-color-primary-darker: #175fad;
+  --ifm-color-primary-darkest: #134e8f;
+  --ifm-color-primary-light: #3681d4;
+  --ifm-color-primary-lighter: #4389d8;
+  --ifm-color-primary-lightest: #75abe4;
+  --ifm-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif;
+  --ifm-heading-font-family: var(--ifm-font-family-base);
+  --ifm-font-color-base: #17172d;
+  --ifm-heading-color: #25255d;
+  --ifm-background-color: #ffffff;
+  --ifm-background-surface-color: #f5f8ff;
+  --ifm-navbar-background-color: #ffffff;
+  --ifm-navbar-shadow: 0 1px 0 rgba(49, 49, 138, 0.14);
+  --ifm-toc-border-color: #d9e2f1;
+  --ifm-code-font-size: 95%;
+  --arcscord-brand-blue: #1c70cd;
+  --arcscord-brand-indigo: #31318a;
+  --arcscord-brand-bow: #84450d;
+  --arcscord-blue: var(--arcscord-brand-blue);
+  --arcscord-periwinkle: var(--arcscord-brand-indigo);
+  --arcscord-sky: #d6e8fb;
+  --arcscord-bow: var(--arcscord-brand-bow);
+  --arcscord-ink: #17172d;
+}
+
+html[data-theme="dark"] {
+  --ifm-color-primary: #69a9ef;
+  --ifm-color-primary-dark: #559ce9;
+  --ifm-color-primary-darker: #4a95e6;
+  --ifm-color-primary-darkest: #217bd8;
+  --ifm-color-primary-light: #7db5f1;
+  --ifm-color-primary-lighter: #8abcf3;
+  --ifm-color-primary-lightest: #b7d8f8;
+  --ifm-font-color-base: #e8eefb;
+  --ifm-heading-color: #f7f9ff;
+  --ifm-background-color: #05010f;
+  --ifm-background-surface-color: #090116;
+  --ifm-navbar-background-color: #090116;
+  --ifm-navbar-shadow: 0 1px 0 rgba(105, 169, 239, 0.18);
+  --ifm-toc-border-color: #24264a;
+  --arcscord-blue: #69a9ef;
+  --arcscord-periwinkle: #a7a9ff;
+  --arcscord-sky: #1a244d;
+  --arcscord-ink: #f8fbff;
+}
+
+html {
+  font-optical-sizing: auto;
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: var(--ifm-font-family-base);
+}
+
+code,
+kbd,
+pre,
+samp {
+  font-family: var(--ifm-font-family-monospace);
+}
+
+.button {
+  font-family: var(--ifm-font-family-base);
+  font-weight: 700;
+}
+
+.button--primary:not(.button--outline) {
+  border-color: var(--arcscord-brand-blue);
+  color: #ffffff;
+  background: var(--arcscord-brand-blue);
+}
+
+.button--primary:not(.button--outline):hover {
+  border-color: #175fad;
+  color: #ffffff;
+  background: #175fad;
+}
+
+.button--secondary:not(.button--outline) {
+  border-color: #c5d9f2;
+  color: var(--arcscord-brand-indigo);
+  background: #edf5ff;
+}
+
+.button--secondary:not(.button--outline):hover {
+  border-color: var(--arcscord-brand-blue);
+  color: var(--arcscord-brand-indigo);
+  background: #e0edfb;
+}
+
+[data-theme="dark"] .button--secondary:not(.button--outline) {
+  border-color: #303568;
+  color: #f7f9ff;
+  background: #11142b;
+}
+
+[data-theme="dark"] .button--secondary:not(.button--outline):hover {
+  border-color: var(--ifm-color-primary);
+  color: #ffffff;
+  background: #191d3b;
 }
 
 /* ===== Discord screenshot container ===== */
@@ -157,18 +251,27 @@
   }
 }
 
+.navbar {
+  border-bottom: 1px solid var(--ifm-toc-border-color);
+  box-shadow: var(--ifm-navbar-shadow);
+}
+
+.navbar__brand {
+  flex-shrink: 0;
+  margin-right: 1.5rem;
+}
+
 .navbar__logo {
-  height: 2rem;
-  width: 2rem;
+  width: auto;
+  height: 1.25rem;
+  margin-right: 0;
 }
 
-.navbar__title {
-  color: var(--arcscord-ink);
-  font-weight: 800;
-}
-
-[data-theme="dark"] .navbar__title {
-  color: #edf2ff;
+.navbar__logo img {
+  width: auto;
+  max-width: min(40vw, 8rem);
+  height: 100%;
+  object-fit: contain;
 }
 
 .theme-doc-markdown h1,
@@ -549,5 +652,15 @@ a.api-type:hover {
   .api-relations div {
     grid-template-columns: 1fr;
     gap: 0.15rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .navbar__brand {
+    margin-right: 0.75rem;
+  }
+
+  .navbar__logo {
+    height: 1.15rem;
   }
 }
