@@ -252,6 +252,12 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
       maxValues: effectiveMaximum,
     });
   }
+  if (effectiveMinimum === 0 && required !== false) {
+    validationFailure(context, "select-menu-required-minimum", `${context.path}.minValues can be zero only when required is false`, type, {
+      minValues: effectiveMinimum,
+      required: required ?? true,
+    });
+  }
 
   const requiredProperty: { readonly required?: true } = required === true ? { required: true } : {};
   const base = {
@@ -267,6 +273,12 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
 
   if (type === ComponentType.StringSelect) {
     const options = decodeArray(record.options, childContext(context, "options"), 1, 25, "select-menu-options", type, decodeSelectOption);
+    if (effectiveMinimum > options.length) {
+      validationFailure(childContext(context, "minValues"), "select-menu-options", `${context.path}.minValues cannot exceed the number of options`, type, {
+        minValues: effectiveMinimum,
+        optionCount: options.length,
+      });
+    }
     const defaults = options.filter(option => option.default === true).length;
     if (defaults > 0 && (defaults < effectiveMinimum || defaults > effectiveMaximum)) {
       validationFailure(childContext(context, "options"), "select-menu-defaults", `${context.path} default option count must be within minValues and maxValues`, type, {

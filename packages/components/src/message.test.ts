@@ -12,6 +12,16 @@ describe("v2Message", () => {
     expect(Number(result.flags) & MessageFlags.SuppressNotifications).toBeTruthy();
   });
 
+  it("preserves explicit legacy-field resets for message migrations", () => {
+    expect(v2Message({ content: null, embeds: [], poll: null, stickers: [] }, "Migrated")).toMatchObject({
+      content: null,
+      embeds: [],
+      poll: null,
+      stickers: [],
+      components: [{ type: ComponentType.TextDisplay, content: "Migrated" }],
+    });
+  });
+
   it("distinguishes a builder passed first from message options", () => {
     const builder = new ContainerBuilder().addTextDisplayComponents(
       new TextDisplayBuilder().setContent("Builder message"),

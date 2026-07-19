@@ -1,6 +1,7 @@
 import type {
   MessageV2Component,
   MessageV2EditReplyOptions,
+  MessageV2MigrationReplyOptions,
   MessageV2ReplyOptions,
 } from "../message";
 import type { ValidationContext } from "./context";
@@ -8,6 +9,7 @@ import type {
   CanonicalMessageComponent,
   MessageComponentInput,
   MessageV2EditValidationInput,
+  MessageV2MigrationValidationInput,
   MessageV2ReplyValidationInput,
   MessageV2ValidationInput,
 } from "./types";
@@ -44,6 +46,11 @@ type MessageTraversalState = {
 
 type MessageFlagResolvable = Parameters<typeof MessageFlagsBitField.resolve>[0];
 
+const allowedV2MessageFlags = MessageFlags.SuppressEmbeds
+  | MessageFlags.Ephemeral
+  | MessageFlags.SuppressNotifications
+  | MessageFlags.IsComponentsV2;
+
 function isMessageFlagResolvable(value: unknown): value is MessageFlagResolvable {
   if (value === undefined || typeof value === "number" || typeof value === "string") {
     return true;
@@ -61,12 +68,21 @@ export function decodeMessageFlags(value: unknown, context: ValidationContext): 
   if (!isMessageFlagResolvable(value)) {
     validationFailure(context, "message-flags", `${context.path} cannot be resolved`);
   }
+  let flags: number;
   try {
-    return MessageFlagsBitField.resolve(value);
+    flags = MessageFlagsBitField.resolve(value);
   }
   catch (cause) {
     validationFailure(context, "message-flags", `${context.path} cannot be resolved`, undefined, {}, cause);
   }
+  const unsupported = flags & ~allowedV2MessageFlags;
+  if (unsupported !== 0) {
+    validationFailure(context, "message-flags", `${context.path} contains flags that cannot be set on a Components V2 payload`, undefined, {
+      allowed: allowedV2MessageFlags,
+      unsupported,
+    });
+  }
+  return flags;
 }
 
 export function decodeMessageComponent(input: unknown, context: ValidationContext): CanonicalMessageComponent {
@@ -158,11 +174,13 @@ export function validateMessageComponent(input: MessageComponentInput): Canonica
   return decodeMessageComponent(input, rootContext("component"));
 }
 
+/** Validates and normalizes an edit payload that migrates a legacy message to Components V2. */
+export function validateV2Message(input: MessageV2MigrationValidationInput): MessageV2MigrationReplyOptions;
 /** Validates and normalizes a complete Components V2 message payload. */
 export function validateV2Message(input: MessageV2EditValidationInput): MessageV2EditReplyOptions;
 /** Validates and normalizes a reply-compatible Components V2 message payload. */
 export function validateV2Message(input: MessageV2ReplyValidationInput): MessageV2ReplyOptions;
-export function validateV2Message(input: MessageV2ValidationInput): MessageV2EditReplyOptions | MessageV2ReplyOptions {
+export function validateV2Message(input: MessageV2ValidationInput): MessageV2EditReplyOptions | MessageV2MigrationReplyOptions | MessageV2ReplyOptions {
   return decodeV2Message(input, rootContext("message"));
 }
 
@@ -170,9 +188,22 @@ export function validateV2Message(input: MessageV2ValidationInput): MessageV2Edi
 export function decodeV2Message(
   input: MessageV2ValidationInput,
   context: ValidationContext,
-): MessageV2EditReplyOptions | MessageV2ReplyOptions {
+): MessageV2EditReplyOptions | MessageV2MigrationReplyOptions | MessageV2ReplyOptions {
   const record = serializeInput(input, context);
-  for (const incompatibleField of ["content", "embeds", "poll", "stickers"] as const) {
+  const resetFields: Readonly<Record<string, (value: unknown) => boolean>> = {
+    content: value => value === null,
+    embeds: value => Array.isArray(value) && value.length === 0,
+    poll: value => value === null,
+    stickers: value => Array.isArray(value) && value.length === 0,
+    sticker_ids: value => Array.isArray(value) && value.length === 0,
+  };
+  for (const [field, isResetValue] of Object.entries(resetFields)) {
+    const value = record[field];
+    if (value !== undefined && !isResetValue(value)) {
+      validationFailure(childContext(context, field), "v2-incompatible-field", `message.${field} must be reset before enabling Components V2`);
+    }
+  }
+  for (const incompatibleField of ["sharedClientTheme", "shared_client_theme"] as const) {
     if (record[incompatibleField] !== undefined) {
       validationFailure(childContext(context, incompatibleField), "v2-incompatible-field", `message.${incompatibleField} is incompatible with Components V2 messages`);
     }

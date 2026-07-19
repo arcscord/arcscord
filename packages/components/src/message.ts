@@ -33,13 +33,38 @@ export type MessageV2ReplyOptions = Omit<MessageV2Options, "flags"> & {
 /** Edit-compatible options excluding the body managed by {@link v2Message}. */
 export type MessageV2EditOptions = Omit<MessageEditOptions, "components" | "content" | "embeds">;
 
+/** Empty legacy-field values accepted while migrating a message to Components V2. */
+export type MessageV2ResetFields = {
+  readonly content?: null;
+  readonly embeds?: readonly [];
+  readonly poll?: null;
+  readonly stickers?: readonly [];
+};
+
+/**
+ * Edit options that explicitly clear legacy fields while enabling Components V2.
+ * Discord requires these empty values when the edited message previously used them.
+ */
+export type MessageV2MigrationOptions = Omit<MessageEditOptions, "components" | "content" | "embeds"> & MessageV2ResetFields & (
+  | { readonly content: null }
+  | { readonly embeds: readonly [] }
+  | { readonly poll: null }
+  | { readonly stickers: readonly [] }
+);
+
 /** Universal reply/edit payload returned when no reply-only option is supplied. */
 export type MessageV2EditReplyOptions = Omit<MessageV2EditOptions, "flags"> & {
   readonly components: readonly MessageV2Component[];
   readonly flags: number;
 };
 
-function isOptionsObject(value: MessageV2EditOptions | MessageV2Options | MessageV2Child): value is MessageV2EditOptions | MessageV2Options {
+/** Edit payload that includes the explicit resets needed to migrate a legacy message. */
+export type MessageV2MigrationReplyOptions = Omit<MessageV2MigrationOptions, "flags"> & {
+  readonly components: readonly MessageV2Component[];
+  readonly flags: number;
+};
+
+function isOptionsObject(value: MessageV2EditOptions | MessageV2MigrationOptions | MessageV2Options | MessageV2Child): value is MessageV2EditOptions | MessageV2MigrationOptions | MessageV2Options {
   return typeof value === "object" && value !== null && !isComponentInput(value);
 }
 
@@ -55,6 +80,14 @@ function isOptionsObject(value: MessageV2EditOptions | MessageV2Options | Messag
  * ```
  */
 export function v2Message(child: MessageV2Child, ...children: MessageV2Child[]): MessageV2EditReplyOptions;
+/**
+ * Creates an edit payload that resets legacy fields while enabling Components V2.
+ *
+ * @param options - One or more explicit Discord reset values (`null` or an empty array).
+ * @param child - First supported top-level child.
+ * @param children - Additional supported top-level children.
+ */
+export function v2Message(options: MessageV2MigrationOptions, child: MessageV2Child, ...children: MessageV2Child[]): MessageV2MigrationReplyOptions;
 /**
  * Creates an edit-compatible payload with message options.
  *
@@ -72,9 +105,9 @@ export function v2Message(options: MessageV2EditOptions, child: MessageV2Child, 
  */
 export function v2Message(options: MessageV2Options, child: MessageV2Child, ...children: MessageV2Child[]): MessageV2ReplyOptions;
 export function v2Message(
-  first: MessageV2EditOptions | MessageV2Options | MessageV2Child,
+  first: MessageV2EditOptions | MessageV2MigrationOptions | MessageV2Options | MessageV2Child,
   ...children: MessageV2Child[]
-): MessageV2EditReplyOptions | MessageV2ReplyOptions {
+): MessageV2EditReplyOptions | MessageV2MigrationReplyOptions | MessageV2ReplyOptions {
   const options = isOptionsObject(first) ? first : {};
   const allChildren: readonly MessageV2Child[] = isOptionsObject(first) ? children : [first, ...children];
   const message = {

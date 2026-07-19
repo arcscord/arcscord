@@ -2,7 +2,7 @@ import type { APITextDisplayComponent } from "discord-api-types/v10";
 import type { TextDisplayComponentData } from "discord.js";
 import type { CanonicalButtonComponentData, MessageActionRow } from "./action-row";
 import type { CanonicalComponentData } from "./component";
-import type { MessageV2EditReplyOptions, MessageV2ReplyOptions } from "./message";
+import type { MessageV2EditReplyOptions, MessageV2MigrationReplyOptions, MessageV2ReplyOptions } from "./message";
 import { ButtonStyle, ComponentType, MessageFlags } from "discord-api-types/v10";
 import { TextDisplayBuilder } from "discord.js";
 import { describe, expectTypeOf, it } from "vitest";
@@ -44,5 +44,12 @@ describe("validator public types", () => {
       ephemeral: true,
     });
     expectTypeOf(reply).toEqualTypeOf<MessageV2ReplyOptions>();
+
+    const migration = validateV2Message({
+      components: ["Body"],
+      flags: MessageFlags.IsComponentsV2,
+      content: null,
+    });
+    expectTypeOf(migration).toEqualTypeOf<MessageV2MigrationReplyOptions>();
   });
 });

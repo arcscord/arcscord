@@ -15,7 +15,7 @@ import type {
 } from "../action-row";
 import type { CanonicalComponentData } from "../component";
 import type { CanonicalContainerComponentData, ContainerChild, ContainerComponentInput } from "../container";
-import type { MessageV2Child, MessageV2EditOptions, MessageV2Options } from "../message";
+import type { MessageV2Child, MessageV2EditOptions, MessageV2MigrationOptions, MessageV2Options } from "../message";
 import type { CanonicalSectionComponentData } from "../section";
 import type { ThumbnailInput } from "../thumbnail";
 
@@ -40,10 +40,15 @@ export type MessageV2EditValidationInput = MessageV2EditOptions & {
   readonly components: readonly MessageV2Child[];
 };
 
+/** Migration payload accepted by {@link validateV2Message}. */
+export type MessageV2MigrationValidationInput = MessageV2MigrationOptions & {
+  readonly components: readonly MessageV2Child[];
+};
+
 /** Reply-compatible payload accepted by {@link validateV2Message}. */
 export type MessageV2ReplyValidationInput = MessageV2Options & {
   readonly components: readonly MessageV2Child[];
 };
 
 /** Complete payload shape accepted by {@link validateV2Message}. */
-export type MessageV2ValidationInput = MessageV2EditValidationInput | MessageV2ReplyValidationInput;
+export type MessageV2ValidationInput = MessageV2EditValidationInput | MessageV2MigrationValidationInput | MessageV2ReplyValidationInput;

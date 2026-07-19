@@ -38,8 +38,11 @@ export type {
   MessageV2Component,
   MessageV2EditOptions,
   MessageV2EditReplyOptions,
+  MessageV2MigrationOptions,
+  MessageV2MigrationReplyOptions,
   MessageV2Options,
   MessageV2ReplyOptions,
+  MessageV2ResetFields,
 } from "./message";
 export { accessory, section } from "./section";
 export type {
@@ -80,6 +83,7 @@ export type {
   CanonicalMessageComponent,
   MessageComponentInput,
   MessageV2EditValidationInput,
+  MessageV2MigrationValidationInput,
   MessageV2ReplyValidationInput,
   MessageV2ValidationInput,
 } from "./validation";

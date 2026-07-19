@@ -83,6 +83,19 @@ ctx.reply(v2Message(
 | `tts` | `boolean` | Text-to-speech. |
 | `allowedMentions` | `AllowedMentions` | Control which mentions trigger notifications. |
 
+### Migrating an existing message
+
+Discord requires legacy fields to be explicitly cleared when an edit enables Components V2. Supply at least one reset value in the options object; `v2Message()` returns a typed `MessageV2MigrationReplyOptions` payload:
+
+```ts
+await message.edit(v2Message(
+  { content: null, embeds: [], stickers: [] },
+  "Replacement Components V2 content",
+));
+```
+
+Non-empty legacy fields are rejected by the runtime validator. Raw REST payloads may also use an empty `sticker_ids` array.
+
 ### Allowed top-level children
 
 `v2Message()` accepts these component types at the top level. `container()` accepts the same list except another container:

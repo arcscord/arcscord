@@ -159,6 +159,12 @@ export function decodeSnowflake(value: unknown, context: ValidationContext, comp
   if (typeof value !== "string" || !/^\d+$/.test(value)) {
     validationFailure(context, "snowflake", `${context.path} must be a Discord snowflake`, componentType);
   }
+  if (BigInt(value) > 0xFFFF_FFFF_FFFF_FFFFn) {
+    validationFailure(context, "snowflake", `${context.path} must fit in an unsigned 64-bit integer`, componentType, {
+      maximum: "18446744073709551615",
+      actual: value,
+    });
+  }
   return value;
 }
 
@@ -207,7 +213,7 @@ export function decodeUrl(
   catch (cause) {
     validationFailure(context, "url", `${context.path} must be a valid URL`, componentType, {}, cause);
   }
-  if (!protocols.includes(protocol)) {
+  if (protocols.length > 0 && !protocols.includes(protocol)) {
     validationFailure(
       context,
       "url-protocol",

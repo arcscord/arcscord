@@ -68,7 +68,7 @@ export function decodeThumbnail(input: unknown, context: ValidationContext): Can
   const record = serializeInput(input, context);
   assertComponentType(record, ComponentType.Thumbnail, context);
   const id = decodeComponentId(record, context);
-  const media = requiredField(record, "media", context, (value, fieldContext) => decodeMedia(value, fieldContext, ["http:", "https:", "attachment:"], ComponentType.Thumbnail));
+  const media = requiredField(record, "media", context, (value, fieldContext) => decodeMedia(value, fieldContext, [], ComponentType.Thumbnail));
   const description = optionalField(record, "description", context, (value, fieldContext) => decodeNullableString(value, fieldContext, 1, 1024, ComponentType.Thumbnail));
   const spoiler = optionalField(record, "spoiler", context, (value, fieldContext) => decodeBoolean(value, fieldContext, ComponentType.Thumbnail));
   return {
@@ -82,7 +82,7 @@ export function decodeThumbnail(input: unknown, context: ValidationContext): Can
 
 export function decodeMediaGalleryItem(input: unknown, context: ValidationContext): MediaGalleryItemData {
   const record = serializeInput(input, context);
-  const media = requiredField(record, "media", context, (value, fieldContext) => decodeMedia(value, fieldContext, ["http:", "https:", "attachment:"], ComponentType.MediaGallery));
+  const media = requiredField(record, "media", context, (value, fieldContext) => decodeMedia(value, fieldContext, [], ComponentType.MediaGallery));
   const description = optionalField(record, "description", context, (value, fieldContext) => decodeNullableString(value, fieldContext, 1, 1024, ComponentType.MediaGallery));
   const spoiler = optionalField(record, "spoiler", context, (value, fieldContext) => decodeBoolean(value, fieldContext, ComponentType.MediaGallery));
   return {

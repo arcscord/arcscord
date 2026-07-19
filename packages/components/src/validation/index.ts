@@ -23,6 +23,7 @@ export type {
   CanonicalMessageComponent,
   MessageComponentInput,
   MessageV2EditValidationInput,
+  MessageV2MigrationValidationInput,
   MessageV2ReplyValidationInput,
   MessageV2ValidationInput,
 } from "./types";

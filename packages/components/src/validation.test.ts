@@ -156,11 +156,15 @@ describe("message component validators", () => {
   it("validates thumbnail and media-gallery fields", () => {
     validateMediaGalleryItem({ media: { url: "attachment://image.png" }, description: "Image" });
     validateMediaGallery({ type: ComponentType.MediaGallery, items: [{ media: { url: "https://example.com/image.png" } }] });
+    validateThumbnail({
+      type: ComponentType.Thumbnail,
+      media: { url: "ftp://example.com/image.png" },
+    });
 
     expect(validationError(() => validateThumbnail({
       type: ComponentType.Thumbnail,
-      media: { url: "ftp://example.com/image.png" },
-    })).rule).toBe("url-protocol");
+      media: { url: "not a URL" },
+    })).rule).toBe("url");
     expect(validationError(() => validateMediaGallery({
       type: ComponentType.MediaGallery,
       items: [],
@@ -197,6 +201,11 @@ describe("message component validators", () => {
       sku_id: "123",
       label: "Invalid",
     } as never)).rule).toBe("premium-button-fields");
+    expect(validationError(() => validateButton({
+      type: ComponentType.Button,
+      style: ButtonStyle.Premium,
+      sku_id: "18446744073709551616",
+    })).rule).toBe("snowflake");
   });
 
   it("validates select bounds, options, defaults, and action-row composition", () => {
@@ -219,6 +228,20 @@ describe("message component validators", () => {
       ...select,
       options: [],
     })).rule).toBe("select-menu-options");
+    expect(validationError(() => validateSelectMenu({
+      ...select,
+      min_values: 2,
+      max_values: 2,
+    })).rule).toBe("select-menu-options");
+    validateSelectMenu({
+      ...select,
+      min_values: 0,
+      required: false,
+    });
+    expect(validationError(() => validateSelectMenu({
+      ...select,
+      min_values: 0,
+    })).rule).toBe("select-menu-required-minimum");
     expect(validationError(() => validateActionRow({
       type: ComponentType.ActionRow,
       components: [select, select],
@@ -321,5 +344,39 @@ describe("message component validators", () => {
       flags: 0,
       components: [text("Body")],
     } as never)).rule).toBe("components-v2-flag");
+  });
+
+  it("accepts only Discord reset values when migrating an existing message", () => {
+    expect(validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("Body")],
+      content: null,
+      embeds: [],
+      poll: null,
+      stickers: [],
+    })).toMatchObject({ content: null, embeds: [], poll: null, stickers: [] });
+
+    validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("Body")],
+      sticker_ids: [],
+    } as never);
+    expect(validationError(() => validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("Body")],
+      sticker_ids: ["123"],
+    } as never)).rule).toBe("v2-incompatible-field");
+    expect(validationError(() => validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("Body")],
+      shared_client_theme: {},
+    } as never)).rule).toBe("v2-incompatible-field");
+  });
+
+  it("rejects flags that cannot be set by supported Components V2 endpoints", () => {
+    expect(validationError(() => validateV2Message({
+      flags: MessageFlags.IsComponentsV2 | MessageFlags.Urgent,
+      components: [text("Body")],
+    } as never)).rule).toBe("message-flags");
   });
 });

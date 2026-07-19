@@ -67,6 +67,15 @@ const payload = v2Message(
 
 This example does not require an Arcscord client, context, manager, or error package. Pass the result to any compatible Discord.js reply or edit method. `v2Message` adds `MessageFlags.IsComponentsV2` automatically.
 
+When converting an existing legacy message, pass the reset values required by Discord before the first component. The returned `MessageV2MigrationReplyOptions` preserves them in the edit payload:
+
+```ts
+await message.edit(v2Message(
+  { content: null, embeds: [], stickers: [] },
+  "Replacement Components V2 content",
+));
+```
+
 ## Accepted inputs
 
 Nested components accept:
@@ -82,7 +91,7 @@ Builders and raw API objects are recursively normalized to Discord.js camelCase 
 
 ## Runtime validation
 
-Every helper runs a single serialization, normalization, and validation pipeline before returning. Invalid component fields, nesting, URL protocols, cardinalities, duplicate component/custom IDs, and messages containing more than 40 total components fail locally instead of being sent to Discord.
+Every helper runs a single serialization, normalization, and validation pipeline before returning. Invalid component fields, nesting, protocol restrictions, cardinalities, duplicate component/custom IDs, unsupported message flags, and messages containing more than 40 total components fail locally instead of being sent to Discord.
 
 Component type errors stay neutral: `unexpected-component-type` reports a discriminator outside the accepted set, while `component-placement` reports a known Discord component used at an invalid nesting location. Neither error assumes whether the input is a typo or an API addition.
 
