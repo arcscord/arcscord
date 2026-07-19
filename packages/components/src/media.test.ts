@@ -2,14 +2,14 @@ import { ComponentType } from "discord-api-types/v10";
 import { FileBuilder, MediaGalleryBuilder, MediaGalleryItemBuilder } from "discord.js";
 import { describe, expect, it } from "vitest";
 import { file } from "./file";
-import { normalizeFile } from "./internal/normalize-display";
 import { mediaGallery } from "./media-gallery";
 import { v2Message } from "./message";
+import { validateFile } from "./validation";
 
 describe("media components", () => {
   it("creates file data and normalizes FileBuilder", () => {
     expect(file({ file: { url: "attachment://file.txt" } })).toMatchObject({ type: ComponentType.File });
-    expect(normalizeFile(new FileBuilder().setURL("attachment://builder.txt"))).toMatchObject({
+    expect(validateFile(new FileBuilder().setURL("attachment://builder.txt"))).toMatchObject({
       type: ComponentType.File,
       file: { url: "attachment://builder.txt" },
     });

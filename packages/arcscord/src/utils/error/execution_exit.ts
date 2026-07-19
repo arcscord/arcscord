@@ -1,5 +1,6 @@
 import type { NonNullish, Result } from "@arcscord/error";
 import { isResult } from "@arcscord/error";
+import { normalizeArcscordError } from "./normalize_arcscord_error";
 
 /** Successful handler execution. */
 export type ExecutionSuccess<T> = {
@@ -37,7 +38,7 @@ export function executionFailure<E>(failure: E): ExecutionFailure<E> {
 
 /** Creates an unexpected-defect execution exit. */
 export function executionDefect(defect: unknown): ExecutionDefect {
-  return { status: "defect", defect };
+  return { status: "defect", defect: normalizeArcscordError(defect) };
 }
 
 /** Normalizes raw handler values and Arcscord Result tuples to an {@link ExecutionExit}. */

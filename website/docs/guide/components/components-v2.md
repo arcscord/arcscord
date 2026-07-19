@@ -41,6 +41,16 @@ await interaction.reply(v2Message(
 
 Both import paths produce the same Discord.js-compatible payloads. The standalone package depends only on `discord-api-types` at runtime and uses `discord.js` as a peer dependency.
 
+## Validation errors
+
+Every Components V2 helper serializes, normalizes, and validates its result before returning it, including nested components. You can process external data explicitly with `validateTextDisplay`, `validateActionRow`, `validateSection`, `validateContainer`, `validateMessageComponent`, or `validateV2Message`; successful calls return newly constructed Discord.js camelCase data.
+
+Invalid direct calls throw `MessageComponentValidationError`, which exposes the failed `rule` and exact component `path`, whether the helper is imported from `@arcscord/components` or `arcscord`. If that error is thrown by a command, component, event, or middleware, Arcscord converts the execution defect into an `ArcscordError` with code `MESSAGE_COMPONENT_VALIDATION_FAILED` and retains the validation error as `cause`. Call `normalizeArcscordError(error)` for the same conversion outside the execution pipeline.
+
+An unrecognized discriminator uses the neutral `unexpected-component-type` rule. A recognized Discord component used at an invalid nesting location uses `component-placement`; neither rule guesses whether the value came from a typo or a newer API.
+
+At message level, validation rejects incompatible legacy body fields, missing `IS_COMPONENTS_V2`, duplicate non-zero component IDs, duplicate interactive custom IDs, and payloads containing more than 40 components across the full nested tree.
+
 ## `v2Message()`
 
 Entry point for a v2 message. Wraps layout components and optional message-level options.
@@ -75,7 +85,7 @@ ctx.reply(v2Message(
 
 ### Allowed top-level children
 
-`v2Message` and `container()` accept these component types as children:
+`v2Message()` accepts these component types at the top level. `container()` accepts the same list except another container:
 
 | Type | Description |
 |---|---|
@@ -158,7 +168,7 @@ section(
 
 ### Content arguments
 
-Pass any number of text items before the accessory — strings are automatically wrapped in `text()`.
+Pass one to three text items before the accessory — strings are automatically wrapped in `text()`.
 
 ### Accessory (last argument, required)
 
@@ -238,6 +248,8 @@ container(
 | `actionRow()` | One to five buttons or exactly one select menu |
 
 `section()` and `mediaGallery()` cannot be nested inside each other inside a container.
+
+`container()` constructs a new container and does not accept a complete `ContainerBuilder` as its sole argument. Pass a complete builder directly to `v2Message()`, or call `validateContainer(builder)` when canonical container data is needed separately.
 
 ---
 

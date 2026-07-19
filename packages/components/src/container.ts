@@ -1,15 +1,15 @@
 import type { APIContainerComponent } from "discord-api-types/v10";
-import type { ContainerComponentData } from "discord.js";
-import type { MessageActionRowInput } from "./action-row";
-import type { ComponentBuilderLike } from "./component";
+import type { ContainerComponentData, FileComponentData, MediaGalleryComponentData, SeparatorComponentData, TextDisplayComponentData } from "discord.js";
+import type { MessageActionRow, MessageActionRowInput } from "./action-row";
+import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import type { FileComponentInput } from "./file";
 import type { MediaGalleryComponentInput } from "./media-gallery";
-import type { SectionComponentInput } from "./section";
+import type { CanonicalSectionComponentData, SectionComponentInput } from "./section";
 import type { SeparatorComponentInput } from "./separator";
 import type { TextDisplayInput } from "./text";
 import { ComponentType } from "discord-api-types/v10";
-import { normalizeContainer, normalizeContainerChild } from "./internal/normalize-component";
-import { isComponentInput, serializeComponent } from "./internal/serialize";
+import { isComponentInput, rootContext } from "./validation/context";
+import { decodeContainer } from "./validation/layout";
 
 /** Any valid non-container child accepted by {@link container}. */
 export type ContainerChild
@@ -25,6 +25,24 @@ export type ContainerOptions = Omit<ContainerComponentData, "type" | "components
   readonly accentColor?: number | null;
 };
 
+/** Canonical child stored in a validated container. */
+export type CanonicalContainerChild
+  = | MessageActionRow
+    | CanonicalComponentData<FileComponentData, ComponentType.File>
+    | CanonicalComponentData<MediaGalleryComponentData, ComponentType.MediaGallery>
+    | CanonicalSectionComponentData
+    | CanonicalComponentData<SeparatorComponentData, ComponentType.Separator>
+    | CanonicalComponentData<TextDisplayComponentData, ComponentType.TextDisplay>;
+
+/** Canonical container data returned by validation. */
+export type CanonicalContainerComponentData = {
+  readonly type: ComponentType.Container;
+  readonly components: readonly CanonicalContainerChild[];
+  readonly id?: number;
+  readonly accentColor?: number;
+  readonly spoiler?: boolean;
+};
+
 /** Discord.js data/builder, raw API data, or a flexible top-level container. */
 export type ContainerComponentInput
   = | (Omit<ContainerComponentData, "components" | "accentColor"> & {
@@ -32,10 +50,11 @@ export type ContainerComponentInput
     readonly accentColor?: number | null;
   })
   | ContainerComponentData
+  | CanonicalContainerComponentData
   | APIContainerComponent
   | ComponentBuilderLike<APIContainerComponent>;
 
-function isOptionsObject(value: unknown): value is Record<string, unknown> {
+function isOptionsObject(value: ContainerOptions | ContainerChild): value is ContainerOptions {
   return typeof value === "object" && value !== null && !isComponentInput(value);
 }
 
@@ -50,14 +69,7 @@ function isOptionsObject(value: unknown): value is Record<string, unknown> {
  * container({ accentColor: 0x5865F2 }, "## Status", separator(), actionRow(refreshButton))
  * ```
  */
-export function container(child: ContainerChild, ...children: ContainerChild[]): ContainerComponentData;
-/**
- * Normalizes an existing complete container.
- *
- * @param input - Discord.js container data/`ContainerBuilder`, raw API data, or a
- * flexible container definition. All descendants are normalized recursively.
- */
-export function container(input: ContainerComponentInput): ContainerComponentData;
+export function container(child: ContainerChild, ...children: ContainerChild[]): CanonicalContainerComponentData;
 /**
  * Creates a container with explicit options.
  *
@@ -65,25 +77,15 @@ export function container(input: ContainerComponentInput): ContainerComponentDat
  * @param child - First supported non-container child.
  * @param children - Additional supported non-container children.
  */
-export function container(options: ContainerOptions, child: ContainerChild, ...children: ContainerChild[]): ContainerComponentData;
-export function container(first: ContainerOptions | ContainerChild | ContainerComponentInput, ...children: ContainerChild[]): ContainerComponentData {
-  if (typeof first !== "string" && isComponentInput(first)) {
-    const component = serializeComponent(first);
-    if (typeof component === "object" && component !== null && "type" in component && component.type === ComponentType.Container) {
-      if (children.length > 0) {
-        throw new TypeError("An existing container cannot be combined with additional children");
-      }
-      return normalizeContainer(component as unknown as APIContainerComponent);
-    }
-  }
-
-  const options = isOptionsObject(first) ? first as ContainerOptions : {};
-  const allChildren = isOptionsObject(first) ? children : [first as ContainerChild, ...children];
-  return {
+export function container(options: ContainerOptions, child: ContainerChild, ...children: ContainerChild[]): CanonicalContainerComponentData;
+export function container(first: ContainerOptions | ContainerChild, ...children: ContainerChild[]): CanonicalContainerComponentData {
+  const options = isOptionsObject(first) ? first : {};
+  const allChildren: readonly unknown[] = isOptionsObject(first) ? children : [first, ...children];
+  return decodeContainer({
     type: ComponentType.Container,
-    id: options.id,
-    accentColor: options.accentColor ?? undefined,
-    spoiler: options.spoiler,
-    components: allChildren.map(normalizeContainerChild),
-  };
+    ...(options.id === undefined ? {} : { id: options.id }),
+    ...(options.accentColor === undefined || options.accentColor === null ? {} : { accentColor: options.accentColor }),
+    ...(options.spoiler === undefined ? {} : { spoiler: options.spoiler }),
+    components: allChildren,
+  }, rootContext("container"));
 }

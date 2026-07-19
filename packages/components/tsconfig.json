@@ -4,6 +4,8 @@
     "rootDir": "src",
     "outDir": "dist",
     "isolatedDeclarations": true,
+    "exactOptionalPropertyTypes": true,
+    "noUncheckedIndexedAccess": true,
     "types": ["node"]
   }
 }

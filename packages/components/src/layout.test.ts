@@ -16,6 +16,7 @@ import { accessory, section } from "./section";
 import { separator } from "./separator";
 import { text } from "./text";
 import { thumbnail } from "./thumbnail";
+import { validateContainer } from "./validation";
 
 describe("layout components", () => {
   it("creates text, thumbnail, and separator data", () => {
@@ -64,7 +65,7 @@ describe("layout components", () => {
       .addSeparatorComponents(new SeparatorBuilder().setSpacing(SeparatorSpacingSize.Large))
       .addActionRowComponents(selectRow);
 
-    expect(container(builder)).toMatchObject({
+    expect(validateContainer(builder)).toMatchObject({
       components: [
         { content: "Container" },
         { type: ComponentType.Section },
@@ -80,6 +81,6 @@ describe("layout components", () => {
       type: ComponentType.Button,
       style: ButtonStyle.Primary,
       customId: "invalid",
-    })).toThrow("Unsupported container component type");
+    })).toThrow("not allowed at container.components[0]");
   });
 });

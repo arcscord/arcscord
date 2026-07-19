@@ -1,8 +1,9 @@
 import type { APITextDisplayComponent } from "discord-api-types/v10";
 import type { TextDisplayComponentData } from "discord.js";
-import type { ComponentBuilderLike } from "./component";
+import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import { ComponentType } from "discord-api-types/v10";
-import { normalizeTextDisplay } from "./internal/normalize-display";
+import { rootContext } from "./validation/context";
+import { decodeTextDisplay } from "./validation/display";
 
 /** A string, Discord.js data/builder, or raw API text display accepted by layout helpers. */
 export type TextDisplayInput
@@ -24,6 +25,6 @@ export type TextDisplayOptions = Omit<TextDisplayComponentData, "type" | "conten
  * text("## Status\nEverything is operational.", { id: 1 })
  * ```
  */
-export function text(content: string, options: TextDisplayOptions = {}): TextDisplayComponentData {
-  return normalizeTextDisplay({ ...options, type: ComponentType.TextDisplay, content });
+export function text(content: string, options: TextDisplayOptions = {}): CanonicalComponentData<TextDisplayComponentData, ComponentType.TextDisplay> {
+  return decodeTextDisplay({ ...options, type: ComponentType.TextDisplay, content }, rootContext("textDisplay"));
 }

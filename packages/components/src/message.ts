@@ -1,22 +1,12 @@
-import type {
-  ActionRowData,
-  ButtonComponentData,
-  ContainerComponentData,
-  FileComponentData,
-  InteractionReplyOptions,
-  MediaGalleryComponentData,
-  MessageEditOptions,
-  MessageFlags,
-  SectionComponentData,
-  SeparatorComponentData,
-  TextDisplayComponentData,
-} from "discord.js";
+import type { ComponentType } from "discord-api-types/v10";
+import type { FileComponentData, InteractionReplyOptions, MediaGalleryComponentData, MessageEditOptions, SeparatorComponentData, TextDisplayComponentData } from "discord.js";
 import type { MessageActionRow } from "./action-row";
-import type { ContainerChild, ContainerComponentInput } from "./container";
+import type { CanonicalComponentData } from "./component";
+import type { CanonicalContainerComponentData, ContainerChild, ContainerComponentInput } from "./container";
+import type { CanonicalSectionComponentData } from "./section";
 import { MessageFlags as DiscordMessageFlags } from "discord-api-types/v10";
-import { MessageFlagsBitField } from "discord.js";
-import { normalizeMessageChild } from "./internal/normalize-component";
-import { isComponentInput } from "./internal/serialize";
+import { isComponentInput, rootContext } from "./validation/context";
+import { decodeMessageFlags, decodeV2Message } from "./validation/message";
 
 /** Any top-level child accepted by {@link v2Message}. */
 export type MessageV2Child = ContainerChild | ContainerComponentInput;
@@ -24,20 +14,20 @@ export type MessageV2Child = ContainerChild | ContainerComponentInput;
 /** Resolved component data emitted by {@link v2Message}. */
 export type MessageV2Component
   = | MessageActionRow
-    | ActionRowData<ButtonComponentData>
-    | ContainerComponentData
-    | FileComponentData
-    | MediaGalleryComponentData
-    | SectionComponentData
-    | SeparatorComponentData
-    | TextDisplayComponentData;
+    | CanonicalContainerComponentData
+    | CanonicalComponentData<FileComponentData, ComponentType.File>
+    | CanonicalComponentData<MediaGalleryComponentData, ComponentType.MediaGallery>
+    | CanonicalSectionComponentData
+    | CanonicalComponentData<SeparatorComponentData, ComponentType.Separator>
+    | CanonicalComponentData<TextDisplayComponentData, ComponentType.TextDisplay>;
 
 /** Reply options excluding fields Discord forbids on Components V2 messages. */
 export type MessageV2Options = Omit<InteractionReplyOptions, "components" | "content" | "embeds" | "poll" | "stickers">;
 
 /** Reply payload returned when reply-only options are supplied. */
-export type MessageV2ReplyOptions = MessageV2Options & {
+export type MessageV2ReplyOptions = Omit<MessageV2Options, "flags"> & {
   readonly components: readonly MessageV2Component[];
+  readonly flags: number;
 };
 
 /** Edit-compatible options excluding the body managed by {@link v2Message}. */
@@ -46,10 +36,10 @@ export type MessageV2EditOptions = Omit<MessageEditOptions, "components" | "cont
 /** Universal reply/edit payload returned when no reply-only option is supplied. */
 export type MessageV2EditReplyOptions = Omit<MessageV2EditOptions, "flags"> & {
   readonly components: readonly MessageV2Component[];
-  readonly flags?: MessageFlags.IsComponentsV2 | MessageFlags.SuppressEmbeds;
+  readonly flags: number;
 };
 
-function isOptionsObject(value: unknown): value is Record<string, unknown> {
+function isOptionsObject(value: MessageV2EditOptions | MessageV2Options | MessageV2Child): value is MessageV2EditOptions | MessageV2Options {
   return typeof value === "object" && value !== null && !isComponentInput(value);
 }
 
@@ -85,14 +75,12 @@ export function v2Message(
   first: MessageV2EditOptions | MessageV2Options | MessageV2Child,
   ...children: MessageV2Child[]
 ): MessageV2EditReplyOptions | MessageV2ReplyOptions {
-  const options = isOptionsObject(first) ? first as MessageV2EditOptions : {};
-  const allChildren = isOptionsObject(first) ? children : [first as MessageV2Child, ...children];
-  return {
+  const options = isOptionsObject(first) ? first : {};
+  const allChildren: readonly MessageV2Child[] = isOptionsObject(first) ? children : [first, ...children];
+  const message = {
     ...options,
-    flags: ((options.flags === undefined
-      ? 0
-      : MessageFlagsBitField.resolve(options.flags as Parameters<typeof MessageFlagsBitField.resolve>[0]))
-    | DiscordMessageFlags.IsComponentsV2) as MessageV2EditReplyOptions["flags"],
-    components: allChildren.map(normalizeMessageChild),
+    flags: decodeMessageFlags(options.flags, rootContext("message.flags")) | DiscordMessageFlags.IsComponentsV2,
+    components: allChildren,
   };
+  return decodeV2Message(message, rootContext("message"));
 }

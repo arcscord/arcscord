@@ -18,7 +18,8 @@ import type {
 } from "discord.js";
 import type { ComponentBuilderLike } from "./component";
 import { ComponentType as DiscordComponentType } from "discord-api-types/v10";
-import { normalizeActionRowItems } from "./internal/normalize-action-row";
+import { rootContext } from "./validation/context";
+import { decodeActionRow } from "./validation/interactive";
 
 /** String button styles and Arcscord's historical color aliases. */
 export type StringButtonStyle = "primary" | "secondary" | "success" | "danger" | "link" | "premium" | "blurple" | "grey" | "green" | "red";
@@ -45,6 +46,18 @@ export type DisplayButton
     | APIButtonComponent
     | ComponentBuilderLike<APIButtonComponent>
     | FlexibleButtonData;
+
+/** Canonical premium button data missing from Discord.js' public component-data union. */
+export type PremiumButtonComponentData = {
+  readonly type: ComponentType.Button;
+  readonly style: ButtonStyle.Premium;
+  readonly skuId: string;
+  readonly id?: number;
+  readonly disabled?: boolean;
+};
+
+/** Canonical button data, including premium buttons missing from Discord.js' union. */
+export type CanonicalButtonComponentData = ButtonComponentData | PremiumButtonComponentData;
 
 /** Resolved Discord.js data for every select menu allowed in a message action row. */
 export type SelectMenuComponentData
@@ -78,17 +91,30 @@ export type ButtonList
 export type ActionRowItems = ButtonList | [SelectMenuInput];
 
 /** A resolved action row containing buttons. */
-export type ButtonActionRow = ActionRowData<ButtonComponentData>;
+export type ButtonActionRow = {
+  readonly type: ComponentType.ActionRow;
+  readonly id?: number;
+  readonly components: readonly CanonicalButtonComponentData[];
+};
 
 /** A resolved action row containing exactly one select menu. */
-export type SelectMenuActionRow = ActionRowData<SelectMenuComponentData>;
+export type SelectMenuActionRow = {
+  readonly type: ComponentType.ActionRow;
+  readonly id?: number;
+  readonly components: readonly [SelectMenuComponentData];
+};
 
 /** A resolved message action row containing buttons or one select menu. */
-export type MessageActionRow = ActionRowData<ButtonComponentData | SelectMenuComponentData>;
+export type MessageActionRow = ButtonActionRow | SelectMenuActionRow;
 
 /** An existing action row accepted inside a Components V2 message or container. */
 export type MessageActionRowInput
   = | ActionRowData<MessageActionRowComponentData>
+    | {
+      readonly type: ComponentType.ActionRow;
+      readonly id?: number;
+      readonly components: readonly ActionRowComponentInput[];
+    }
     | APIActionRowComponent<APIComponentInMessageActionRow>
     | ComponentBuilderLike<APIActionRowComponent<APIComponentInMessageActionRow>>;
 
@@ -114,9 +140,9 @@ export function actionRow(...buttons: ButtonList): ButtonActionRow;
  * ```
  */
 export function actionRow(selectMenu: SelectMenuInput): SelectMenuActionRow;
-export function actionRow(...components: ActionRowItems): MessageActionRow {
-  return {
+export function actionRow(...components: ActionRowItems): ButtonActionRow | SelectMenuActionRow {
+  return decodeActionRow({
     type: DiscordComponentType.ActionRow,
-    components: normalizeActionRowItems(components),
-  };
+    components,
+  }, rootContext("actionRow"));
 }

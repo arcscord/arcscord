@@ -1,8 +1,9 @@
 import type { APIFileComponent } from "discord-api-types/v10";
 import type { FileComponentData } from "discord.js";
-import type { ComponentBuilderLike } from "./component";
+import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import { ComponentType } from "discord-api-types/v10";
-import { normalizeFile } from "./internal/normalize-display";
+import { rootContext } from "./validation/context";
+import { decodeFile } from "./validation/display";
 
 /** Discord.js data, builder, or raw API file component accepted by layout helpers. */
 export type FileComponentInput
@@ -23,6 +24,6 @@ export type FileOptions = Omit<FileComponentData, "type">;
  * file({ file: { url: "attachment://report.pdf" }, spoiler: true })
  * ```
  */
-export function file(options: FileOptions): FileComponentData {
-  return normalizeFile({ ...options, type: ComponentType.File });
+export function file(options: FileOptions): CanonicalComponentData<FileComponentData, ComponentType.File> {
+  return decodeFile({ ...options, type: ComponentType.File }, rootContext("file"));
 }

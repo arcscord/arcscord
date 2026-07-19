@@ -10,7 +10,7 @@ import {
 } from "discord.js";
 import { describe, expect, it } from "vitest";
 import { actionRow } from "./action-row";
-import { normalizeActionRow } from "./internal/normalize-action-row";
+import { validateActionRow } from "./validation";
 
 describe("actionRow", () => {
   it("normalizes one to five buttons", () => {
@@ -66,7 +66,7 @@ describe("actionRow", () => {
       .setCustomId("existing")
       .addOptions({ label: "Existing", value: "existing" });
     const builder = new ActionRowBuilder<StringSelectMenuBuilder>().addComponents(select);
-    expect(normalizeActionRow(builder)).toMatchObject({
+    expect(validateActionRow(builder)).toMatchObject({
       type: ComponentType.ActionRow,
       components: [{ type: ComponentType.StringSelect, customId: "existing" }],
     });
@@ -78,8 +78,8 @@ describe("actionRow", () => {
       type: ComponentType.UserSelect,
       custom_id: "select",
     } as const;
-    expect(() => (actionRow as (...items: unknown[]) => unknown)()).toThrow("between one and five");
-    expect(() => (actionRow as (...items: unknown[]) => unknown)(button, button, button, button, button, button)).toThrow("between one and five");
+    expect(() => (actionRow as (...items: unknown[]) => unknown)()).toThrow("between 1 and 5");
+    expect(() => (actionRow as (...items: unknown[]) => unknown)(button, button, button, button, button, button)).toThrow("between 1 and 5");
     expect(() => (actionRow as (...items: unknown[]) => unknown)(button, select)).toThrow("exactly one select menu");
     expect(() => (actionRow as (...items: unknown[]) => unknown)(select, select)).toThrow("exactly one select menu");
   });

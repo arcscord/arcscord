@@ -1,8 +1,9 @@
 import type { APISeparatorComponent, SeparatorSpacingSize } from "discord-api-types/v10";
 import type { SeparatorComponentData } from "discord.js";
-import type { ComponentBuilderLike } from "./component";
+import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import { ComponentType } from "discord-api-types/v10";
-import { normalizeSeparator } from "./internal/normalize-display";
+import { rootContext } from "./validation/context";
+import { decodeSeparator } from "./validation/display";
 
 /** String separator spacing shortcuts accepted by {@link separator}. */
 export type StringSeparatorSpacingSize = "small" | "large";
@@ -30,6 +31,6 @@ export type SeparatorOptions = Omit<SeparatorComponentData, "type" | "spacing"> 
  * separator({ divider: true, spacing: "large" })
  * ```
  */
-export function separator(options: SeparatorOptions = {}): SeparatorComponentData {
-  return normalizeSeparator({ ...options, type: ComponentType.Separator });
+export function separator(options: SeparatorOptions = {}): CanonicalComponentData<SeparatorComponentData, ComponentType.Separator> {
+  return decodeSeparator({ ...options, type: ComponentType.Separator }, rootContext("separator"));
 }

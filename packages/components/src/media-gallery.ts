@@ -1,8 +1,9 @@
 import type { APIMediaGalleryComponent, APIMediaGalleryItem } from "discord-api-types/v10";
 import type { MediaGalleryComponentData, MediaGalleryItemData } from "discord.js";
-import type { ComponentBuilderLike } from "./component";
+import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import { ComponentType } from "discord-api-types/v10";
-import { normalizeMediaGallery, normalizeMediaGalleryItem } from "./internal/normalize-display";
+import { rootContext } from "./validation/context";
+import { decodeMediaGallery } from "./validation/display";
 
 /** Discord.js data, a `MediaGalleryItemBuilder`, or raw API gallery item. */
 export type MediaGalleryItemInput
@@ -12,7 +13,8 @@ export type MediaGalleryItemInput
 
 /** Discord.js data, builder, or raw API media gallery accepted by layout helpers. */
 export type MediaGalleryComponentInput
-  = | MediaGalleryComponentData
+  = | (Omit<MediaGalleryComponentData, "items"> & { readonly items: readonly MediaGalleryItemInput[] })
+    | MediaGalleryComponentData
     | APIMediaGalleryComponent
     | ComponentBuilderLike<APIMediaGalleryComponent>;
 
@@ -31,10 +33,9 @@ export type MediaGalleryOptions = Omit<MediaGalleryComponentData, "type" | "item
  * mediaGallery({ items: [{ media: { url: "https://example.com/image.png" } }] })
  * ```
  */
-export function mediaGallery(options: MediaGalleryOptions): MediaGalleryComponentData {
-  return normalizeMediaGallery({
+export function mediaGallery(options: MediaGalleryOptions): CanonicalComponentData<MediaGalleryComponentData, ComponentType.MediaGallery> {
+  return decodeMediaGallery({
     ...options,
     type: ComponentType.MediaGallery,
-    items: options.items.map(normalizeMediaGalleryItem),
-  });
+  }, rootContext("mediaGallery"));
 }

@@ -3,6 +3,7 @@ import { ButtonBuilder, ContainerBuilder } from "discord.js";
 import { describe, it } from "vitest";
 import { container } from "./container";
 import { accessory, section } from "./section";
+import { validateContainer } from "./validation";
 
 describe("layout public types", () => {
   it("rejects invalid nesting before runtime", () => {
@@ -18,7 +19,10 @@ describe("layout public types", () => {
     container(new ButtonBuilder());
     // @ts-expect-error Discord does not permit nested containers.
     container("Outer", new ContainerBuilder());
+    // @ts-expect-error Complete containers are normalized explicitly with validateContainer().
+    container(new ContainerBuilder());
 
     section("Text", accessory(button));
+    validateContainer(new ContainerBuilder().addTextDisplayComponents({ type: ComponentType.TextDisplay, content: "Text" }));
   });
 });
