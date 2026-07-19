@@ -37,7 +37,6 @@ export type MessageV2EditOptions = Omit<MessageEditOptions, "components" | "cont
 export type MessageV2ResetFields = {
   readonly content?: null;
   readonly embeds?: readonly [];
-  readonly poll?: null;
   readonly stickers?: readonly [];
 };
 
@@ -48,7 +47,6 @@ export type MessageV2ResetFields = {
 export type MessageV2MigrationOptions = Omit<MessageEditOptions, "components" | "content" | "embeds"> & MessageV2ResetFields & (
   | { readonly content: null }
   | { readonly embeds: readonly [] }
-  | { readonly poll: null }
   | { readonly stickers: readonly [] }
 );
 

@@ -13,10 +13,9 @@ describe("v2Message", () => {
   });
 
   it("preserves explicit legacy-field resets for message migrations", () => {
-    expect(v2Message({ content: null, embeds: [], poll: null, stickers: [] }, "Migrated")).toMatchObject({
+    expect(v2Message({ content: null, embeds: [], stickers: [] }, "Migrated")).toMatchObject({
       content: null,
       embeds: [],
-      poll: null,
       stickers: [],
       components: [{ type: ComponentType.TextDisplay, content: "Migrated" }],
     });

@@ -352,9 +352,14 @@ describe("message component validators", () => {
       components: [text("Body")],
       content: null,
       embeds: [],
-      poll: null,
       stickers: [],
-    })).toMatchObject({ content: null, embeds: [], poll: null, stickers: [] });
+    })).toMatchObject({ content: null, embeds: [], stickers: [] });
+
+    validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("Body")],
+      poll: null,
+    } as never);
 
     validateV2Message({
       flags: MessageFlags.IsComponentsV2,

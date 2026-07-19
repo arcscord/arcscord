@@ -12,6 +12,7 @@ import {
   thumbnail,
   v2Message,
 } from "arcscord";
+import { EmbedBuilder } from "discord.js";
 import { channelSelectMenu } from "../components/channel_select_menu";
 import { i18nButton } from "../components/i18n_button";
 import { mentionableSelectMenu } from "../components/mentionable_select_menu";
@@ -95,6 +96,10 @@ export const componentTestCommand = createCommand({
           {
             name: "components_v2_i18n",
             value: "components_v2_i18n",
+          },
+          {
+            name: "components_v2_migration",
+            value: "components_v2_migration",
           },
           {
             name: "route_params",
@@ -272,6 +277,27 @@ export const componentTestCommand = createCommand({
             ),
           ),
         );
+      case "components_v2_migration": {
+        const legacyReply = await ctx.reply({
+          content: "Legacy message content that must be cleared.",
+          embeds: [
+            new EmbedBuilder()
+              .setTitle("Legacy embed")
+              .setDescription("This embed should disappear during the Components V2 migration."),
+          ],
+        });
+        if (legacyReply[0] !== null) {
+          return legacyReply;
+        }
+        return ctx.editReply(v2Message(
+          { content: null, embeds: [] },
+          container(
+            { accentColor: 0x57F287 },
+            "## Components V2 migration succeeded",
+            "The legacy content and embed were cleared before enabling `IsComponentsV2`.",
+          ),
+        ));
+      }
       case "middleware":
         return ctx.reply({
           components: [
