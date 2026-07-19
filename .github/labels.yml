@@ -37,6 +37,9 @@
 - name: packages/core
   color: 0E8A16
   description: About main package
+- name: packages/components
+  color: 0E8A16
+  description: About standalone Components V2 helpers
 - name: packages/error
   color: 0E8A16
   description: About error package

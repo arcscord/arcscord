@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "#/*": ["./src/*"],
+      "@arcscord/components": ["../components/src/index.ts"],
       "@arcscord/error": ["../error/src/index.ts"],
       "arcscord": ["./src/index.ts"],
       "arcscord/testing": ["./src/testing/index.ts"]

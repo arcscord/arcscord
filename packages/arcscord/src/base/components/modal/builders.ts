@@ -1,3 +1,4 @@
+import type { TextDisplayInput } from "@arcscord/components";
 import type {
   LabelComponentData,
   ModalBuilder,
@@ -21,7 +22,6 @@ import type {
   ModalUserSelectValue,
   RadioGroup,
   RoleSelectMenu,
-  TextDisplayInput,
   UserSelectMenu,
 } from "../shared/component_definer.type";
 import type {

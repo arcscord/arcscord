@@ -31,6 +31,10 @@ const tarballDir = path.resolve(tarballArg);
 // Local packages that can shadow their published counterparts, mapped to the
 // stable tarball name produced by scripts/pack-local.mjs.
 const localPackages = {
+  "@arcscord/components": {
+    tarball: "components.tgz",
+    transitiveOf: ["arcscord"],
+  },
   "@arcscord/error": {
     tarball: "error.tgz",
     transitiveOf: ["arcscord", "@arcscord/middleware"],

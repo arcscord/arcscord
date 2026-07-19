@@ -98,6 +98,12 @@ const packages: Pkg[] = [
     description: "Core Discord bot framework: client, commands, components, events.",
   },
   {
+    name: "@arcscord/components",
+    npm: "@arcscord/components",
+    doc: "/packages/components",
+    description: "Typed Components V2 helpers, available through Arcscord or standalone.",
+  },
+  {
     name: "@arcscord/middleware",
     npm: "@arcscord/middleware",
     doc: "/packages/middleware",

@@ -23,6 +23,7 @@ if (selectedPackages.size === 0) {
 
 const packages = [
   { dir: "packages/arcscord", slug: "arcscord" },
+  { dir: "packages/components", slug: "components" },
   { dir: "packages/middleware", slug: "middleware" },
   { dir: "packages/error", slug: "error" },
   { dir: "packages/better_error", slug: "better-error" },

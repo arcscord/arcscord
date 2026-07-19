@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - arcscord
+          - components
           - middleware
           - error
           - better_error

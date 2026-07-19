@@ -1,0 +1,21 @@
+{
+  "name": "@arcscord/components-test-bot",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Standalone Discord.js test bot for @arcscord/components",
+  "type": "module",
+  "scripts": {
+    "start": "pnpm --filter @arcscord/components build && node --import=tsx --env-file-if-exists=.env src/index.ts",
+    "typecheck": "tsc -p tsconfig.eslint.json"
+  },
+  "dependencies": {
+    "@arcscord/components": "workspace:*",
+    "discord-api-types": "^0.38.49",
+    "discord.js": "^14.26.4"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.0",
+    "tsx": "^4.23.0",
+    "typescript": "^6.0.3"
+  }
+}

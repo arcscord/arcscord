@@ -36,6 +36,7 @@ The default `pnpm lint` script applies fixes. Use `pnpm lint --fix=false` when y
 ## Repository Layout
 
 - `packages/arcscord`: core Discord bot framework
+- `packages/components`: standalone Discord Components V2 helpers
 - `packages/create-arcscord-bot`: maintained project scaffolder
 - `packages/middleware`: reusable middleware
 - `packages/error`: result-style error helpers

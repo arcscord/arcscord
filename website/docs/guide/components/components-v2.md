@@ -8,6 +8,49 @@ import { DiscordScreenshot } from '@site/src/components/DiscordScreenshot';
 
 Components v2 is Discord's layout-first message format. A v2 message is built entirely from layout and media components instead of `content` + `embeds`. Arcscord sets the required `IS_COMPONENTS_V2` flag automatically.
 
+The examples in this guide import the helpers from `arcscord`, which re-exports the complete Components V2 API. Every valid nesting point accepts Discord.js component data, official builders, and raw `discord-api-types` component objects.
+
+## Arcscord and standalone usage
+
+In an Arcscord bot, import the helpers directly from the framework. You do not need to install `@arcscord/components` separately:
+
+```ts
+import { actionRow, container, text, v2Message } from "arcscord";
+```
+
+The same API also works without the Arcscord framework. Install the standalone package alongside Discord.js and change only the import source:
+
+```sh
+pnpm add @arcscord/components discord.js
+```
+
+```ts
+import { ButtonBuilder, ButtonStyle } from "discord.js";
+import { actionRow, v2Message } from "@arcscord/components";
+
+await interaction.reply(v2Message(
+  "Standalone Components V2",
+  actionRow(
+    new ButtonBuilder()
+      .setCustomId("confirm")
+      .setLabel("Confirm")
+      .setStyle(ButtonStyle.Primary),
+  ),
+));
+```
+
+Both import paths produce the same Discord.js-compatible payloads. The standalone package depends only on `discord-api-types` at runtime and uses `discord.js` as a peer dependency.
+
+## Validation errors
+
+Every Components V2 helper serializes, normalizes, and validates its result before returning it, including nested components. You can process external data explicitly with `validateTextDisplay`, `validateActionRow`, `validateSection`, `validateContainer`, `validateMessageComponent`, or `validateV2Message`; successful calls return newly constructed Discord.js camelCase data.
+
+Invalid direct calls throw `MessageComponentValidationError`, which exposes the failed `rule` and exact component `path`, whether the helper is imported from `@arcscord/components` or `arcscord`. If that error is thrown by a command, component, event, or middleware, Arcscord converts the execution defect into an `ArcscordError` with code `MESSAGE_COMPONENT_VALIDATION_FAILED` and retains the validation error as `cause`. Call `normalizeArcscordError(error)` for the same conversion outside the execution pipeline.
+
+An unrecognized discriminator uses the neutral `unexpected-component-type` rule. A recognized Discord component used at an invalid nesting location uses `component-placement`; neither rule guesses whether the value came from a typo or a newer API.
+
+At message level, validation rejects incompatible legacy body fields, missing `IS_COMPONENTS_V2`, duplicate non-zero component IDs, duplicate interactive custom IDs, and payloads containing more than 40 components across the full nested tree.
+
 ## `v2Message()`
 
 Entry point for a v2 message. Wraps layout components and optional message-level options.
@@ -40,9 +83,22 @@ ctx.reply(v2Message(
 | `tts` | `boolean` | Text-to-speech. |
 | `allowedMentions` | `AllowedMentions` | Control which mentions trigger notifications. |
 
+### Migrating an existing message
+
+Discord requires legacy fields to be explicitly cleared when an edit enables Components V2. Supply at least one reset value in the options object; `v2Message()` returns a typed `MessageV2MigrationReplyOptions` payload:
+
+```ts
+await message.edit(v2Message(
+  { content: null, embeds: [], stickers: [] },
+  "Replacement Components V2 content",
+));
+```
+
+Non-empty legacy fields are rejected by the runtime validator. Raw REST payloads may also use an empty `sticker_ids` array.
+
 ### Allowed top-level children
 
-`v2Message` and `container()` accept these component types as children:
+`v2Message()` accepts these component types at the top level. `container()` accepts the same list except another container:
 
 | Type | Description |
 |---|---|
@@ -52,8 +108,9 @@ ctx.reply(v2Message(
 | `separator()` | Vertical spacing / divider |
 | `mediaGallery()` | Image grid |
 | `file()` | Uploaded file display |
-| `actionRow(button1, button2, ...)` | Row of up to 5 buttons (buttons only) |
-| arcscord select menu `ActionRowData` | The return value of `stringSelectMenu()`, `userSelectMenu()`, etc. — they already include their own action row |
+| `actionRow(button1, button2, ...)` | Row of 1–5 buttons |
+| `actionRow(selectMenu)` | Row containing exactly one string, user, role, mentionable, or channel select |
+| Existing `ActionRowData` / `ActionRowBuilder` | A complete Discord.js action row, including rows returned by Arcscord's select helpers |
 
 ---
 
@@ -124,7 +181,7 @@ section(
 
 ### Content arguments
 
-Pass any number of text items before the accessory — strings are automatically wrapped in `text()`.
+Pass one to three text items before the accessory — strings are automatically wrapped in `text()`.
 
 ### Accessory (last argument, required)
 
@@ -201,9 +258,11 @@ container(
 | `separator()` | Spacing / divider |
 | `mediaGallery()` | Image grid |
 | `file()` | Uploaded file |
-| `actionRow()` | Interactive buttons |
+| `actionRow()` | One to five buttons or exactly one select menu |
 
 `section()` and `mediaGallery()` cannot be nested inside each other inside a container.
+
+`container()` constructs a new container and does not accept a complete `ContainerBuilder` as its sole argument. Pass a complete builder directly to `v2Message()`, or call `validateContainer(builder)` when canonical container data is needed separately.
 
 ---
 
@@ -259,9 +318,9 @@ ctx.reply(v2Message(
 
 ---
 
-## `actionRow(...buttons)`
+## `actionRow(...components)`
 
-A row of up to 5 **buttons**. Used for interactive buttons inside v2 messages.
+Creates a Discord message action row. It accepts either 1–5 **buttons**, or exactly one **select menu**. The select may be a string, user, role, mentionable, or channel select.
 
 ```ts
 import { actionRow } from "arcscord";
@@ -269,19 +328,23 @@ import { actionRow } from "arcscord";
 actionRow(confirmButton.build(), cancelButton.build())
 ```
 
-`actionRow` only accepts buttons. Select menus built with arcscord helpers (`stringSelectMenu()`, `userSelectMenu()`, etc.) already return an `ActionRowData` — pass their result directly to `v2Message()` or `container()` without wrapping:
+Official Discord.js builders, Discord.js component data, and raw `discord-api-types` objects are accepted:
 
 ```ts
-import { stringSelectMenu, userSelectMenu } from "arcscord";
+import { actionRow, v2Message } from "arcscord";
+import { StringSelectMenuBuilder } from "discord.js";
 
 ctx.reply(v2Message(
   "Pick a value",
-  stringSelectMenu({ customId: "...", options: ["a", "b"] }),
-  "Pick a user",
-  userSelectMenu({ customId: "..." }),
-  actionRow(confirmButton.build()),
+  actionRow(
+    new StringSelectMenuBuilder()
+      .setCustomId("choice")
+      .addOptions({ label: "A", value: "a" }, { label: "B", value: "b" }),
+  ),
 ))
 ```
+
+Arcscord's `stringSelectMenu()`, `userSelectMenu()`, and related helpers already return a complete `ActionRowData`. Pass those rows directly to `v2Message()` or `container()`; use `actionRow(selectBuilder)` when you have the select component itself.
 
 ---
 
@@ -289,10 +352,10 @@ ctx.reply(v2Message(
 
 | Parent | Allowed children |
 |---|---|
-| `v2Message()` / `container()` | `string` / `text()`, `section()`, `separator()`, `mediaGallery()`, `file()`, `actionRow()` (buttons), select menu `ActionRowData` |
+| `v2Message()` / `container()` | `string` / `text()`, `section()`, `separator()`, `mediaGallery()`, `file()`, and message action rows |
 | `section()` | Text strings / `text()` + exactly one `accessory()` |
 | `accessory()` | `thumbnail()` or a single `button()` |
-| `actionRow()` | Up to 5 buttons only |
+| `actionRow()` | 1–5 buttons, or exactly one string/user/role/mentionable/channel select |
 
 ---
 

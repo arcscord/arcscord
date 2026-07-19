@@ -18,4 +18,5 @@ export {
   stringifyDebugValues,
 } from "./error.util";
 export * from "./execution_exit";
+export * from "./normalize_arcscord_error";
 export { applyDiagnosticLevel } from "./run_normalize";

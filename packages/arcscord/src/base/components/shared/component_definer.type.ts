@@ -1,4 +1,16 @@
-import type { ButtonStyle, ComponentType, SeparatorSpacingSize } from "discord-api-types/v10";
+import type {
+  ContainerChild,
+  ContainerComponentInput,
+  FileComponentInput,
+  MediaGalleryComponentInput,
+  MessageV2Child,
+  MessageV2Component,
+  SectionComponentInput,
+  SeparatorComponentInput,
+  TextDisplayInput,
+  ThumbnailInput,
+} from "@arcscord/components";
+import type { ButtonStyle, ComponentType } from "discord-api-types/v10";
 import type {
   Attachment,
   ChannelSelectMenuComponentData,
@@ -7,24 +19,17 @@ import type {
   CheckboxGroupOption,
   ComponentEmojiResolvable,
   ComponentInLabelData,
-  ContainerComponentData,
-  FileComponentData,
   FileUploadComponentData,
   GuildBasedChannel,
   LabelComponentData,
-  MediaGalleryComponentData,
-  MediaGalleryItemData,
   MentionableSelectMenuComponentData,
   RadioGroupComponentData,
   RadioGroupOption,
   Role,
   RoleSelectMenuComponentData,
-  SectionComponentData,
-  SeparatorComponentData,
   StringSelectMenuComponentData,
   TextDisplayComponentData,
   TextInputComponentData,
-  UnfurledMediaItemData,
   User,
   UserSelectMenuComponentData,
 } from "discord.js";
@@ -311,85 +316,35 @@ export type AnySelectMenuComponentData
     | MentionableSelectMenuComponentData
     | ChannelSelectMenuComponentData;
 
-/**
- * Type for a text display component.
- */
-export type TextDisplay = BaseComponent & {
-  readonly type: ComponentType.TextDisplay;
-  readonly content: string;
-};
+/** @deprecated Use {@link MessageV2Component} instead. */
+export type AnyMessageTopLevelComponentData = MessageV2Component;
 
-/**
- * Text display input accepted by Arcscord builders.
- */
-export type TextDisplayInput = string | TextDisplay | TextDisplayComponentData;
+/** @deprecated Use {@link ContainerChild} instead. */
+export type ComponentInContainer = ContainerChild;
 
-/**
- * Type for a thumbnail component.
- */
-export type Thumbnail = BaseComponent & {
-  readonly type: ComponentType.Thumbnail;
-  readonly media: UnfurledMediaItemData;
-  readonly description?: string;
-  readonly spoiler?: boolean;
-};
+/** @deprecated Use {@link ContainerComponentInput} instead. */
+export type Container = ContainerComponentInput;
 
-/**
- * Type for a section component.
- */
-export type Section = BaseComponent & {
-  readonly type: ComponentType.Section;
-  readonly components: TextDisplayInput[];
-  readonly accessory: Button | Thumbnail;
-};
+/** @deprecated Use {@link FileComponentInput} instead. */
+export type File = FileComponentInput;
 
-/**
- * Type for a media gallery component.
- */
-export type MediaGallery = BaseComponent & {
-  readonly type: ComponentType.MediaGallery;
-  readonly items: readonly MediaGalleryItemData[];
-};
+/** @deprecated Use {@link MediaGalleryComponentInput} instead. */
+export type MediaGallery = MediaGalleryComponentInput;
 
-/**
- * Type for a file component.
- */
-export type File = BaseComponent & {
-  readonly type: ComponentType.File;
-  readonly file: UnfurledMediaItemData;
-  readonly spoiler?: boolean;
-};
+/** @deprecated Use {@link MessageV2Child} instead. */
+export type MessageTopLevelComponent = MessageV2Child;
 
-/**
- * Type for a separator component.
- */
-export type Separator = BaseComponent & {
-  readonly type: ComponentType.Separator;
-  readonly divider?: boolean;
-  readonly spacing?: StringSeparatorSpacingSize | SeparatorSpacingSize;
-};
+/** @deprecated Use {@link SectionComponentInput} instead. */
+export type Section = SectionComponentInput;
 
-/**
- * Components allowed inside a container.
- */
-export type ComponentInContainer
-  = | string
-    | ReturnType<typeof import("#/base/components/display/builders").actionRow>
-    | File
-    | MediaGallery
-    | Section
-    | Separator
-    | TextDisplay;
+/** @deprecated Use {@link SeparatorComponentInput} instead. */
+export type Separator = SeparatorComponentInput;
 
-/**
- * Type for a container component.
- */
-export type Container = BaseComponent & {
-  readonly type: ComponentType.Container;
-  readonly components: readonly ComponentInContainer[];
-  readonly accentColor?: number | null;
-  readonly spoiler?: boolean;
-};
+/** @deprecated Use {@link TextDisplayInput} instead. */
+export type TextDisplay = TextDisplayInput;
+
+/** @deprecated Use {@link ThumbnailInput} instead. */
+export type Thumbnail = ThumbnailInput;
 
 /**
  * Type for Discord text input styles by name.
@@ -489,28 +444,6 @@ export type Label = BaseComponent & {
  * Components allowed at the top level of a modal.
  */
 export type ModalTopLevelComponent = Label | TextDisplayInput;
-
-/**
- * Components allowed at the top level of a message using components v2.
- */
-export type MessageTopLevelComponent
-  = | string
-    | ReturnType<typeof import("#/base/components/display/builders").actionRow>
-    | Container
-    | File
-    | MediaGallery
-    | Section
-    | Separator
-    | TextDisplay;
-
-/** Union of every resolved component data type allowed at the top level of a message. */
-export type AnyMessageTopLevelComponentData
-  = | ContainerComponentData
-    | FileComponentData
-    | MediaGalleryComponentData
-    | SectionComponentData
-    | SeparatorComponentData
-    | TextDisplayComponentData;
 
 /** Union of every resolved component data type allowed inside a modal. */
 export type AnyModalComponentData

@@ -40,10 +40,16 @@ With Bun:
 bun add arcscord discord.js
 ```
 
-Optional packages can be installed as needed:
+Additional Arcscord packages can be installed as needed:
 
 ```bash
 pnpm add @arcscord/middleware @arcscord/error @arcscord/better-error
+```
+
+Arcscord already re-exports the Components V2 helpers, so an Arcscord bot does not need to install `@arcscord/components` separately. Install that package directly only when using the helpers in a standalone Discord.js project:
+
+```bash
+pnpm add @arcscord/components discord.js
 ```
 
 Useful setup links:

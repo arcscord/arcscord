@@ -1,5 +1,13 @@
-import type { TypedSelectMenuOptionOverride, TypedSelectMenuOptionOverrides } from "arcscord";
+import type {
+  ContainerComponentInput,
+  Container as LegacyContainer,
+  MessageTopLevelComponent as LegacyMessageTopLevelComponent,
+  MessageV2Child,
+  TypedSelectMenuOptionOverride,
+  TypedSelectMenuOptionOverrides,
+} from "arcscord";
 import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
+import { container, v2Message } from "@arcscord/components";
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import {
   ArcClient,
@@ -23,6 +31,12 @@ type IsExact<Actual, Expected>
     : false;
 
 function expectExactType<Check extends true>(_check: Check): void {}
+
+expectExactType<IsExact<LegacyContainer, ContainerComponentInput>>(true);
+expectExactType<IsExact<LegacyMessageTopLevelComponent, MessageV2Child>>(true);
+
+const standaloneMessage = v2Message(container("TypeScript 5.4"));
+void standaloneMessage;
 
 const command = createCommand({
   slash: {

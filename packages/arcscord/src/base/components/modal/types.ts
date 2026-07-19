@@ -1,3 +1,4 @@
+import type { TextDisplayInput } from "@arcscord/components";
 import type { ComponentType } from "discord-api-types/v10";
 import type {
   ChannelSelectMenuBuilder,
@@ -21,7 +22,6 @@ import type {
   ModalLabelOverrides,
   ModalTopLevelComponent,
   StringSelectMenu,
-  TextDisplayInput,
   TextInput,
 } from "../shared/component_definer.type";
 

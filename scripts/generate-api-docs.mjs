@@ -36,6 +36,11 @@ const packages = [
     docsEntryPoints: ["src/base/utils/context.type.ts"],
   },
   {
+    dir: "packages/components",
+    slug: "components",
+    tsconfig: "packages/components/tsconfig.json",
+  },
+  {
     dir: "packages/middleware",
     slug: "middleware",
     tsconfig: "packages/middleware/tsconfig.json",
@@ -95,7 +100,6 @@ const arcscordTypedocOptions = {
     "BaseEventResultHandlerInfos",
     "BaseMessageContext",
     "BuildableHandler",
-    "ButtonList",
     "ChannelSelectMenuContextOptions",
     "CommandResultHandlerImplementer",
     "ContextOptionsDef",
@@ -130,6 +134,19 @@ const errorTypedocOptions = {
     "AnyMultipleCallback",
     "CallbackError",
     "CallbackValue",
+  ],
+};
+
+const componentsTypedocOptions = {
+  treatWarningsAsErrors: true,
+  validation: {
+    notExported: true,
+    notDocumented: true,
+    invalidLink: true,
+  },
+  requiredToBeDocumented: [
+    "Function",
+    "TypeAlias",
   ],
 };
 
@@ -180,6 +197,7 @@ for (const pkg of packages) {
       entryPointStrategy: "resolve",
       excludeInternal: true,
       ...(pkg.slug === "arcscord" ? arcscordTypedocOptions : {}),
+      ...(pkg.slug === "components" ? componentsTypedocOptions : {}),
       ...(pkg.slug === "error" ? errorTypedocOptions : {}),
       includeVersion: true,
       json: outFile,

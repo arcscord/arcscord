@@ -42,7 +42,6 @@ import {
 } from "./builders";
 import {
   buttonToAPI,
-  componentInContainerToAPI,
   selectMenuOptionsToAPI,
   selectMenuToAPI,
   textInputToAPI,
@@ -465,9 +464,5 @@ describe("component builders", () => {
         },
       ],
     });
-  });
-
-  it("throws for unsupported container components", () => {
-    expect(() => componentInContainerToAPI({ type: ComponentType.Button } as any)).toThrow("Unsupported container component type");
   });
 });
