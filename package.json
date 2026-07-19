@@ -13,6 +13,7 @@
     "test": "node scripts/test.mjs",
     "test:test-bot": "pnpm -r --filter '@arcscord/test-bot' run start",
     "test:test-bot:bun": "pnpm --filter @arcscord/test-bot run start:bun",
+    "test:components-bot": "pnpm --filter @arcscord/components-test-bot run start",
     "pack:local": "node scripts/pack-local.mjs",
     "test:bun": "pnpm pack:local && cd test/compat/bun-consumer && bun install --no-save && bun run typecheck && bun run smoke && bun test",
     "test:typescript-compat": "pnpm pack:local && cd test/compat/typescript-consumer && pnpm install --no-lockfile && pnpm typecheck",
