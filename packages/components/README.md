@@ -1,4 +1,13 @@
+<p align="center">
+  <a href="https://arcscord.dev/">
+    <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="380" />
+  </a>
+</p>
+
 # @arcscord/components
+
+[![npm version](https://badge.fury.io/js/@arcscord%2Fcomponents.svg)](https://www.npmjs.com/package/@arcscord/components)
+[![Discord](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)
 
 Standalone, typed helpers for building Discord Components V2 messages. The package depends only on Discord.js and `discord-api-types`; it does not require the Arcscord framework.
 

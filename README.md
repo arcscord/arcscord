@@ -1,6 +1,8 @@
 <div align="center">
 
-# Arcscord
+<a href="https://arcscord.dev/">
+  <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="460" />
+</a>
 
 [![GitHub](https://img.shields.io/github/license/arcscord/arcscord?logo=github&style=flat)](https://github.com/arcscord/arcscord/blob/main/LICENSE)
 [![Discord Server](https://img.shields.io/discord/1012097557532528791?color=blue&label=Discord&logo=discord&style=shield)](https://discord.gg/4geBanVWGR)
@@ -16,6 +18,7 @@
 ## Packages 📦
 
 - `arcscord` - [source](https://github.com/arcscord/arcscord/tree/main/packages/arcscord) - The core Discord bot framework.
+- `@arcscord/components` - [source](https://github.com/arcscord/arcscord/tree/main/packages/components) - Typed helpers for building Discord Components V2 messages with Arcscord or Discord.js.
 - `create-arcscord-bot` - [source](https://github.com/arcscord/arcscord/tree/main/packages/create-arcscord-bot) - Scaffold a ready-to-run Arcscord bot with `pnpm create arcscord-bot`, `npm create arcscord-bot`, `yarn create arcscord-bot`, or `bun create arcscord-bot`.
 - `@arcscord/middleware` - [source](https://github.com/arcscord/arcscord/tree/main/packages/middleware) - Middleware utilities for Arcscord.
 - `@arcscord/error` - [source](https://github.com/arcscord/arcscord/tree/main/packages/error) - Result-style error handling helpers.
