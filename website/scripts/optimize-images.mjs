@@ -15,8 +15,8 @@ const asset = p => path.join(root, "assets", p);
 const imageOut = p => path.join(root, "static", "img", p);
 
 const faviconBackground = { r: 255, g: 255, b: 255, alpha: 1 };
-const brandMark = asset("brand/icon.PNG");
-const brandWordmark = asset("brand/icon_full_name.PNG");
+const brandMark = asset("brand/icon.png");
+const brandWordmark = asset("brand/icon_full_name.png");
 
 await mkdir(path.dirname(imageOut("brand-wordmark.webp")), { recursive: true });
 
