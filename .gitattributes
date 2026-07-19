@@ -5,3 +5,4 @@
 *.webp binary -text
 *.gif  binary -text
 *.ico  binary -text
+*.ttf binary
