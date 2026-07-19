@@ -34,7 +34,7 @@ import {
 import { componentIds } from "./ids";
 import { runValidationSuite } from "./validation-suite";
 
-const logoPath = fileURLToPath(new URL("../../../website/assets/Arcscord_Logo.png", import.meta.url));
+const logoPath = fileURLToPath(new URL("../../../website/assets/brand/icon.PNG", import.meta.url));
 
 function testButton(label: string, customId: string, style: ButtonStyle): ButtonBuilder {
   return new ButtonBuilder().setCustomId(customId).setLabel(label).setStyle(style);
@@ -63,7 +63,7 @@ export function layoutScenario(): MessageV2EditReplyOptions {
 
 export function mediaScenario(): MessageV2ReplyOptions {
   const image = new AttachmentBuilder(logoPath, {
-    name: "arcscord-logo.png",
+    name: "icon.PNG",
     description: "Arcscord logo used by the Components V2 media test",
   });
   const report = new AttachmentBuilder(Buffer.from("@arcscord/components standalone file test\n", "utf8"), {
@@ -79,13 +79,13 @@ export function mediaScenario(): MessageV2ReplyOptions {
       section(
         "The thumbnail and gallery resolve an uploaded `attachment://` URL.",
         accessory(thumbnail({
-          media: { url: "attachment://arcscord-logo.png" },
+          media: { url: "attachment://icon.PNG" },
           description: "Test thumbnail",
         })),
       ),
       mediaGallery({
         items: [{
-          media: { url: "attachment://arcscord-logo.png" },
+          media: { url: "attachment://icon.PNG" },
           description: "Attachment-backed gallery item",
           spoiler: true,
         }],
