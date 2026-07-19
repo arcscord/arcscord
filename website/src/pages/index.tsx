@@ -118,12 +118,21 @@ const packages: Pkg[] = [
 ];
 
 function Hero(): ReactNode {
-  const logo = useBaseUrl("img/logo.webp");
+  const brandWordmark = useBaseUrl("img/brand-wordmark.webp");
   return (
     <header className={styles.hero}>
       <div className={styles.heroInner}>
-        <img className={styles.heroLogo} src={logo} alt="Arcscord logo" width={251} height={320} />
-        <h1 className={styles.heroTitle}>Arcscord</h1>
+        <h1 className={styles.heroTitle}>
+          <span className={styles.visuallyHidden}>Arcscord</span>
+          <img
+            className={styles.heroWordmark}
+            src={brandWordmark}
+            alt=""
+            aria-hidden="true"
+            width={1137}
+            height={180}
+          />
+        </h1>
         <p className={styles.heroTagline}>
           A TypeScript-first framework for building Discord bots — typed
           commands, components, and result-style error handling on top of
@@ -146,7 +155,7 @@ function Hero(): ReactNode {
         <div className={styles.heroBadges}>
           <Link href="https://www.npmjs.com/package/arcscord" aria-label="arcscord on npm">
             <img
-              src="https://img.shields.io/npm/v/arcscord?color=377bc3&label=arcscord&logo=npm"
+              src="https://img.shields.io/npm/v/arcscord?color=1c70cd&label=arcscord&logo=npm"
               alt="arcscord npm version"
               width={118}
               height={20}
@@ -154,7 +163,7 @@ function Hero(): ReactNode {
           </Link>
           <Link href="https://www.npmjs.com/package/arcscord" aria-label="arcscord downloads on npm">
             <img
-              src="https://img.shields.io/npm/dm/arcscord?color=8298ed&label=downloads"
+              src="https://img.shields.io/npm/dm/arcscord?color=31318a&label=downloads"
               alt="arcscord monthly downloads"
               width={134}
               height={20}
@@ -162,7 +171,7 @@ function Hero(): ReactNode {
           </Link>
           <Link href="https://github.com/arcscord/arcscord" aria-label="arcscord on GitHub">
             <img
-              src="https://img.shields.io/github/stars/arcscord/arcscord?color=8298ed&logo=github"
+              src="https://img.shields.io/github/stars/arcscord/arcscord?color=31318a&logo=github"
               alt="GitHub stars"
               width={96}
               height={20}
