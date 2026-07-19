@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://arcscord.dev/">
+    <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="380" />
+  </a>
+</p>
+
 # create-arcscord-bot
 
 Scaffold a ready-to-run [Arcscord](https://arcscord.dev) Discord bot in one command.

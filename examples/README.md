@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://arcscord.dev/">
+    <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="340" />
+  </a>
+</p>
+
 # Arcscord examples
 
 Full, runnable bots that show how Arcscord's pieces fit together in a real

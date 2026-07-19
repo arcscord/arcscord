@@ -1,6 +1,8 @@
 <div align="center">
 
-# Arcscord
+<a href="https://arcscord.dev/">
+  <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="460" />
+</a>
 
 [![GitHub](https://img.shields.io/github/license/arcscord/arcscord?logo=github&style=flat)](https://github.com/arcscord/arcscord/blob/main/LICENSE)
 [![Discord Server](https://img.shields.io/discord/1012097557532528791?color=blue&label=Discord&logo=discord&style=shield)](https://discord.gg/4geBanVWGR)

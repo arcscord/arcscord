@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://arcscord.dev/">
+    <img src="https://arcscord.dev/img/brand-wordmark.webp" alt="Arcscord" width="380" />
+  </a>
+</p>
+
 # @arcscord/better-error
 
 [![npm version](https://badge.fury.io/js/@arcscord%2Fbetter-error.svg)](https://www.npmjs.com/package/@arcscord/better-error)
