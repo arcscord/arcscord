@@ -119,7 +119,7 @@ export type CommandHandler<
 /**
  * @internal
  */
-export type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : false;
+type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : false;
 
 /**
  * Reassembles a {@link FullCommandDefinition} from the individually inferred
@@ -128,7 +128,7 @@ export type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : f
  *
  * @internal
  */
-export type AssembleFullDefinition<Slash, Message, User>
+type AssembleFullDefinition<Slash, Message, User>
   = (IsOmitted<Slash, SlashCommandDefinition> extends true ? Record<never, never> : { slash: Slash })
     & (IsOmitted<Message, BaseCommandDefinition> extends true ? Record<never, never> : { message: Message })
     & (IsOmitted<User, BaseCommandDefinition> extends true ? Record<never, never> : { user: User });

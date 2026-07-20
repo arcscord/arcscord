@@ -144,16 +144,6 @@ export type CommandContextDocs = {
 };
 
 /**
- * FOR DOCS ONLY
- */
-export type SlashCommandContextDocs = {
-  /**
-   * typed command options values
-   */
-  options: unknown;
-};
-
-/**
  * Documentation-only shape describing the extra members available on a message
  * command context (rendered in the API reference).
  */

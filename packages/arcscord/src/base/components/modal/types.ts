@@ -32,7 +32,7 @@ export type DiscordModalTopLevelBuilder
   = | LabelBuilder
     | ModalBuilder;
 
-export type DiscordModalFieldBuilder
+type DiscordModalFieldBuilder
   = | ChannelSelectMenuBuilder
     | MentionableSelectMenuBuilder
     | RoleSelectMenuBuilder

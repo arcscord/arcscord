@@ -82,7 +82,7 @@ export function commandToAPI(definer: FullCommandDefinition, client: ArcClient):
   return obj;
 }
 
-export function subCommandToAPI(
+function subCommandToAPI(
   definer: SubCommandDefinition,
   client: ArcClient,
 ): APIApplicationCommandSubcommandOption {

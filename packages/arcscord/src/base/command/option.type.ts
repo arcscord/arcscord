@@ -281,7 +281,7 @@ type NumberChoice<T extends ChoiceOptionNumber>
 /**
  * @internal
  */
-export type ContextOption<T extends Option> = T extends BaseStringOption
+type ContextOption<T extends Option> = T extends BaseStringOption
   ? T extends ChoiceOptionString
     ? StringChoice<T>
     : string

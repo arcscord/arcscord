@@ -80,7 +80,7 @@ export function decodeThumbnail(input: unknown, context: ValidationContext): Can
   } satisfies CanonicalThumbnail;
 }
 
-export function decodeMediaGalleryItem(input: unknown, context: ValidationContext): MediaGalleryItemData {
+function decodeMediaGalleryItem(input: unknown, context: ValidationContext): MediaGalleryItemData {
   const record = serializeInput(input, context);
   const media = requiredField(record, "media", context, (value, fieldContext) => decodeMedia(value, fieldContext, [], ComponentType.MediaGallery));
   const description = optionalField(record, "description", context, (value, fieldContext) => decodeNullableString(value, fieldContext, 1, 1024, ComponentType.MediaGallery));

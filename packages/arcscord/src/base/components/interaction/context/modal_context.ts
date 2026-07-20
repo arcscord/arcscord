@@ -37,7 +37,7 @@ export function readModalRawValues(interaction: ModalSubmitInteraction): Map<str
   return new Map<string, ModalContextValue>(values);
 }
 
-export function readModalRawFields(interaction: ModalSubmitInteraction): Map<string, unknown> {
+function readModalRawFields(interaction: ModalSubmitInteraction): Map<string, unknown> {
   return new Map(
     [...interaction.fields.fields.entries()].map(([customId, field]) => [customId, field as unknown]),
   );

@@ -35,7 +35,7 @@ export type ValidButtonStyle = typeof ButtonStyle.Primary
   | typeof ButtonStyle.Link
   | typeof ButtonStyle.Premium;
 
-export const validButtonStyles: readonly ValidButtonStyle[] = [
+const validButtonStyles: readonly ValidButtonStyle[] = [
   ButtonStyle.Primary,
   ButtonStyle.Secondary,
   ButtonStyle.Success,
@@ -50,14 +50,14 @@ export type SelectMenuComponentType = typeof ComponentType.StringSelect
   | typeof ComponentType.MentionableSelect
   | typeof ComponentType.ChannelSelect;
 
-export type ContainerChildComponentType = typeof ComponentType.ActionRow
+type ContainerChildComponentType = typeof ComponentType.ActionRow
   | typeof ComponentType.File
   | typeof ComponentType.MediaGallery
   | typeof ComponentType.Section
   | typeof ComponentType.Separator
   | typeof ComponentType.TextDisplay;
 
-export type TopLevelComponentType = typeof ComponentType.Container | ContainerChildComponentType;
+type TopLevelComponentType = typeof ComponentType.Container | ContainerChildComponentType;
 
 export const selectMenuComponentTypes: readonly SelectMenuComponentType[] = [
   ComponentType.StringSelect,

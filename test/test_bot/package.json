@@ -6,7 +6,6 @@
   "author": "",
   "license": "ISC",
   "keywords": [],
-  "main": "index.js",
   "scripts": {
     "start": "node --import=tsx --env-file-if-exists=.env src/index.ts debug",
     "start:bun": "bun src/index.ts debug",

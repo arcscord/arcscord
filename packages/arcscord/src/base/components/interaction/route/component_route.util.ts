@@ -1,7 +1,7 @@
 import type { IdInitialiseFunction, RouteVariablesObject } from "./component_route.type";
 import { ArcscordError, arcscordErrorCodes } from "#/utils/error";
 
-export type RoutePart = {
+type RoutePart = {
   type: "static";
   value: string;
 } | {
@@ -14,7 +14,7 @@ export type CompiledComponentRoute = {
   parts: RoutePart[];
 };
 
-export const maxComponentCustomIdLength = 100;
+const maxComponentCustomIdLength = 100;
 
 const staticSegmentRegex = /^[\w-]+$/;
 const routeParamRegex = /^[A-Z_]\w*$/i;

@@ -75,7 +75,7 @@ export const supportedDiscordLocales: readonly Locale[] = [
   "ko",
 ];
 
-export const supportedDiscordLocaleSet: ReadonlySet<string> = new Set(supportedDiscordLocales);
+const supportedDiscordLocaleSet: ReadonlySet<string> = new Set(supportedDiscordLocales);
 
 /**
  * Type guard narrowing an arbitrary string to a Discord {@link Locale}.
