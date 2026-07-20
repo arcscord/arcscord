@@ -1,6 +1,6 @@
 {
   "name": "@arcscord/components",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Standalone typed helpers for Discord Components V2 messages.",
   "author": "Arcoz0308",
   "license": "MIT",
