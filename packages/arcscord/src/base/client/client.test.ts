@@ -139,7 +139,7 @@ describe("arcClient.waitReady", () => {
   ] as const)("rejects invalid %s options", (options, optionName) => {
     const client = new ArcClient("token", { intents: [] });
 
-    expect(() => client.waitReady(options)).toThrow(new RegExp(optionName));
+    expect(() => client.waitReady(options)).toThrow(optionName);
   });
 });
 
