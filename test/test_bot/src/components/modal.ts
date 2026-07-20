@@ -239,5 +239,3 @@ export const selectModal = createModal({
     );
   },
 });
-
-export const modal = profileModal;

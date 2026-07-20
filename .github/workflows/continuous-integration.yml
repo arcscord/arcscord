@@ -30,6 +30,10 @@ jobs:
       - name: Run ESLint
         id: lint
         run: pnpm lint --fix=false
+      - name: Run Knip
+        id: knip
+        if: always() && steps.install.outcome == 'success'
+        run: pnpm knip
       - name: Write summary
         if: always()
         run: |
@@ -40,6 +44,7 @@ jobs:
             echo "| --- | --- | --- |"
             echo "| Root workspace | \`pnpm install --frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Root workspace | \`pnpm lint --fix=false\` | \`${{ steps.lint.outcome }}\` |"
+            echo "| Root workspace | \`pnpm knip\` | \`${{ steps.knip.outcome }}\` |"
           } >> "$GITHUB_STEP_SUMMARY"
 
   Building:

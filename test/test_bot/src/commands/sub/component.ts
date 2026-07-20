@@ -1,5 +1,5 @@
 import { actionRow, createSubCommand } from "arcscord";
-import { modal } from "../../components/modal";
+import { profileModal } from "../../components/modal";
 import { simpleButton } from "../../components/simple_button";
 import { stringSelectMenu } from "../../components/string_select_menu";
 
@@ -17,7 +17,7 @@ export const modalComponentSubCommand = createSubCommand({
   name: "modal",
   description: "show a modal",
   run: (ctx) => {
-    return ctx.showModal(modal.build());
+    return ctx.showModal(profileModal.build());
   },
 });
 

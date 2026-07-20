@@ -42,14 +42,14 @@ import {
 } from "#/base/components/shared/component.enum";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 
-export type DiscordSelectMenuBuilder
+type DiscordSelectMenuBuilder
   = | StringSelectMenuBuilder
     | UserSelectMenuBuilder
     | RoleSelectMenuBuilder
     | MentionableSelectMenuBuilder
     | ChannelSelectMenuBuilder;
 
-export type ButtonInput = Button | ButtonBuilder;
+type ButtonInput = Button | ButtonBuilder;
 export type SelectMenuInput = SelectMenu | DiscordSelectMenuBuilder;
 
 function isButtonBuilder(button: ButtonInput): button is ButtonBuilder {
@@ -359,7 +359,7 @@ export function checkboxToAPI(checkbox: Checkbox): CheckboxComponentData {
   };
 }
 
-export function componentInLabelToAPI(component: ComponentInLabel): LabelComponentData["component"] {
+function componentInLabelToAPI(component: ComponentInLabel): LabelComponentData["component"] {
   switch (component.type) {
     case ComponentType.TextInput:
       return textInputToAPI(component as TextInput | TextInputComponentData);

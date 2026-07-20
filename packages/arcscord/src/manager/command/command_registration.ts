@@ -352,7 +352,7 @@ function commandRoute(options: CommandRouteOptions, commandId: string): `/${stri
   return Routes.applicationCommand(options.applicationId, commandId);
 }
 
-export function apiCommandToResolvedCommand(command: APIApplicationCommand): ApplicationCommandRegistration {
+function apiCommandToResolvedCommand(command: APIApplicationCommand): ApplicationCommandRegistration {
   return {
     id: command.id,
     name: command.name,

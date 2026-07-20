@@ -86,7 +86,7 @@ export function decodeMessageFlags(value: unknown, context: ValidationContext): 
   return flags;
 }
 
-export function decodeMessageComponent(input: unknown, context: ValidationContext): CanonicalMessageComponent {
+function decodeMessageComponent(input: unknown, context: ValidationContext): CanonicalMessageComponent {
   if (typeof input === "string") {
     return decodeTextDisplay(input, context);
   }

@@ -51,8 +51,6 @@ export type RouteComponentHandle<Route extends string> = {
 export type {
   ComponentBuildArgs,
   IdInitialiseFunction,
-  RouteVariables,
-  RouteVariablesObject,
 } from "./route";
 
 /**
