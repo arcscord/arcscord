@@ -57,7 +57,7 @@ export function assertComponentType<Type extends number>(
 
 export function decodeComponentId(record: UnknownRecord, context: ValidationContext): number | undefined {
   return optionalField(record, "id", context, (value, fieldContext) => {
-    return decodeInteger(value, fieldContext, 0, 0xFFFF_FFFF, componentTypeOf(record));
+    return decodeInteger(value, fieldContext, 0, 0x7FFF_FFFF, componentTypeOf(record));
   });
 }
 

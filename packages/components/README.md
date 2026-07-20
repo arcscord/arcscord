@@ -91,7 +91,7 @@ Builders and raw API objects are recursively normalized to Discord.js camelCase 
 
 ## Runtime validation
 
-Every helper runs a single serialization, normalization, and validation pipeline before returning. Invalid component fields, nesting, protocol restrictions, cardinalities, duplicate component/custom IDs, unsupported message flags, and messages containing more than 40 total components fail locally instead of being sent to Discord.
+Every helper runs a single serialization, normalization, and validation pipeline before returning. Invalid component fields, nesting, protocol restrictions, cardinalities, duplicate component/custom IDs or select values, unsupported message flags, messages containing more than 40 total components, and messages exceeding 4,000 cumulative Text Display characters fail locally instead of being sent to Discord. Containers accept up to 40 direct children, subject to the same recursive 40-component message limit.
 
 Component type errors stay neutral: `unexpected-component-type` reports a discriminator outside the accepted set, while `component-placement` reports a known Discord component used at an invalid nesting location. Neither error assumes whether the input is a typo or an API addition.
 

@@ -40,6 +40,7 @@ import { decodeContainer, decodeContainerChild, decodeSection } from "./layout";
 
 type MessageTraversalState = {
   count: number;
+  displayableTextLength: number;
   readonly ids: Map<number, string>;
   readonly customIds: Map<string, string>;
 };
@@ -134,6 +135,9 @@ function decodeTopLevelComponent(input: unknown, context: ValidationContext): Me
 
 function registerUniqueIdentifiers(component: CanonicalMessageComponent, path: string, state: MessageTraversalState): void {
   state.count += 1;
+  if (component.type === ComponentType.TextDisplay) {
+    state.displayableTextLength += component.content.length;
+  }
   if (component.id !== undefined && component.id !== 0) {
     const existing = state.ids.get(component.id);
     if (existing !== undefined) {
@@ -223,12 +227,18 @@ export function decodeV2Message(
   const components = record.components.map((component, index) => {
     return decodeTopLevelComponent(component, childContext(componentsContext, index));
   });
-  const state: MessageTraversalState = { count: 0, ids: new Map(), customIds: new Map() };
+  const state: MessageTraversalState = { count: 0, displayableTextLength: 0, ids: new Map(), customIds: new Map() };
   components.forEach((component, index) => registerUniqueIdentifiers(component, `message.components[${index}]`, state));
   if (state.count > 40) {
     validationFailure(componentsContext, "message-component-count", "message cannot contain more than 40 total components", undefined, {
       maximum: 40,
       actual: state.count,
+    });
+  }
+  if (state.displayableTextLength > 4000) {
+    validationFailure(componentsContext, "message-displayable-text-size", "message cannot contain more than 4000 total Text Display characters", ComponentType.TextDisplay, {
+      maximum: 4000,
+      actual: state.displayableTextLength,
     });
   }
 

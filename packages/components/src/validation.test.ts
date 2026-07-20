@@ -1,6 +1,6 @@
 import type { APIStringSelectComponent } from "discord-api-types/v10";
 import type { MessageComponentValidationError } from "./validation-error";
-import { ButtonStyle, ComponentType, MessageFlags, SeparatorSpacingSize } from "discord-api-types/v10";
+import { ButtonStyle, ComponentType, MessageFlags, SelectMenuDefaultValueType, SeparatorSpacingSize } from "discord-api-types/v10";
 import { ButtonBuilder, TextDisplayBuilder, ThumbnailBuilder } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { actionRow } from "./action-row";
@@ -188,6 +188,18 @@ describe("message component validators", () => {
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Primary, custom_id: "save", label: "Save" });
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Link, url: "https://example.com", label: "Open" });
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Premium, sku_id: "123" });
+    validateButton({
+      type: ComponentType.Button,
+      style: ButtonStyle.Primary,
+      custom_id: "emoji-id",
+      emoji: { id: "123", name: "" },
+    });
+    validateButton({
+      type: ComponentType.Button,
+      style: ButtonStyle.Primary,
+      custom_id: "emoji-long-name",
+      emoji: { id: "123", name: "x".repeat(101) },
+    });
 
     expect(validationError(() => validateButton({
       type: ComponentType.Button,
@@ -236,12 +248,33 @@ describe("message component validators", () => {
     validateSelectMenu({
       ...select,
       min_values: 0,
-      required: false,
+    });
+    validateSelectMenu({
+      ...select,
+      options: [{ label: "One", value: "one", description: "" }],
     });
     expect(validationError(() => validateSelectMenu({
       ...select,
-      min_values: 0,
-    })).rule).toBe("select-menu-required-minimum");
+      options: [{ label: "One", value: "same" }, { label: "Two", value: "same" }],
+    })).rule).toBe("select-menu-option-value");
+    validateSelectMenu({
+      type: ComponentType.UserSelect,
+      custom_id: "users",
+      min_values: 2,
+      max_values: 2,
+      default_values: [{ type: SelectMenuDefaultValueType.User, id: "123" }],
+    });
+    expect(validationError(() => validateSelectMenu({
+      type: ComponentType.UserSelect,
+      custom_id: "users",
+      max_values: 2,
+      default_values: [{ type: SelectMenuDefaultValueType.User, id: "123" }, { type: SelectMenuDefaultValueType.User, id: "123" }],
+    })).rule).toBe("select-menu-default-value");
+    expect(validationError(() => validateSelectMenu({
+      type: ComponentType.ChannelSelect,
+      custom_id: "channels",
+      channel_types: [0, 0],
+    })).rule).toBe("channel-types-unique");
     expect(validationError(() => validateActionRow({
       type: ComponentType.ActionRow,
       components: [select, select],
@@ -260,10 +293,32 @@ describe("message component validators", () => {
       components: Array.from({ length: 4 }, () => ({ type: ComponentType.TextDisplay, content: "Body" })),
       accessory: button,
     } as never)).rule).toBe("section-cardinality");
-    expect(validationError(() => validateContainer({
+    validateContainer({
       type: ComponentType.Container,
       components: Array.from({ length: 11 }, () => ({ type: ComponentType.TextDisplay, content: "Body" })),
-    })).rule).toBe("container-cardinality");
+    });
+    validateContainer({
+      type: ComponentType.Container,
+      components: Array.from({ length: 40 }, () => ({ type: ComponentType.TextDisplay, content: "Body" })),
+    });
+    expect(validationError(() => validateContainer({
+      type: ComponentType.Container,
+      components: Array.from({ length: 41 }, () => ({ type: ComponentType.TextDisplay, content: "Body" })),
+    } as never)).rule).toBe("container-cardinality");
+    validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [{
+        type: ComponentType.Container,
+        components: Array.from({ length: 39 }, () => ({ type: ComponentType.TextDisplay, content: "x" })),
+      }],
+    });
+    expect(validationError(() => validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [{
+        type: ComponentType.Container,
+        components: Array.from({ length: 40 }, () => ({ type: ComponentType.TextDisplay, content: "x" })),
+      }],
+    })).rule).toBe("message-component-count");
   });
 
   it("dispatches individual interactive components while rejecting them at message top level", () => {
@@ -312,6 +367,44 @@ describe("message component validators", () => {
       flags: MessageFlags.IsComponentsV2,
       components: Array.from({ length: 41 }, (_, index) => String(index)),
     })).rule).toBe("message-component-count");
+  });
+
+  it("enforces the cumulative Text Display budget at 4000 characters", () => {
+    validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [text("a".repeat(2000)), text("b".repeat(2000))],
+    });
+    const error = validationError(() => validateV2Message({
+      flags: MessageFlags.IsComponentsV2,
+      components: [
+        {
+          type: ComponentType.Container,
+          components: [text("a".repeat(2001))],
+        },
+        {
+          type: ComponentType.Container,
+          components: [text("b".repeat(2001))],
+        },
+      ],
+    }));
+    expect(error).toMatchObject({
+      rule: "message-displayable-text-size",
+      details: { maximum: 4000, actual: 4002 },
+    });
+  });
+
+  it("limits component ids to Discord's signed 32-bit range", () => {
+    validateTextDisplay({ type: ComponentType.TextDisplay, id: 0x7FFF_FFFF, content: "max" });
+    const error = validationError(() => validateTextDisplay({
+      type: ComponentType.TextDisplay,
+      id: 0x8000_0000,
+      content: "overflow",
+    }));
+    expect(error).toMatchObject({
+      rule: "integer-range",
+      path: "textDisplay.id",
+      details: { maximum: 0x7FFF_FFFF },
+    });
   });
 
   it("rejects duplicate component and custom identifiers across nesting", () => {

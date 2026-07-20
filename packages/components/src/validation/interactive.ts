@@ -80,7 +80,7 @@ function decodeButtonStyle(value: unknown, context: ValidationContext): ValidBut
 function decodeEmoji(value: unknown, context: ValidationContext): APIMessageComponentEmoji {
   const record = decodeRecord(value, context, ComponentType.Button);
   const id = optionalField(record, "id", context, (field, fieldContext) => decodeSnowflake(field, fieldContext, ComponentType.Button));
-  const name = optionalField(record, "name", context, (field, fieldContext) => decodeString(field, fieldContext, 1, 100, ComponentType.Button));
+  const name = optionalField(record, "name", context, (field, fieldContext) => decodeString(field, fieldContext, id === undefined ? 1 : 0, Number.MAX_SAFE_INTEGER, ComponentType.Button));
   const animated = optionalField(record, "animated", context, (field, fieldContext) => decodeBoolean(field, fieldContext, ComponentType.Button));
   if (id === undefined && name === undefined) {
     validationFailure(context, "emoji-identity", `${context.path} must define an id or name`, ComponentType.Button);
@@ -172,7 +172,7 @@ function decodeSelectOption(value: unknown, context: ValidationContext): SelectM
   const record = serializeInput(value, context);
   const label = requiredField(record, "label", context, (field, fieldContext) => decodeString(field, fieldContext, 1, 100, ComponentType.StringSelect));
   const optionValue = requiredField(record, "value", context, (field, fieldContext) => decodeString(field, fieldContext, 1, 100, ComponentType.StringSelect));
-  const description = optionalField(record, "description", context, (field, fieldContext) => decodeString(field, fieldContext, 1, 100, ComponentType.StringSelect));
+  const description = optionalField(record, "description", context, (field, fieldContext) => decodeString(field, fieldContext, 0, 100, ComponentType.StringSelect));
   const emoji = optionalField(record, "emoji", context, decodeEmoji);
   const isDefault = optionalField(record, "default", context, (field, fieldContext) => decodeBoolean(field, fieldContext, ComponentType.StringSelect));
   return {
@@ -216,17 +216,34 @@ function decodeDefaultValues<Type extends DefaultValueType>(
   });
 }
 
-function assertDefaultCount(
+function assertUniqueValues<Value>(
+  values: readonly Value[],
+  context: ValidationContext,
+  componentType: number,
+  key: (value: Value) => string | number,
+  rule: string,
+): void {
+  const seen = new Set<string | number>();
+  values.forEach((value, index) => {
+    const identifier = key(value);
+    if (seen.has(identifier)) {
+      validationFailure(childContext(context, index), rule, `${context.path} cannot contain duplicate values`, componentType, {
+        value: identifier,
+      });
+    }
+    seen.add(identifier);
+  });
+}
+
+function assertDefaultMaximum(
   defaultValues: readonly unknown[] | undefined,
   context: ValidationContext,
   componentType: number,
-  minimum: number,
   maximum: number,
 ): void {
-  if (defaultValues !== undefined && (defaultValues.length < minimum || defaultValues.length > maximum)) {
-    validationFailure(childContext(context, "defaultValues"), "select-menu-defaults", `${context.path}.defaultValues count must be within minValues and maxValues`, componentType, {
+  if (defaultValues !== undefined && defaultValues.length > maximum) {
+    validationFailure(childContext(context, "defaultValues"), "select-menu-defaults", `${context.path}.defaultValues count cannot exceed maxValues`, componentType, {
       defaultCount: defaultValues.length,
-      minValues: minimum,
       maxValues: maximum,
     });
   }
@@ -252,13 +269,6 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
       maxValues: effectiveMaximum,
     });
   }
-  if (effectiveMinimum === 0 && required !== false) {
-    validationFailure(context, "select-menu-required-minimum", `${context.path}.minValues can be zero only when required is false`, type, {
-      minValues: effectiveMinimum,
-      required: required ?? true,
-    });
-  }
-
   const requiredProperty: { readonly required?: true } = required === true ? { required: true } : {};
   const base = {
     type,
@@ -273,6 +283,7 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
 
   if (type === ComponentType.StringSelect) {
     const options = decodeArray(record.options, childContext(context, "options"), 1, 25, "select-menu-options", type, decodeSelectOption);
+    assertUniqueValues(options, childContext(context, "options"), type, option => option.value, "select-menu-option-value");
     if (effectiveMinimum > options.length) {
       validationFailure(childContext(context, "minValues"), "select-menu-options", `${context.path}.minValues cannot exceed the number of options`, type, {
         minValues: effectiveMinimum,
@@ -280,10 +291,9 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
       });
     }
     const defaults = options.filter(option => option.default === true).length;
-    if (defaults > 0 && (defaults < effectiveMinimum || defaults > effectiveMaximum)) {
-      validationFailure(childContext(context, "options"), "select-menu-defaults", `${context.path} default option count must be within minValues and maxValues`, type, {
+    if (defaults > effectiveMaximum) {
+      validationFailure(childContext(context, "options"), "select-menu-defaults", `${context.path} default option count cannot exceed maxValues`, type, {
         defaultCount: defaults,
-        minValues: effectiveMinimum,
         maxValues: effectiveMaximum,
       });
     }
@@ -292,7 +302,8 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
 
   if (type === ComponentType.UserSelect) {
     const defaultValues = decodeDefaultValues(record, context, type, (value): value is SelectMenuDefaultValueType.User => value === SelectMenuDefaultValueType.User);
-    assertDefaultCount(defaultValues, context, type, effectiveMinimum, effectiveMaximum);
+    assertDefaultMaximum(defaultValues, context, type, effectiveMaximum);
+    assertUniqueValues(defaultValues ?? [], childContext(context, "defaultValues"), type, value => `${value.type}:${value.id}`, "select-menu-default-value");
     return {
       ...base,
       type,
@@ -301,7 +312,8 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
   }
   if (type === ComponentType.RoleSelect) {
     const defaultValues = decodeDefaultValues(record, context, type, (value): value is SelectMenuDefaultValueType.Role => value === SelectMenuDefaultValueType.Role);
-    assertDefaultCount(defaultValues, context, type, effectiveMinimum, effectiveMaximum);
+    assertDefaultMaximum(defaultValues, context, type, effectiveMaximum);
+    assertUniqueValues(defaultValues ?? [], childContext(context, "defaultValues"), type, value => `${value.type}:${value.id}`, "select-menu-default-value");
     return {
       ...base,
       type,
@@ -312,7 +324,8 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
     const defaultValues = decodeDefaultValues(record, context, type, (value): value is SelectMenuDefaultValueType.User | SelectMenuDefaultValueType.Role => {
       return value === SelectMenuDefaultValueType.User || value === SelectMenuDefaultValueType.Role;
     });
-    assertDefaultCount(defaultValues, context, type, effectiveMinimum, effectiveMaximum);
+    assertDefaultMaximum(defaultValues, context, type, effectiveMaximum);
+    assertUniqueValues(defaultValues ?? [], childContext(context, "defaultValues"), type, value => `${value.type}:${value.id}`, "select-menu-default-value");
     return {
       ...base,
       type,
@@ -321,17 +334,20 @@ function decodeSelectRecord(record: UnknownRecord, context: ValidationContext): 
   }
 
   const defaultValues = decodeDefaultValues(record, context, type, (value): value is SelectMenuDefaultValueType.Channel => value === SelectMenuDefaultValueType.Channel);
-  assertDefaultCount(defaultValues, context, type, effectiveMinimum, effectiveMaximum);
+  assertDefaultMaximum(defaultValues, context, type, effectiveMaximum);
+  assertUniqueValues(defaultValues ?? [], childContext(context, "defaultValues"), type, value => `${value.type}:${value.id}`, "select-menu-default-value");
   const channelTypes = optionalAliasedField(record, "channelTypes", "channel_types", context, (value, fieldContext) => {
     if (!Array.isArray(value)) {
       validationFailure(fieldContext, "channel-types", `${fieldContext.path} must be an array`, type);
     }
-    return value.map((channelType, index) => {
+    const decoded = value.map((channelType, index) => {
       if (!isChannelType(channelType)) {
         validationFailure(childContext(fieldContext, index), "channel-types", `${fieldContext.path} must contain supported Discord channel types`, type);
       }
       return channelType;
     });
+    assertUniqueValues(decoded, fieldContext, type, channelType => channelType, "channel-types-unique");
+    return decoded;
   });
   return {
     ...base,

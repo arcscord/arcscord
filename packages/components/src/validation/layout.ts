@@ -111,7 +111,7 @@ export function decodeContainer(input: unknown, context: ValidationContext): Can
     return decodeInteger(value, fieldContext, 0, 0xFF_FF_FF, ComponentType.Container);
   });
   const spoiler = optionalField(record, "spoiler", context, (value, fieldContext) => decodeBoolean(value, fieldContext, ComponentType.Container));
-  const components = decodeArray(record.components, childContext(context, "components"), 1, 10, "container-cardinality", ComponentType.Container, decodeContainerChild);
+  const components = decodeArray(record.components, childContext(context, "components"), 1, 40, "container-cardinality", ComponentType.Container, decodeContainerChild);
   return {
     type: ComponentType.Container,
     components,
