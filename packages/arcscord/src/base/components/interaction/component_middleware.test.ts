@@ -1,8 +1,8 @@
 import type { ComponentMiddlewareRun } from "./component_middleware";
 import type { ComponentContext } from "./context";
 import { describe, expect, it } from "vitest";
+import { ComponentManager } from "#/manager/component/component_manager.class";
 import { createMockComponentContext } from "#/testing";
-import { ComponentManager } from "../../../manager/component/component_manager.class";
 import { ComponentMiddleware } from "./component_middleware";
 
 class TestComponentMiddleware extends ComponentMiddleware {

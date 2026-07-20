@@ -109,6 +109,14 @@ export class LocaleManager extends BaseManager {
   readonly availableLanguages: Set<Locale>;
 
   /**
+   * Reverse index of {@link NormalizedLocaleManagerOptions.languageMap}, mapping
+   * each locale back to its language key so {@link mapLanguage} is O(1).
+   *
+   * @internal
+   */
+  private readonly reverseLanguageMap: Map<string, string>;
+
+  /**
    * Resolves when the i18next instance is ready to serve translations.
    */
   readonly ready: Promise<void>;
@@ -125,6 +133,7 @@ export class LocaleManager extends BaseManager {
     this.options = options;
     this.enabled = options.enabled ?? false;
     this.normalizedOptions = this.normalizeOptions(options);
+    this.reverseLanguageMap = LocaleManager.buildReverseLanguageMap(this.normalizedOptions.languageMap);
     this.i18n = i18next.createInstance();
 
     if (!options.enabled) {
@@ -141,12 +150,40 @@ export class LocaleManager extends BaseManager {
     }
     else {
       this.i18n = i18next.createInstance();
-      this.ready = this.i18n.init(options.i18nOptions).then(() => undefined);
+      const init = this.i18n.init(options.i18nOptions).then(() => undefined);
+      // `ready` stays rejectable for anyone awaiting it. This side branch only
+      // marks the rejection as observed, so a failing init logs instead of
+      // reaching the process as an unhandledRejection before the first
+      // `await this.ready` in detectLanguage().
+      init.catch(err => this.logger.logError(err, { source: "localeManager.init" }));
+      this.ready = init;
     }
     this.t = this.i18n.t;
 
     this.detect = this.normalizedOptions.langDetector;
     this.availableLanguages = this.normalizedOptions.availableLanguages;
+  }
+
+  /**
+   * Builds the locale -> language key index used by {@link mapLanguage}.
+   *
+   * The first key declaring a locale wins, matching the previous linear scan
+   * over `Object.entries(languageMap)`.
+   *
+   * @internal
+   */
+  private static buildReverseLanguageMap(languageMap: Record<string, Locale | Locale[]>): Map<string, string> {
+    const reverse = new Map<string, string>();
+
+    for (const [key, value] of Object.entries(languageMap)) {
+      for (const locale of Array.isArray(value) ? value : [value]) {
+        if (!reverse.has(locale)) {
+          reverse.set(locale, key);
+        }
+      }
+    }
+
+    return reverse;
   }
 
   private normalizeOptions(options: LocaleManagerOptions): NormalizedLocaleManagerOptions {
@@ -204,19 +241,7 @@ export class LocaleManager extends BaseManager {
       return lang;
     }
 
-    for (const [key, value] of Object.entries(this.normalizedOptions.languageMap)) {
-      if (Array.isArray(value)) {
-        if (value.includes(lang as Locale)) {
-          return key;
-        }
-      }
-      else {
-        if (value === lang) {
-          return key;
-        }
-      }
-    }
-    return lang;
+    return this.reverseLanguageMap.get(lang) ?? lang;
   }
 
   /**

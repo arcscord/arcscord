@@ -3,7 +3,7 @@ import i18next from "i18next";
 import { describe, expect, it, vi } from "vitest";
 import { LocaleManager } from "./locale_manager.class";
 
-function createClient(): ArcClient {
+function createClient(logError = vi.fn()): ArcClient {
   return {
     arcOptions: {
       enableInternalTrace: false,
@@ -14,7 +14,7 @@ function createClient(): ArcClient {
       info: vi.fn(),
       warn: vi.fn(),
       error: vi.fn(),
-      logError: vi.fn(),
+      logError,
       fatal: vi.fn(),
       fatalError: vi.fn(),
       log: vi.fn(),
@@ -128,5 +128,39 @@ describe("locale manager", () => {
       user: null,
       channel: null,
     })).resolves.toBe("fr");
+  });
+
+  it("logs an i18next init failure without leaking an unhandled rejection", async () => {
+    const failure = new Error("init boom");
+    const createInstance = vi.spyOn(i18next, "createInstance").mockReturnValue({
+      init: vi.fn(() => Promise.reject(failure)),
+      t: vi.fn(),
+      options: {},
+    } as unknown as ReturnType<typeof i18next.createInstance>);
+
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+
+    try {
+      const logError = vi.fn();
+      const manager = new LocaleManager(createClient(logError), {
+        enabled: true,
+        i18nOptions: { fallbackLng: "en", enableSelector: "optimize" },
+      });
+
+      // Let the rejection settle without anyone awaiting `ready`: this is the
+      // window in which the missing catch used to crash the process.
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(unhandled).not.toHaveBeenCalled();
+      expect(logError).toHaveBeenCalledWith(failure, { source: "localeManager.init" });
+
+      // `ready` must still reject so callers awaiting it see the failure.
+      await expect(manager.ready).rejects.toThrow("init boom");
+    }
+    finally {
+      process.off("unhandledRejection", unhandled);
+      createInstance.mockRestore();
+    }
   });
 });
