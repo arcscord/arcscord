@@ -569,13 +569,19 @@ export type ModalRoleSelectValue<
   Required extends boolean | undefined,
 > = ModalSelectableValue<Role, MaxValues, Required>;
 
-/** Parsed value of a modal mentionable-select field: resolved `User | Role`(s), shaped by {@link ModalSelectableValue}. */
+/**
+ * Parsed value of a modal mentionable-select field: resolved `User | Role`(s),
+ * shaped by {@link ModalSelectableValue}.
+ */
 export type ModalMentionableSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,
 > = ModalSelectableValue<User | Role, MaxValues, Required>;
 
-/** Parsed value of a modal channel-select field: resolved `GuildBasedChannel`(s), shaped by {@link ModalSelectableValue}. */
+/**
+ * Parsed value of a modal channel-select field: resolved `GuildBasedChannel`(s),
+ * shaped by {@link ModalSelectableValue}.
+ */
 export type ModalChannelSelectValue<
   MaxValues extends number | undefined,
   Required extends boolean | undefined,

@@ -40,7 +40,10 @@ type DiscordModalFieldBuilder
     | TextInputBuilder
     | UserSelectMenuBuilder;
 
-/** Any value accepted as a top-level component when building a modal: an arcscord definition, raw component data, text input, or a {@link DiscordModalTopLevelBuilder}. */
+/**
+ * Any value accepted as a top-level component when building a modal: an arcscord definition,
+ * raw component data, text input, or a {@link DiscordModalTopLevelBuilder}.
+ */
 export type ModalTopLevelComponentInput
   = | ModalTopLevelComponent
     | LabelComponentData
@@ -110,7 +113,10 @@ export type FileUploadFieldOptions<
   required?: Required;
 };
 
-/** Shared label options for a modal field wrapped by {@link modalLabel}: the required `label` and an optional `description`. */
+/**
+ * Shared label options for a modal field wrapped by {@link modalLabel}: the required
+ * `label` and an optional `description`.
+ */
 export type LabeledFieldOptions = {
   description?: string;
   label: string;

@@ -31,6 +31,16 @@ export default antfu(
     },
   },
   {
+    files: ["**/*.{js,mjs,cjs,jsx,ts,mts,cts,tsx}"],
+    rules: {
+      "style/max-len": ["error", {
+        code: Number.MAX_SAFE_INTEGER, // no limit on code, only comments
+        comments: 120,
+        ignoreUrls: true, // exempt unshortenable doc links (@see)
+      }],
+    },
+  },
+  {
     files: ["**/*.ts"],
     rules: {
       "no-throw-literal": "off",

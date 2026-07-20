@@ -76,7 +76,8 @@ export function hasAutocomplete(
 }
 
 /**
- * Converts a CommandInteractionOption to a string representation based on its ApplicationCommandOptionType, like `Number<30>`
+ * Converts a CommandInteractionOption to a string representation based on its
+ * ApplicationCommandOptionType, like `Number<30>`
  *
  * @param option - The option to be converted to string.
  * @returns The string representation of the command option.

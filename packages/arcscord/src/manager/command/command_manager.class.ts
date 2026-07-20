@@ -324,7 +324,8 @@ export class CommandManager
    * Pushes a set of global commands to the application.
    *
    * @param commands - An array of command data resolvable objects to be registered globally.
-   * @return A promise that resolves to a result object containing an array of globally registered application commands or an error.
+   * @return A promise that resolves to a result object containing an array of globally
+   *   registered application commands or an error.
    */
   async pushGlobalCommands(
     commands: RESTPostAPIApplicationCommandsJSONBody[],
@@ -362,7 +363,8 @@ export class CommandManager
   /**
    * Deletes unloaded commands from the application for a specified guild.
    *
-   * @param guildId - The ID of the guild from which to remove the commands. If not provided, global commands are considered.
+   * @param guildId - The ID of the guild from which to remove the commands. If not provided,
+   *   global commands are considered.
    * @return A promise that resolves to a result object containing the number of deleted commands or an error.
    */
   async deleteUnloadedCommands(

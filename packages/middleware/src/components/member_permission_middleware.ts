@@ -46,7 +46,8 @@ export class ComponentMemberPermissionMiddleware extends ComponentMiddleware {
    * full required permission list and the permissions missing from the current member.
    *
    * @param permissions Discord permissions required to continue the component handler.
-   * @param message Callback called when the current member is missing permissions. It receives {@link ComponentMemberPermissionMiddlewareMessageOptions} and returns the Discord message to send.
+   * @param message Callback called when the current member is missing permissions. It receives
+   *   {@link ComponentMemberPermissionMiddlewareMessageOptions} and returns the Discord message to send.
    */
   constructor(
     permissions: Iterable<PermissionsString>,

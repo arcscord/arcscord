@@ -46,7 +46,8 @@ export class ComponentBotPermissionMiddleware extends ComponentMiddleware {
    * full required permission list and the permissions missing from the bot.
    *
    * @param permissions Discord permissions required by the bot to continue the component handler.
-   * @param message Callback called when the bot is missing permissions. It receives {@link ComponentBotPermissionMiddlewareMessageOptions} and returns the Discord message to send.
+   * @param message Callback called when the bot is missing permissions. It receives
+   *   {@link ComponentBotPermissionMiddlewareMessageOptions} and returns the Discord message to send.
    */
   constructor(
     permissions: Iterable<PermissionsString>,

@@ -41,7 +41,10 @@ export type EventResultHandler = (
   manager: EventManager,
 ) => void | Promise<void>;
 
-/** What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`, or `error` (return a loading failure). */
+/**
+ * What an intent-coverage check does when it finds an issue: `off` (nothing), `warn`,
+ * or `error` (return a loading failure).
+ */
 export type EventIntentCheckAction = "off" | "warn" | "error";
 
 /** Per-{@link EventIntentCoverageTarget} toggle of the coverage expected by the intent check. */
@@ -91,7 +94,10 @@ export type RequiredEventIntentCheckOptions = Required<EventIntentCheckOptions>;
 /** The kind of issue reported by an intent check: fully `missing` or only `partialCoverage`. */
 export type EventIntentCheckIssueType = "missing" | "partialCoverage";
 
-/** A single diagnostic produced by the event intent check, describing the affected handler and the missing/present intents. */
+/**
+ * A single diagnostic produced by the event intent check, describing the affected
+ * handler and the missing/present intents.
+ */
 export type EventIntentCheckIssue = {
   /**
    * The type of diagnostic emitted by the check.

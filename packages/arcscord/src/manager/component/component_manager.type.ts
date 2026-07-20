@@ -15,7 +15,10 @@ import type { ComponentManager } from "#/manager/component/component_manager.cla
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 
-/** The {@link ComponentManager}'s registry: one `customId → handler` map per component type (buttons, each select-menu kind, and modals). */
+/**
+ * The {@link ComponentManager}'s registry: one `customId → handler` map per
+ * component type (buttons, each select-menu kind, and modals).
+ */
 export type ComponentList = {
   [ComponentType.Button]: Map<string, ButtonComponentHandler>;
   [ComponentType.StringSelect]: Map<string, AnyStringSelectMenuComponentHandler>;

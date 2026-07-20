@@ -46,7 +46,8 @@ export class CommandBotPermissionMiddleware extends CommandMiddleware {
    * full required permission list and the permissions missing from the bot.
    *
    * @param permissions Discord permissions required by the bot to continue the command handler.
-   * @param message Callback called when the bot is missing permissions. It receives {@link CommandBotPermissionMiddlewareMessageOptions} and returns the Discord message to send.
+   * @param message Callback called when the bot is missing permissions. It receives
+   *   {@link CommandBotPermissionMiddlewareMessageOptions} and returns the Discord message to send.
    */
   constructor(
     permissions: Iterable<PermissionsString>,

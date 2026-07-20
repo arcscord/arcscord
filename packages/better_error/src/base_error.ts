@@ -176,7 +176,8 @@ export class BaseError extends Error {
    * Retrieves the stack information in the specified format.
    *
    * @param stackFormat The format of the stack information. Defaults to "split".
-   * @param stacks The stack information to be retrieved. If not provided, it will use the stack information of the current instance.
+   * @param stacks The stack information to be retrieved. If not provided, it will use the stack
+   *   information of the current instance.
    *
    * @returns The stack information in the defined format.
    */

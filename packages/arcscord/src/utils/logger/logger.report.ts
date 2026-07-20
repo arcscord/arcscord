@@ -202,7 +202,10 @@ export function createErrorReport(
   };
 }
 
-/** Options controlling how an {@link ErrorReport} is rendered by {@link renderErrorReport} / {@link renderJsonErrorReport}. */
+/**
+ * Options controlling how an {@link ErrorReport} is rendered by
+ * {@link renderErrorReport} / {@link renderJsonErrorReport}.
+ */
 export type ErrorReportRenderOptions = {
   /**
    * Whether to include the stack trace and the full cause chain.

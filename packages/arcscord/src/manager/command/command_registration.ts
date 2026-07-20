@@ -31,7 +31,10 @@ export type CommandRegistrationUnusedMode = "delete" | "warn" | "ignore";
 /** The scope a command registration applies to: `global` or `guild`. */
 export type CommandRegistrationScope = "global" | "guild";
 
-/** Registration behavior for a single scope: how local commands are pushed (`commands`) and how unused Discord commands are handled (`unused`). */
+/**
+ * Registration behavior for a single scope: how local commands are pushed (`commands`)
+ * and how unused Discord commands are handled (`unused`).
+ */
 export type CommandRegistrationScopeConfig = {
   /**
    * How local command definitions are pushed to Discord.
@@ -56,7 +59,10 @@ export type CommandRegistrationScopeConfig = {
   unused?: CommandRegistrationUnusedMode;
 };
 
-/** Command registration configuration, with a {@link CommandRegistrationScopeConfig} per scope (`global` and `guild`). */
+/**
+ * Command registration configuration, with a {@link CommandRegistrationScopeConfig}
+ * per scope (`global` and `guild`).
+ */
 export type CommandRegistrationConfig = {
   /**
    * Registration behavior for global application commands.
