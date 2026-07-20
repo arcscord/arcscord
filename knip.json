@@ -1,0 +1,75 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignoreWorkspaces": [
+    "website"
+  ],
+  "workspaces": {
+    ".": {
+      "entry": [
+        "scripts/*.{mjs,mts}",
+        "scripts/tests/*.test.mjs",
+        "scripts/tests/vitest.config.mts"
+      ],
+      "project": [
+        "scripts/**/*.{mjs,mts}"
+      ]
+    },
+    "packages/arcscord": {
+      "entry": [
+        "src/**/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/components": {
+      "entry": [
+        "src/**/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/error": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/better_error": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/middleware": {
+      "entry": [
+        "src/**/index.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "packages/create-arcscord-bot": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "test/test_bot": {
+      "project": [
+        "src/**/*.ts"
+      ],
+      "ignoreDependencies": [
+        "i18next"
+      ]
+    },
+    "test/components_bot": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "test/logger_demo": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    }
+  }
+}
