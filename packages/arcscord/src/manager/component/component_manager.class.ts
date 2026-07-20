@@ -13,7 +13,11 @@ import type { ArcClient, ComponentContext } from "#/base";
 import type { ComponentRunReturn } from "#/base/components/interaction/component.type";
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
-import type { ComponentList, ComponentManagerOptions, ComponentResultHandlerInfos } from "#/manager/component/component_manager.type";
+import type {
+  ComponentList,
+  ComponentManagerOptions,
+  ComponentResultHandlerInfos,
+} from "#/manager/component/component_manager.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { MaybePromise } from "#/utils/type/util.type";
 import { anyToError, error, ok } from "@arcscord/error";
@@ -30,7 +34,15 @@ import {
 } from "#/base/components/interaction/context/select_menu_context";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { BaseManager } from "#/base/manager/manager.class";
-import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn } from "#/utils";
+import {
+  ArcscordError,
+  arcscordErrorCodes,
+  executionDefect,
+  executionFailure,
+  executionSuccess,
+  isArcscordError,
+  normalizeHandlerReturn,
+} from "#/utils";
 import { validateComponentMiddlewareNames } from "#/utils/validator/middleware_validator";
 
 type MatchedComponent = {

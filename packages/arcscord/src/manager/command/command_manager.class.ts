@@ -7,7 +7,11 @@ import type {
   CommandInteraction,
 } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, ArcClient } from "#/base";
-import type { CommandContext, PartialCommandDefinitionForSlash, SlashCommandContextBuilderOptions } from "#/base/command";
+import type {
+  CommandContext,
+  PartialCommandDefinitionForSlash,
+  SlashCommandContextBuilderOptions,
+} from "#/base/command";
 import type {
   Command,
   SlashWithSubsCommandDefinition,
@@ -39,7 +43,16 @@ import {
 } from "#/base/command";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { BaseManager } from "#/base/manager/manager.class";
-import { ArcscordError, arcscordErrorCodes, executionDefect, executionFailure, executionSuccess, isArcscordError, normalizeHandlerReturn, validateCommands } from "#/utils";
+import {
+  ArcscordError,
+  arcscordErrorCodes,
+  executionDefect,
+  executionFailure,
+  executionSuccess,
+  isArcscordError,
+  normalizeHandlerReturn,
+  validateCommands,
+} from "#/utils";
 import { applyDiagnosticLevel } from "#/utils/error/run_normalize";
 import { validateCommandMiddlewareNames } from "#/utils/validator/middleware_validator";
 import {

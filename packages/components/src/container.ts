@@ -1,5 +1,11 @@
 import type { APIContainerComponent } from "discord-api-types/v10";
-import type { ContainerComponentData, FileComponentData, MediaGalleryComponentData, SeparatorComponentData, TextDisplayComponentData } from "discord.js";
+import type {
+  ContainerComponentData,
+  FileComponentData,
+  MediaGalleryComponentData,
+  SeparatorComponentData,
+  TextDisplayComponentData,
+} from "discord.js";
 import type { MessageActionRow, MessageActionRowInput } from "./action-row";
 import type { CanonicalComponentData, ComponentBuilderLike } from "./component";
 import type { FileComponentInput } from "./file";

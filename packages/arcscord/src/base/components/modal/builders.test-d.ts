@@ -1,7 +1,19 @@
 import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
 import { describe, expectTypeOf, it } from "vitest";
 import { createModal } from "../interaction/component_handler.func";
-import { buildModal, modalChannelSelect, modalCheckbox, modalCheckboxGroup, modalFileUpload, modalMentionableSelect, modalRadioGroup, modalRoleSelect, modalStringSelect, modalTextInput, modalUserSelect } from "./builders";
+import {
+  buildModal,
+  modalChannelSelect,
+  modalCheckbox,
+  modalCheckboxGroup,
+  modalFileUpload,
+  modalMentionableSelect,
+  modalRadioGroup,
+  modalRoleSelect,
+  modalStringSelect,
+  modalTextInput,
+  modalUserSelect,
+} from "./builders";
 
 // The parsed value carried by a field is asserted through `field.parse`'s
 // return type; the `label()` override slot is asserted separately below.

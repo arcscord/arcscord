@@ -20,7 +20,13 @@ import type {
   UserSelectMenuContext,
 } from "#/base/components/interaction/context/select_menu_context";
 import type { componentHandlerTypeEnum } from "#/base/components/shared/component.enum";
-import type { Button, MessageComponentType, ModalFields, ModalFieldValues, TypedSelectMenuOptions } from "#/base/components/shared/component_definer.type";
+import type {
+  Button,
+  MessageComponentType,
+  ModalFields,
+  ModalFieldValues,
+  TypedSelectMenuOptions,
+} from "#/base/components/shared/component_definer.type";
 import type { PreReplyMode } from "#/utils/type/pre_reply.type";
 import type { MaybePromise } from "#/utils/type/util.type";
 import type { ComponentBuildArgs, IdInitialiseFunction } from "./route";

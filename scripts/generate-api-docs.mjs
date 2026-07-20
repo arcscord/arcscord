@@ -105,6 +105,7 @@ const arcscordTypedocOptions = {
     "ContextOptionsDef",
     "FullCommandInput",
     "HandlerOptions",
+    "InteractionErrorContext",
     "MentionableSelectMenuContextOptions",
     "MessageCommandContextBuilderOptions",
     "MiddlewaresResults",

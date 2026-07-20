@@ -1,12 +1,23 @@
 import type { APITextDisplayComponent } from "discord-api-types/v10";
 import type { TextDisplayComponentData } from "discord.js";
 import type { MessageComponentArcscordError } from "#/utils/error";
-import type { CanonicalButtonComponentData, CanonicalComponentData, MessageActionRow, MessageV2EditReplyOptions } from "./types";
+import type {
+  CanonicalButtonComponentData,
+  CanonicalComponentData,
+  MessageActionRow,
+  MessageV2EditReplyOptions,
+} from "./types";
 import { ButtonStyle, ComponentType } from "discord-api-types/v10";
 import { TextDisplayBuilder } from "discord.js";
 import { describe, expectTypeOf, it } from "vitest";
 import { normalizeArcscordError } from "#/utils/error";
-import { MessageComponentValidationError, v2Message, validateActionRow, validateButton, validateTextDisplay } from "./builders";
+import {
+  MessageComponentValidationError,
+  v2Message,
+  validateActionRow,
+  validateButton,
+  validateTextDisplay,
+} from "./builders";
 
 describe("adapted validator public types", () => {
   it("preserves helper overloads and returns canonical validator data", () => {

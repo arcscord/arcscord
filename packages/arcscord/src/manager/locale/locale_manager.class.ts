@@ -1,6 +1,11 @@
 import type { i18n } from "i18next";
 import type { ArcClient } from "#/base";
-import type { BaseLocaleManagerOptions, LangDetector, LocaleManagerOptions, NormalizedLocaleManagerOptions } from "#/manager/locale/locale_manager.type";
+import type {
+  BaseLocaleManagerOptions,
+  LangDetector,
+  LocaleManagerOptions,
+  NormalizedLocaleManagerOptions,
+} from "#/manager/locale/locale_manager.type";
 import type { Locale } from "#/utils";
 import { anyToError } from "@arcscord/error";
 import i18next from "i18next";

@@ -1,6 +1,12 @@
 import type { APIStringSelectComponent } from "discord-api-types/v10";
 import type { MessageComponentValidationError } from "./validation-error";
-import { ButtonStyle, ComponentType, MessageFlags, SelectMenuDefaultValueType, SeparatorSpacingSize } from "discord-api-types/v10";
+import {
+  ButtonStyle,
+  ComponentType,
+  MessageFlags,
+  SelectMenuDefaultValueType,
+  SeparatorSpacingSize,
+} from "discord-api-types/v10";
 import { ButtonBuilder, TextDisplayBuilder, ThumbnailBuilder } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { actionRow } from "./action-row";

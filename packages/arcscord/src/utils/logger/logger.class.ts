@@ -3,7 +3,17 @@ import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/
 import * as process from "node:process";
 import { stringifyDebugValues } from "#/utils";
 import { createErrorReport, renderErrorReport, renderJsonErrorReport } from "#/utils/logger/logger.report";
-import { colorDebugValue, formatJsonLog, formatLog, formatShortDebug, resolveDefaultLogFunc, resolveLogFormat, resolveLogLevel, shouldLog, shouldUseJsonLogs } from "#/utils/logger/logger.util";
+import {
+  colorDebugValue,
+  formatJsonLog,
+  formatLog,
+  formatShortDebug,
+  resolveDefaultLogFunc,
+  resolveLogFormat,
+  resolveLogLevel,
+  shouldLog,
+  shouldUseJsonLogs,
+} from "#/utils/logger/logger.util";
 
 /**
  * Default {@link LoggerInterface} implementation used by {@link ArcClient}.

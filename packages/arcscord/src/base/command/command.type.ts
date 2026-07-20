@@ -3,7 +3,13 @@ import type {
   RESTPostAPIChatInputApplicationCommandsJSONBody,
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
-import type { BaseCommandDefinition, CommandContext, FullCommandDefinition, SlashCommandDefinition, SubCommandDefinition } from "#/base";
+import type {
+  BaseCommandDefinition,
+  CommandContext,
+  FullCommandDefinition,
+  SlashCommandDefinition,
+  SubCommandDefinition,
+} from "#/base";
 import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
 import type { OptionsList } from "#/base/command/option.type";

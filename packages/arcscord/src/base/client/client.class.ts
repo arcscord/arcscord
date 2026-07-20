@@ -1,6 +1,13 @@
 import type { Result } from "@arcscord/error";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString } from "discord.js";
-import type { ArcClientOptions, BaseMessageContext, HandlersList, HandlersLoadReport, MessageOptions, WaitReadyOptions } from "#/base/client/client.type";
+import type {
+  ArcClientOptions,
+  BaseMessageContext,
+  HandlersList,
+  HandlersLoadReport,
+  MessageOptions,
+  WaitReadyOptions,
+} from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { AnyEventHandler } from "#/base/event/event.type";

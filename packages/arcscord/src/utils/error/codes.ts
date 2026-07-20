@@ -28,6 +28,15 @@ export const arcscordErrorCodes = {
 /** Union of every stable Arcscord framework error code. */
 export type ArcscordErrorCode = typeof arcscordErrorCodes[keyof typeof arcscordErrorCodes];
 
+/** Shared metadata shape for interaction-related error codes (commands, components, autocomplete). */
+type InteractionErrorContext = {
+  interactionId?: string;
+  commandName?: string;
+  route?: string;
+  reason?: string;
+  [key: string]: unknown;
+};
+
 /** Code-specific structured metadata carried by {@link ArcscordError}. */
 export type ArcscordErrorMetadata = {
   CLIENT_READY_TIMEOUT: { timeoutMs: number };
@@ -72,14 +81,14 @@ export type ArcscordErrorMetadata = {
   INTERACTION_OPERATION_FAILED: {
     operation: "reply" | "editReply" | "deferReply" | "showModal" | "deferUpdate" | "updateMessage" | "autocomplete";
   };
-  COMMAND_NOT_FOUND: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMMAND_OPTION_PARSING_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMMAND_CONTEXT_CREATION_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMMAND_DEFER_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMPONENT_NOT_FOUND: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMPONENT_MULTIPLE_MATCHES: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMPONENT_CONTEXT_CREATION_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMPONENT_TYPED_SELECT_INVALID_VALUES: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  COMPONENT_DEFER_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
-  AUTOCOMPLETE_EXECUTION_FAILED: { interactionId?: string; commandName?: string; route?: string; reason?: string; [key: string]: unknown };
+  COMMAND_NOT_FOUND: InteractionErrorContext;
+  COMMAND_OPTION_PARSING_FAILED: InteractionErrorContext;
+  COMMAND_CONTEXT_CREATION_FAILED: InteractionErrorContext;
+  COMMAND_DEFER_FAILED: InteractionErrorContext;
+  COMPONENT_NOT_FOUND: InteractionErrorContext;
+  COMPONENT_MULTIPLE_MATCHES: InteractionErrorContext;
+  COMPONENT_CONTEXT_CREATION_FAILED: InteractionErrorContext;
+  COMPONENT_TYPED_SELECT_INVALID_VALUES: InteractionErrorContext;
+  COMPONENT_DEFER_FAILED: InteractionErrorContext;
+  AUTOCOMPLETE_EXECUTION_FAILED: InteractionErrorContext;
 };

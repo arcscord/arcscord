@@ -2,7 +2,18 @@ import { ComponentType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
 import { describe, expect, it } from "vitest";
 import { button } from "../shared/builders";
-import { accessory, actionRow, container, file, mediaGallery, section, separator, text, thumbnail, v2Message } from "./builders";
+import {
+  accessory,
+  actionRow,
+  container,
+  file,
+  mediaGallery,
+  section,
+  separator,
+  text,
+  thumbnail,
+  v2Message,
+} from "./builders";
 
 describe("display builders", () => {
   describe("text", () => {
