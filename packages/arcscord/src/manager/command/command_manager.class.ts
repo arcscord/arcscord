@@ -37,11 +37,11 @@ import {
   hasUserCommand,
   isSubCommand,
   MessageCommandContext,
-  parseOptions,
   SlashCommandContext,
   UserCommandContext,
 } from "#/base/command";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
+import { parseOptions } from "#/base/command/option_parser";
 import { BaseManager } from "#/base/manager/manager.class";
 import {
   ArcscordError,
