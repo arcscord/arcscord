@@ -1239,6 +1239,48 @@ describe("command manager", () => {
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
       expect(managerWithOptions.logger.logError).toHaveBeenCalledOnce();
+      expect(managerWithOptions.logger.logError).toHaveBeenCalledWith(
+        expect.objectContaining({
+          code: arcscordErrorCodes.CommandOptionParsingFailed,
+        }),
+        expect.objectContaining({ incidentId: expect.any(String) }),
+      );
+    });
+
+    it("applies the optionParsingFailed diagnostic configuration", async () => {
+      const resultHandler = vi.fn();
+      const { client } = createMockClientWithManager();
+      const managerWithOptions = new CommandManager(client, {
+        resultHandler,
+        dispatchDiagnostics: {
+          optionParsingFailed: { level: "warn", reply: false },
+        },
+      });
+      const run = vi.fn(ctx => ctx.ok());
+      const command = createCommand({
+        slash: {
+          name: "greet",
+          description: "Greet",
+          options: {
+            name: { type: "string", description: "Name", required: true },
+          },
+        },
+        run,
+      });
+      managerWithOptions.commands.set("cmd_1_greet", command);
+
+      const interaction = createMockChatInputInteraction({ commandName: "greet" });
+      ((interaction as unknown as Record<string, unknown>).options as Record<string, unknown>).getString = vi.fn(() => null);
+
+      await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(interaction);
+
+      expect(run).not.toHaveBeenCalled();
+      expect(resultHandler).not.toHaveBeenCalled();
+      expect(managerWithOptions.logger.warn).toHaveBeenCalledWith(
+        "Option name is required but was not provided.",
+        expect.objectContaining({ incidentId: expect.any(String) }),
+      );
+      expect(interaction.reply).not.toHaveBeenCalled();
     });
   });
 
