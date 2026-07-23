@@ -1,13 +1,7 @@
-import type { NonNullish } from "@arcscord/error";
 import type {
-  InteractionDeferReplyOptions,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
   MessageComponentInteraction,
-  MessagePayload,
   ModalSubmitInteraction,
 } from "discord.js";
-import type i18next from "i18next";
 import type {
   ArcClient,
   ButtonContext,
@@ -19,13 +13,11 @@ import type {
   StringSelectMenuContext,
   UserSelectMenuContext,
 } from "#/base";
-import type { ComponentRunResult, SelectMenuContext } from "#/base/components";
+import type { SelectMenuContext } from "#/base/components";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import type { RouteVariablesObject } from "#/base/components/interaction/route";
 import type { ContextDocs } from "#/base/utils";
-import { anyToError, error, ok } from "@arcscord/error";
-import { InteractionContext } from "#/base/utils";
-import { ArcscordError, arcscordErrorCodes } from "#/utils";
+import { RepliableInteractionContext } from "#/base/utils";
 
 /**
  * @internal
@@ -59,7 +51,7 @@ export class BaseComponentContext<
   M extends ComponentMiddleware[] = ComponentMiddleware[],
   Route extends string = string,
   InGuild extends true | false = true | false,
-> extends InteractionContext<InGuild> implements Omit<ContextDocs, "command" | "resolvedCommandName"> {
+> extends RepliableInteractionContext<InGuild> implements Omit<ContextDocs, "command" | "resolvedCommandName"> {
   /**
    * The custom id of the component
    */
@@ -73,29 +65,9 @@ export class BaseComponentContext<
   interaction: MessageComponentInteraction | ModalSubmitInteraction;
 
   /**
-   * If interaction already deferred
-   */
-  defer: boolean = false;
-
-  /**
-   * If interaction already has a reply
-   */
-  hasReply: boolean = false;
-
-  /**
    * Additional middleware results
    */
   additional: MiddlewaresResults<M>;
-
-  /**
-   * get a locale text, with language detected self
-   */
-  t: typeof i18next.t;
-
-  /**
-   * Detected i18next language used by this component context.
-   */
-  locale: string;
 
   /**
    * Constructor for ComponentContext.
@@ -108,123 +80,12 @@ export class BaseComponentContext<
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     options: BaseComponentContextOptions<M, Route>,
   ) {
-    super(client, interaction);
+    super(client, interaction, options.locale);
     this.customId = interaction.customId;
     this.params = options.params || ({} as RouteVariablesObject<Route>);
     this.interaction = interaction;
 
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
-    this.locale = options.locale;
-
-    if (this.client.localeManager.enabled) {
-      this.t = this.client.localeManager.i18n.getFixedT(options.locale);
-    }
-    else {
-      this.t = this.client.localeManager.t;
-    }
-  }
-
-  /**
-   * Responds to the interaction by sending a reply message.
-   * @param options Reply options.
-   * @returns The result of the reply operation.
-   */
-  async reply(
-    options: MessagePayload | InteractionReplyOptions | string,
-    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
-  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.reply(
-        typeof options === "string"
-          ? { ...extraOptions, content: options }
-          : options,
-      );
-      this.hasReply = true;
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to reply to interaction : ${anyToError(e).message}`,
-          metadata: { operation: "reply" },
-          cause: e,
-        }),
-      );
-    }
-  }
-
-  /**
-   * Edits an existing reply message in the interaction.
-   * @param options Edit reply options.
-   * @returns The result of the edit operation.
-   */
-  async editReply(
-    options: MessagePayload | InteractionEditReplyOptions | string,
-    extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
-  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.editReply(
-        typeof options === "string"
-          ? { ...extraOptions, content: options }
-          : options,
-      );
-      this.hasReply = true;
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to edit reply to interaction : ${anyToError(e).message}`,
-          metadata: { operation: "editReply" },
-          cause: e,
-        }),
-      );
-    }
-  }
-
-  /**
-   * Defers the reply to the interaction.
-   * @param options The defer reply options.
-   * @returns The result of the defer operation.
-   */
-  async deferReply(
-    options: InteractionDeferReplyOptions,
-  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.deferReply(options);
-      this.defer = true;
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to defer reply to interaction : ${anyToError(e).message}}`,
-          metadata: { operation: "deferReply" },
-          cause: e,
-        }),
-      );
-    }
-  }
-
-  /**
-   * Wraps a value with a success status.
-   * @param value The value to be wrapped.
-   * @returns The result object with success status.
-   */
-  ok(value: string | true = true): ComponentRunResult {
-    return ok(value);
-  }
-
-  /**
-   * Creates an error result.
-   * @param failure The expected failure value.
-   * @returns The error result.
-   */
-  error<E extends NonNullish>(failure: E): ComponentRunResult<E> {
-    return error(failure);
   }
 
   /**

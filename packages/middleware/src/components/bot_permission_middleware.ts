@@ -2,8 +2,7 @@ import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
 import type { PermissionsString, User } from "discord.js";
 import type { MessageOptions } from "../type";
 import { ComponentMiddleware } from "arcscord";
-import { MessageFlags, PermissionsBitField } from "discord.js";
-import { resolveMessage } from "../utils";
+import { missingBotPermissions, replyOrEditReply, resolveMessage } from "../utils";
 
 export type ComponentBotPermissionMiddlewareNext = {
   allowed: true;
@@ -60,12 +59,7 @@ export class ComponentBotPermissionMiddleware extends ComponentMiddleware {
   }
 
   run(ctx: ComponentContext): ComponentMiddlewareRun<ComponentBotPermissionMiddlewareNext> {
-    if (!ctx.interaction.inGuild()) {
-      return this.next({ allowed: true });
-    }
-
-    const botPermissions = new PermissionsBitField(ctx.interaction.appPermissions ?? 0n);
-    const missingPermissions = this.permissions.filter(permission => !botPermissions.has(permission));
+    const missingPermissions = missingBotPermissions(ctx, this.permissions);
 
     if (missingPermissions.length > 0) {
       const message = resolveMessage(this.message, ctx, {
@@ -74,10 +68,7 @@ export class ComponentBotPermissionMiddleware extends ComponentMiddleware {
         user: ctx.user,
       });
 
-      return this.cancel(ctx.defer
-        ? ctx.editReply(message)
-        : ctx.reply({ flags: MessageFlags.Ephemeral, ...message }),
-      );
+      return this.cancel(replyOrEditReply(ctx, message));
     }
 
     return this.next({ allowed: true });

@@ -9,7 +9,7 @@ import { commandContextsEnum, commandIntegrationTypesEnum, commandOptionTypesEnu
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 import { localizationCallbackToMap } from "./localization";
 
-export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefined, client: ArcClient, _name = false): LocaleMap | undefined {
+export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefined, client: ArcClient): LocaleMap | undefined {
   if (typeof locales === "undefined") {
     return undefined;
   }
@@ -45,20 +45,20 @@ export function optionChannelTypeToAPI(
   return channelTypes.map(channelType => channelTypeEnum[channelType]);
 }
 
-export function stringChoiceToAPI(
-  choices: (string | ChoiceString)[] | Record<string, string> | undefined,
-): APIApplicationCommandOptionChoice<string>[] | undefined {
+function choicesToAPI(
+  choices:
+    | (string | number | APIApplicationCommandOptionChoice<string | number>)[]
+    | Record<string, string | number>
+    | undefined,
+): APIApplicationCommandOptionChoice<string | number>[] | undefined {
   if (!choices) {
     return undefined;
   }
 
   if (Array.isArray(choices)) {
     return choices.map((choice) => {
-      if (typeof choice === "string") {
-        return {
-          name: `${choice}`,
-          value: choice,
-        };
+      if (typeof choice === "string" || typeof choice === "number") {
+        return { name: `${choice}`, value: choice };
       }
       return choice;
     });
@@ -72,31 +72,16 @@ export function stringChoiceToAPI(
   });
 }
 
+export function stringChoiceToAPI(
+  choices: (string | ChoiceString)[] | Record<string, string> | undefined,
+): APIApplicationCommandOptionChoice<string>[] | undefined {
+  return choicesToAPI(choices) as APIApplicationCommandOptionChoice<string>[] | undefined;
+}
+
 export function numberChoiceToAPI(
   choices: (number | ChoiceNumber)[] | Record<string, number> | undefined,
 ): APIApplicationCommandOptionChoice<number>[] | undefined {
-  if (!choices) {
-    return undefined;
-  }
-
-  if (Array.isArray(choices)) {
-    return choices.map((choice) => {
-      if (typeof choice === "number") {
-        return {
-          name: `${choice}`,
-          value: choice,
-        };
-      }
-      return choice;
-    });
-  }
-
-  return Object.keys(choices).map((choice) => {
-    return {
-      name: choice,
-      value: choices[choice],
-    };
-  });
+  return choicesToAPI(choices) as APIApplicationCommandOptionChoice<number>[] | undefined;
 }
 
 export function optionToAPI(
@@ -111,7 +96,7 @@ export function optionToAPI(
   const baseOption: Omit<APIApplicationCommandBasicOption, "type"> = {
     name,
     description: option.description,
-    name_localizations: localizationToAPI(option.nameLocalizations, client, true),
+    name_localizations: localizationToAPI(option.nameLocalizations, client),
     description_localizations: localizationToAPI(option.descriptionLocalizations, client),
     required: option.required,
   };

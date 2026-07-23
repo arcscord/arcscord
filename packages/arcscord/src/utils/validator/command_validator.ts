@@ -15,7 +15,7 @@ import type { LocaleMap } from "#/utils";
 import type { ValidationContext, ValidationFailure } from "./validator.util";
 import { error, ok } from "@arcscord/error";
 import { isSubCommand } from "#/base/command";
-import { localizationCallbackToMap } from "#/utils/discord/transformers/localization";
+import { localizationToAPI } from "#/utils/discord/transformers/command";
 import { ArcscordError } from "#/utils/error/arcscord_error";
 import { arcscordErrorCodes } from "#/utils/error/codes";
 import {
@@ -456,7 +456,7 @@ function validateName(
     }
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
+  return validateLocalizations(localizationToAPI(localizations, client), path, context, (localeValue, localePath) => {
     const [localeLengthErr] = validateRequiredStringLength(localeValue, localePath, COMMAND_NAME_MAX_LENGTH, context);
     if (localeLengthErr !== null) {
       return error(localeLengthErr);
@@ -482,7 +482,7 @@ function validateChoiceName(
     return error(lengthErr);
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
+  return validateLocalizations(localizationToAPI(localizations, client), path, context, (localeValue, localePath) => {
     return validateRequiredStringLength(localeValue, localePath, COMMAND_CHOICE_NAME_MAX_LENGTH, context);
   });
 }
@@ -499,7 +499,7 @@ function validateDescription(
     return error(lengthErr);
   }
 
-  return validateLocalizations(resolveLocalizations(localizations, client), path, context, (localeValue, localePath) => {
+  return validateLocalizations(localizationToAPI(localizations, client), path, context, (localeValue, localePath) => {
     return validateRequiredStringLength(localeValue, localePath, COMMAND_DESCRIPTION_MAX_LENGTH, context);
   });
 }
@@ -517,23 +517,4 @@ function validateSlashNameFormat(value: string, path: string, context: CommandVa
     `${path} contains characters that Discord does not allow`,
     context,
   );
-}
-
-function resolveLocalizations(
-  localizations: LocaleMap | LocaleCallback | undefined,
-  client: ArcClient,
-): LocaleMap | undefined {
-  if (!localizations) {
-    return undefined;
-  }
-
-  if (typeof localizations !== "function") {
-    return localizations;
-  }
-
-  if (!client.localeManager.enabled) {
-    return undefined;
-  }
-
-  return localizationCallbackToMap(localizations, client);
 }
