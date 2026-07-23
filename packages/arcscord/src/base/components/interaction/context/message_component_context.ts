@@ -9,10 +9,11 @@ import type {
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
 import type { ComponentRunResult } from "#/base/components";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
-import { anyToError, error, ok } from "@arcscord/error";
+import type { ArcscordError } from "#/utils";
+import { error, ok } from "@arcscord/error";
 import { ComponentType } from "discord-api-types/v10";
 import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
-import { ArcscordError, arcscordErrorCodes } from "#/utils";
+import { InteractionOperationError } from "#/utils";
 
 /**
  * MessageComponentContext class.
@@ -52,14 +53,7 @@ export class MessageComponentContext<
       return ok(true);
     }
     catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to show modal : ${anyToError(e).message}`,
-          metadata: { operation: "showModal" },
-          cause: e,
-        }),
-      );
+      return error(new InteractionOperationError("showModal", e));
     }
   }
 
@@ -74,14 +68,7 @@ export class MessageComponentContext<
       return ok(true);
     }
     catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to defer update message : ${anyToError(e).message}`,
-          metadata: { operation: "deferUpdate" },
-          cause: e,
-        }),
-      );
+      return error(new InteractionOperationError("deferUpdate", e));
     }
   }
 
@@ -106,14 +93,7 @@ export class MessageComponentContext<
       return ok(true);
     }
     catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to update message : ${anyToError(e).message}`,
-          metadata: { operation: "updateMessage" },
-          cause: e,
-        }),
-      );
+      return error(new InteractionOperationError("updateMessage", e));
     }
   }
 

@@ -92,7 +92,7 @@ describe("command transformers", () => {
   it("keeps command name localizations unchanged", () => {
     const client = createClient();
 
-    expect(localizationToAPI(() => "admin.tools:reload", client, true)).toEqual({
+    expect(localizationToAPI(() => "admin.tools:reload", client)).toEqual({
       "en-US": "admin.tools:reload",
       "fr": "admin.tools:reload",
     });
@@ -101,7 +101,7 @@ describe("command transformers", () => {
   it("builds callback localizations only for languages with loaded resources", async () => {
     const client = await createI18nClient();
 
-    expect(localizationToAPI(t => (t as any)(($: any) => $.command.name), client, true)).toEqual({
+    expect(localizationToAPI(t => (t as any)(($: any) => $.command.name), client)).toEqual({
       "en-US": "i18n-en",
       "en-GB": "i18n-en",
       "fr": "i18n-fr",

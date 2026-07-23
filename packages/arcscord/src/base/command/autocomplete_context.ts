@@ -1,10 +1,8 @@
-import type { NonNullish } from "@arcscord/error";
 import type {
   ApplicationCommandOptionChoiceData,
   AutocompleteFocusedOption,
   AutocompleteInteraction,
 } from "discord.js";
-import type i18next from "i18next";
 import type {
   AnyCommandHandler,
   AnySubCommandHandler,
@@ -26,9 +24,10 @@ import type {
   OptionsList,
 } from "#/base/command/option.type";
 import type { ContextDocs } from "#/base/utils/context.type";
+import type { ArcscordError } from "#/utils";
 import type { MaybePromise } from "#/utils/type/util.type";
-import { anyToError, error, ok } from "@arcscord/error";
-import { ArcscordError, arcscordErrorCodes } from "#/utils";
+import { error, ok } from "@arcscord/error";
+import { InteractionOperationError } from "#/utils";
 import { InteractionContext } from "../utils/interaction_context.class";
 
 type BaseAutocompleteOptions = {
@@ -125,23 +124,11 @@ export class AutocompleteContext<
   Name extends string = string,
   InGuild extends true | false = true | false,
 > extends InteractionContext<InGuild> implements ContextDocs {
-  client: ArcClient;
-
   command: StoredCommandHandler;
 
   interaction: AutocompleteInteraction;
 
   resolvedCommandName: string;
-
-  /**
-   * get a locale text, with language detected self
-   */
-  t: typeof i18next.t;
-
-  /**
-   * Detected i18next language used by this autocomplete context.
-   */
-  locale: string;
 
   /**
    * Constructs a new BaseAutocompleteContext.
@@ -155,18 +142,10 @@ export class AutocompleteContext<
     interaction: AutocompleteInteraction,
     options: BaseAutocompleteOptions,
   ) {
-    super(options.client, interaction);
+    super(options.client, interaction, options.locale);
     this.command = command;
     this.interaction = interaction;
     this.resolvedCommandName = options.resolvedName;
-    this.client = options.client;
-    this.locale = options.locale;
-    if (this.client.localeManager.enabled) {
-      this.t = this.client.localeManager.i18n.getFixedT(options.locale);
-    }
-    else {
-      this.t = this.client.localeManager.t;
-    }
   }
 
   /**
@@ -236,32 +215,7 @@ export class AutocompleteContext<
       return ok(true);
     }
     catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `Failed to send choices for command, error : ${anyToError(e).message}`,
-          metadata: { operation: "autocomplete" },
-          cause: e,
-        }),
-      );
+      return error(new InteractionOperationError("autocomplete", e));
     }
-  }
-
-  /**
-   * Returns a successful CommandRunResult.
-   *
-   * @param value A value to pass to the command. Can be a string or true.
-   */
-  ok(value: string | true = true): CommandRunResult {
-    return ok(value);
-  }
-
-  /**
-   * Returns a failed CommandRunResult.
-   *
-   * @param failure - The expected failure value.
-   */
-  error<E extends NonNullish>(failure: E): CommandRunResult<E> {
-    return error(failure);
   }
 }

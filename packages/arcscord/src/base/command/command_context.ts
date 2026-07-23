@@ -1,20 +1,14 @@
-import type { NonNullish } from "@arcscord/error";
 import type { APIInteractionGuildMember } from "discord-api-types/v10";
 import type {
   ChatInputCommandInteraction,
   CommandInteraction,
   GuildMember,
-  InteractionDeferReplyOptions,
-  InteractionEditReplyOptions,
-  InteractionReplyOptions,
   Message,
   MessageContextMenuCommandInteraction,
-  MessagePayload,
   ModalComponentData,
   User,
   UserContextMenuCommandInteraction,
 } from "discord.js";
-import type i18next from "i18next";
 import type { AnyCommandHandler, AnySubCommandHandler, ArcClient, CommandRunResult } from "#/base";
 import type {
   CommandContexts,
@@ -32,10 +26,11 @@ import type {
   ContextDocs,
   MessageCommandContextDocs,
 } from "#/base/utils";
-import { anyToError, error, ok } from "@arcscord/error";
+import type { ArcscordError } from "#/utils";
+import { error, ok } from "@arcscord/error";
 import { InteractionContextType } from "discord.js";
-import { ArcscordError, arcscordErrorCodes } from "#/utils";
-import { InteractionContext } from "../utils/interaction_context.class";
+import { InteractionOperationError } from "#/utils";
+import { RepliableInteractionContext } from "../utils/interaction_context.class";
 
 /**
  * @internal
@@ -64,7 +59,7 @@ export type BaseCommandContextBuilderOptions<
 export class BaseCommandContext<
   M extends CommandMiddleware[] = CommandMiddleware[],
   InGuild extends true | false = true | false,
-> extends InteractionContext<InGuild> implements ContextDocs {
+> extends RepliableInteractionContext<InGuild> implements ContextDocs {
   /**
    * The command properties
    */
@@ -88,13 +83,6 @@ export class BaseCommandContext<
   interactionSource: CommandIntegrationType;
 
   /**
-   * Whether the reply to the interaction is deferred
-   */
-  defer: boolean = false;
-
-  client: ArcClient;
-
-  /**
    * The resolved name of the command
    */
   resolvedCommandName: string;
@@ -107,16 +95,6 @@ export class BaseCommandContext<
   additional: MiddlewaresResults<M>;
 
   /**
-   * get a locale text, with language detected self
-   */
-  t: typeof i18next.t;
-
-  /**
-   * Detected i18next language used by this command context.
-   */
-  locale: string;
-
-  /**
    * Construct a new BaseCommandContext
    */
   constructor(
@@ -124,7 +102,7 @@ export class BaseCommandContext<
     interaction: CommandInteraction,
     options: BaseCommandContextBuilderOptions<M>,
   ) {
-    super(options.client, interaction);
+    super(options.client, interaction, options.locale);
 
     this.command = command;
     this.interaction = interaction;
@@ -136,95 +114,8 @@ export class BaseCommandContext<
       ? "guildInstall"
       : "userInstall";
 
-    this.client = options.client;
-
     this.resolvedCommandName = options.resolvedName;
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
-    this.locale = options.locale;
-
-    if (this.client.localeManager.enabled) {
-      this.t = this.client.localeManager.i18n.getFixedT(options.locale);
-    }
-    else {
-      this.t = this.client.localeManager.t;
-    }
-  }
-
-  /**
-   * Reply to the interaction with options
-   */
-  async reply(
-    options: MessagePayload | InteractionReplyOptions | string,
-    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
-  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.reply(
-        typeof options === "string"
-          ? { ...extraOptions, content: options }
-          : options,
-      );
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to reply to interaction : ${anyToError(e).message}`,
-          metadata: { operation: "reply" },
-          cause: e,
-        }),
-      );
-    }
-  }
-
-  /**
-   * Edit the reply to the interaction with options
-   */
-  async editReply(
-    options: MessagePayload | InteractionEditReplyOptions | string,
-    extraOptions: Omit<InteractionEditReplyOptions, "content"> = {},
-  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.editReply(
-        typeof options === "string"
-          ? { ...extraOptions, content: options }
-          : options,
-      );
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to edit reply to interaction : ${anyToError(e).message}`,
-          metadata: { operation: "editReply" },
-          cause: e,
-        }),
-      );
-    }
-  }
-
-  /**
-   * Defer the reply to the interaction
-   */
-  async deferReply(
-    options: InteractionDeferReplyOptions,
-  ): Promise<CommandRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
-    try {
-      await this.interaction.deferReply(options);
-      this.defer = true;
-      return ok(true);
-    }
-    catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to defer reply to interaction : ${anyToError(e).message}`,
-          metadata: { operation: "deferReply" },
-          cause: e,
-        }),
-      );
-    }
   }
 
   /**
@@ -236,29 +127,8 @@ export class BaseCommandContext<
       return ok(true);
     }
     catch (e) {
-      return error(
-        new ArcscordError({
-          code: arcscordErrorCodes.InteractionOperationFailed,
-          message: `failed to show modal : ${anyToError(e).message}`,
-          metadata: { operation: "showModal" },
-          cause: e,
-        }),
-      );
+      return error(new InteractionOperationError("showModal", e));
     }
-  }
-
-  /**
-   * Create a success result
-   */
-  ok(value: string | true = true): CommandRunResult {
-    return ok(value);
-  }
-
-  /**
-   * Create an error result
-   */
-  error<E extends NonNullish>(failure: E): CommandRunResult<E> {
-    return error(failure);
   }
 
   /**

@@ -1,5 +1,6 @@
 export * from "./arcscord_error";
 export { ArcClientReadyTimeoutError } from "./class/client_ready_timeout_error";
+export { InteractionOperationError } from "./class/interaction_operation_error";
 export * from "./codes";
 export type {
   CommandDispatchDiagnostics,
