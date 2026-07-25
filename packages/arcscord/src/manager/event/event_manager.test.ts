@@ -81,6 +81,73 @@ function createMockClient(
 }
 
 describe("event manager", () => {
+  it("runs execution handlers around events with typed context and arguments", async () => {
+    const calls: string[] = [];
+    let messageId: string | undefined;
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      executionHandlers: [
+        async (execution, next) => {
+          calls.push(`before:${execution.eventName}`);
+          if (execution.eventName === "messageCreate") {
+            messageId = execution.args[0].id;
+            expect(execution.context.handler).toBe(execution.event);
+          }
+          const outcome = await next();
+          calls.push(outcome.kind === "completed"
+            ? `after:${outcome.exit.status}`
+            : "after:cancelled");
+          return outcome;
+        },
+      ],
+    });
+    const run = vi.fn(() => {
+      calls.push("run");
+      return ok(true as const);
+    });
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run,
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    expect(messageId).toBe("message_1");
+    expect(calls).toEqual([
+      "before:messageCreate",
+      "run",
+      "after:success",
+    ]);
+  });
+
+  it("lets an execution handler short-circuit an event", async () => {
+    const { client, manager } = createMockClient(["GuildMessages"], {
+      intentCheck: false,
+      executionHandlers: [
+        execution => execution.complete({
+          status: "failure",
+          failure: "blocked",
+        }),
+      ],
+    });
+    const run = vi.fn(() => ok(true as const));
+
+    await manager.loadEvent(createEvent({
+      event: "messageCreate",
+      run,
+    }));
+    await client.emitMock("messageCreate", { id: "message_1" });
+
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("rejects resultHandler and executionHandlers together at runtime", () => {
+    expect(() => createMockClient([], {
+      executionHandlers: [],
+      resultHandler: () => {},
+    } as never)).toThrow("event executionHandlers and resultHandler are mutually exclusive");
+  });
+
   it("accepts heterogeneous event handler lists at type level", () => {
     const events = [
       createEvent({

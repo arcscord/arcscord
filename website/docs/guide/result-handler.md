@@ -2,9 +2,52 @@
 sidebar_position: 7
 ---
 
-# Result handlers
+# Execution handlers
 
-Every command, component, and event execution is normalized to an `ExecutionExit` before its result handler is called.
+Execution handlers are Koa-style interceptors around command middleware and
+`run()`, component middleware and `run()`, or an event's `run()`.
+
+```ts
+const metricsHandler: CommandExecutionHandler = async (execution, next) => {
+  metrics.increment("commands.started", {
+    command: execution.interaction.commandName,
+  });
+
+  const outcome = await next();
+
+  metrics.timing("commands.duration", outcome.durationMs);
+  return outcome;
+};
+```
+
+Code before `next()` runs in declaration order. Code after `next()` runs in
+reverse order. An execution handler can also skip `next()` to short-circuit the
+execution or return a transformed outcome.
+
+## Outcomes
+
+`next()` returns an `ExecutionOutcome`:
+
+```ts
+type ExecutionOutcome<T, E = unknown> =
+  | {
+      kind: "completed";
+      exit: ExecutionExit<T, E>;
+      startedAt: number;
+      endedAt: number;
+      durationMs: number;
+      incidentId?: string;
+    }
+  | {
+      kind: "cancelled";
+      startedAt: number;
+      endedAt: number;
+      durationMs: number;
+    };
+```
+
+`kind: "cancelled"` means command or component middleware deliberately stopped
+before `run()`. Completed executions contain the existing `ExecutionExit`:
 
 ```ts
 type ExecutionExit<T, E = unknown> =
@@ -13,116 +56,134 @@ type ExecutionExit<T, E = unknown> =
   | { status: "defect"; defect: unknown };
 ```
 
-- `success` means the handler returned normally.
-- `failure` means it explicitly returned an error `Result`.
-- `defect` means the handler or a middleware threw.
+- `success` means `run()` returned normally.
+- `failure` means middleware or `run()` returned an expected failure.
+- `defect` means middleware or `run()` threw.
 
-Expected failures may be any value; they do not need to extend `Error`. The `_tag` field below is only an example of a convenient TypeScript convention for discriminating application failures. Arcscord does not require it or impose any failure shape:
+## Configuring a chain
+
+Providing `executionHandlers` replaces Arcscord's default execution handler.
+Add the exported default handler explicitly when you want to augment rather
+than replace the built-in behavior:
 
 ```ts
-type TicketLimitReached = {
-  _tag: "TicketLimitReached";
-  current: number;
-  limit: number;
+import {
+  ArcClient,
+  defaultCommandExecutionHandler,
+  type CommandExecutionHandler,
+} from "arcscord";
+
+const metricsHandler: CommandExecutionHandler = async (execution, next) => {
+  const outcome = await next();
+
+  await recordCommandExecution({
+    command: execution.interaction.commandName,
+    outcome,
+  });
+
+  return outcome;
 };
 
-function isTicketLimitReached(value: unknown): value is TicketLimitReached {
-  return typeof value === "object"
-    && value !== null
-    && "_tag" in value
-    && value._tag === "TicketLimitReached";
-}
+const client = new ArcClient(token, {
+  intents: ["Guilds"],
+  managers: {
+    command: {
+      executionHandlers: [
+        defaultCommandExecutionHandler,
+        metricsHandler,
+      ],
+    },
+  },
+});
+```
 
-export const ticket = createCommand({
-  slash: { name: "ticket", description: "Open a support ticket" },
-  run: async (ctx) => {
-    const current = await ticketStore.countOpenByUser(ctx.user.id);
-    const limit = 3;
+With this order, the default handler receives the final outcome after inner
+handlers have transformed it. The equivalent exports for the other managers are
+`defaultComponentExecutionHandler` and `defaultEventExecutionHandler`.
 
-    if (current >= limit) {
-      return ctx.error({ _tag: "TicketLimitReached", current, limit });
+An empty array is valid: middleware and `run()` still execute, but Arcscord does
+not apply any result logging or error reply.
+
+## Short-circuiting and transforming
+
+Every execution context provides `complete(exit)` and `cancel()` helpers. They
+create a correctly timed outcome and make short-circuiting straightforward:
+
+```ts
+const maintenanceHandler: CommandExecutionHandler = async (execution, next) => {
+  if (maintenance.enabled) {
+    return execution.complete(executionFailure({
+      code: "MAINTENANCE",
+    }));
+  }
+
+  return next();
+};
+```
+
+An interceptor can transform an outcome after `next()`:
+
+```ts
+const recoveryHandler: CommandExecutionHandler = async (execution, next) => {
+  const outcome = await next();
+
+  if (outcome.kind === "completed" && outcome.exit.status === "failure") {
+    const recovered = await recover(outcome.exit.failure);
+    if (recovered) {
+      return execution.complete(executionSuccess("recovered"));
     }
+  }
 
-    await ticketStore.open(ctx.user.id);
-    return ctx.ok();
-  },
-});
+  return outcome;
+};
 ```
 
-## Command result handler
+Each `next()` function may only be called once. Arcscord contains and logs an
+uncaught execution-handler error instead of leaking an unhandled rejection into
+Discord.js.
+
+## Manager-specific context
+
+Command and component execution handlers receive the resolved handler,
+interaction, Arcscord context, locale, defer state, and timing controls.
+
+Event execution handlers additionally receive the typed `EventContext` and the
+Discord.js event arguments:
 
 ```ts
-const client = new ArcClient(token, {
-  intents: ["Guilds"],
-  managers: {
-    command: {
-      resultHandler: async (infos) => {
-        switch (infos.exit.status) {
-          case "success":
-            client.logger.debug("Command succeeded", {
-              command: infos.interaction.commandName,
-              durationMs: infos.durationMs,
-            });
-            return;
+const auditEvents: EventExecutionHandler = async (execution, next) => {
+  if (execution.eventName === "messageCreate") {
+    const [message] = execution.args;
+    audit.debug("message received", { messageId: message.id });
+  }
 
-          case "failure":
-            if (isTicketLimitReached(infos.exit.failure)) {
-              await infos.interaction.reply({
-                content: `You already have ${infos.exit.failure.current} open tickets (limit: ${infos.exit.failure.limit}).`,
-                flags: MessageFlags.Ephemeral,
-              });
-              return;
-            }
-            client.logger.logError(infos.exit.failure);
-            return;
-
-          case "defect":
-            client.logger.logError(infos.exit.defect, {
-              incidentId: infos.incidentId,
-            });
-            return;
-        }
-      },
-    },
-  },
-});
+  return next();
+};
 ```
 
-Command and component payloads contain `interaction`, the resolved handler, its context, locale and defer state, plus `startedAt`, `endedAt`, and `durationMs`. Unexpected defects also receive an `incidentId`.
+Resolution, context creation, pre-reply defer, and `dispatchDiagnostics` remain
+outside the execution-handler chain.
 
-Event result handlers use the same `exit` model and expose the event handler, event name, timestamps, duration, and optional incident ID.
+## Migrating from `resultHandler`
 
-## Delegating to the default handler
-
-A custom result handler receives the owning manager as its **second argument**. Use it to run your own logic and then hand back to the framework default via `manager.defaultResultHandler(infos)`, instead of reimplementing the default logging and error reply:
+`resultHandler`, its payload types, and `manager.defaultResultHandler()` remain
+available for compatibility but are deprecated. Existing configurations keep
+their previous behavior.
 
 ```ts
-const client = new ArcClient(token, {
-  intents: ["Guilds"],
-  managers: {
-    command: {
-      resultHandler: async (infos, manager) => {
-        // your own side effect (metrics, audit log, ...)
-        await recordCommandUsage(infos.interaction.commandName);
-
-        // then reuse the built-in logging + user-facing error reply
-        return manager.defaultResultHandler(infos);
-      },
-    },
+// Deprecated, but still supported
+command: {
+  resultHandler: async (infos, manager) => {
+    await recordCommandUsage(infos.interaction.commandName);
+    return manager.defaultResultHandler(infos);
   },
-});
+}
 ```
 
-`defaultResultHandler(infos)` is available on the command, component, and event managers and holds the exact behavior described below.
+Migrate by moving pre-execution work before `next()`, post-execution work after
+it, and explicitly including the appropriate default execution handler.
+`resultHandler` and `executionHandlers` cannot be configured together.
 
-## Default behavior
-
-The default command and component handlers:
-
-- log successes at debug level;
-- log explicit failures and reply with the configured internal-error message;
-- log defects with an incident ID and include that ID in the user-facing message.
-
-The default event handler logs failures and defects but never sends a Discord reply.
-
-The result handler is the only API that controls logging, recovery, and user replies. 
+The default command and component execution handlers log successes, log failures
+and defects, and send the configured internal-error reply. The default event
+execution handler logs failures and defects without replying to Discord.

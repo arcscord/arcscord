@@ -16,6 +16,7 @@ import {
   createMockUserContextMenuInteraction,
 } from "#/testing";
 import { arcscordErrorCodes } from "#/utils";
+import { defaultCommandExecutionHandler } from "./command_execution_handler";
 import { CommandManager } from "./command_manager.class";
 
 function createMockClientWithManager() {
@@ -691,6 +692,142 @@ describe("command manager", () => {
     expect(resultHandler.mock.calls[0]?.[0].exit.value).toBe(true);
   });
 
+  it("runs execution handlers around run() and allows outcome transformation", async () => {
+    const calls: string[] = [];
+    let finalStatus: string | undefined;
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, {
+      executionHandlers: [
+        async (execution, next) => {
+          calls.push(`outer:before:${execution.interaction.commandName}`);
+          const outcome = await next();
+          calls.push("outer:after");
+          if (outcome.kind === "cancelled") {
+            return outcome;
+          }
+          const transformed = {
+            ...outcome,
+            exit: { status: "failure" as const, failure: "transformed" },
+            incidentId: undefined,
+          };
+          finalStatus = transformed.exit.status;
+          return transformed;
+        },
+        async (_execution, next) => {
+          calls.push("inner:before");
+          const outcome = await next();
+          calls.push("inner:after");
+          return outcome;
+        },
+      ],
+    });
+
+    const run = vi.fn((ctx) => {
+      calls.push("run");
+      return ctx.ok();
+    });
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run,
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(finalStatus).toBe("failure");
+    expect(calls).toEqual([
+      "outer:before:ping",
+      "inner:before",
+      "run",
+      "inner:after",
+      "outer:after",
+    ]);
+  });
+
+  it("lets an execution handler short-circuit before run()", async () => {
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, {
+      executionHandlers: [
+        execution => execution.complete({
+          status: "failure",
+          failure: "blocked",
+        }),
+      ],
+    });
+    const run = vi.fn(ctx => ctx.ok());
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run,
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("can explicitly include Arcscord's default execution handler", async () => {
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, {
+      executionHandlers: [defaultCommandExecutionHandler],
+    });
+    const defaultSpy = vi.spyOn(managerWithOptions, "defaultResultHandler");
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(defaultSpy).toHaveBeenCalledOnce();
+  });
+
+  it("contains and logs execution handlers that call next() twice", async () => {
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client, {
+      executionHandlers: [
+        async (_execution, next) => {
+          await next();
+          return next();
+        },
+      ],
+    });
+    const run = vi.fn(ctx => ctx.ok());
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run,
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await expect((managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    )).resolves.toBeUndefined();
+
+    expect(run).toHaveBeenCalledOnce();
+    expect(managerWithOptions.logger.logError).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: "execution handler next() called more than once",
+      }),
+      { source: "executionHandler" },
+    );
+  });
+
+  it("rejects resultHandler and executionHandlers together at runtime", () => {
+    const { client } = createMockClientWithManager();
+
+    expect(() => new CommandManager(client, {
+      executionHandlers: [],
+      resultHandler: () => {},
+    } as never)).toThrow("command executionHandlers and resultHandler are mutually exclusive");
+  });
+
   it("passes the owning manager as the second argument to resultHandler", async () => {
     const resultHandler = vi.fn();
     const { client } = createMockClientWithManager();
@@ -1020,6 +1157,36 @@ describe("command manager", () => {
 
       expect(run).not.toHaveBeenCalled();
       expect(resultHandler).not.toHaveBeenCalled();
+    });
+
+    it("exposes middleware cancellation to execution handlers", async () => {
+      const outcomes: string[] = [];
+      const { client } = createMockClientWithManager();
+      const managerWithOptions = new CommandManager(client, {
+        executionHandlers: [
+          async (_execution, next) => {
+            outcomes.push("before");
+            const outcome = await next();
+            outcomes.push(outcome.kind);
+            return outcome;
+          },
+        ],
+      });
+
+      const run = vi.fn(ctx => ctx.ok());
+      const command = createCommand({
+        slash: { name: "ping", description: "Ping" },
+        use: [new CancelThirdMiddleware()],
+        run,
+      });
+      managerWithOptions.commands.set("cmd_1_ping", command);
+
+      await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+        createMockChatInputInteraction(),
+      );
+
+      expect(run).not.toHaveBeenCalled();
+      expect(outcomes).toEqual(["before", "cancelled"]);
     });
 
     it("passes status thrown with the middleware's ArcscordError when a middleware in the chain errors", async () => {

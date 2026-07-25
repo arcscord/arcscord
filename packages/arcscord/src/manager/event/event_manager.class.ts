@@ -3,25 +3,37 @@ import type { ClientEvents, GatewayIntentsString } from "discord.js";
 import type { ArcClient } from "#/base/client/client.class";
 import type { AnyEventHandler, EventHandler, EventHandlerForRegistry } from "#/base/event/event.type";
 import type {
+  AnyEventExecutionContext,
+  EventExecutionContext,
+  EventExecutionHandler,
+  EventExecutionOutcome,
   EventIntentCheckCoverage,
   EventIntentCheckIssue,
   EventIntentCheckOptions,
   EventManagerOptions,
+  EventResultHandler,
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
 } from "./event_manager.type";
 import { error, ok } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
+import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
 import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerReturn } from "#/utils";
+import {
+  defaultEventExecutionHandler,
+  eventResultHandlerAdapter,
+} from "./event_execution_handler";
 
 type EventRegistration = {
   event: EventHandlerForRegistry;
   listener: (...args: unknown[]) => Promise<void>;
 };
 
-type NormalizedEventManagerOptions = Omit<Required<EventManagerOptions>, "intentCheck"> & {
+type NormalizedEventManagerOptions = {
+  executionHandlers: readonly EventExecutionHandler[];
+  resultHandler: EventResultHandler;
   intentCheck: false | RequiredEventIntentCheckOptions;
 };
 
@@ -33,12 +45,28 @@ export class EventManager extends BaseManager {
 
   private events: Map<string, EventRegistration> = new Map();
 
+  private readonly preExecutionResultHandler?: EventResultHandler;
+
   constructor(client: ArcClient, options?: EventManagerOptions) {
     super(client, "event");
 
+    if (options?.executionHandlers !== undefined && options.resultHandler !== undefined) {
+      throw new TypeError("event executionHandlers and resultHandler are mutually exclusive");
+    }
+
+    const executionHandlers = options?.executionHandlers
+      ?? (options?.resultHandler
+        ? [eventResultHandlerAdapter(options.resultHandler)]
+        : [defaultEventExecutionHandler]);
+
+    this.preExecutionResultHandler = options?.resultHandler
+      ?? (options?.executionHandlers === undefined
+        ? this.defaultResultHandler.bind(this)
+        : undefined);
+
     this.options = {
-      resultHandler: this.defaultResultHandler.bind(this),
-      ...options,
+      executionHandlers,
+      resultHandler: options?.resultHandler ?? this.defaultResultHandler.bind(this),
       intentCheck: this.normalizeIntentCheckOptions(options?.intentCheck),
     };
   }
@@ -108,15 +136,22 @@ export class EventManager extends BaseManager {
           }
           catch (e) {
             const endedAt = Date.now();
-            await this.runResultHandler(() => this.options.resultHandler({
-              exit: executionDefect(e),
+            const exit = executionDefect(e);
+            const infos: EventResultHandlerInfos = {
+              exit,
               event: event as unknown as AnyEventHandler,
               eventName: event.event,
               startedAt: receivedAt,
               endedAt,
               durationMs: endedAt - receivedAt,
               incidentId: crypto.randomUUID(),
-            }, this));
+            };
+            if (this.preExecutionResultHandler) {
+              await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
+            }
+            else {
+              this.logger.logError(exit.defect, { source: "eventBeforeReady" });
+            }
             return;
           }
         }
@@ -164,6 +199,9 @@ export class EventManager extends BaseManager {
    *
    * A custom `resultHandler` can call this to reuse the default behavior after
    * running its own logic: `return manager.defaultResultHandler(infos)`.
+   *
+   * @deprecated Use {@link defaultEventExecutionHandler} in
+   * `executionHandlers`.
    */
   async defaultResultHandler(infos: EventResultHandlerInfos): Promise<void> {
     const meta = {
@@ -187,34 +225,37 @@ export class EventManager extends BaseManager {
     args: ClientEvents[E],
   ): Promise<void> {
     const startedAt = Date.now();
+    const context = new EventContext(this.client, event);
+    const execution: EventExecutionContext<E> = {
+      event,
+      eventName: event.event,
+      context,
+      args,
+      ...createExecutionControls<string | true>(startedAt),
+    };
+
+    await this.runExecutionHandlers(
+      this.options.executionHandlers,
+      execution as unknown as AnyEventExecutionContext,
+      () => this.executeEvent(execution, event),
+      this,
+    );
+  }
+
+  private async executeEvent<E extends keyof ClientEvents>(
+    execution: EventExecutionContext<E>,
+    event: EventHandler<E>,
+  ): Promise<EventExecutionOutcome> {
     try {
-      const context = new EventContext(this.client, event);
-      const rawResult = await event.run(context, ...args);
+      const rawResult = await event.run(execution.context, ...execution.args);
       this.logger.debug(`Event handled: ${event.name}`, {
         handler: event.name,
         event: event.event,
       });
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: normalizeHandlerReturn(rawResult),
-        event: event as unknown as AnyEventHandler,
-        eventName: event.event,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-      }, this));
+      return execution.complete(normalizeHandlerReturn(rawResult));
     }
     catch (e) {
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: executionDefect(e),
-        event: event as unknown as AnyEventHandler,
-        eventName: event.event,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-        incidentId: crypto.randomUUID(),
-      }, this));
+      return execution.complete(executionDefect(e));
     }
   }
 

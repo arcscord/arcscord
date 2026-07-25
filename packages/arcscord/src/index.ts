@@ -341,6 +341,16 @@ export type {
 } from "./base/event/event.type";
 export { EventContext } from "./base/event/event_context";
 
+export { createExecutionControls } from "./base/manager/execution_handler";
+export type {
+  CancelledExecutionOutcome,
+  CompletedExecutionOutcome,
+  ExecutionControls,
+  ExecutionHandler,
+  ExecutionNext,
+  ExecutionOutcome,
+  ExecutionTiming,
+} from "./base/manager/execution_handler";
 export { BaseManager } from "./base/manager/manager.class";
 export type {
   ContextInDm,
@@ -353,6 +363,9 @@ export {
 export {
   CommandManager,
   ComponentManager,
+  defaultCommandExecutionHandler,
+  defaultComponentExecutionHandler,
+  defaultEventExecutionHandler,
   EventManager,
   LocaleManager,
 } from "./manager";
@@ -367,11 +380,19 @@ export type {
   RequiredCommandRegistrationScopeConfig,
 } from "./manager";
 export type {
+  BaseCommandExecutionInfos,
+  CommandExecutionContext,
+  CommandExecutionHandler,
+  CommandExecutionOutcome,
   CommandManagerOptions,
   CommandResultHandler,
   CommandResultHandlerInfos,
 } from "./manager/command/command_manager.type";
 export type {
+  BaseComponentExecutionInfos,
+  ComponentExecutionContext,
+  ComponentExecutionHandler,
+  ComponentExecutionOutcome,
   ComponentList,
   ComponentManagerOptions,
   ComponentResultHandler,
@@ -379,6 +400,11 @@ export type {
 } from "./manager/component/component_manager.type";
 
 export type {
+  AnyEventExecutionContext,
+  BaseEventExecutionInfos,
+  EventExecutionContext,
+  EventExecutionHandler,
+  EventExecutionOutcome,
   EventIntentCheckAction,
   EventIntentCheckCoverage,
   EventIntentCheckIssue,

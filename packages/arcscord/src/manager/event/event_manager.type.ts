@@ -1,13 +1,21 @@
 import type { ClientEvents } from "discord.js";
 import type { AnyEventHandler } from "#/base/event";
+import type { EventHandler } from "#/base/event/event.type";
+import type { EventContext } from "#/base/event/event_context";
+import type {
+  ExecutionControls,
+  ExecutionNext,
+  ExecutionOutcome,
+} from "#/base/manager/execution_handler";
 import type { EventManager } from "#/manager/event/event_manager.class";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
+import type { MaybePromise } from "#/utils/type/util.type";
 import type { EventIntentCoverageTarget, EventIntentRequirement } from "./intents_map";
 
 /**
  * Shared fields present in all event result handler payloads.
  */
-type BaseEventResultHandlerInfos = {
+export type BaseEventExecutionInfos = {
   /**
    * The event handler that was executed.
    */
@@ -19,14 +27,45 @@ type BaseEventResultHandlerInfos = {
   eventName: keyof ClientEvents | string;
 };
 
-/** Payload received by `resultHandler` after every event execution. */
-export type EventResultHandlerInfos = BaseEventResultHandlerInfos & {
+/**
+ * Payload received by `resultHandler` after every event execution.
+ *
+ * @deprecated Use {@link EventExecutionContext} and
+ * {@link EventExecutionOutcome}.
+ */
+export type EventResultHandlerInfos = BaseEventExecutionInfos & {
   exit: ExecutionExit<string | true, unknown>;
   startedAt: number;
   endedAt: number;
   durationMs: number;
   incidentId?: string;
 };
+
+/** Context exposed to event execution interceptors. */
+export type EventExecutionContext<E extends keyof ClientEvents>
+  = Omit<BaseEventExecutionInfos, "event" | "eventName">
+    & ExecutionControls<string | true, unknown>
+    & {
+      event: EventHandler<E>;
+      eventName: E;
+      context: EventContext<E>;
+      args: ClientEvents[E];
+    };
+
+/** Union of execution contexts for every Discord.js client event. */
+export type AnyEventExecutionContext = {
+  [E in keyof ClientEvents]: EventExecutionContext<E>;
+}[keyof ClientEvents];
+
+/** Outcome returned by event execution interceptors. */
+export type EventExecutionOutcome = ExecutionOutcome<string | true, unknown>;
+
+/** Koa-style interceptor around an event handler's `run()` call. */
+export type EventExecutionHandler = (
+  execution: AnyEventExecutionContext,
+  next: ExecutionNext<EventExecutionOutcome>,
+  manager: EventManager,
+) => MaybePromise<EventExecutionOutcome>;
 
 /**
  * Callback invoked after every event handler runs, receiving the normalized
@@ -35,6 +74,8 @@ export type EventResultHandlerInfos = BaseEventResultHandlerInfos & {
  * Receives the owning {@link EventManager} as a second argument so a custom
  * handler can run its own logic and then delegate to the framework default via
  * `manager.defaultResultHandler(infos)`.
+ *
+ * @deprecated Use {@link EventExecutionHandler}.
  */
 export type EventResultHandler = (
   infos: EventResultHandlerInfos,
@@ -135,8 +176,7 @@ export type EventIntentCheckIssue = {
   message: string;
 };
 
-/** Options for the {@link EventManager}, including the gateway-intent coverage check and the result handler. */
-export type EventManagerOptions = {
+type BaseEventManagerOptions = {
   /**
    * Checks loaded event handlers against the client gateway intents.
    * This never adds intents automatically; it only warns or throws.
@@ -146,15 +186,33 @@ export type EventManagerOptions = {
    * @default { missing: "warn", partialCoverage: "off", ignore: [] }
    */
   intentCheck?: false | EventIntentCheckOptions;
+};
+
+type EventExecutionHandlerOptions = {
+  /**
+   * Ordered Koa-style interceptors around event `run()`.
+   *
+   * Providing this option replaces Arcscord's default execution handler.
+   */
+  executionHandlers?: readonly EventExecutionHandler[];
+  resultHandler?: never;
+};
+
+type LegacyEventResultHandlerOptions = {
+  executionHandlers?: never;
 
   /**
    * Set a custom result handler.
    *
-   * The owning manager is passed as the second argument, so a custom handler can
-   * do its own work and then delegate to the default behavior with
-   * `return manager.defaultResultHandler(infos)`.
-   *
-   * @default {@link EventManager.defaultResultHandler}
+   * @deprecated Use {@link EventManagerOptions.executionHandlers}.
    */
   resultHandler?: EventResultHandler;
 };
+
+/**
+ * Options for the event manager.
+ *
+ * `executionHandlers` and the deprecated `resultHandler` are mutually exclusive.
+ */
+export type EventManagerOptions = BaseEventManagerOptions
+  & (EventExecutionHandlerOptions | LegacyEventResultHandlerOptions);
