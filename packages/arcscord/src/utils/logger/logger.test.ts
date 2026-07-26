@@ -101,6 +101,47 @@ describe("arcLogger", () => {
     });
   });
 
+  it("redacts secrets from error metadata added by the caller", () => {
+    const output: unknown[] = [];
+    const logger = new ArcLogger("test", (...data) => output.push(...data), {
+      format: "json",
+    });
+
+    logger.logError(new Error("failed"), {
+      token: "caller-secret",
+      details: "password=embedded-secret",
+    });
+
+    const rendered = String(output[0]);
+    expect(rendered).not.toContain("caller-secret");
+    expect(rendered).not.toContain("embedded-secret");
+    expect(JSON.parse(rendered).debug).toMatchObject({
+      token: "[redacted]",
+      details: "password=[redacted]",
+    });
+  });
+
+  it("redacts secrets from regular log messages and metadata", () => {
+    const output: unknown[] = [];
+    const logger = new ArcLogger("test", (...data) => output.push(...data), {
+      format: "json",
+    });
+
+    logger.info("request failed with token=message-secret", {
+      authorization: "Bearer metadata-secret",
+    });
+
+    const rendered = String(output[0]);
+    expect(rendered).not.toContain("message-secret");
+    expect(rendered).not.toContain("metadata-secret");
+    expect(JSON.parse(rendered)).toMatchObject({
+      message: "request failed with token=[redacted]",
+      meta: {
+        authorization: "[redacted]",
+      },
+    });
+  });
+
   it("writes detailed reports to the diagnostic sink", () => {
     const consoleOutput: unknown[] = [];
     const diagnostics: unknown[] = [];
