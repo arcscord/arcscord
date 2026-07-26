@@ -27,6 +27,7 @@ const packages = [
   { dir: "packages/middleware", slug: "middleware" },
   { dir: "packages/error", slug: "error" },
   { dir: "packages/better_error", slug: "better-error" },
+  { dir: "packages/webhooks", slug: "webhooks" },
 ];
 
 for (const pkg of packages.filter(pkg => selectedPackages.has(pkg.slug))) {

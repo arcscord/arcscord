@@ -1,0 +1,206 @@
+---
+description: Receive, verify, acknowledge, and dispatch typed Discord Webhook Events in any web framework.
+keywords:
+  - discord webhook events
+  - discord webhooks
+  - ed25519
+  - typescript
+  - arcscord webhooks
+---
+
+# @arcscord/webhooks
+
+`@arcscord/webhooks` receives [Discord Webhook Events](https://docs.discord.com/developers/events/webhook-events) without owning your HTTP server. It validates Ed25519 signatures against the exact raw body, acknowledges Discord endpoint checks, and dispatches event-specific TypeScript callbacks.
+
+- [API reference](/api?package=webhooks)
+- [npm package](https://www.npmjs.com/package/@arcscord/webhooks)
+- [Source](https://github.com/arcscord/arcscord/tree/main/packages/webhooks)
+
+The package is standalone. It does not depend on `arcscord`, `discord.js`, Express, Fastify, Next.js, or another server framework.
+
+## Install
+
+```sh
+pnpm add @arcscord/webhooks
+```
+
+Copy the application public key from the Discord Developer Portal. Do not use the bot token or client secret:
+
+```env
+DISCORD_PUBLIC_KEY=your_application_public_key
+```
+
+## Create a typed handler
+
+The event name used as each registry key determines the exact type of `delivery.event.data`:
+
+```ts
+import {
+  createWebhookHandler,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+
+export const webhooks = createWebhookHandler({
+  publicKey: process.env.DISCORD_PUBLIC_KEY!,
+  handlers: {
+    [WebhookEventType.ApplicationAuthorized]: async (delivery) => {
+      console.log(delivery.event.data.user.id);
+      console.log(delivery.event.data.scopes);
+    },
+    [WebhookEventType.EntitlementCreate]: async (delivery) => {
+      await grantEntitlement(delivery.event.data);
+    },
+    [WebhookEventType.LobbyMessageDelete]: async (delivery) => {
+      await removeLobbyMessage(
+        delivery.event.data.lobby_id,
+        delivery.event.data.id,
+      );
+    },
+  },
+  onUnknownEvent: (delivery) => {
+    console.warn("New Discord event:", delivery.event.type);
+  },
+  onError: (error, delivery) => {
+    console.error(`Webhook handler failed: ${delivery.event.type}`, error);
+  },
+});
+```
+
+Payload properties stay in Discord's native `snake_case` form. The complete outer delivery remains available so handlers can read `application_id`, the event timestamp, and the event data together.
+
+## Fetch Request and Response
+
+Use `handleRequest()` in frameworks based on the Fetch API, including Next.js route handlers, Hono, and Bun:
+
+```ts title="app/api/discord-webhooks/route.ts"
+import type { WebhookDispatchResult } from "@arcscord/webhooks";
+import { webhooks } from "./webhooks";
+
+function observe(result: WebhookDispatchResult): void {
+  if (result.status === "failed")
+    console.error(result.eventType, result.error);
+}
+
+export async function POST(request: Request): Promise<Response> {
+  const { response, completion } = await webhooks.handleRequest(request);
+
+  void completion.then(observe);
+  return response;
+}
+```
+
+`response` is ready after method, signature, and envelope validation. The event callback is not awaited before the `204` acknowledgement is returned.
+
+On a runtime with an execution-context API, keep the background work alive explicitly:
+
+```ts
+const { response, completion } = await webhooks.handleRequest(request);
+context.waitUntil(completion);
+return response;
+```
+
+## Express with an exact raw body
+
+Discord signs the timestamp followed by the exact request bytes. Configure Express to preserve those bytes for this route:
+
+```ts
+import express from "express";
+import { webhooks } from "./webhooks";
+
+const app = express();
+
+app.post(
+  "/discord/webhooks",
+  express.raw({ type: "application/json" }),
+  async (request, response) => {
+    const { response: acknowledgement, completion } = await webhooks.handleRaw({
+      body: request.body,
+      signature: request.get("X-Signature-Ed25519"),
+      timestamp: request.get("X-Signature-Timestamp"),
+    });
+
+    response.status(acknowledgement.status);
+    for (const [name, value] of Object.entries(acknowledgement.headers))
+      response.setHeader(name, value);
+
+    if (acknowledgement.body === null)
+      response.end();
+    else
+      response.send(acknowledgement.body);
+
+    void completion;
+  },
+);
+```
+
+Do not run `express.json()` before this route. A parsed and reserialized object is not the body Discord signed.
+
+Fastify integrations follow the same rule: use a raw-body plugin or parser, then pass its `Buffer`, `Uint8Array`, string, or `ArrayBuffer` to `handleRaw()`.
+
+## HTTP behavior
+
+| Request | Response | Dispatch |
+| --- | --- | --- |
+| Method other than POST | `405` | `not-dispatched` |
+| Missing or invalid signature | `401` | `not-dispatched` |
+| Signed invalid JSON or envelope | `400` | `not-dispatched` |
+| Signed Discord `PING` | Empty `204` | `not-dispatched` with reason `ping` |
+| Signed known event | Empty `204` | Registered typed handler, or `unhandled` |
+| Signed future event name | Empty `204` | `onUnknownEvent`, or `unhandled`, with `known: false` |
+
+All responses include `Content-Type: application/json; charset=utf-8`. A `405` also includes `Allow: POST`.
+
+## Completion results
+
+The HTTP acknowledgement and callback completion are intentionally separate:
+
+```ts
+const { response, completion } = await webhooks.handleRequest(request);
+
+completion.then((result) => {
+  switch (result.status) {
+    case "handled":
+      console.log("Handled", result.eventType, result.known);
+      break;
+    case "unhandled":
+      console.warn("No handler", result.eventType, result.known);
+      break;
+    case "failed":
+      console.error(result.eventType, result.error);
+      break;
+    case "not-dispatched":
+      console.log(result.reason);
+      break;
+  }
+});
+
+return response;
+```
+
+`completion` always resolves. A failed event callback becomes `failed` and is also passed to `onError`. If `onError` throws, that secondary failure is available as `errorHandlerError`.
+
+## Supported event names
+
+| Family | Events |
+| --- | --- |
+| Application | `APPLICATION_AUTHORIZED`, `APPLICATION_DEAUTHORIZED` |
+| Entitlement | `ENTITLEMENT_CREATE`, `ENTITLEMENT_UPDATE`, `ENTITLEMENT_DELETE` |
+| Quest | `QUEST_USER_ENROLLMENT` |
+| Lobby Message | `LOBBY_MESSAGE_CREATE`, `LOBBY_MESSAGE_UPDATE`, `LOBBY_MESSAGE_DELETE` |
+| Game Direct Message | `GAME_DIRECT_MESSAGE_CREATE`, `GAME_DIRECT_MESSAGE_UPDATE`, `GAME_DIRECT_MESSAGE_DELETE` |
+
+Discord currently documents Quest enrollment but does not make it receivable by applications. It remains typed so the registry matches the Developer Portal and protocol documentation.
+
+## Lower-level signature verification
+
+Use the configured verifier when a framework needs a custom parsing pipeline:
+
+```ts
+const valid = await webhooks.verifyWebhookSignature({
+  body: rawBody,
+  signature,
+  timestamp,
+});
+```
+
+The standalone `verifyWebhookSignature({ publicKey, body, signature, timestamp })` export provides the same verification without creating a handler. Malformed request signatures return `false`; malformed configured public keys throw a `TypeError`.

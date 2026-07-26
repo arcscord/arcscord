@@ -63,6 +63,7 @@ const sidebars: SidebarsConfig = {
       items: [
         "packages/arcscord",
         "packages/components",
+        "packages/webhooks",
         "packages/middleware",
         "packages/error",
         "packages/better-error",

@@ -23,6 +23,11 @@ packages/middleware:
       - any-glob-to-any-file:
           - packages/middleware/*
           - packages/middleware/**/*
+packages/webhooks:
+  - changed-files:
+      - any-glob-to-any-file:
+          - packages/webhooks/*
+          - packages/webhooks/**/*
 packages/create-arcscord-bot:
   - changed-files:
       - any-glob-to-any-file:

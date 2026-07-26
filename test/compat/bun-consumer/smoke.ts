@@ -9,6 +9,10 @@
 import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
+  createWebhookHandler,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import {
   ArcClient,
   button,
   createButton,
@@ -21,6 +25,12 @@ const client = new ArcClient("smoke-token", {
   intents: [],
 });
 const standaloneMessage = v2Message(container("standalone"));
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.EntitlementCreate]: delivery => void delivery.event.data.id,
+  },
+});
 
 // 2. Build a slash command.
 const pingCommand = createCommand({
@@ -58,6 +68,9 @@ if (!(client instanceof ArcClient)) {
 }
 if (standaloneMessage.components.length !== 1) {
   throw new Error("standalone components build failed");
+}
+if (typeof webhooks.handleRequest !== "function") {
+  throw new TypeError("standalone webhooks build failed");
 }
 if (pingCommand.slash?.name !== "ping") {
   throw new Error("command build failed");

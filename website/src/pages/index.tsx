@@ -104,6 +104,12 @@ const packages: Pkg[] = [
     description: "Typed Components V2 helpers, available through Arcscord or standalone.",
   },
   {
+    name: "@arcscord/webhooks",
+    npm: "@arcscord/webhooks",
+    doc: "/packages/webhooks",
+    description: "Typed Discord Webhook Events handling for existing web frameworks.",
+  },
+  {
     name: "@arcscord/middleware",
     npm: "@arcscord/middleware",
     doc: "/packages/middleware",

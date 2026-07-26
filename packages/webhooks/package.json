@@ -1,0 +1,59 @@
+{
+  "name": "@arcscord/webhooks",
+  "version": "0.1.0",
+  "description": "Framework-agnostic, typed Discord Webhook Events handling.",
+  "author": "Arcoz0308",
+  "license": "MIT",
+  "homepage": "https://arcscord.dev/packages/webhooks",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/arcscord/arcscord.git"
+  },
+  "bugs": {
+    "url": "https://github.com/arcscord/arcscord/issues"
+  },
+  "keywords": [
+    "arcscord",
+    "discord",
+    "webhook",
+    "webhook-events",
+    "typescript"
+  ],
+  "main": "dist/cjs/index.cjs",
+  "module": "dist/esm/index.mjs",
+  "types": "dist/cjs/index.d.ts",
+  "exports": {
+    "import": {
+      "types": "./dist/esm/index.d.mts",
+      "default": "./dist/esm/index.mjs"
+    },
+    "require": {
+      "types": "./dist/cjs/index.d.ts",
+      "default": "./dist/cjs/index.cjs"
+    }
+  },
+  "scripts": {
+    "test": "vitest run",
+    "build": "tsdown",
+    "typecheck": "tsc -p tsconfig.eslint.json",
+    "docs": "typedoc"
+  },
+  "dependencies": {
+    "discord-api-types": "^0.38.51"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "tsdown": "0.22.14",
+    "typedoc": "^0.28.20",
+    "typescript": "^6.0.3",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=24.11.0",
+    "bun": ">=1.3.0"
+  },
+  "files": [
+    "dist/cjs/",
+    "dist/esm/"
+  ]
+}

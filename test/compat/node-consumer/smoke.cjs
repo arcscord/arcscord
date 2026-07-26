@@ -12,6 +12,10 @@ const assert = require("node:assert/strict");
 const process = require("node:process");
 const { container, v2Message } = require("@arcscord/components");
 const {
+  createWebhookHandler,
+  WebhookEventType,
+} = require("@arcscord/webhooks");
+const {
   ArcClient,
   button,
   createButton,
@@ -20,7 +24,14 @@ const {
 } = require("arcscord");
 
 const client = new ArcClient("smoke-token", { intents: [] });
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.EntitlementCreate]: () => {},
+  },
+});
 assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components CJS failed");
+assert.equal(typeof webhooks.handleRaw, "function", "standalone webhooks CJS failed");
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 

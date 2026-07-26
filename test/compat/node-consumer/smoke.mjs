@@ -10,6 +10,10 @@ import assert from "node:assert/strict";
 import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
+  createWebhookHandler,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import {
   ArcClient,
   button,
   createButton,
@@ -18,7 +22,14 @@ import {
 } from "arcscord";
 
 const client = new ArcClient("smoke-token", { intents: [] });
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.EntitlementCreate]: () => {},
+  },
+});
 assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components ESM failed");
+assert.equal(typeof webhooks.handleRequest, "function", "standalone webhooks ESM failed");
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 
