@@ -1,10 +1,39 @@
 import type {
   AnyEventExecutionContext,
+  BaseEventExecutionInfos,
   EventExecutionHandler,
   EventExecutionOutcome,
   EventResultHandler,
   EventResultHandlerInfos,
 } from "./event_manager.type";
+
+type CompletedEventExecutionOutcome = Extract<
+  EventExecutionOutcome,
+  { kind: "completed" }
+>;
+
+/** @internal */
+export function runDefaultEventExecution(
+  execution: BaseEventExecutionInfos,
+  outcome: CompletedEventExecutionOutcome,
+  manager: Parameters<EventExecutionHandler>[2],
+): void {
+  const meta = {
+    handler: execution.event.name,
+    event: execution.eventName,
+    durationMs: outcome.durationMs,
+    incidentId: outcome.incidentId,
+  };
+
+  if (outcome.exit.status === "defect") {
+    const incidentId = outcome.incidentId ?? crypto.randomUUID();
+    manager.logger.logError(outcome.exit.defect, { ...meta, incidentId });
+    return;
+  }
+  if (outcome.exit.status === "failure") {
+    manager.logger.logError(outcome.exit.failure, meta);
+  }
+}
 
 function toResultHandlerInfos(
   execution: AnyEventExecutionContext,
@@ -46,4 +75,10 @@ export function eventResultHandlerAdapter(
  * failure and defect logging.
  */
 export const defaultEventExecutionHandler: EventExecutionHandler
-  = eventResultHandlerAdapter((infos, manager) => manager.defaultResultHandler(infos));
+  = async (execution, next, manager) => {
+    const outcome = await next();
+    if (outcome.kind === "completed") {
+      runDefaultEventExecution(execution, outcome, manager);
+    }
+    return outcome;
+  };

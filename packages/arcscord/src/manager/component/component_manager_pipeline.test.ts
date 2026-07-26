@@ -731,8 +731,9 @@ describe("component manager pipeline", () => {
       expect(manager.logger.warn).toHaveBeenCalled();
     });
 
-    it("uses editReply instead of reply for the default resultHandler when defer is true", async () => {
+    it("uses editReply through the default execution handler when defer is true", async () => {
       const { manager } = createManagerWithClient();
+      const legacySpy = vi.spyOn(manager, "defaultResultHandler");
 
       const handler = createButton({
         route: "greet",
@@ -750,9 +751,10 @@ describe("component manager pipeline", () => {
       expect(interaction.deferReply).toHaveBeenCalledOnce();
       expect(interaction.editReply).toHaveBeenCalledOnce();
       expect(interaction.reply).not.toHaveBeenCalled();
+      expect(legacySpy).not.toHaveBeenCalled();
     });
 
-    it("uses reply for the default resultHandler when there was no defer", async () => {
+    it("uses reply through the default execution handler when there was no defer", async () => {
       const { manager } = createManagerWithClient();
 
       const handler = createButton({

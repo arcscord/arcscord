@@ -786,7 +786,26 @@ describe("command manager", () => {
       createMockChatInputInteraction(),
     );
 
-    expect(defaultSpy).toHaveBeenCalledOnce();
+    expect(defaultSpy).not.toHaveBeenCalled();
+    expect(managerWithOptions.logger.debug).toHaveBeenCalled();
+  });
+
+  it("uses the default execution handler without calling the legacy path", async () => {
+    const { client } = createMockClientWithManager();
+    const managerWithOptions = new CommandManager(client);
+    const defaultSpy = vi.spyOn(managerWithOptions, "defaultResultHandler");
+    const command = createCommand({
+      slash: { name: "ping", description: "Ping" },
+      run: ctx => ctx.ok(),
+    });
+    managerWithOptions.commands.set("cmd_1_ping", command);
+
+    await (managerWithOptions as unknown as ExposedHandleInteraction).handleInteraction(
+      createMockChatInputInteraction(),
+    );
+
+    expect(defaultSpy).not.toHaveBeenCalled();
+    expect(managerWithOptions.logger.debug).toHaveBeenCalled();
   });
 
   it("contains and logs execution handlers that call next() twice", async () => {

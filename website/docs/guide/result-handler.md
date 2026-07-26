@@ -101,6 +101,10 @@ With this order, the default handler receives the final outcome after inner
 handlers have transformed it. The equivalent exports for the other managers are
 `defaultComponentExecutionHandler` and `defaultEventExecutionHandler`.
 
+The three default execution handlers own Arcscord's built-in logging and error
+reply behavior directly. They do not delegate to the deprecated
+`defaultResultHandler()`.
+
 An empty array is valid: middleware and `run()` still execute, but Arcscord does
 not apply any result logging or error reply.
 
@@ -183,6 +187,10 @@ command: {
 Migrate by moving pre-execution work before `next()`, post-execution work after
 it, and explicitly including the appropriate default execution handler.
 `resultHandler` and `executionHandlers` cannot be configured together.
+
+The normal Arcscord path already uses the execution-handler implementation.
+Removing the legacy result-handler API in Arcscord v2 will therefore not change
+the default runtime behavior.
 
 The default command and component execution handlers log successes, log failures
 and defects, and send the configured internal-error reply. The default event

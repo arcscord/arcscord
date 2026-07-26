@@ -24,6 +24,7 @@ import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerRet
 import {
   defaultEventExecutionHandler,
   eventResultHandlerAdapter,
+  runDefaultEventExecution,
 } from "./event_execution_handler";
 
 type EventRegistration = {
@@ -47,6 +48,8 @@ export class EventManager extends BaseManager {
 
   private readonly preExecutionResultHandler?: EventResultHandler;
 
+  private readonly useDefaultPreExecutionHandler: boolean;
+
   constructor(client: ArcClient, options?: EventManagerOptions) {
     super(client, "event");
 
@@ -59,10 +62,9 @@ export class EventManager extends BaseManager {
         ? [eventResultHandlerAdapter(options.resultHandler)]
         : [defaultEventExecutionHandler]);
 
-    this.preExecutionResultHandler = options?.resultHandler
-      ?? (options?.executionHandlers === undefined
-        ? this.defaultResultHandler.bind(this)
-        : undefined);
+    this.preExecutionResultHandler = options?.resultHandler;
+    this.useDefaultPreExecutionHandler = options?.executionHandlers === undefined
+      && options?.resultHandler === undefined;
 
     this.options = {
       executionHandlers,
@@ -149,6 +151,16 @@ export class EventManager extends BaseManager {
             if (this.preExecutionResultHandler) {
               await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
             }
+            else if (this.useDefaultPreExecutionHandler) {
+              runDefaultEventExecution(infos, {
+                kind: "completed",
+                exit,
+                startedAt: receivedAt,
+                endedAt,
+                durationMs: endedAt - receivedAt,
+                incidentId: infos.incidentId,
+              }, this);
+            }
             else {
               this.logger.logError(exit.defect, { source: "eventBeforeReady" });
             }
@@ -204,20 +216,14 @@ export class EventManager extends BaseManager {
    * `executionHandlers`.
    */
   async defaultResultHandler(infos: EventResultHandlerInfos): Promise<void> {
-    const meta = {
-      handler: infos.event.name,
-      event: infos.eventName,
+    runDefaultEventExecution(infos, {
+      kind: "completed",
+      exit: infos.exit,
+      startedAt: infos.startedAt,
+      endedAt: infos.endedAt,
       durationMs: infos.durationMs,
       incidentId: infos.incidentId,
-    };
-    if (infos.exit.status === "defect") {
-      const incidentId = infos.incidentId ?? crypto.randomUUID();
-      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
-      return;
-    }
-    if (infos.exit.status === "failure") {
-      this.logger.logError(infos.exit.failure, meta);
-    }
+    }, this);
   }
 
   private async runEvent<E extends keyof ClientEvents>(

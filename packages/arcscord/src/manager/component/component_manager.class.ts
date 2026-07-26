@@ -52,6 +52,7 @@ import { validateComponentMiddlewareNames } from "#/utils/validator/middleware_v
 import {
   componentResultHandlerAdapter,
   defaultComponentExecutionHandler,
+  runDefaultComponentExecution,
 } from "./component_execution_handler";
 
 type NormalizedComponentManagerOptions = {
@@ -587,27 +588,6 @@ export class ComponentManager extends BaseManager {
   }
 
   /**
-   * Sends an error reply to a component interaction, respecting the defer state.
-   * Used by the default `defaultResultHandler`.
-   */
-  private async sendFailureReply(incidentId: string, infos: ComponentResultHandlerInfos): Promise<void> {
-    const message = this.client.getErrorMessage(incidentId, infos.locale);
-    try {
-      if (infos.defer) {
-        await infos.interaction.editReply(message);
-      }
-      else {
-        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
-      }
-    }
-    catch (e) {
-      this.logger.error("failed to send failure reply", {
-        baseError: anyToError(e).message,
-      });
-    }
-  }
-
-  /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    *
@@ -618,27 +598,13 @@ export class ComponentManager extends BaseManager {
    * `executionHandlers`.
    */
   async defaultResultHandler(infos: ComponentResultHandlerInfos): Promise<void> {
-    const meta = {
-      route: infos.component.route,
-      interactionId: infos.interaction.id,
-      guildId: infos.interaction.guildId,
-      userId: infos.interaction.user.id,
+    return runDefaultComponentExecution(infos, {
+      kind: "completed",
+      exit: infos.exit,
+      startedAt: infos.startedAt,
+      endedAt: infos.endedAt,
       durationMs: infos.durationMs,
       incidentId: infos.incidentId,
-    };
-    if (infos.exit.status === "defect") {
-      const incidentId = infos.incidentId ?? crypto.randomUUID();
-      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    if (infos.exit.status === "failure") {
-      const incidentId = crypto.randomUUID();
-      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    this.logger.debug(`Component executed: ${infos.component.route}`, {
-      ...meta,
-      value: infos.exit.value,
-    });
+    }, this);
   }
 }

@@ -35,7 +35,6 @@ import { ApplicationCommandType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
 import {
   AutocompleteContext,
-  commandInteractionToString,
   hasAutocomplete,
   hasMessageCommand,
   hasSlashCommand,
@@ -64,6 +63,7 @@ import { validateCommandMiddlewareNames } from "#/utils/validator/middleware_val
 import {
   commandResultHandlerAdapter,
   defaultCommandExecutionHandler,
+  runDefaultCommandExecution,
 } from "./command_execution_handler";
 import {
   normalizeCommandRegistrationConfig,
@@ -996,30 +996,6 @@ export class CommandManager
   }
 
   /**
-   * Sends an error reply to a command interaction, respecting the defer state.
-   * Used by the default `defaultResultHandler`.
-   */
-  private async sendFailureReply(
-    incidentId: string,
-    infos: CommandResultHandlerInfos,
-  ): Promise<void> {
-    const message = this.client.getErrorMessage(incidentId, infos.locale);
-    try {
-      if (infos.defer) {
-        await infos.interaction.editReply(message);
-      }
-      else {
-        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
-      }
-    }
-    catch (e) {
-      this.logger.error("failed to send failure reply", {
-        baseError: anyToError(e).message,
-      });
-    }
-  }
-
-  /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    *
@@ -1030,27 +1006,13 @@ export class CommandManager
    * `executionHandlers`.
    */
   async defaultResultHandler(infos: CommandResultHandlerInfos): Promise<void> {
-    const meta = {
-      command: infos.interaction.commandName,
-      interactionId: infos.interaction.id,
-      guildId: infos.interaction.guildId,
-      userId: infos.interaction.user.id,
+    return runDefaultCommandExecution(infos, {
+      kind: "completed",
+      exit: infos.exit,
+      startedAt: infos.startedAt,
+      endedAt: infos.endedAt,
       durationMs: infos.durationMs,
       incidentId: infos.incidentId,
-    };
-    if (infos.exit.status === "defect") {
-      const incidentId = infos.incidentId ?? crypto.randomUUID();
-      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    if (infos.exit.status === "failure") {
-      const incidentId = crypto.randomUUID();
-      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
-      ...meta,
-      value: infos.exit.value,
-    });
+    }, this);
   }
 }
