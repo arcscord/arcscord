@@ -13,20 +13,20 @@ type PackageJSONOptions = {
 };
 
 const dependenciesVersions = {
-  "discord.js": "^14.26.4",
-  "@types/node": "^24.10.0",
-  "tsx": "^4.23.0",
+  "discord.js": "^14.27.0",
+  "@types/node": "^24.13.3",
+  "tsx": "^4.23.1",
   "typescript": "^6.0.3",
 
-  "eslint": "^10.6.0",
+  "eslint": "^10.8.0",
   "@eslint/js": "^10.0.1",
   "typescript-eslint": "^8.62.0",
-  "@antfu/eslint-config": "^9.1.0",
+  "@antfu/eslint-config": "^9.2.0",
 
   "prettier": "^3.9.1",
   "eslint-config-prettier": "^10.1.8",
 
-  "i18next": "^26.3.3",
+  "i18next": "^26.3.6",
 };
 
 export function generatePackageJson(options: PackageJSONOptions): string {

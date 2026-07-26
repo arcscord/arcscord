@@ -3,7 +3,7 @@ import { defineConfig } from "tsdown";
 
 const baseOptions: UserConfig = {
   clean: true,
-  deps: { skipNodeModulesBundle: true },
+  deps: { neverBundle: true },
   dts: true,
   entry: ["src/index.ts"],
   minify: false,
