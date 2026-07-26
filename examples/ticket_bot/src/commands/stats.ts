@@ -28,7 +28,7 @@ function buildUsageTable(
  * `/stats` — show how many times each command has been used.
  *
  * The counts come from the `CommandUsage` table, which is filled by the custom
- * command result handler (utils/command_result_handler.ts) after every command.
+ * command execution handler (utils/command_execution_handler.ts) after every command.
  * The result is rendered as a monospace table and returned as an ephemeral reply
  * in the current channel.
  */

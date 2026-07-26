@@ -16,7 +16,7 @@ Every middleware returns one of three results:
 | --- | --- | --- |
 | Continue | `this.next(value)` | Continue to the next middleware or handler and expose `value` in `ctx.additional`. |
 | Cancel | `this.cancel(result)` | Stop the middleware chain and do not run the handler. Use this when the middleware already replied or handled the interaction. |
-| Failure | `this.fail(failure)` | Stop the middleware chain and forward an expected failure to the result handler. |
+| Failure | `this.fail(failure)` | Stop the middleware chain and forward an expected failure through the execution-handler chain. |
 
 Each helper returns a discriminated object whose `status` is `"next"`, `"cancel"`, or `"failure"`.
 
@@ -37,10 +37,10 @@ The flow is:
 2. Each middleware runs in order.
 3. `next(value)` stores the value under `ctx.additional[middleware.name]`.
 4. `cancel(result)` awaits its optional result, then stops execution. If that result returns an error `Result`, it becomes an expected failure.
-5. `fail(failure)` awaits its value, stops execution, and forwards that expected failure to the configured result handler.
+5. `fail(failure)` awaits its value, stops execution, and returns that expected failure to the surrounding execution handlers.
 6. If every middleware continues, Arcscord runs the command or component handler.
 
-If middleware execution or a cancelled operation throws, Arcscord forwards it to the result handler as an `ExecutionExit` defect.
+If middleware execution or a cancelled operation throws, Arcscord exposes it to the execution handlers as an `ExecutionExit` defect.
 
 ## Command Middleware
 
@@ -176,7 +176,7 @@ export const secureButton = createButton({
 
 ### Component failures
 
-Use `this.fail(...)` when the middleware should fail through the component result handler.
+Use `this.fail(...)` when the middleware should produce an expected failure for the component execution handlers.
 
 ```ts
 import type { ComponentContext, ComponentMiddlewareRun } from "arcscord";
@@ -252,7 +252,7 @@ return this.cancel(ctx.reply({
 }));
 ```
 
-Use `fail` when the result handler should receive an expected failure:
+Use `fail` when the execution handlers should receive an expected failure:
 
 ```ts
 return this.fail({

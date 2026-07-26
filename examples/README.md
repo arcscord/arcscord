@@ -16,7 +16,7 @@ and `.sample.env` — clone the repo, `cd` into one, and run it.
 | --- | --- | --- |
 | [`starter-bot`](./starter-bot) | The smallest end-to-end bot, right after scaffolding. No database. | Typed slash and context-menu commands, a Components v2 reply with a self-updating button, a component middleware, and a gateway event listener. |
 | [`reminder-bot`](./reminder-bot) | A user-install bot that stores personal reminders and DMs you when they are due. | Persistence with SQLite (`better-sqlite3`), a background scheduler, subcommands (`/reminder create\|list\|delete`), and a duration parser. |
-| [`ticket_bot`](./ticket_bot) | A complete support-ticket system built on Discord threads. | Prisma + SQLite, i18n (en/fr), modals, buttons, autocomplete, a custom result handler, and command/component middlewares. |
+| [`ticket_bot`](./ticket_bot) | A complete support-ticket system built on Discord threads. | Prisma + SQLite, i18n (en/fr), modals, buttons, autocomplete, a custom execution handler, and command/component middlewares. |
 
 ## Suggested reading order
 

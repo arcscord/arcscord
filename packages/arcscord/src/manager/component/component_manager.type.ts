@@ -35,7 +35,7 @@ export type ComponentList = {
 };
 
 /**
- * Shared fields present in all component result handler payloads.
+ * Shared fields present in component execution contexts and legacy result payloads.
  */
 export type BaseComponentExecutionInfos = {
   /**

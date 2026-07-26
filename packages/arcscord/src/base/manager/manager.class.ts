@@ -84,8 +84,8 @@ export abstract class BaseManager {
    * optionally sends an ephemeral reply to the user.
    *
    * Use this for pre-`run()` failures (command not found, option parsing
-   * error, defer failure, etc.). Errors during `run()` or middleware should
-   * be forwarded to `resultHandler` instead.
+   * error, defer failure, etc.). Errors during `run()` or middleware flow
+   * through the execution-handler chain instead.
    *
    * @param config - The dispatch config from manager options (may be undefined).
    * @param defaultLevel - Fallback level when `config.level` is not set.

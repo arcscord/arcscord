@@ -13,8 +13,8 @@ export type ArcscordErrorOptions<Code extends ArcscordErrorCode> = {
  *
  * The stable {@link code} identifies the failure category while
  * {@link metadata} carries code-specific, structured details. Execution
- * context and incident identifiers intentionally live in result-handler
- * payloads rather than on the error itself.
+ * context and incident identifiers intentionally live in execution outcomes
+ * rather than on the error itself.
  */
 export class ArcscordError<Code extends ArcscordErrorCode = ArcscordErrorCode> extends Error {
   readonly code: Code;

@@ -13,7 +13,7 @@ import type { MaybePromise } from "#/utils/type/util.type";
 import type { EventIntentCoverageTarget, EventIntentRequirement } from "./intents_map";
 
 /**
- * Shared fields present in all event result handler payloads.
+ * Shared fields present in event execution contexts and legacy result payloads.
  */
 export type BaseEventExecutionInfos = {
   /**

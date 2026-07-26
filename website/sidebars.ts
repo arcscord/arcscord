@@ -53,7 +53,7 @@ const sidebars: SidebarsConfig = {
         "guide/localization",
         "guide/logger",
         "guide/middleware",
-        "guide/result-handler",
+        "guide/execution-handlers",
         "guide/error-handling",
       ],
     },

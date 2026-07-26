@@ -11,7 +11,7 @@ import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 
 /**
- * Shared fields present in all command result handler payloads.
+ * Shared fields present in command execution contexts and legacy result payloads.
  */
 export type BaseCommandExecutionInfos = {
   /**

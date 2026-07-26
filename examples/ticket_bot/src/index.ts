@@ -4,12 +4,12 @@
  * Creates the {@link ArcClient} (a thin subclass of the discord.js `Client`),
  * configures its managers, then loads every handler and logs in.
  */
-import { ArcClient } from "arcscord";
+import { ArcClient, defaultCommandExecutionHandler } from "arcscord";
 import { GatewayIntentBits } from "discord.js";
 import en from "../locales/en.json";
 import fr from "../locales/fr.json";
 import handlers from "./handlers";
-import { commandResultHandler } from "./utils/command_result_handler";
+import { commandUsageExecutionHandler } from "./utils/command_execution_handler";
 import { readRequiredEnv } from "./utils/env";
 
 const token = readRequiredEnv("TOKEN");
@@ -52,10 +52,13 @@ const client = new ArcClient(token, {
       // Discord locales the command name/description localizations are built for.
       availableLanguages: ["en-US", "en-GB", "fr"],
     },
-    // Command manager: swap the default result handler for our own, which also
-    // records command usage. See utils/command_result_handler.ts.
+    // Command manager: keep Arcscord's default execution behavior around our
+    // command-usage interceptor. See utils/command_execution_handler.ts.
     command: {
-      resultHandler: commandResultHandler,
+      executionHandlers: [
+        defaultCommandExecutionHandler,
+        commandUsageExecutionHandler,
+      ],
     },
   },
   // Required for this example because handlers are loaded before `login()`.

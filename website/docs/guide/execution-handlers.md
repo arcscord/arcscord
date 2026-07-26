@@ -24,6 +24,34 @@ Code before `next()` runs in declaration order. Code after `next()` runs in
 reverse order. An execution handler can also skip `next()` to short-circuit the
 execution or return a transformed outcome.
 
+## Execution flow
+
+The default handler is an ordinary execution handler. With the configuration
+`[default, metrics, audit]`, execution enters the chain from top to bottom and
+unwinds from bottom to top:
+
+```mermaid
+flowchart TD
+  input["Discord interaction or event"] --> dispatch["Dispatch: resolve handler, build context, optionally defer"]
+  dispatch --> defaultBefore["Default execution handler<br/>await next()"]
+  defaultBefore --> metricsBefore["Metrics handler<br/>before next()"]
+  metricsBefore --> auditBefore["Audit handler<br/>before next()"]
+  auditBefore --> terminal{"Execution terminal"}
+  terminal --> middleware["Command/component middleware"]
+  middleware --> cancelled["Cancelled outcome"]
+  middleware --> run["Handler run()"]
+  run --> completed["Completed outcome<br/>success | failure | defect"]
+  cancelled --> auditAfter["Audit handler<br/>after next()"]
+  completed --> auditAfter
+  auditAfter --> metricsAfter["Metrics handler<br/>after next()"]
+  metricsAfter --> defaultAfter["Default execution behavior<br/>logs and optional error reply"]
+  defaultAfter --> done["Execution finished"]
+```
+
+Dispatch errors occur before the chain and continue to use
+`dispatchDiagnostics`. Events have no command/component middleware, so their
+terminal calls `run()` directly.
+
 ## Outcomes
 
 `next()` returns an `ExecutionOutcome`:

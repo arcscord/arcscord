@@ -187,7 +187,7 @@ export const riskyCommand = createCommand({
 
 `Result` is optional: a handler may return nothing, `string`, or `true` for a
 successful execution. Return `ok(...)` or `error(...)` only when you need an
-explicit typed result. Arcscord normalizes all of these forms before invoking
-the default `resultHandler`; thrown values are routed there separately. See
+explicit typed result. Arcscord normalizes all of these forms into an
+`ExecutionOutcome` consumed by the execution-handler chain. See
 [Error handling](/guide/error-handling) and
-[Result handlers](/guide/result-handler).
+[Execution handlers](/guide/execution-handlers).

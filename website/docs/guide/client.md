@@ -142,9 +142,9 @@ Per-manager configuration. All fields are optional.
 
 | Field | Manages | Documentation |
 |---|---|---|
-| `managers.command` | Slash, user, and message commands — result handler, dispatch diagnostics | [Result handler](/guide/result-handler) |
-| `managers.component` | Buttons, select menus, modals — result handler, dispatch diagnostics | [Result handler](/guide/result-handler) |
-| `managers.event` | Discord.js event listeners — intent checks, result handler | [Events](/guide/events) |
+| `managers.command` | Slash, user, and message commands — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
+| `managers.component` | Buttons, select menus, modals — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
+| `managers.event` | Discord.js event listeners — intent checks, execution handlers | [Execution handlers](/guide/execution-handlers) |
 | `managers.locale` | i18next integration — language map, detection, resources | [Localization](/guide/localization) |
 
 Example with event intent check configuration:
@@ -171,7 +171,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 |---|---|
 | `client.commandManager` | Registers commands with Discord and dispatches interactions. |
 | `client.componentManager` | Routes component custom IDs and dispatches interactions. |
-| `client.eventManager` | Wraps discord.js event listeners with result handling. |
+| `client.eventManager` | Wraps discord.js event listeners with execution handling. |
 | `client.localeManager` | i18next wrapper used at registration time and per interaction. |
 
 ## Methods
@@ -196,7 +196,7 @@ The previous numeric form remains supported: `waitReady(100)` sets `checkInterva
 
 Loading comes in two tiers with deliberately different error handling:
 
-- The **per-category loaders** (`loadCommands`, `loadComponents`, `loadEvents`) are `async` and return an Arcscord [`Result`](./result-handler.md) — `[error, count]`. On failure the first tuple item is an [`ArcscordError`](../reference/error-codes.md) whose `code` identifies the problem. They never throw for expected failures such as a duplicate route or an unmet intent requirement — you inspect the outcome.
+- The **per-category loaders** (`loadCommands`, `loadComponents`, `loadEvents`) are `async` and return an Arcscord [`Result`](./error-handling.md) — `[error, count]`. On failure the first tuple item is an [`ArcscordError`](../reference/error-codes.md) whose `code` identifies the problem. They never throw for expected failures such as a duplicate route or an unmet intent requirement — you inspect the outcome.
 - The **convenience `loadHandlers`** is a bootstrap helper that fails fast: it **throws** the first `ArcscordError` instead of returning it, so a broken startup crashes loudly rather than continuing in a half-wired state. Reach for the per-category loaders when you want to handle the failure yourself.
 
 ### `loadHandlers(handlers, logs?)`

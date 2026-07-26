@@ -23,8 +23,8 @@ template. A good reading order is:
    slash commands and buttons.
 6. `src/events/message_count.ts` and `src/commands/ticket_stats.ts` — an event
    handler, a Prisma counter and an autocomplete command option.
-7. `src/utils/command_result_handler.ts` and `src/commands/stats.ts` — replacing
-   the command result handler while preserving the default error behaviour.
+7. `src/utils/command_execution_handler.ts` and `src/commands/stats.ts` —
+   composing command-usage tracking with the default execution behaviour.
 
 ## Install
 
@@ -68,7 +68,7 @@ The base schema contains:
 - `Ticket`: one Discord thread ticket, including the opener, thread ID, modal fields, status, and close metadata.
 - `TicketEvent`: a lightweight audit trail for creation, claim, close, reopen, and notes.
 - `TicketParticipant`: one row per user seen in a ticket thread; holds the message count (read by `/ticketstats`) and a `removed` flag for members taken out of the thread on close.
-- `CommandUsage`: a global per-command counter, incremented by the custom command result handler and read back by `/stats`.
+- `CommandUsage`: a global per-command counter, incremented by the custom command execution handler and read back by `/stats`.
 
 After changing the schema, run:
 
@@ -146,12 +146,13 @@ counts as an ephemeral message. It works inside a ticket (defaults to the curren
 thread) or anywhere else via a `ticket` autocomplete option that searches the
 guild's tickets.
 
-### Command stats and the custom result handler
+### Command stats and the custom execution handler
 
-`src/utils/command_result_handler.ts` is wired through
-`managers.command.resultHandler` in `src/index.ts`. It runs after every command,
-increments the `CommandUsage` row for that command name, and then reproduces the
-framework's default logging and error reply.
+`src/utils/command_execution_handler.ts` is wired through
+`managers.command.executionHandlers` in `src/index.ts`. It runs after every
+command and increments the `CommandUsage` row for that command name. Arcscord's
+default execution handler wraps it to preserve the standard logging and error
+reply.
 
 `/stats` (needs `Manage Server`) reads those counters and replies with a monospace
 usage table as an ephemeral message in the current channel.
