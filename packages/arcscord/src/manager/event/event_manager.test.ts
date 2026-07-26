@@ -562,6 +562,10 @@ describe("event manager", () => {
       mode: "all",
       intents: ["Guilds", "GuildMembers"],
     });
+    expect(intentsMap.voiceServerUpdate).toEqual({
+      mode: "all",
+      intents: ["GuildVoiceStates"],
+    });
     expect(intentsMap.interactionCreate).toEqual({
       mode: "none",
     });
