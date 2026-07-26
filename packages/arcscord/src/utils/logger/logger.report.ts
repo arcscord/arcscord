@@ -8,6 +8,43 @@ const MAX_DEPTH = 3;
 const MAX_ARRAY_ITEMS = 20;
 const MAX_OBJECT_KEYS = 30;
 const MAX_STRING_LENGTH = 800;
+const SENSITIVE_KEY_PATTERN = /token|authorization|password|secret|cookie|api[_-]?key|private[_-]?key|credential/i;
+
+/**
+ * Redacts common secret representations embedded in free-form log text.
+ *
+ * Key-based object redaction remains the strongest protection. This textual
+ * pass covers the forms most often found in error messages and stack traces:
+ * assignments, authorization schemes, credentials in URLs, Discord webhook
+ * URLs, and Discord token shapes.
+ *
+ * @internal
+ */
+export function sanitizeLogText(value: string): string {
+  return value
+    .replace(
+      /((?:^|["'\s{,])["']?(?:authorization|cookie)["']?\s*[:=]\s*)(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,}][^\r\n,}]*)/gim,
+      "$1[redacted]",
+    )
+    .replace(
+      /((?:^|["'\s{,])["']?(?:token|password|secret|api[_-]?key|private[_-]?key|credential)["']?\s*[:=]\s*)(?:"[^"\r\n]*"|'[^'\r\n]*'|[^\s,;}\]]+)/gim,
+      "$1[redacted]",
+    )
+    .replace(/\b(Bearer|Bot|Basic)\s+[\w.~+/-]+={0,2}/gi, "$1 [redacted]")
+    .replace(
+      /(https?:\/\/)[^/\s:@]+:[^@\s/]+@/gi,
+      "$1[redacted]@",
+    )
+    .replace(
+      /(https?:\/\/(?:(?:canary|ptb)\.)?discord(?:app)?\.com\/api(?:\/v\d+)?\/webhooks\/\d+\/)[^/?#\s]+/gi,
+      "$1[redacted]",
+    )
+    .replace(/\bmfa\.[\w-]{20,}\b/g, "mfa.[redacted]")
+    .replace(
+      /\b[\w-]{20,}\.[\w-]{6}\.[\w-]{20,}\b/g,
+      "[redacted-discord-token]",
+    );
+}
 
 /**
  * Plain, JSON-safe representation of an error and its `cause` chain, produced
@@ -53,7 +90,7 @@ function sanitizeValue(value: unknown, depth = 0, seen = new WeakSet<object>()):
   }
 
   if (typeof value === "string") {
-    return truncateString(value);
+    return truncateString(sanitizeLogText(value));
   }
 
   if (typeof value === "symbol") {
@@ -67,7 +104,7 @@ function sanitizeValue(value: unknown, depth = 0, seen = new WeakSet<object>()):
   if (value instanceof Error) {
     return {
       type: value.name,
-      message: value.message,
+      message: sanitizeLogText(value.message),
     };
   }
 
@@ -94,10 +131,14 @@ function sanitizeValue(value: unknown, depth = 0, seen = new WeakSet<object>()):
   if (value instanceof Map) {
     return Array.from(value.entries())
       .slice(0, MAX_ARRAY_ITEMS)
-      .map(([key, item]) => [
-        sanitizeValue(key, depth + 1, seen),
-        sanitizeValue(item, depth + 1, seen),
-      ]);
+      .map(([key, item]) => {
+        return [
+          sanitizeValue(key, depth + 1, seen),
+          typeof key === "string" && SENSITIVE_KEY_PATTERN.test(key)
+            ? "[redacted]"
+            : sanitizeValue(item, depth + 1, seen),
+        ];
+      });
   }
 
   if (value instanceof Set) {
@@ -116,7 +157,7 @@ function sanitizeValue(value: unknown, depth = 0, seen = new WeakSet<object>()):
   const entries = Object.entries(value).slice(0, MAX_OBJECT_KEYS);
 
   for (const [key, item] of entries) {
-    if (/token|authorization|password|secret|cookie/i.test(key)) {
+    if (SENSITIVE_KEY_PATTERN.test(key)) {
       output[key] = "[redacted]";
       continue;
     }
@@ -130,6 +171,15 @@ function sanitizeValue(value: unknown, depth = 0, seen = new WeakSet<object>()):
   }
 
   return output;
+}
+
+/**
+ * Returns a sanitized copy of structured logger metadata.
+ *
+ * @internal
+ */
+export function sanitizeDebugValues(value: DebugValues): DebugValues {
+  return sanitizeValue(value) as DebugValues;
 }
 
 function stringifyValue(value: unknown): string {
@@ -147,15 +197,23 @@ function stringifyValue(value: unknown): string {
   }
 }
 
-function serializeError(error: unknown): SerializedError {
+function serializeError(error: unknown, seen = new WeakSet<object>()): SerializedError {
   if (error instanceof Error) {
-    const cause = error.cause ? serializeError(error.cause) : undefined;
+    if (seen.has(error)) {
+      return {
+        type: error.name,
+        message: "[Circular error cause]",
+      };
+    }
+    seen.add(error);
+
+    const cause = error.cause ? serializeError(error.cause, seen) : undefined;
 
     return {
       type: error.name,
       code: isArcscordError(error) ? error.code : undefined,
-      message: error.message,
-      stack: error.stack,
+      message: sanitizeLogText(error.message),
+      stack: error.stack ? sanitizeLogText(error.stack) : undefined,
       cause,
     };
   }
@@ -170,16 +228,16 @@ function serializeDebugs(error: unknown): DebugValues {
   if (!isArcscordError(error)) {
     return {};
   }
-  return sanitizeValue(error.metadata) as DebugValues;
+  return sanitizeDebugValues(error.metadata);
 }
 
 /**
  * Builds a sanitized {@link ErrorReport} from any thrown value.
  *
- * Redacts secret-looking keys (`token`, `password`, `authorization`, `secret`,
- * `cookie`), truncates oversized strings/collections, and unwraps
- * {@link ArcscordError} metadata and native cause chains. Reuse it in a custom `logError`
- * implementation instead of re-implementing sanitization.
+ * Redacts secret-looking keys and recognizable credentials embedded in messages,
+ * stack traces, and cause chains; truncates oversized strings/collections; and
+ * unwraps {@link ArcscordError} metadata and native causes. Reuse it in a custom
+ * `logError` implementation instead of re-implementing sanitization.
  *
  * @param error - The thrown value; if an array is given, its first element is used.
  * @param level - The severity to record on the report. Defaults to `"error"`.
@@ -195,7 +253,7 @@ export function createErrorReport(
   return {
     level,
     message: arcscordError
-      ? `${arcscordError.name} [${arcscordError.code}]: ${arcscordError.message}`
+      ? `${arcscordError.name} [${arcscordError.code}]: ${serialized.message}`
       : `${serialized.type}: ${serialized.message}`,
     error: serialized,
     debug: serializeDebugs(firstError),

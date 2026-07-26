@@ -29,22 +29,23 @@ jobs:
       id-token: write
     steps:
       - name: Checkout Project
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - name: Guard prerelease publishes without a dist-tag
+        env:
+          PACKAGE_NAME: ${{ inputs.package }}
+          PUBLISH_TAG: ${{ inputs.tag }}
         run: |
-          VERSION=$(grep -m1 '"version"' "packages/${{ inputs.package }}/package.json" | sed -E 's/.*"version": *"([^"]+)".*/\1/')
+          VERSION=$(node -p "require('./packages/' + process.env.PACKAGE_NAME + '/package.json').version")
           if [[ "$VERSION" == *-* && -z "$PUBLISH_TAG" ]]; then
             echo "::error::Version $VERSION looks like a prerelease but no dist-tag (tag input) was provided. Refusing to publish to 'latest'."
             exit 1
           fi
-        env:
-          PUBLISH_TAG: ${{ inputs.tag }}
       - name: Install pnpm
-        uses: pnpm/action-setup@v6
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         with:
           version: 11.8.0
       - name: Use Node.js v24.11.0
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24.11.0
           cache: pnpm

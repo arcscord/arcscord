@@ -223,7 +223,9 @@ function adaptDebug(namespace: string): LoggerInterface {
 
 ### Reusing the built-in error serialization
 
-Redacting secrets (`token`, `password`, `authorization`, `secret`, `cookie`), truncating large objects, and formatting cause chains is handled by `createErrorReport`/`renderErrorReport`/`renderJsonErrorReport`, exported from `arcscord`. Reuse them in a custom `logError` instead of re-implementing sanitization:
+ArcLogger redacts secret-looking metadata keys and recognizable credentials embedded in regular messages, error messages, stack traces, and cause chains. This covers common assignments such as `token=...`, authorization schemes, credential-bearing URLs, Discord webhook URLs, and Discord token shapes. Arbitrary unlabelled strings cannot be identified reliably, so applications should still avoid placing secrets in error messages.
+
+For custom loggers, redaction, large-object truncation, and cause-chain formatting are handled by `createErrorReport`/`renderErrorReport`/`renderJsonErrorReport`, exported from `arcscord`. Reuse them in a custom `logError` instead of re-implementing sanitization:
 
 ```ts
 import { createErrorReport, renderJsonErrorReport } from "arcscord";

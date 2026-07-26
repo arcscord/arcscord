@@ -2,7 +2,13 @@ import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
 import * as process from "node:process";
 import { stringifyDebugValues } from "#/utils";
-import { createErrorReport, renderErrorReport, renderJsonErrorReport } from "#/utils/logger/logger.report";
+import {
+  createErrorReport,
+  renderErrorReport,
+  renderJsonErrorReport,
+  sanitizeDebugValues,
+  sanitizeLogText,
+} from "#/utils/logger/logger.report";
 import {
   colorDebugValue,
   formatJsonLog,
@@ -142,7 +148,7 @@ export class ArcLogger implements LoggerInterface {
 
     const report = createErrorReport(error);
     if (meta) {
-      Object.assign(report.debug, meta);
+      Object.assign(report.debug, sanitizeDebugValues(meta));
     }
 
     const includeStack = this.errorDetail === "full";
@@ -172,7 +178,7 @@ export class ArcLogger implements LoggerInterface {
   fatalError(error: unknown, meta?: DebugValues): void {
     const report = createErrorReport(error, "fatal");
     if (meta) {
-      Object.assign(report.debug, meta);
+      Object.assign(report.debug, sanitizeDebugValues(meta));
     }
 
     const includeStack = this.errorDetail === "full";
@@ -196,18 +202,20 @@ export class ArcLogger implements LoggerInterface {
       return;
     }
 
-    const hasMeta = meta !== undefined && Object.keys(meta).length > 0;
+    const sanitizedMessage = sanitizeLogText(message);
+    const sanitizedMeta = meta ? sanitizeDebugValues(meta) : undefined;
+    const hasMeta = sanitizedMeta !== undefined && Object.keys(sanitizedMeta).length > 0;
     const useJson = shouldUseJsonLogs(this.logFormat);
 
     this.write(
       useJson
-        ? formatJsonLog(level, message, this.processName, meta)
-        : formatLog(level, message, this.processName),
+        ? formatJsonLog(level, sanitizedMessage, this.processName, sanitizedMeta)
+        : formatLog(level, sanitizedMessage, this.processName),
       level,
     );
 
     if (hasMeta && !useJson) {
-      for (const debug of stringifyDebugValues(meta)) {
+      for (const debug of stringifyDebugValues(sanitizedMeta)) {
         this.write(formatShortDebug(debug), level);
       }
     }

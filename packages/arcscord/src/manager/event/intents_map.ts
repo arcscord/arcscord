@@ -85,6 +85,7 @@ export const intentsMap: Record<keyof ClientEvents, EventIntentRequirement> = {
   inviteDelete: all("GuildInvites"),
 
   voiceStateUpdate: all("GuildVoiceStates"),
+  voiceServerUpdate: all("GuildVoiceStates"),
   voiceChannelEffectSend: all("GuildVoiceStates"),
 
   presenceUpdate: all("GuildPresences"),

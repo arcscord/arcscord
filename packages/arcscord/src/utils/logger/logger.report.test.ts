@@ -79,6 +79,27 @@ describe("logger.report", () => {
       });
     });
 
+    it("redacts sensitive Map entries", () => {
+      const error = new ArcscordError({
+        code: "COMMAND_VALIDATION_FAILED",
+        message: "failed",
+        metadata: {
+          rule: "test",
+          headers: new Map([
+            ["authorization", "Bearer map-secret"],
+            ["content-type", "application/json"],
+          ]),
+        },
+      });
+
+      const report = createErrorReport(error);
+
+      expect(report.debug.headers).toEqual([
+        ["authorization", "[redacted]"],
+        ["content-type", "application/json"],
+      ]);
+    });
+
     it("serializes Map and Set debug values as arrays", () => {
       const error = new ArcscordError({
         code: "COMMAND_VALIDATION_FAILED",
@@ -129,6 +150,60 @@ describe("logger.report", () => {
 
       expect(report.error).toEqual({ type: "NonError", message: "plain string failure" });
       expect(report.message).toBe("NonError: plain string failure");
+    });
+
+    it("redacts secrets from messages, stacks, and native causes", () => {
+      const inner = new Error("request failed with password=hunter2");
+      const outer = new Error("Authorization: Bearer outer-secret", { cause: inner });
+      outer.stack = [
+        "Error: Authorization: Bearer outer-secret",
+        "    at token=stack-secret",
+      ].join("\n");
+
+      const report = createErrorReport(outer);
+      const serialized = JSON.stringify(report);
+
+      expect(serialized).not.toContain("outer-secret");
+      expect(serialized).not.toContain("hunter2");
+      expect(serialized).not.toContain("stack-secret");
+      expect(report.error.message).toBe("Authorization: [redacted]");
+      expect(report.error.cause?.message).toBe("request failed with password=[redacted]");
+    });
+
+    it("redacts secrets from non-Error thrown strings", () => {
+      const report = createErrorReport("token=plain-secret");
+
+      expect(report.error.message).toBe("token=[redacted]");
+      expect(report.message).toBe("NonError: token=[redacted]");
+    });
+
+    it("redacts credential URLs, Discord webhooks, and Discord token shapes", () => {
+      const discordToken = `${"a".repeat(24)}.${"b".repeat(6)}.${"c".repeat(27)}`;
+      const report = createErrorReport(new Error([
+        "https://user:password@example.com/private",
+        "https://discord.com/api/webhooks/123456789/webhook-secret",
+        discordToken,
+      ].join(" ")));
+      const serialized = JSON.stringify(report);
+
+      expect(serialized).not.toContain("user:password");
+      expect(serialized).not.toContain("webhook-secret");
+      expect(serialized).not.toContain(discordToken);
+      expect(report.error.message).toContain("https://[redacted]@example.com/private");
+      expect(report.error.message).toContain("webhooks/123456789/[redacted]");
+      expect(report.error.message).toContain("[redacted-discord-token]");
+    });
+
+    it("handles a circular native cause without recursing forever", () => {
+      const error = new Error("outer") as Error & { cause?: unknown };
+      error.cause = error;
+
+      const report = createErrorReport(error);
+
+      expect(report.error.cause).toEqual({
+        type: "Error",
+        message: "[Circular error cause]",
+      });
     });
   });
 

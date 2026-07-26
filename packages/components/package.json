@@ -39,18 +39,18 @@
     "docs": "typedoc"
   },
   "dependencies": {
-    "discord-api-types": "^0.38.49"
+    "discord-api-types": "^0.38.51"
   },
   "peerDependencies": {
     "discord.js": "^14.26.4",
     "typescript": "^5.4.0 || ^6.0.0"
   },
   "devDependencies": {
-    "discord.js": "^14.26.4",
-    "tsdown": "0.22.4",
-    "typedoc": "^0.28.19",
+    "discord.js": "^14.27.0",
+    "tsdown": "0.22.14",
+    "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "vitest": "4.1.9"
+    "vitest": "4.1.10"
   },
   "engines": {
     "node": ">=24.11.0",
