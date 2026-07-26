@@ -14,8 +14,12 @@ import type { ComponentRunReturn } from "#/base/components/interaction/component
 import type { ComponentHandler, ModalComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { CompiledComponentRoute } from "#/base/components/interaction/route";
 import type {
+  ComponentExecutionContext,
+  ComponentExecutionHandler,
+  ComponentExecutionOutcome,
   ComponentList,
   ComponentManagerOptions,
+  ComponentResultHandler,
   ComponentResultHandlerInfos,
 } from "#/manager/component/component_manager.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
@@ -33,6 +37,7 @@ import {
   UserSelectMenuContext,
 } from "#/base/components/interaction/context/select_menu_context";
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
+import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
 import {
   ArcscordError,
@@ -44,6 +49,17 @@ import {
   normalizeHandlerReturn,
 } from "#/utils";
 import { validateComponentMiddlewareNames } from "#/utils/validator/middleware_validator";
+import {
+  componentResultHandlerAdapter,
+  defaultComponentExecutionHandler,
+  runDefaultComponentExecution,
+} from "./component_execution_handler";
+
+type NormalizedComponentManagerOptions = {
+  executionHandlers: readonly ComponentExecutionHandler[];
+  resultHandler: ComponentResultHandler;
+  dispatchDiagnostics: NonNullable<ComponentManagerOptions["dispatchDiagnostics"]>;
+};
 
 type MatchedComponent = {
   component: ComponentHandler;
@@ -64,17 +80,27 @@ export class ComponentManager extends BaseManager {
     modal: new Map<string, ModalComponentHandler>(),
   };
 
-  options: Required<ComponentManagerOptions>;
+  options: NormalizedComponentManagerOptions;
 
   private compiledRoutes = new WeakMap<ComponentHandler, CompiledComponentRoute>();
 
   constructor(client: ArcClient, options?: ComponentManagerOptions) {
     super(client, "component");
 
+    if (options?.executionHandlers !== undefined && options.resultHandler !== undefined) {
+      throw new TypeError("component executionHandlers and resultHandler are mutually exclusive");
+    }
+
+    const executionHandlers = options?.executionHandlers
+      ?? (options?.resultHandler
+        ? [componentResultHandlerAdapter(options.resultHandler)]
+        : [defaultComponentExecutionHandler]);
+
     this.options = {
-      resultHandler: this.defaultResultHandler.bind(this),
       dispatchDiagnostics: {},
       ...options,
+      executionHandlers,
+      resultHandler: options?.resultHandler ?? this.defaultResultHandler.bind(this),
     };
     client.on("interactionCreate", (interaction) => {
       if (interaction.isMessageComponent() || interaction.isModalSubmit()) {
@@ -377,30 +403,24 @@ export class ComponentManager extends BaseManager {
       );
     }
 
-    /* Middlewares */
     const startedAt = Date.now();
-    const middlewareExit = await this.runMiddleware(matched.component, context);
-    if (middlewareExit.status !== "success") {
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: middlewareExit,
-        component: matched.component,
-        interaction,
-        context,
-        locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-        incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      }, this));
-      return;
-    }
-    if (!this.handleMiddlewareResult(middlewareExit.value, context)) {
-      return;
-    }
+    const execution: ComponentExecutionContext = {
+      component: matched.component,
+      interaction,
+      context,
+      get defer() {
+        return context.defer;
+      },
+      locale,
+      ...createExecutionControls<string | true>(startedAt),
+    };
 
-    await this.executeComponent(matched.component, context, startedAt);
+    await this.runExecutionHandlers(
+      this.options.executionHandlers,
+      execution,
+      () => this.executeComponent(execution),
+      this,
+    );
   }
 
   /**
@@ -511,48 +531,29 @@ export class ComponentManager extends BaseManager {
     return ok(true);
   }
 
-  private handleMiddlewareResult(middlewareResult: object | false, context: ComponentContext): boolean {
-    if (!middlewareResult) {
-      return false;
+  private async executeComponent(
+    execution: ComponentExecutionContext,
+  ): Promise<ComponentExecutionOutcome> {
+    const { component, context } = execution;
+    const middlewareExit = await this.runMiddleware(component, context);
+
+    if (middlewareExit.status !== "success") {
+      return execution.complete(middlewareExit);
     }
+    if (!middlewareExit.value) {
+      return execution.cancel();
+    }
+    context.additional = middlewareExit.value as typeof context.additional;
 
-    context.additional = middlewareResult as typeof context.additional;
-    return true;
-  }
-
-  private async executeComponent(component: ComponentHandler, context: ComponentContext, startedAt: number): Promise<void> {
     try {
       // `component.run` and `context` are each unions correlated by construction
       // (see `createContext`'s exhaustive switch), but that link isn't provable
       // statically once both are widened back to their general union types here.
       const rawResult = await (component.run as (ctx: ComponentContext) => MaybePromise<ComponentRunReturn>)(context);
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: normalizeHandlerReturn(rawResult),
-        component,
-        interaction: context.interaction,
-        context,
-        locale: context.locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-      }, this));
+      return execution.complete(normalizeHandlerReturn(rawResult));
     }
     catch (e) {
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: executionDefect(e),
-        component,
-        interaction: context.interaction,
-        context,
-        locale: context.locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-        incidentId: crypto.randomUUID(),
-      }, this));
+      return execution.complete(executionDefect(e));
     }
   }
 
@@ -587,55 +588,23 @@ export class ComponentManager extends BaseManager {
   }
 
   /**
-   * Sends an error reply to a component interaction, respecting the defer state.
-   * Used by the default `defaultResultHandler`.
-   */
-  private async sendFailureReply(incidentId: string, infos: ComponentResultHandlerInfos): Promise<void> {
-    const message = this.client.getErrorMessage(incidentId, infos.locale);
-    try {
-      if (infos.defer) {
-        await infos.interaction.editReply(message);
-      }
-      else {
-        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
-      }
-    }
-    catch (e) {
-      this.logger.error("failed to send failure reply", {
-        baseError: anyToError(e).message,
-      });
-    }
-  }
-
-  /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    *
    * A custom `resultHandler` can call this to reuse the default behavior after
    * running its own logic: `return manager.defaultResultHandler(infos)`.
+   *
+   * @deprecated Use {@link defaultComponentExecutionHandler} in
+   * `executionHandlers`.
    */
   async defaultResultHandler(infos: ComponentResultHandlerInfos): Promise<void> {
-    const meta = {
-      route: infos.component.route,
-      interactionId: infos.interaction.id,
-      guildId: infos.interaction.guildId,
-      userId: infos.interaction.user.id,
+    return runDefaultComponentExecution(infos, {
+      kind: "completed",
+      exit: infos.exit,
+      startedAt: infos.startedAt,
+      endedAt: infos.endedAt,
       durationMs: infos.durationMs,
       incidentId: infos.incidentId,
-    };
-    if (infos.exit.status === "defect") {
-      const incidentId = infos.incidentId ?? crypto.randomUUID();
-      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    if (infos.exit.status === "failure") {
-      const incidentId = crypto.randomUUID();
-      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    this.logger.debug(`Component executed: ${infos.component.route}`, {
-      ...meta,
-      value: infos.exit.value,
-    });
+    }, this);
   }
 }

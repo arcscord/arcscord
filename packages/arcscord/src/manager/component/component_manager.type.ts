@@ -11,6 +11,11 @@ import type {
   UserSelectMenuComponentHandler,
 } from "#/base/components/interaction/component_handlers.type";
 import type { ComponentContext } from "#/base/components/interaction/context";
+import type {
+  ExecutionControls,
+  ExecutionHandler,
+  ExecutionOutcome,
+} from "#/base/manager/execution_handler";
 import type { ComponentManager } from "#/manager/component/component_manager.class";
 import type { ComponentDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
@@ -30,9 +35,9 @@ export type ComponentList = {
 };
 
 /**
- * Shared fields present in all component result handler payloads.
+ * Shared fields present in component execution contexts and legacy result payloads.
  */
-type BaseComponentResultHandlerInfos = {
+export type BaseComponentExecutionInfos = {
   /**
    * The loaded component handler.
    */
@@ -54,31 +59,38 @@ type BaseComponentResultHandlerInfos = {
   defer: boolean;
 
   /**
-   * Unix timestamp (ms) when the component started running.
-   */
-  startedAt: number;
-
-  /**
-   * Unix timestamp (ms) when the component finished running.
-   */
-  endedAt: number;
-
-  /** Total execution duration in milliseconds. */
-  durationMs: number;
-
-  /** Correlation ID generated for an unexpected defect. */
-  incidentId?: string;
-
-  /**
    * Detected i18next language for this interaction.
    */
   locale: string;
 };
 
-/** Payload received by `resultHandler` after every component execution. */
-export type ComponentResultHandlerInfos = BaseComponentResultHandlerInfos & {
+/**
+ * Payload received by `resultHandler` after every component execution.
+ *
+ * @deprecated Use {@link ComponentExecutionContext} and
+ * {@link ComponentExecutionOutcome}.
+ */
+export type ComponentResultHandlerInfos = BaseComponentExecutionInfos & {
   exit: ExecutionExit<string | true, unknown>;
+  startedAt: number;
+  endedAt: number;
+  durationMs: number;
+  incidentId?: string;
 };
+
+/** Context exposed to component execution interceptors. */
+export type ComponentExecutionContext = BaseComponentExecutionInfos
+  & ExecutionControls<string | true, unknown>;
+
+/** Outcome returned by component execution interceptors. */
+export type ComponentExecutionOutcome = ExecutionOutcome<string | true, unknown>;
+
+/** Koa-style interceptor around component middleware and `run()`. */
+export type ComponentExecutionHandler = ExecutionHandler<
+  ComponentExecutionContext,
+  ComponentExecutionOutcome,
+  ComponentManager
+>;
 
 /**
  * Handler called after every component `run()` execution, whether it returned
@@ -87,6 +99,8 @@ export type ComponentResultHandlerInfos = BaseComponentResultHandlerInfos & {
  * Receives the owning {@link ComponentManager} as a second argument so a custom
  * handler can run its own logic and then delegate to the framework default via
  * `manager.defaultResultHandler(infos)`.
+ *
+ * @deprecated Use {@link ComponentExecutionHandler}.
  */
 export type ComponentResultHandler = (
   infos: ComponentResultHandlerInfos,
@@ -96,21 +110,7 @@ export type ComponentResultHandler = (
 /**
  * Options for configuring the component manager.
  */
-export type ComponentManagerOptions = {
-  /**
-   * Custom result handler called after every component `run()` execution.
-   *
-   * Receives the normalized `infos.exit` regardless of whether `run()` returned
-   * or threw; check `infos.exit.status` to distinguish the cases. The owning
-   * manager is passed as the second argument, so a custom handler can do its own
-   * work and then delegate to the default behavior with
-   * `return manager.defaultResultHandler(infos)`.
-   *
-   * @default {@link ComponentManager.defaultResultHandler} — logs errors and
-   * sends `client.getErrorMessage(...)` to the user
-   */
-  resultHandler?: ComponentResultHandler;
-
+type BaseComponentManagerOptions = {
   /**
    * Per-case configuration for dispatch errors that occur before `run()` is
    * invoked (component not found, multiple matches, defer failure, etc.).
@@ -120,3 +120,32 @@ export type ComponentManagerOptions = {
    */
   dispatchDiagnostics?: ComponentDispatchDiagnostics;
 };
+
+type ComponentExecutionHandlerOptions = {
+  /**
+   * Ordered Koa-style interceptors around component middleware and `run()`.
+   *
+   * Providing this option replaces Arcscord's default execution handler.
+   */
+  executionHandlers?: readonly ComponentExecutionHandler[];
+  resultHandler?: never;
+};
+
+type LegacyComponentResultHandlerOptions = {
+  executionHandlers?: never;
+
+  /**
+   * Custom result handler called after every component `run()` execution.
+   *
+   * @deprecated Use {@link ComponentManagerOptions.executionHandlers}.
+   */
+  resultHandler?: ComponentResultHandler;
+};
+
+/**
+ * Options for configuring the component manager.
+ *
+ * `executionHandlers` and the deprecated `resultHandler` are mutually exclusive.
+ */
+export type ComponentManagerOptions = BaseComponentManagerOptions
+  & (ComponentExecutionHandlerOptions | LegacyComponentResultHandlerOptions);

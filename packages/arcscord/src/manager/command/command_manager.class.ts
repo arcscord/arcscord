@@ -19,10 +19,15 @@ import type {
 } from "#/base/command/command_definition.type";
 import type { Option, OptionsList } from "#/base/command/option.type";
 import type {
+  CommandExecutionContext,
+  CommandExecutionHandler,
+  CommandExecutionOutcome,
   CommandManagerOptions,
+  CommandResultHandler,
   CommandResultHandlerImplementer,
   CommandResultHandlerInfos,
 } from "#/manager/command/command_manager.type";
+import type { CommandRegistrationConfig } from "#/manager/command/command_registration";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 import type { ApplicationCommandRegistration } from "./command_registration";
 import { anyToError, error, ok } from "@arcscord/error";
@@ -30,7 +35,6 @@ import { ApplicationCommandType } from "discord-api-types/v10";
 import { MessageFlags } from "discord.js";
 import {
   AutocompleteContext,
-  commandInteractionToString,
   hasAutocomplete,
   hasMessageCommand,
   hasSlashCommand,
@@ -42,6 +46,7 @@ import {
 } from "#/base/command";
 import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transformer";
 import { parseOptions } from "#/base/command/option_parser";
+import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
 import {
   ArcscordError,
@@ -56,9 +61,21 @@ import {
 import { applyDiagnosticLevel } from "#/utils/error/run_normalize";
 import { validateCommandMiddlewareNames } from "#/utils/validator/middleware_validator";
 import {
+  commandResultHandlerAdapter,
+  defaultCommandExecutionHandler,
+  runDefaultCommandExecution,
+} from "./command_execution_handler";
+import {
   normalizeCommandRegistrationConfig,
   registerCommands,
 } from "./command_registration";
+
+type NormalizedCommandManagerOptions = {
+  executionHandlers: readonly CommandExecutionHandler[];
+  resultHandler: CommandResultHandler;
+  registration: Required<CommandRegistrationConfig>;
+  dispatchDiagnostics: NonNullable<CommandManagerOptions["dispatchDiagnostics"]>;
+};
 
 /**
  * The `CommandManager` class is responsible for managing commands;
@@ -68,15 +85,25 @@ export class CommandManager
   implements CommandResultHandlerImplementer {
   commands: Map<string, Command> = new Map();
 
-  options: Required<CommandManagerOptions>;
+  options: NormalizedCommandManagerOptions;
 
   constructor(client: ArcClient, options?: CommandManagerOptions) {
     super(client, "command");
 
+    if (options?.executionHandlers !== undefined && options.resultHandler !== undefined) {
+      throw new TypeError("command executionHandlers and resultHandler are mutually exclusive");
+    }
+
+    const executionHandlers = options?.executionHandlers
+      ?? (options?.resultHandler
+        ? [commandResultHandlerAdapter(options.resultHandler)]
+        : [defaultCommandExecutionHandler]);
+
     this.options = {
-      resultHandler: this.defaultResultHandler.bind(this),
       dispatchDiagnostics: {},
       ...options,
+      executionHandlers,
+      resultHandler: options?.resultHandler ?? this.defaultResultHandler.bind(this),
       registration: normalizeCommandRegistrationConfig(options?.registration),
     };
 
@@ -827,61 +854,46 @@ export class CommandManager
     }
 
     const startedAt = Date.now();
+    const execution: CommandExecutionContext = {
+      interaction,
+      command,
+      context: context as CommandContext,
+      locale,
+      get defer() {
+        return context.defer;
+      },
+      ...createExecutionControls<string | true>(startedAt),
+    };
 
-    /* Middlewares */
-    const middlewareExit = await this.runMiddleware(command, context as CommandContext);
+    await this.runExecutionHandlers(
+      this.options.executionHandlers,
+      execution,
+      () => this.executeCommand(execution),
+      this,
+    );
+  }
+
+  private async executeCommand(
+    execution: CommandExecutionContext,
+  ): Promise<CommandExecutionOutcome> {
+    const { command, context } = execution;
+    const middlewareExit = await this.runMiddleware(command, context);
+
     if (middlewareExit.status !== "success") {
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: middlewareExit,
-        interaction,
-        command,
-        context: context as CommandContext,
-        locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-        incidentId: middlewareExit.status === "defect" ? crypto.randomUUID() : undefined,
-      }, this));
-      return;
+      return execution.complete(middlewareExit);
     }
     if (!middlewareExit.value) {
-      return;
+      return execution.cancel();
     }
     context.additional = middlewareExit.value as typeof context.additional;
 
-    /* Command Run */
     try {
       const run = command.run as (ctx: CommandContext) => ReturnType<AnyCommandHandler["run"]>;
-      const rawResult = await run(context as CommandContext);
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: normalizeHandlerReturn(rawResult),
-        interaction,
-        command,
-        context: context as CommandContext,
-        locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-      }, this));
+      const rawResult = await run(context);
+      return execution.complete(normalizeHandlerReturn(rawResult));
     }
     catch (e) {
-      const endedAt = Date.now();
-      await this.runResultHandler(() => this.options.resultHandler({
-        exit: executionDefect(e),
-        interaction,
-        command,
-        context: context as CommandContext,
-        locale,
-        defer: context.defer,
-        startedAt,
-        endedAt,
-        durationMs: endedAt - startedAt,
-        incidentId: crypto.randomUUID(),
-      }, this));
+      return execution.complete(executionDefect(e));
     }
   }
 
@@ -984,58 +996,23 @@ export class CommandManager
   }
 
   /**
-   * Sends an error reply to a command interaction, respecting the defer state.
-   * Used by the default `defaultResultHandler`.
-   */
-  private async sendFailureReply(
-    incidentId: string,
-    infos: CommandResultHandlerInfos,
-  ): Promise<void> {
-    const message = this.client.getErrorMessage(incidentId, infos.locale);
-    try {
-      if (infos.defer) {
-        await infos.interaction.editReply(message);
-      }
-      else {
-        await infos.interaction.reply({ ...message, flags: MessageFlags.Ephemeral });
-      }
-    }
-    catch (e) {
-      this.logger.error("failed to send failure reply", {
-        baseError: anyToError(e).message,
-      });
-    }
-  }
-
-  /**
    * Default result handler.
    * Logs errors, sends an ephemeral error reply, and logs successful executions at debug level.
    *
    * A custom `resultHandler` can call this to reuse the default behavior after
    * running its own logic: `return manager.defaultResultHandler(infos)`.
+   *
+   * @deprecated Use {@link defaultCommandExecutionHandler} in
+   * `executionHandlers`.
    */
   async defaultResultHandler(infos: CommandResultHandlerInfos): Promise<void> {
-    const meta = {
-      command: infos.interaction.commandName,
-      interactionId: infos.interaction.id,
-      guildId: infos.interaction.guildId,
-      userId: infos.interaction.user.id,
+    return runDefaultCommandExecution(infos, {
+      kind: "completed",
+      exit: infos.exit,
+      startedAt: infos.startedAt,
+      endedAt: infos.endedAt,
       durationMs: infos.durationMs,
       incidentId: infos.incidentId,
-    };
-    if (infos.exit.status === "defect") {
-      const incidentId = infos.incidentId ?? crypto.randomUUID();
-      this.logger.logError(infos.exit.defect, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    if (infos.exit.status === "failure") {
-      const incidentId = crypto.randomUUID();
-      this.logger.logError(infos.exit.failure, { ...meta, incidentId });
-      return this.sendFailureReply(incidentId, infos);
-    }
-    this.logger.debug(`Command executed: ${commandInteractionToString(infos.interaction)}`, {
-      ...meta,
-      value: infos.exit.value,
-    });
+    }, this);
   }
 }

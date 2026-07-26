@@ -3,9 +3,11 @@ import type { ArcClient } from "#/base/client/client.class";
 import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { DiagnosticLevel, DispatchErrorConfig, DispatchMessageContext } from "#/utils/error/dispatch.type";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
+import type { ExecutionHandler, ExecutionNext } from "./execution_handler";
 import { anyToError } from "@arcscord/error";
 import { MessageFlags } from "discord.js";
 import { applyDiagnosticLevel } from "#/utils/error/run_normalize";
+import { composeExecutionHandlers } from "./execution_handler";
 
 /**
  * Abstract class representing a base manager that all other managers should extend.
@@ -59,12 +61,31 @@ export abstract class BaseManager {
   }
 
   /**
+   * Runs an execution interceptor chain without allowing a broken custom
+   * interceptor to escape into Discord.js' event emitter.
+   */
+  protected async runExecutionHandlers<C, O, M extends BaseManager>(
+    handlers: readonly ExecutionHandler<C, O, M>[],
+    execution: C,
+    terminal: ExecutionNext<O>,
+    manager: M,
+  ): Promise<O | undefined> {
+    try {
+      return await composeExecutionHandlers(handlers, execution, terminal, manager);
+    }
+    catch (e) {
+      this.logger.logError(e, { source: "executionHandler" });
+      return undefined;
+    }
+  }
+
+  /**
    * Applies a dispatch error config: logs at the configured level and
    * optionally sends an ephemeral reply to the user.
    *
    * Use this for pre-`run()` failures (command not found, option parsing
-   * error, defer failure, etc.). Errors during `run()` or middleware should
-   * be forwarded to `resultHandler` instead.
+   * error, defer failure, etc.). Errors during `run()` or middleware flow
+   * through the execution-handler chain instead.
    *
    * @param config - The dispatch config from manager options (may be undefined).
    * @param defaultLevel - Fallback level when `config.level` is not set.

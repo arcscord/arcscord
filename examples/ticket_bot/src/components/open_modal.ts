@@ -83,7 +83,7 @@ export const ticketOpenModal = createModal({
 
     const channel = await ctx.client.channels.fetch(ctx.interaction.channelId || "");
     if (!channel || channel.type !== ChannelType.GuildText) {
-      // Returning an `error(...)` result routes to the component result handler,
+      // Returning an `error(...)` result routes through the component execution handlers,
       // which logs it and shows the user a generic error message.
       return error({
         _tag: "InvalidTicketChannel",

@@ -25,8 +25,7 @@ export type CommandRunResult<E extends NonNullish = NonNullish> = Result<string 
 /**
  * All values a `run()` function may return.
  *
- * The manager normalizes these to a {@link CommandRunResult} before calling
- * the result handler:
+ * The manager normalizes these into the command {@link ExecutionOutcome}:
  * - `void` / `undefined` → `ok(true)`
  * - `string` or `true` → `ok(value)`
  * - `Result<string | true, E>` → normalized as an expected failure or success
@@ -87,8 +86,8 @@ export type CommandExtras<
    * Command execution function.
    *
    * May return `void`, a plain `string`, `true`, or a full
-   * `Result<string | true, E>`. The manager normalizes all forms
-   * before calling the result handler.
+   * `Result<string | true, E>`. The manager normalizes all forms before the
+   * execution-handler chain unwinds.
    *
    * @param ctx - The command context.
    */

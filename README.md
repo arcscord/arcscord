@@ -30,7 +30,7 @@ Full, runnable bots showing how the pieces fit together. See the [`examples/`](h
 
 - `starter-bot` - [source](https://github.com/arcscord/arcscord/tree/main/examples/starter-bot) - The smallest end-to-end bot: typed commands, a self-updating button, a middleware, and an event.
 - `reminder-bot` - [source](https://github.com/arcscord/arcscord/tree/main/examples/reminder-bot) - Personal reminders in SQLite with a background scheduler and subcommands.
-- `ticket_bot` - [source](https://github.com/arcscord/arcscord/tree/main/examples/ticket_bot) - A full ticket system with Prisma, i18n, modals, and a custom result handler.
+- `ticket_bot` - [source](https://github.com/arcscord/arcscord/tree/main/examples/ticket_bot) - A full ticket system with Prisma, i18n, modals, and a custom execution handler.
 
 ## Contributors ✨
 

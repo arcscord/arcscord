@@ -92,7 +92,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadEvents([messageEvent, readyEvent]);
 ```
 
-`loadEvents` is async and returns a [`Result`](./result-handler.md) with the number of loaded handlers. Duplicate handler names and unmet intent requirements surface as an `ArcscordError` failure (`EVENT_HANDLER_DUPLICATE` / `EVENT_INTENT_MISSING`) instead of throwing:
+`loadEvents` is async and returns a [`Result`](./error-handling.md) with the number of loaded handlers. Duplicate handler names and unmet intent requirements surface as an `ArcscordError` failure (`EVENT_HANDLER_DUPLICATE` / `EVENT_INTENT_MISSING`) instead of throwing:
 
 ```ts
 const [err, loadedEvents] = await client.loadEvents([messageEvent, readyEvent]);

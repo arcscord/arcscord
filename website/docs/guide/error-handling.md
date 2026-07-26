@@ -33,7 +33,7 @@ const failure = new ArcscordError({
 
 Use `error.code` for control flow; messages are descriptive and may change. See [Arcscord error codes](../reference/error-codes.md).
 
-Incident IDs belong to an execution failure, not to the error object. Default result handlers generate them for defects so the same ID can appear in logs and the user-facing error message.
+Incident IDs belong to an execution failure, not to the error object. Default execution handlers generate them for defects so the same ID can appear in logs and the user-facing error message.
 
 ## Context helpers
 

@@ -1,14 +1,19 @@
 import type { CommandInteraction } from "discord.js";
 import type { AnyCommandHandler, AnySubCommandHandler, CommandContext } from "#/base";
+import type {
+  ExecutionControls,
+  ExecutionHandler,
+  ExecutionOutcome,
+} from "#/base/manager/execution_handler";
 import type { CommandManager } from "#/manager/command/command_manager.class";
 import type { CommandRegistrationConfig } from "#/manager/command/command_registration";
 import type { CommandDispatchDiagnostics } from "#/utils/error/dispatch.type";
 import type { ExecutionExit } from "#/utils/error/execution_exit";
 
 /**
- * Shared fields present in all command result handler payloads.
+ * Shared fields present in command execution contexts and legacy result payloads.
  */
-type BaseCommandResultHandlerInfos = {
+export type BaseCommandExecutionInfos = {
   /**
    * The Discord.js interaction.
    */
@@ -34,27 +39,35 @@ type BaseCommandResultHandlerInfos = {
    */
   defer: boolean;
 
-  /**
-   * Unix timestamp (ms) when the command started running.
-   */
+};
+
+/**
+ * Payload received by `resultHandler` after every command execution.
+ *
+ * @deprecated Use {@link CommandExecutionContext} and
+ * {@link CommandExecutionOutcome}.
+ */
+export type CommandResultHandlerInfos = BaseCommandExecutionInfos & {
+  exit: ExecutionExit<string | true, unknown>;
   startedAt: number;
-
-  /**
-   * Unix timestamp (ms) when the command finished running.
-   */
   endedAt: number;
-
-  /** Total execution duration in milliseconds. */
   durationMs: number;
-
-  /** Correlation ID generated for an unexpected defect. */
   incidentId?: string;
 };
 
-/** Payload received by `resultHandler` after every command execution. */
-export type CommandResultHandlerInfos = BaseCommandResultHandlerInfos & {
-  exit: ExecutionExit<string | true, unknown>;
-};
+/** Context exposed to command execution interceptors. */
+export type CommandExecutionContext = BaseCommandExecutionInfos
+  & ExecutionControls<string | true, unknown>;
+
+/** Outcome returned by command execution interceptors. */
+export type CommandExecutionOutcome = ExecutionOutcome<string | true, unknown>;
+
+/** Koa-style interceptor around command middleware and `run()`. */
+export type CommandExecutionHandler = ExecutionHandler<
+  CommandExecutionContext,
+  CommandExecutionOutcome,
+  CommandManager
+>;
 
 /**
  * Handler called after every command `run()` execution, whether it returned
@@ -63,6 +76,8 @@ export type CommandResultHandlerInfos = BaseCommandResultHandlerInfos & {
  * Receives the owning {@link CommandManager} as a second argument so a custom
  * handler can run its own logic and then delegate to the framework default via
  * `manager.defaultResultHandler(infos)`.
+ *
+ * @deprecated Use {@link CommandExecutionHandler}.
  */
 export type CommandResultHandler = (
   infos: CommandResultHandlerInfos,
@@ -79,21 +94,7 @@ export type CommandResultHandlerImplementer = {
 /**
  * Options for configuring the command manager.
  */
-export type CommandManagerOptions = {
-  /**
-   * Custom result handler called after every `run()` execution.
-   *
-   * Receives the normalized `infos.exit` regardless of whether `run()` returned
-   * or threw; check `infos.exit.status` to distinguish the cases. The owning
-   * manager is passed as the second argument, so a custom handler can do its own
-   * work and then delegate to the default behavior with
-   * `return manager.defaultResultHandler(infos)`.
-   *
-   * @default {@link CommandManager.defaultResultHandler} — logs errors and sends
-   * `client.getErrorMessage(...)` to the user
-   */
-  resultHandler?: CommandResultHandler;
-
+type BaseCommandManagerOptions = {
   /**
    * Controls how loaded commands are synchronized with Discord per scope.
    *
@@ -111,3 +112,34 @@ export type CommandManagerOptions = {
    */
   dispatchDiagnostics?: CommandDispatchDiagnostics;
 };
+
+type CommandExecutionHandlerOptions = {
+  /**
+   * Ordered Koa-style interceptors around command middleware and `run()`.
+   *
+   * Providing this option replaces Arcscord's default execution handler. Add
+   * {@link defaultCommandExecutionHandler} explicitly to reuse the default
+   * logging and error replies.
+   */
+  executionHandlers?: readonly CommandExecutionHandler[];
+  resultHandler?: never;
+};
+
+type LegacyCommandResultHandlerOptions = {
+  executionHandlers?: never;
+
+  /**
+   * Custom result handler called after every `run()` execution.
+   *
+   * @deprecated Use {@link CommandManagerOptions.executionHandlers}.
+   */
+  resultHandler?: CommandResultHandler;
+};
+
+/**
+ * Options for configuring the command manager.
+ *
+ * `executionHandlers` and the deprecated `resultHandler` are mutually exclusive.
+ */
+export type CommandManagerOptions = BaseCommandManagerOptions
+  & (CommandExecutionHandlerOptions | LegacyCommandResultHandlerOptions);

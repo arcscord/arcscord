@@ -9,8 +9,7 @@ export type ComponentRunResult<E extends NonNullish = NonNullish> = Result<true 
 /**
  * All values a component `run()` function may return.
  *
- * The manager normalizes these to a {@link ComponentRunResult} before calling
- * the result handler:
+ * The manager normalizes these into the component {@link ExecutionOutcome}:
  * - `void` / `undefined` → `ok(true)`
  * - `string` or `true` → `ok(value)`
  * - `Result<true | string, E>` → normalized as an expected failure or success

@@ -54,6 +54,66 @@ async function dispatch(manager: ComponentManager, interaction: unknown): Promis
 }
 
 describe("component manager pipeline", () => {
+  it("runs execution handlers around component run() and exposes defects", async () => {
+    const calls: string[] = [];
+    let defect: unknown;
+    const { manager } = createManagerWithClient({
+      executionHandlers: [
+        async (execution, next) => {
+          calls.push(`before:${execution.component.route}`);
+          const outcome = await next();
+          calls.push("after");
+          if (outcome.kind === "completed" && outcome.exit.status === "defect") {
+            defect = outcome.exit.defect;
+          }
+          return outcome;
+        },
+      ],
+    });
+    const thrown = new Error("component boom");
+    const run = vi.fn(() => {
+      calls.push("run");
+      throw thrown;
+    });
+    manager.loadComponent(createButton({
+      route: "greet",
+      build: id => button({ customId: id(), label: "Greet", style: "primary" }),
+      run,
+    }));
+
+    await dispatch(manager, createMockButtonInteraction({ customId: "greet" }));
+
+    expect(defect).toBe(thrown);
+    expect(calls).toEqual(["before:greet", "run", "after"]);
+  });
+
+  it("lets an execution handler short-circuit a component", async () => {
+    const { manager } = createManagerWithClient({
+      executionHandlers: [
+        execution => execution.cancel(),
+      ],
+    });
+    const run = vi.fn(async ctx => ctx.ok());
+    manager.loadComponent(createButton({
+      route: "greet",
+      build: id => button({ customId: id(), label: "Greet", style: "primary" }),
+      run,
+    }));
+
+    await dispatch(manager, createMockButtonInteraction({ customId: "greet" }));
+
+    expect(run).not.toHaveBeenCalled();
+  });
+
+  it("rejects resultHandler and executionHandlers together at runtime", () => {
+    const client = createMockClient();
+
+    expect(() => new ComponentManager(client, {
+      executionHandlers: [],
+      resultHandler: () => {},
+    } as never)).toThrow("component executionHandlers and resultHandler are mutually exclusive");
+  });
+
   describe("full interactionCreate pipeline (via client.on)", () => {
     it("dispatches a button interaction emitted on the client through to resultHandler", async () => {
       const resultHandler = vi.fn();
@@ -671,8 +731,9 @@ describe("component manager pipeline", () => {
       expect(manager.logger.warn).toHaveBeenCalled();
     });
 
-    it("uses editReply instead of reply for the default resultHandler when defer is true", async () => {
+    it("uses editReply through the default execution handler when defer is true", async () => {
       const { manager } = createManagerWithClient();
+      const legacySpy = vi.spyOn(manager, "defaultResultHandler");
 
       const handler = createButton({
         route: "greet",
@@ -690,9 +751,10 @@ describe("component manager pipeline", () => {
       expect(interaction.deferReply).toHaveBeenCalledOnce();
       expect(interaction.editReply).toHaveBeenCalledOnce();
       expect(interaction.reply).not.toHaveBeenCalled();
+      expect(legacySpy).not.toHaveBeenCalled();
     });
 
-    it("uses reply for the default resultHandler when there was no defer", async () => {
+    it("uses reply through the default execution handler when there was no defer", async () => {
       const { manager } = createManagerWithClient();
 
       const handler = createButton({
