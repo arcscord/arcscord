@@ -13,6 +13,7 @@ import {
   createWebhookHandler,
   WebhookEventType,
 } from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
 import {
   ArcClient,
   button,
@@ -30,6 +31,7 @@ const webhooks = createWebhookHandler({
 });
 assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components ESM failed");
 assert.equal(typeof webhooks.handleRequest, "function", "standalone webhooks ESM failed");
+assert.equal(typeof createWebhookTestClient, "function", "webhooks testing subpath ESM failed");
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 

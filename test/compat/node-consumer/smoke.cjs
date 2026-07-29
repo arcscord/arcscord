@@ -15,6 +15,7 @@ const {
   createWebhookHandler,
   WebhookEventType,
 } = require("@arcscord/webhooks");
+const { createWebhookTestClient } = require("@arcscord/webhooks/testing");
 const {
   ArcClient,
   button,
@@ -32,6 +33,7 @@ const webhooks = createWebhookHandler({
 });
 assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components CJS failed");
 assert.equal(typeof webhooks.handleRaw, "function", "standalone webhooks CJS failed");
+assert.equal(typeof createWebhookTestClient, "function", "webhooks testing subpath CJS failed");
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 

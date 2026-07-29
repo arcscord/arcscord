@@ -59,6 +59,7 @@ const packages = [
     dir: "packages/webhooks",
     slug: "webhooks",
     tsconfig: "packages/webhooks/tsconfig.json",
+    docsEntryPoints: ["src/testing/index.ts"],
   },
 ];
 

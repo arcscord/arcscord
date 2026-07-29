@@ -13,6 +13,7 @@ import {
   createWebhookHandler,
   WebhookEventType,
 } from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
 import {
   ArcClient,
   buildModal,
@@ -54,6 +55,9 @@ const webhooks = createWebhookHandler({
   },
 });
 void webhooks;
+
+const testClient = createWebhookTestClient();
+void testClient;
 
 const command = createCommand({
   slash: {

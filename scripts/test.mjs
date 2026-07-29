@@ -12,6 +12,7 @@ const targets = [
   ["@arcscord/error", "packages/error"],
   ["@arcscord/middleware", "packages/middleware"],
   ["@arcscord/webhooks", "packages/webhooks"],
+  ["@arcscord/webhooks framework integrations", "test/webhooks_frameworks"],
   ["scripts", "scripts/tests"],
 ];
 

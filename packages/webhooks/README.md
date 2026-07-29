@@ -19,6 +19,19 @@ It works on its own and has no dependency on `arcscord` or `discord.js`.
 pnpm add @arcscord/webhooks
 ```
 
+## Officially tested integrations
+
+The package runs integration tests against real framework request pipelines:
+
+| Runtime/API | Officially tested integrations |
+| --- | --- |
+| Fetch `Request`/`Response` | Next.js App Router, SvelteKit, React Router/Remix, Astro, Cloudflare Workers |
+| Fetch-native routers | Hono 4, H3 2 / Nitro 3 |
+| Node raw body | Express 5, Fastify 5, Koa 3 |
+| Bun | Elysia 1.4 |
+
+Framework dependencies live only in the repository's integration-test workspace. They are not dependencies or peers of the published package.
+
 ## Fetch API frameworks
 
 `handleRequest()` accepts a standard Fetch `Request`. Return its `response` immediately, and attach `completion` to the framework's background-task mechanism when one is available:
@@ -68,9 +81,6 @@ app.post("/discord/webhooks", express.raw({ type: "application/json" }), async (
     timestamp: request.get("X-Signature-Timestamp"),
   });
 
-  for (const [name, value] of Object.entries(result.response.headers))
-    response.setHeader(name, value);
-
   response.status(result.response.status);
   for (const [name, value] of Object.entries(result.response.headers))
     response.setHeader(name, value);
@@ -85,6 +95,41 @@ app.post("/discord/webhooks", express.raw({ type: "application/json" }), async (
 ```
 
 `handleRaw()` accepts a string, `Uint8Array`, or `ArrayBuffer`. Do not pass a parsed JSON object or reserialized body because that changes the signed bytes.
+
+Fastify can preserve the signed bytes with a route-scoped buffer content-type parser:
+
+```ts
+fastify.addContentTypeParser(
+  "application/json",
+  { parseAs: "buffer" },
+  (_request, body, done) => done(null, body),
+);
+```
+
+## Signed integration-test client
+
+The testing subpath creates a fresh Ed25519 key pair and Discord-shaped signed requests without starting a server:
+
+```ts
+import { createWebhookHandler, WebhookEventType } from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
+
+const discord = await createWebhookTestClient();
+const webhooks = createWebhookHandler({
+  publicKey: discord.publicKey,
+  handlers: {
+    [WebhookEventType.QuestUserEnrollment]: () => {},
+  },
+});
+
+const request = await discord.createEventRequest("https://example.test/webhooks", {
+  type: WebhookEventType.QuestUserEnrollment,
+  data: undefined,
+});
+const { response, completion } = await webhooks.handleRequest(request);
+```
+
+Use `sendPing()`, `sendEvent()`, or `sendUnknownEvent()` to exercise a listening test server through global `fetch`, or inject another Fetch implementation through `createWebhookTestClient({ fetch })`.
 
 ## Dispatch completion
 

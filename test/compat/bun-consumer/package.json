@@ -13,7 +13,8 @@
     "@arcscord/error": "file:vendor/error.tgz",
     "@arcscord/webhooks": "file:vendor/webhooks.tgz",
     "arcscord": "file:vendor/arcscord.tgz",
-    "discord.js": "^14.26.4"
+    "discord.js": "^14.26.4",
+    "elysia": "^1.4.29"
   },
   "overrides": {
     "@arcscord/components": "file:vendor/components.tgz",

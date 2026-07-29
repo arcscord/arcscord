@@ -1,0 +1,30 @@
+{
+  "name": "@arcscord/webhooks-framework-tests",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Executed framework integration tests for @arcscord/webhooks",
+  "scripts": {
+    "test": "vitest run",
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@arcscord/webhooks": "workspace:*",
+    "express": "^5.2.1",
+    "fastify": "^5.10.0",
+    "h3": "2.0.1-rc.25",
+    "hono": "^4.12.32",
+    "koa": "^3.2.1",
+    "light-my-request": "^6.6.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.0",
+    "@types/koa": "^3.0.0",
+    "@types/node": "^24.13.3",
+    "typescript": "^6.0.3",
+    "vitest": "4.1.10"
+  },
+  "engines": {
+    "node": ">=24.11.0"
+  }
+}

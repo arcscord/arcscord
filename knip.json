@@ -49,9 +49,6 @@
       ]
     },
     "packages/webhooks": {
-      "entry": [
-        "src/index.ts"
-      ],
       "project": [
         "src/**/*.ts"
       ]
@@ -77,6 +74,17 @@
     "test/logger_demo": {
       "project": [
         "src/**/*.ts"
+      ]
+    },
+    "test/compat/bun-consumer": {
+      "entry": [
+        "*.ts"
+      ],
+      "ignoreDependencies": [
+        "@arcscord/error"
+      ],
+      "project": [
+        "*.ts"
       ]
     }
   }

@@ -30,6 +30,26 @@ Copy the application public key from the Discord Developer Portal. Do not use th
 DISCORD_PUBLIC_KEY=your_application_public_key
 ```
 
+## Official support matrix
+
+Every integration in this table is executed in the repository test suite with a real signed Ed25519 request. “Fetch contract” means the framework passes the standard `Request` to the route and accepts the returned `Response`; “framework integration” additionally executes that framework's router or raw-body parser.
+
+| Framework/runtime | Tested API | Coverage |
+| --- | --- | --- |
+| Next.js App Router | `POST(request: Request)` | Fetch contract |
+| SvelteKit | `POST({ request })` | Fetch contract |
+| React Router / Remix | `action({ request })` | Fetch contract |
+| Astro | `POST({ request })` | Fetch contract |
+| Cloudflare Workers | `fetch(request)` and `waitUntil()` | Fetch contract |
+| Hono 4 | `context.req.raw` and `app.request()` | Framework integration |
+| H3 2 / Nitro 3 | `fromWebHandler()` and `app.request()` | Framework integration |
+| Express 5 | `express.raw()` | Framework integration |
+| Fastify 5 | buffer content-type parser | Framework integration |
+| Koa 3 | unparsed Node request stream | Framework integration |
+| Elysia 1.4 on Bun | `request` and `app.handle()` | Framework integration |
+
+The package remains framework-independent: none of these frameworks is a dependency or peer dependency of `@arcscord/webhooks`.
+
 ## Create a typed handler
 
 The event name used as each registry key determines the exact type of `delivery.event.data`:
@@ -99,7 +119,23 @@ context.waitUntil(completion);
 return response;
 ```
 
-## Express with an exact raw body
+### Hono
+
+Hono exposes the untouched standard request as `context.req.raw`:
+
+```ts
+app.post("/discord/webhooks", async (context) => {
+  const { response, completion } = await webhooks.handleRequest(context.req.raw);
+  void completion.then(observe);
+  return response;
+});
+```
+
+H3 v2 uses the same Fetch handler through `fromWebHandler()`. Elysia passes its route `request` directly to `handleRequest()`.
+
+## Raw-body frameworks
+
+### Express
 
 Discord signs the timestamp followed by the exact request bytes. Configure Express to preserve those bytes for this route:
 
@@ -135,7 +171,66 @@ app.post(
 
 Do not run `express.json()` before this route. A parsed and reserialized object is not the body Discord signed.
 
-Fastify integrations follow the same rule: use a raw-body plugin or parser, then pass its `Buffer`, `Uint8Array`, string, or `ArrayBuffer` to `handleRaw()`.
+### Fastify
+
+Install a buffer parser before the webhook route, then use the same `handleRaw()` mapping as Express:
+
+```ts
+fastify.removeContentTypeParser("application/json");
+fastify.addContentTypeParser(
+  "application/json",
+  { parseAs: "buffer" },
+  (_request, body, done) => done(null, body),
+);
+```
+
+Pass `request.body` and the two signature headers to `handleRaw()`. If the application has other JSON routes, register this parser inside an encapsulated Fastify plugin so it only affects the webhook route.
+
+### Koa
+
+Koa leaves the incoming Node stream unparsed until body middleware consumes it. Read that stream into a `Buffer` for `handleRaw()` and write the returned status, headers, and body to `context.res`. Set `context.respond = false` when preserving the handler's headers on an empty `204`.
+
+`handleRaw()` accepts a `Buffer` through its `Uint8Array` compatibility, as well as a string or `ArrayBuffer`.
+
+## Signed test client
+
+`@arcscord/webhooks/testing` provides a small Discord-like Fetch client. It generates a fresh Ed25519 key pair, exposes only the public key, creates protocol-shaped payloads, and signs the exact timestamp plus JSON body:
+
+```ts
+import {
+  createWebhookHandler,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
+
+const discord = await createWebhookTestClient({
+  applicationId: "123456789012345678",
+});
+const webhooks = createWebhookHandler({
+  publicKey: discord.publicKey,
+  handlers: {
+    [WebhookEventType.QuestUserEnrollment]: () => {},
+  },
+});
+
+const request = await discord.createEventRequest(
+  "https://example.test/discord/webhooks",
+  {
+    type: WebhookEventType.QuestUserEnrollment,
+    data: undefined,
+  },
+);
+
+const { response, completion } = await webhooks.handleRequest(request);
+```
+
+The event key precisely determines the accepted `data` type. The client also exposes:
+
+- `createPingRequest()`, `createUnknownEventRequest()`, and generic `createRequest()` for framework injection;
+- `sendPing()`, `sendEvent()`, `sendUnknownEvent()`, and `send()` for a listening server;
+- `createWebhookTestClient({ fetch })` to inject `app.request`, `app.handle`, a worker fetch function, or another test transport.
+
+This subpath is a test utility. It never starts a server and keeps the generated private key internal.
 
 ## HTTP behavior
 
