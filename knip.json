@@ -81,7 +81,8 @@
         "*.ts"
       ],
       "ignoreDependencies": [
-        "@arcscord/error"
+        "@arcscord/error",
+        "discord.js"
       ],
       "project": [
         "*.ts"

@@ -32,8 +32,9 @@ type Fixture = {
 
 type FetchAdapter = {
   name: string;
+  usesWaitUntil?: boolean;
   dispatch: (
-    receive: (request: Request) => Promise<Response>,
+    receive: (request: Request) => Promise<WebhookHandleResult<Response>>,
     request: Request,
     waitUntil: (promise: Promise<unknown>) => void,
   ) => Promise<Response>;
@@ -100,11 +101,13 @@ async function assertInjectedResponse(
   expect(fixture.handledCount()).toBe(1);
 }
 
-function fetchReceiver(fixture: Fixture): (request: Request) => Promise<Response> {
+function fetchReceiver(
+  fixture: Fixture,
+): (request: Request) => Promise<WebhookHandleResult<Response>> {
   return async (request) => {
     const result = await fixture.handler.handleRequest(request);
     fixture.completions.push(result.completion);
-    return result.response;
+    return result;
   };
 }
 
@@ -231,7 +234,7 @@ describe("fetch-native framework integrations", () => {
     const fixture = await createFixture();
     const receive = fetchReceiver(fixture);
     const app = new Hono();
-    app.post(webhookPath, context => receive(context.req.raw));
+    app.post(webhookPath, async context => (await receive(context.req.raw)).response);
 
     const request = await eventRequest(fixture, `https://example.com${webhookPath}`);
     await assertHandled(fixture, await app.request(request));
@@ -240,7 +243,10 @@ describe("fetch-native framework integrations", () => {
   it("executes the H3/Nitro v2 web-handler adapter", async () => {
     const fixture = await createFixture();
     const receive = fetchReceiver(fixture);
-    const app = new H3().post(webhookPath, fromWebHandler(receive));
+    const app = new H3().post(
+      webhookPath,
+      fromWebHandler(async request => (await receive(request)).response),
+    );
 
     const request = await eventRequest(fixture, `https://example.com${webhookPath}`);
     await assertHandled(fixture, await app.request(request));
@@ -251,7 +257,9 @@ const fetchAdapters: FetchAdapter[] = [
   {
     name: "Next.js App Router",
     dispatch: async (receive, request) => {
-      const route = { POST: receive };
+      const route = {
+        POST: async (routeRequest: Request) => (await receive(routeRequest)).response,
+      };
       return route.POST(request);
     },
   },
@@ -259,7 +267,8 @@ const fetchAdapters: FetchAdapter[] = [
     name: "SvelteKit",
     dispatch: async (receive, request) => {
       const route = {
-        POST: ({ request: routeRequest }: { request: Request }) => receive(routeRequest),
+        POST: async ({ request: routeRequest }: { request: Request }) =>
+          (await receive(routeRequest)).response,
       };
       return route.POST({ request });
     },
@@ -267,7 +276,8 @@ const fetchAdapters: FetchAdapter[] = [
   {
     name: "React Router / Remix",
     dispatch: async (receive, request) => {
-      const action = ({ request: routeRequest }: { request: Request }) => receive(routeRequest);
+      const action = async ({ request: routeRequest }: { request: Request }) =>
+        (await receive(routeRequest)).response;
       return action({ request });
     },
   },
@@ -275,19 +285,21 @@ const fetchAdapters: FetchAdapter[] = [
     name: "Astro",
     dispatch: async (receive, request) => {
       const endpoint = {
-        POST: ({ request: routeRequest }: { request: Request }) => receive(routeRequest),
+        POST: async ({ request: routeRequest }: { request: Request }) =>
+          (await receive(routeRequest)).response,
       };
       return endpoint.POST({ request });
     },
   },
   {
     name: "Cloudflare Workers",
+    usesWaitUntil: true,
     dispatch: async (receive, request, waitUntil) => {
       const worker = {
         fetch: async (workerRequest: Request) => {
-          const response = await receive(workerRequest);
-          waitUntil(Promise.resolve());
-          return response;
+          const result = await receive(workerRequest);
+          waitUntil(result.completion);
+          return result.response;
         },
       };
       return worker.fetch(request);
@@ -295,7 +307,7 @@ const fetchAdapters: FetchAdapter[] = [
   },
 ];
 
-describe.each(fetchAdapters)("$name Fetch contract", ({ dispatch }) => {
+describe.each(fetchAdapters)("$name Fetch contract", ({ dispatch, usesWaitUntil }) => {
   it("passes the untouched signed Request and returns the acknowledgement", async () => {
     const fixture = await createFixture();
     const backgroundTasks: Array<Promise<unknown>> = [];
@@ -306,6 +318,7 @@ describe.each(fetchAdapters)("$name Fetch contract", ({ dispatch }) => {
       promise => backgroundTasks.push(promise),
     );
 
+    expect(backgroundTasks).toEqual(usesWaitUntil ? fixture.completions : []);
     await assertHandled(fixture, response);
     await Promise.all(backgroundTasks);
   });
