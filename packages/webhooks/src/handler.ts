@@ -133,8 +133,27 @@ async function dispatchEvent(
   known: boolean,
   options: CreateWebhookHandlerOptions,
 ): Promise<WebhookDispatchResult> {
-  const handler = known
-    ? options.handlers[event.event.type as WebhookEventType] as
+  if (known && "dispatch" in options && options.dispatch) {
+    try {
+      const typedEvent = event as WebhookEvent;
+      const result = await options.dispatch(
+        typedEvent.event.type,
+        typedEvent.event.data,
+      );
+      return {
+        status: result.matched === 0 ? "unhandled" : "handled",
+        event,
+        eventType: event.event.type,
+        known,
+      };
+    }
+    catch (error) {
+      return reportFailure(error, event, options, known);
+    }
+  }
+
+  const handler = known && "handlers" in options
+    ? options.handlers?.[event.event.type as WebhookEventType] as
     | WebhookEventHandler<WebhookEventType>
     | undefined
     : options.onUnknownEvent;
@@ -193,6 +212,15 @@ function fetchResponse(response: RawWebhookResponse): Response {
 export function createWebhookHandler(
   options: CreateWebhookHandlerOptions,
 ): WebhookHandler {
+  const hasHandlers = "handlers" in options && options.handlers !== undefined;
+  const hasDispatch = "dispatch" in options && options.dispatch !== undefined;
+  if (hasHandlers === hasDispatch) {
+    throw new TypeError("configure exactly one webhook dispatch mode: handlers or dispatch");
+  }
+  if (hasDispatch && typeof options.dispatch !== "function") {
+    throw new TypeError("webhook dispatch must be a function");
+  }
+
   assertWebhookPublicKey(options.publicKey);
 
   const verifyWebhookSignature = (

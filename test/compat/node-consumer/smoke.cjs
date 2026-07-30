@@ -13,6 +13,7 @@ const process = require("node:process");
 const { container, v2Message } = require("@arcscord/components");
 const {
   createWebhookHandler,
+  webhookEvents,
   WebhookEventType,
 } = require("@arcscord/webhooks");
 const { createWebhookTestClient } = require("@arcscord/webhooks/testing");
@@ -55,6 +56,12 @@ const readyEvent = createEvent({
   run: ctx => ctx.ok(true),
 });
 assert.equal(readyEvent.event, "clientReady", "event registration failed");
+const deauthorizedEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (_ctx, data) => void data.user.id,
+});
+assert.equal(deauthorizedEvent.source.id, webhookEvents.id, "webhook event source failed");
 
 client.logger.info("node cjs smoke: client ready");
 process.stdout.write("node cjs ok\n");

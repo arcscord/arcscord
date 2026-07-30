@@ -11,6 +11,7 @@ import type {
   MessageType,
   Snowflake,
 } from "discord-api-types/v10";
+import type { WebhookEventDispatcher } from "./event_source";
 
 /** Top-level Discord Webhook Events payload kind. */
 export enum WebhookDeliveryType {
@@ -156,16 +157,33 @@ export type WebhookErrorHandler = (
 ) => MaybePromise<void>;
 
 /** Options accepted by {@link createWebhookHandler}. */
-export type CreateWebhookHandlerOptions = {
+/** Options shared by standalone and Arcscord webhook dispatch modes. */
+export type WebhookHandlerBaseOptions = {
   /** Application public key from the Discord Developer Portal, encoded as hex. */
   publicKey: string;
-  /** Typed event callbacks. One callback can be registered for each event name. */
-  handlers: WebhookEventHandlers;
   /** Called for signed event names introduced after this package version. */
   onUnknownEvent?: UnknownWebhookEventHandler;
-  /** Called when a known or unknown event callback fails. */
+  /** Called when an autonomous callback or direct dispatcher invocation fails. */
   onError?: WebhookErrorHandler;
 };
+
+/** Standalone callback dispatch, without an Arcscord EventManager. */
+export type StandaloneWebhookHandlerOptions = WebhookHandlerBaseOptions & {
+  /** Typed event callbacks. One callback can be registered for each event name. */
+  handlers: WebhookEventHandlers;
+  dispatch?: never;
+};
+
+/** Arcscord dispatch through a dispatcher bound to `webhookEvents`. */
+export type ArcscordWebhookHandlerOptions = WebhookHandlerBaseOptions & {
+  handlers?: never;
+  dispatch: WebhookEventDispatcher;
+};
+
+/** Options accepted by {@link createWebhookHandler}. */
+export type CreateWebhookHandlerOptions
+  = | StandaloneWebhookHandlerOptions
+    | ArcscordWebhookHandlerOptions;
 
 /** Raw request body accepted by the framework-neutral handler. */
 export type WebhookRawBody = string | Uint8Array | ArrayBuffer;

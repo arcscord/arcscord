@@ -40,6 +40,49 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadEvents([messageEvent]);
 ```
 
+## Typed event sources
+
+Discord.js Gateway events use Arcscord's implicit `gatewayEvents` source, so existing handlers do not need to change:
+
+```ts
+createEvent({
+  event: "messageCreate",
+  run: (_ctx, message) => console.log(message.id),
+});
+```
+
+Packages and applications can define independent sources whose event names map to argument tuples:
+
+```ts
+import { createEvent, createEventSource } from "arcscord";
+
+type JobEvents = {
+  completed: [jobId: string];
+};
+
+export const jobEvents = createEventSource<JobEvents>({ name: "jobs" });
+
+const completed = createEvent({
+  source: jobEvents,
+  event: "completed",
+  run: (ctx, jobId) => {
+    ctx.logger.info("Job completed", {
+      jobId,
+      source: ctx.source.name,
+    });
+  },
+});
+
+await client.loadEvents([completed]);
+await client.eventManager.dispatch(jobEvents, "completed", "job_123");
+```
+
+Source identity is symbol-based, so two sources can safely use the same event and handler names. Custom-source dispatches run matching handlers sequentially, await asynchronous handlers, respect `once` and `beforeReady`, and return a report whose `matched` field is `0` when no handler is registered.
+
+Use `client.eventManager.dispatcher(source)` when a transport needs a bound callback. [`@arcscord/webhooks`](/packages/webhooks) uses this API for signed Discord Webhook Events.
+
+Gateway intent diagnostics apply only to `gatewayEvents`; custom sources never consult the Gateway intent map.
+
 ## Common examples
 
 ### `clientReady`

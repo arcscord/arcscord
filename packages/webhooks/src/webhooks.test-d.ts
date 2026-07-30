@@ -10,7 +10,9 @@ import type {
   WebhookLobbyMessage,
   WebhookLobbyMessageDelete,
 } from "./types";
+import { createEvent } from "arcscord";
 import { expectTypeOf } from "vitest";
+import { webhookEvents } from "./event_source";
 import { WebhookEventType } from "./types";
 
 const handlers = {
@@ -51,3 +53,16 @@ const invalidHandlers = {
 
 void handlers;
 void invalidHandlers;
+
+const arcscordHandler = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (ctx, data) => {
+    expectTypeOf(ctx.source).toEqualTypeOf<typeof webhookEvents>();
+    expectTypeOf(data.user).toEqualTypeOf<APIUser>();
+    // @ts-expect-error Deauthorization data is not an entitlement payload.
+    void data.sku_id;
+  },
+});
+
+void arcscordHandler;

@@ -10,6 +10,7 @@ import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
   createWebhookHandler,
+  webhookEvents,
   WebhookEventType,
 } from "@arcscord/webhooks";
 import {
@@ -59,6 +60,11 @@ const readyEvent = createEvent({
   event: "clientReady",
   run: ctx => ctx.ok(true),
 });
+const deauthorizedEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (_ctx, data) => void data.user.id,
+});
 
 // 5. Exercise the logger.
 client.logger.info("bun smoke: client ready");
@@ -80,6 +86,9 @@ if (!builtButton) {
 }
 if (readyEvent.event !== "clientReady") {
   throw new Error("event registration failed");
+}
+if (deauthorizedEvent.source.id !== webhookEvents.id) {
+  throw new Error("webhook event source failed");
 }
 
 process.stdout.write("bun ok\n");

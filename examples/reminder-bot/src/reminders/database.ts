@@ -89,6 +89,14 @@ export function deleteReminder(userId: string, id: number): boolean {
   return result.changes > 0;
 }
 
+export function deleteRemindersForUser(userId: string): number {
+  const result = db
+    .prepare("DELETE FROM reminders WHERE user_id = ?")
+    .run(userId);
+
+  return result.changes;
+}
+
 export function listDueReminders(now: number, limit = 25): Reminder[] {
   const rows = db
     .prepare("SELECT id, user_id, message, remind_at, created_at FROM reminders WHERE remind_at <= ? ORDER BY remind_at ASC LIMIT ?")

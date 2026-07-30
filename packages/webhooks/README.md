@@ -9,15 +9,44 @@
 [![npm version](https://badge.fury.io/js/@arcscord%2Fwebhooks.svg)](https://www.npmjs.com/package/@arcscord/webhooks)
 [![Discord](https://discord.com/api/guilds/1012097557532528791/widget.png?style=shield)](https://discord.gg/4geBanVWGR)
 
-Framework-agnostic, typed handling for [Discord Webhook Events](https://docs.discord.com/developers/events/webhook-events). The package validates Discord's Ed25519 request signature, acknowledges endpoint `PING`s, dispatches typed event callbacks, and never starts a web server.
-
-It works on its own and has no dependency on `arcscord` or `discord.js`.
+Typed handling for [Discord Webhook Events](https://docs.discord.com/developers/events/webhook-events). The package validates Discord's Ed25519 request signature, acknowledges endpoint `PING`s, and can dispatch either to standalone callbacks or Arcscord's multi-source `EventManager`. It never starts a web server.
 
 ## Install
 
 ```sh
 pnpm add @arcscord/webhooks
 ```
+
+## Arcscord EventManager mode
+
+Webhook Events can live in the same `handlers.events` array as Gateway events. The `source + event` pair determines the arguments passed to `run`:
+
+```ts
+import {
+  createWebhookHandler,
+  webhookEvents,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import { createEvent } from "arcscord";
+
+export const deauthorized = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (ctx, data) => {
+    ctx.logger.info("Application removed", { userId: data.user.id });
+  },
+});
+
+const webhooks = createWebhookHandler({
+  publicKey: process.env.DISCORD_PUBLIC_KEY!,
+  dispatch: client.eventManager.dispatcher(webhookEvents),
+  onUnknownEvent: delivery => console.warn(delivery.event.type),
+});
+```
+
+`dispatch` and `handlers` are mutually exclusive. Arcscord handlers receive only the typed `event.data`; the transport envelope and HTTP request stay in this package. A missing handler produces an `unhandled` completion. Expected failures and thrown handler values are normalized by Arcscord's execution chain and do not trigger `onError` a second time.
+
+The standalone callback mode remains available in every HTTP adapter below.
 
 ## Officially tested integrations
 
@@ -139,6 +168,8 @@ Every request returns a `completion` promise separately from its HTTP response. 
 - `unhandled`: the event was valid but had no callback;
 - `failed`: a callback failed; the original error and any `onError` failure are included;
 - `not-dispatched`: the request was a `PING` or was rejected.
+
+In Arcscord mode, `handled` means at least one EventManager handler accepted the dispatch. Business failures remain observable through Arcscord's execution handlers and logger. Only a direct dispatcher rejection becomes `failed` in this package.
 
 Signed event names introduced by Discord after this package version still receive `204`. They are passed to `onUnknownEvent` and report `known: false`.
 

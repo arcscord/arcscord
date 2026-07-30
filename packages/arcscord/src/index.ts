@@ -338,8 +338,18 @@ export type {
   EventHandleResult,
   EventHandleReturn,
   EventHandlerOptions,
+  SourceEventHandler,
 } from "./base/event/event.type";
 export { EventContext } from "./base/event/event_context";
+export type { EventContextHandler } from "./base/event/event_context";
+export { createEventSource, gatewayEvents } from "./base/event/event_source";
+export type {
+  EventMap,
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+  EventSourceMap,
+} from "./base/event/event_source";
 
 export { createExecutionControls } from "./base/manager/execution_handler";
 export type {
@@ -402,6 +412,9 @@ export type {
 export type {
   AnyEventExecutionContext,
   BaseEventExecutionInfos,
+  EventDispatcher,
+  EventDispatchExecution,
+  EventDispatchResult,
   EventExecutionContext,
   EventExecutionHandler,
   EventExecutionOutcome,
@@ -413,6 +426,7 @@ export type {
   EventManagerOptions,
   EventResultHandler,
   EventResultHandlerInfos,
+  SourceEventExecutionContext,
 } from "./manager/event/event_manager.type";
 export type {
   EventIntentAlternatives,

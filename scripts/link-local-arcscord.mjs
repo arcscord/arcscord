@@ -1,6 +1,7 @@
 /**
  * Points a standalone example at the *local repo builds* of arcscord (and its
- * `@arcscord/error` dependency, plus `@arcscord/middleware`) instead of the
+ * `@arcscord/error` dependency, `@arcscord/middleware`, and
+ * `@arcscord/webhooks`) instead of the
  * published npm versions, by injecting a pnpm `overrides:` block into the
  * shared examples workspace.
  *
@@ -41,6 +42,7 @@ const localPackages = {
   },
   "arcscord": { tarball: "arcscord.tgz" },
   "@arcscord/middleware": { tarball: "middleware.tgz" },
+  "@arcscord/webhooks": { tarball: "webhooks.tgz" },
 };
 
 const pkg = JSON.parse(await readFile(path.join(exampleDir, "package.json"), "utf8"));

@@ -17,8 +17,8 @@ template. A good reading order is:
 
 1. `src/index.ts` — creates the `ArcClient`, loads handlers, and starts the
    reminder scheduler when Discord says the client is ready.
-2. `src/handlers.ts` — Arcscord's central registry. The example has one slash
-   command and no components or events.
+2. `src/handlers.ts` — Arcscord's central registry. It mixes the slash command
+   with an `APPLICATION_DEAUTHORIZED` Webhook Event.
 3. `src/commands/reminder/index.ts` — defines the user-install `/reminder`
    command and imports one subcommand per file.
 4. `src/commands/reminder/create.ts`, `src/commands/reminder/list.ts`, and
@@ -27,7 +27,11 @@ template. A good reading order is:
    small functions for creating, listing, deleting, and finding due reminders.
 6. `src/reminders/scheduler.ts` — runs every 30 seconds, fetches due reminders,
    and sends DMs.
-7. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
+7. `src/webhooks/server.ts` — exposes the signed Discord Webhook Events endpoint
+   with `node:http`.
+8. `src/events/application_deauthorized.ts` — removes a user's reminders after
+   the user uninstalls the application.
+9. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
    `2 hours`, and `3 jours`.
 8. `src/utils/reply.ts` — builds the shared Components v2 replies used by the
    reminder commands.
@@ -55,6 +59,7 @@ Fill in at least:
 
 ```env
 TOKEN=""
+DISCORD_PUBLIC_KEY=""
 ```
 
 Optional values:
@@ -62,11 +67,22 @@ Optional values:
 ```env
 APPLICATION_ID=""
 DATABASE_PATH="./data/reminders.sqlite"
+WEBHOOK_PORT=3000
 ```
 
-`src/utils/env.ts` reads `TOKEN` at startup and throws a clear error if it is
-missing. `DATABASE_PATH` points to the SQLite file. If it is missing, the bot
-uses `./data/reminders.sqlite`.
+`TOKEN` and `DISCORD_PUBLIC_KEY` are required. Copy the public key from the
+Discord Developer Portal's **General Information** page; it is not the bot token
+or client secret. `WEBHOOK_PORT` defaults to `3000`.
+
+Configure the application's Webhook Events URL as:
+
+```text
+https://your-public-host.example/discord/webhooks
+```
+
+For local development, expose port `3000` through a secure tunnel. Discord signs
+the exact request bytes, so the native server preserves the raw body before
+passing it to `@arcscord/webhooks`.
 
 ## Database
 
@@ -109,6 +125,13 @@ After creation, the scheduler checks the database every 30 seconds. When a
 reminder is due, the bot fetches the user, sends a DM, then deletes the reminder.
 If the user has closed their DMs, the error is logged and the reminder is still
 deleted to keep this example simple.
+
+The same `handlers.events` array can contain Gateway and HTTP-delivered events.
+When Discord sends `APPLICATION_DEAUTHORIZED`, the webhook transport verifies
+Ed25519, acknowledges the valid delivery with `204`, and dispatches its typed
+data through Arcscord. The handler deletes every reminder owned by that user.
+HTTP/signature errors stay in the webhook package; database or handler failures
+stay in Arcscord's event execution chain.
 
 ## Extending the example
 

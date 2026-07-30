@@ -10,13 +10,13 @@ keywords:
 
 # @arcscord/webhooks
 
-`@arcscord/webhooks` receives [Discord Webhook Events](https://docs.discord.com/developers/events/webhook-events) without owning your HTTP server. It validates Ed25519 signatures against the exact raw body, acknowledges Discord endpoint checks, and dispatches event-specific TypeScript callbacks.
+`@arcscord/webhooks` receives [Discord Webhook Events](https://docs.discord.com/developers/events/webhook-events) without owning your HTTP server. It validates Ed25519 signatures against the exact raw body, acknowledges Discord endpoint checks, and dispatches either to Arcscord's multi-source EventManager or event-specific standalone callbacks.
 
 - [API reference](/api?package=webhooks)
 - [npm package](https://www.npmjs.com/package/@arcscord/webhooks)
 - [Source](https://github.com/arcscord/arcscord/tree/main/packages/webhooks)
 
-The package is standalone. It does not depend on `arcscord`, `discord.js`, Express, Fastify, Next.js, or another server framework.
+The HTTP layer does not depend on Express, Fastify, Next.js, or another server framework.
 
 ## Install
 
@@ -30,7 +30,38 @@ Copy the application public key from the Discord Developer Portal. Do not use th
 DISCORD_PUBLIC_KEY=your_application_public_key
 ```
 
-## Official support matrix
+## Use Arcscord event handlers
+
+`webhookEvents` is a typed event source. Handlers use the normal `createEvent` API and can be mixed with Gateway handlers:
+
+```ts
+import {
+  createWebhookHandler,
+  webhookEvents,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import { createEvent } from "arcscord";
+
+export const applicationDeauthorized = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (ctx, data) => {
+    ctx.logger.info("Application deauthorized", { userId: data.user.id });
+  },
+});
+
+export const webhooks = createWebhookHandler({
+  publicKey: process.env.DISCORD_PUBLIC_KEY!,
+  dispatch: client.eventManager.dispatcher(webhookEvents),
+  onUnknownEvent: delivery => console.warn(delivery.event.type),
+});
+```
+
+The handler receives the event-specific `data` object. `ctx.source` is `webhookEvents`, `ctx.event` is the precise event name, and `ctx.client` remains the owning `ArcClient`.
+
+`handlers` and `dispatch` are mutually exclusive. With `dispatch`, no registered EventManager handler produces `unhandled`. A direct dispatcher rejection produces `failed` and calls `onError`. `ctx.error()`, exceptions from `run`, and execution-handler failures stay in Arcscord's execution chain and are not reported twice.
+
+## Official HTTP support matrix
 
 Every integration in this table is executed in the repository test suite with a real signed Ed25519 request. “Fetch contract” means the framework passes the standard `Request` to the route and accepts the returned `Response`; “framework integration” additionally executes that framework's router or raw-body parser.
 
@@ -50,9 +81,9 @@ Every integration in this table is executed in the repository test suite with a 
 
 The package remains framework-independent: none of these frameworks is a dependency or peer dependency of `@arcscord/webhooks`.
 
-## Create a typed handler
+## Standalone typed callbacks
 
-The event name used as each registry key determines the exact type of `delivery.event.data`:
+Without an ArcClient, the event name used as each registry key determines the exact type of `delivery.event.data`:
 
 ```ts
 import {

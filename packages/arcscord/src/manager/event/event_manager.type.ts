@@ -1,7 +1,15 @@
 import type { ClientEvents } from "discord.js";
-import type { AnyEventHandler } from "#/base/event";
-import type { EventHandler } from "#/base/event/event.type";
+import type {
+  AnyEventHandler,
+  EventHandler,
+  SourceEventHandler,
+} from "#/base/event/event.type";
 import type { EventContext } from "#/base/event/event_context";
+import type {
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+} from "#/base/event/event_source";
 import type {
   ExecutionControls,
   ExecutionNext,
@@ -25,6 +33,9 @@ export type BaseEventExecutionInfos = {
    * The Discord.js event name.
    */
   eventName: keyof ClientEvents | string;
+
+  /** Typed source that delivered the event. */
+  source: EventSource;
 };
 
 /**
@@ -48,17 +59,60 @@ export type EventExecutionContext<E extends keyof ClientEvents>
     & {
       event: EventHandler<E>;
       eventName: E;
+      source: EventSource<ClientEvents>;
       context: EventContext<E>;
       args: ClientEvents[E];
     };
 
-/** Union of execution contexts for every Discord.js client event. */
+/** Execution context for an event from a custom source. */
+export type SourceEventExecutionContext<
+  Source extends EventSource,
+  E extends EventSourceEvent<Source>,
+> = ExecutionControls<string | true, unknown> & {
+  event: SourceEventHandler<Source, E>;
+  eventName: E;
+  source: Source;
+  context: EventContext<E, Source>;
+  args: EventSourceArgs<Source, E>;
+};
+
+/**
+ * Union of execution contexts for every Discord.js Gateway event.
+ *
+ * This remains Gateway-correlated for backward-compatible narrowing. Custom
+ * source authors can use {@link SourceEventExecutionContext} explicitly.
+ */
 export type AnyEventExecutionContext = {
   [E in keyof ClientEvents]: EventExecutionContext<E>;
 }[keyof ClientEvents];
 
 /** Outcome returned by event execution interceptors. */
 export type EventExecutionOutcome = ExecutionOutcome<string | true, unknown>;
+
+/** One handler execution produced by a source dispatch. */
+export type EventDispatchExecution = {
+  event: AnyEventHandler;
+  outcome: EventExecutionOutcome;
+};
+
+/** Structured result of dispatching one event from a typed source. */
+export type EventDispatchResult<
+  Source extends EventSource = EventSource,
+  E extends string = string,
+> = {
+  source: Source;
+  eventName: E;
+  matched: number;
+  executions: EventDispatchExecution[];
+};
+
+/** Bound dispatcher for one typed event source. */
+export type EventDispatcher<Source extends EventSource> = <
+  E extends EventSourceEvent<Source>,
+>(
+  event: E,
+  ...args: EventSourceArgs<Source, E>
+) => Promise<EventDispatchResult<Source, E>>;
 
 /** Koa-style interceptor around an event handler's `run()` call. */
 export type EventExecutionHandler = (

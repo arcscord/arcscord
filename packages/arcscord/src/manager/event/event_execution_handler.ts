@@ -21,6 +21,7 @@ export function runDefaultEventExecution(
   const meta = {
     handler: execution.event.name,
     event: execution.eventName,
+    source: execution.source.name,
     durationMs: outcome.durationMs,
     incidentId: outcome.incidentId,
   };
@@ -42,6 +43,7 @@ function toResultHandlerInfos(
   return {
     event: execution.event,
     eventName: execution.eventName,
+    source: execution.source,
     exit: outcome.exit,
     startedAt: outcome.startedAt,
     endedAt: outcome.endedAt,

@@ -11,6 +11,7 @@ import { container, v2Message } from "@arcscord/components";
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import {
   createWebhookHandler,
+  webhookEvents,
   WebhookEventType,
 } from "@arcscord/webhooks";
 import { createWebhookTestClient } from "@arcscord/webhooks/testing";
@@ -18,6 +19,7 @@ import {
   ArcClient,
   buildModal,
   createCommand,
+  createEvent,
   createModal,
   createTypedStringMenu,
   modalStringSelect,
@@ -55,6 +57,16 @@ const webhooks = createWebhookHandler({
   },
 });
 void webhooks;
+
+const webhookEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (ctx, _data) => {
+    expectExactType<IsExact<typeof _data.user.id, string>>(true);
+    expectExactType<IsExact<typeof ctx.event, WebhookEventType.ApplicationDeauthorized>>(true);
+  },
+});
+void webhookEvent;
 
 const testClient = createWebhookTestClient();
 void testClient;

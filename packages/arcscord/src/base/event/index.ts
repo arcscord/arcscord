@@ -6,5 +6,15 @@ export type {
   EventHandleResult,
   EventHandlerForRegistry,
   EventHandlerOptions,
+  SourceEventHandler,
 } from "./event.type";
 export { EventContext } from "./event_context";
+export type { EventContextHandler } from "./event_context";
+export { createEventSource, gatewayEvents } from "./event_source";
+export type {
+  EventMap,
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+  EventSourceMap,
+} from "./event_source";

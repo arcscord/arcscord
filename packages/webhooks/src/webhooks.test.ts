@@ -1,6 +1,8 @@
 import type { RawWebhookRequest, WebhookRawBody } from "./types";
+import { ArcClient, createEvent } from "arcscord";
 import { MessageType } from "discord-api-types/v10";
 import { beforeAll, describe, expect, it, vi } from "vitest";
+import { webhookEvents } from "./event_source";
 import { createWebhookHandler } from "./handler";
 import {
   WebhookDeliveryType,
@@ -380,5 +382,209 @@ describe("event dispatch", () => {
         }),
       }),
     );
+  });
+});
+
+describe("arcscord event dispatch", () => {
+  function createArcClient(): ArcClient {
+    const client = new ArcClient("test-token", {
+      intents: [],
+      managers: {
+        event: {
+          intentCheck: false,
+        },
+      },
+    });
+    client.ready = true;
+    return client;
+  }
+
+  it("dispatches known event data through the real EventManager", async () => {
+    const client = createArcClient();
+    const received: string[] = [];
+    await client.loadEvents([
+      createEvent({
+        source: webhookEvents,
+        event: WebhookEventType.ApplicationDeauthorized,
+        run: (ctx, data) => {
+          expect(ctx.source).toBe(webhookEvents);
+          expect(ctx.event).toBe(WebhookEventType.ApplicationDeauthorized);
+          received.push(data.user.id);
+        },
+      }),
+    ]);
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: client.eventManager.dispatcher(webhookEvents),
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.ApplicationDeauthorized,
+      { user: { id: "user_1" } },
+    )));
+
+    expect(result.response.status).toBe(204);
+    await expect(result.completion).resolves.toMatchObject({
+      status: "handled",
+      eventType: WebhookEventType.ApplicationDeauthorized,
+      known: true,
+    });
+    expect(received).toEqual(["user_1"]);
+  });
+
+  it("reports no registered Arcscord handler as unhandled", async () => {
+    const client = createArcClient();
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: client.eventManager.dispatcher(webhookEvents),
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.QuestUserEnrollment,
+      undefined,
+    )));
+
+    await expect(result.completion).resolves.toMatchObject({
+      status: "unhandled",
+      eventType: WebhookEventType.QuestUserEnrollment,
+    });
+  });
+
+  it("leaves normalized business failures to Arcscord without calling onError", async () => {
+    const client = createArcClient();
+    const onError = vi.fn();
+    const logError = vi.spyOn(client.eventManager.logger, "logError");
+    await client.loadEvents([
+      createEvent({
+        source: webhookEvents,
+        event: WebhookEventType.QuestUserEnrollment,
+        run: ctx => ctx.error("not enrolled"),
+      }),
+    ]);
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: client.eventManager.dispatcher(webhookEvents),
+      onError,
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.QuestUserEnrollment,
+      undefined,
+    )));
+
+    await expect(result.completion).resolves.toMatchObject({ status: "handled" });
+    expect(onError).not.toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith(
+      "not enrolled",
+      expect.objectContaining({
+        event: WebhookEventType.QuestUserEnrollment,
+        source: "discord-webhooks",
+      }),
+    );
+  });
+
+  it("leaves thrown handler defects to Arcscord without calling onError", async () => {
+    const client = createArcClient();
+    const handlerError = new Error("handler defect");
+    const onError = vi.fn();
+    const logError = vi.spyOn(client.eventManager.logger, "logError");
+    await client.loadEvents([
+      createEvent({
+        source: webhookEvents,
+        event: WebhookEventType.QuestUserEnrollment,
+        run: () => {
+          throw handlerError;
+        },
+      }),
+    ]);
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: client.eventManager.dispatcher(webhookEvents),
+      onError,
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.QuestUserEnrollment,
+      undefined,
+    )));
+
+    await expect(result.completion).resolves.toMatchObject({ status: "handled" });
+    expect(onError).not.toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith(
+      handlerError,
+      expect.objectContaining({
+        event: WebhookEventType.QuestUserEnrollment,
+        source: "discord-webhooks",
+      }),
+    );
+  });
+
+  it("contains execution-handler defects inside Arcscord", async () => {
+    const executionError = new Error("execution handler defect");
+    const client = new ArcClient("test-token", {
+      intents: [],
+      managers: {
+        event: {
+          intentCheck: false,
+          executionHandlers: [
+            () => {
+              throw executionError;
+            },
+          ],
+        },
+      },
+    });
+    client.ready = true;
+    const onError = vi.fn();
+    const logError = vi.spyOn(client.eventManager.logger, "logError");
+    await client.loadEvents([
+      createEvent({
+        source: webhookEvents,
+        event: WebhookEventType.QuestUserEnrollment,
+        run: vi.fn(),
+      }),
+    ]);
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: client.eventManager.dispatcher(webhookEvents),
+      onError,
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.QuestUserEnrollment,
+      undefined,
+    )));
+
+    await expect(result.completion).resolves.toMatchObject({ status: "handled" });
+    expect(onError).not.toHaveBeenCalled();
+    expect(logError).toHaveBeenCalledWith(executionError, {
+      source: "executionHandler",
+    });
+  });
+
+  it("contains direct dispatcher rejection and reports it once", async () => {
+    const dispatchError = new Error("dispatcher unavailable");
+    const onError = vi.fn();
+    const handler = createWebhookHandler({
+      publicKey,
+      dispatch: vi.fn(() => Promise.reject(dispatchError)),
+      onError,
+    });
+    const result = await handler.handleRaw(await signedRequest(eventPayload(
+      WebhookEventType.QuestUserEnrollment,
+      undefined,
+    )));
+
+    await expect(result.completion).resolves.toMatchObject({
+      status: "failed",
+      error: dispatchError,
+    });
+    expect(onError).toHaveBeenCalledOnce();
+  });
+
+  it("rejects missing or conflicting dispatch modes", () => {
+    expect(() => createWebhookHandler({
+      publicKey,
+    } as never)).toThrow("configure exactly one webhook dispatch mode");
+    expect(() => createWebhookHandler({
+      publicKey,
+      handlers: {},
+      dispatch: vi.fn(),
+    } as never)).toThrow("configure exactly one webhook dispatch mode");
   });
 });

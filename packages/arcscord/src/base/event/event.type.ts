@@ -1,6 +1,11 @@
 import type { NonNullish, Result } from "@arcscord/error";
 import type { ClientEvents } from "discord.js";
 import type { EventContext } from "#/base/event/event_context";
+import type {
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+} from "#/base/event/event_source";
 import type { MaybePromise } from "#/utils";
 
 /**
@@ -58,6 +63,11 @@ export type EventHandlerOptions = {
  */
 export type EventHandler<E extends keyof ClientEvents> = {
   /**
+   * Event source. Omitted Gateway handlers use the built-in `gatewayEvents`.
+   */
+  source?: EventSource<ClientEvents>;
+
+  /**
    * The name of the event.
    */
   event: E;
@@ -88,6 +98,30 @@ export type EventHandler<E extends keyof ClientEvents> = {
   ) => MaybePromise<EventHandleReturn>;
 };
 
+/** Represents an event handler for a custom typed event source. */
+export type SourceEventHandler<
+  Source extends EventSource,
+  E extends EventSourceEvent<Source>,
+> = {
+  /** Typed source that owns this event. */
+  source: Source;
+
+  /** Event name within the source. */
+  event: E;
+
+  /** Unique handler name within this source. */
+  name: string;
+
+  /** Optional execution behavior. */
+  options?: EventHandlerOptions;
+
+  /** Function invoked with arguments inferred from `source + event`. */
+  run: (
+    ctx: EventContext<NoInfer<E>, Source>,
+    ...args: EventSourceArgs<Source, NoInfer<E>>
+  ) => MaybePromise<EventHandleReturn>;
+};
+
 /**
  * Union of all supported event handlers.
  *
@@ -95,8 +129,12 @@ export type EventHandler<E extends keyof ClientEvents> = {
  * Discord events, such as handler lists and `loadEvents` inputs.
  */
 export type AnyEventHandler = {
-  [E in keyof ClientEvents]: EventHandler<E>;
-}[keyof ClientEvents];
+  source?: EventSource;
+  event: string;
+  name: string;
+  options?: EventHandlerOptions;
+  run: unknown;
+};
 
 /**
  * Type-erased event handler used by manager registries and diagnostics.
@@ -104,7 +142,8 @@ export type AnyEventHandler = {
  * @internal
  */
 export type EventHandlerForRegistry = {
-  event: keyof ClientEvents;
+  source?: EventSource;
+  event: string;
   name: string;
   options?: EventHandlerOptions;
   run: (

@@ -11,6 +11,7 @@ import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
   createWebhookHandler,
+  webhookEvents,
   WebhookEventType,
 } from "@arcscord/webhooks";
 import { createWebhookTestClient } from "@arcscord/webhooks/testing";
@@ -53,6 +54,12 @@ const readyEvent = createEvent({
   run: ctx => ctx.ok(true),
 });
 assert.equal(readyEvent.event, "clientReady", "event registration failed");
+const deauthorizedEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (_ctx, data) => void data.user.id,
+});
+assert.equal(deauthorizedEvent.source.id, webhookEvents.id, "webhook event source failed");
 
 client.logger.info("node esm smoke: client ready");
 process.stdout.write("node esm ok\n");

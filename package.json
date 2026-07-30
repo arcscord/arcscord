@@ -4,9 +4,10 @@
   "scripts": {
     "clean": "node scripts/clean.mjs",
     "clean:full": "node scripts/clean-full.mjs",
-    "build": "pnpm build:all && pnpm build:arcscord && pnpm build:middleware",
-    "build:all": "pnpm -r --filter='./packages/*' --filter='!./packages/{arcscord,middleware}' run build",
+    "build": "pnpm build:all && pnpm build:arcscord && pnpm build:webhooks && pnpm build:middleware",
+    "build:all": "pnpm -r --filter='./packages/*' --filter='!./packages/{arcscord,middleware,webhooks}' run build",
     "build:arcscord": "pnpm -r --filter='./packages/arcscord' run build",
+    "build:webhooks": "pnpm -r --filter='./packages/webhooks' run build",
     "build:middleware": "pnpm -r --filter='./packages/middleware' run build",
     "lint": "node scripts/lint.mjs",
     "knip": "knip",

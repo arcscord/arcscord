@@ -1,5 +1,13 @@
 import type { ClientEvents } from "discord.js";
-import type { EventHandler } from "#/base/event/event.type";
+import type {
+  EventHandler,
+  EventHandlerOptions,
+  SourceEventHandler,
+} from "#/base/event/event.type";
+import type {
+  EventSource,
+  EventSourceEvent,
+} from "#/base/event/event_source";
 import type { OptionalProperties } from "#/utils";
 
 /**
@@ -21,9 +29,30 @@ import type { OptionalProperties } from "#/utils";
  */
 export function createEvent<E extends keyof ClientEvents>(
   options: OptionalProperties<EventHandler<E>, "name">,
-): EventHandler<E> {
+): EventHandler<E>;
+
+/**
+ * Creates an event handler for a custom typed source.
+ *
+ * The event arguments are inferred from the supplied `source + event` pair.
+ */
+export function createEvent<
+  Source extends EventSource,
+  const E extends EventSourceEvent<Source>,
+>(
+  options: OptionalProperties<SourceEventHandler<Source, E>, "name">,
+): SourceEventHandler<Source, E>;
+export function createEvent(
+  options: {
+    source?: EventSource;
+    event: string;
+    name?: string;
+    options?: EventHandlerOptions;
+    run: (...args: never[]) => unknown;
+  },
+): unknown {
   if (!options.name) {
     options.name = options.event;
   }
-  return options as EventHandler<E>;
+  return options;
 }

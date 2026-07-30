@@ -5,12 +5,13 @@
 // add it to the matching array.
 import type { HandlersList } from "arcscord";
 import { reminderCommand } from "./commands/reminder";
+import { applicationDeauthorized } from "./events/application_deauthorized";
 
 export default {
   // Slash / user / message commands.
   commands: [reminderCommand],
   // This example has no buttons, select menus or modals.
   components: [],
-  // No gateway event listener is needed: reminders are checked by the scheduler.
-  events: [],
+  // Webhook Events share this registry with optional Discord Gateway events.
+  events: [applicationDeauthorized],
 } satisfies HandlersList;
