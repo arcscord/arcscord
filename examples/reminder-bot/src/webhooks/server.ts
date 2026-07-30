@@ -8,6 +8,11 @@ import { createServer } from "node:http";
 
 const webhookPath = "/discord/webhooks";
 
+type WebhookServerOptions = {
+  host: string;
+  port: number;
+};
+
 function headerValue(value: string | string[] | undefined): string | undefined {
   return Array.isArray(value) ? value[0] : value;
 }
@@ -34,7 +39,7 @@ function writeResponse(
 export function startWebhookServer(
   client: ArcClient,
   publicKey: string,
-  port: number,
+  options: WebhookServerOptions,
 ): Promise<Server> {
   const logger = client.createLogger("webhooks");
   const webhooks = createWebhookHandler({
@@ -99,13 +104,16 @@ export function startWebhookServer(
 
   return new Promise((resolve, reject) => {
     server.once("error", reject);
-    server.listen(port, () => {
+    server.listen(options.port, options.host, () => {
       server.off("error", reject);
       const address = server.address();
       const listeningPort = address && typeof address !== "string"
         ? address.port
-        : port;
-      logger.info(`Discord Webhook Events listening on http://localhost:${listeningPort}${webhookPath}`);
+        : options.port;
+      const listeningHost = options.host.includes(":")
+        ? `[${options.host}]`
+        : options.host;
+      logger.info(`Discord Webhook Events listening on http://${listeningHost}:${listeningPort}${webhookPath}`);
       resolve(server);
     });
   });

@@ -29,11 +29,13 @@ template. A good reading order is:
    and sends DMs.
 7. `src/webhooks/server.ts` — exposes the signed Discord Webhook Events endpoint
    with `node:http`.
-8. `src/events/application_deauthorized.ts` — removes a user's reminders after
+8. `src/webhooks/tunnel.ts` — starts a development-only Cloudflare Quick Tunnel
+   and prints the Discord endpoint URL.
+9. `src/events/application_deauthorized.ts` — removes a user's reminders after
    the user uninstalls the application.
-9. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
+10. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
    `2 hours`, and `3 jours`.
-8. `src/utils/reply.ts` — builds the shared Components v2 replies used by the
+11. `src/utils/reply.ts` — builds the shared Components v2 replies used by the
    reminder commands.
 
 ## Install
@@ -67,22 +69,145 @@ Optional values:
 ```env
 APPLICATION_ID=""
 DATABASE_PATH="./data/reminders.sqlite"
+WEBHOOK_HOST="127.0.0.1"
 WEBHOOK_PORT=3000
 ```
 
 `TOKEN` and `DISCORD_PUBLIC_KEY` are required. Copy the public key from the
 Discord Developer Portal's **General Information** page; it is not the bot token
-or client secret. `WEBHOOK_PORT` defaults to `3000`.
+or client secret. `WEBHOOK_HOST` defaults to `127.0.0.1` and `WEBHOOK_PORT`
+defaults to `3000`.
 
-Configure the application's Webhook Events URL as:
+The loopback default is deliberate: the HTTP server is not reachable from other
+devices on the local network and does not require a port-forwarding rule on the
+router.
 
-```text
-https://your-public-host.example/discord/webhooks
+## Test Webhook Events locally
+
+Discord needs a public HTTPS URL, but you should not expose a router port for
+local testing. This example supports a
+[Cloudflare Quick Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/).
+`cloudflared` creates an outbound connection, while the bot continues listening
+only on `127.0.0.1`.
+
+### 1. Install `cloudflared`
+
+Follow the official
+[`cloudflared` installation page](https://developers.cloudflare.com/tunnel/downloads/).
+For example, on macOS with Homebrew:
+
+```sh
+brew install cloudflared
 ```
 
-For local development, expose port `3000` through a secure tunnel. Discord signs
-the exact request bytes, so the native server preserves the raw body before
-passing it to `@arcscord/webhooks`.
+Verify the installation:
+
+```sh
+cloudflared --version
+```
+
+### 2. Start the bot
+
+In the first terminal:
+
+```sh
+pnpm dev
+```
+
+Wait until the bot logs its local endpoint:
+
+```text
+Discord Webhook Events listening on http://127.0.0.1:3000/discord/webhooks
+```
+
+### 3. Start the Quick Tunnel
+
+In a second terminal:
+
+```sh
+pnpm tunnel
+```
+
+The command reads `WEBHOOK_HOST` and `WEBHOOK_PORT` from `.env`, starts
+`cloudflared`, and prints an endpoint similar to:
+
+```text
+Discord Webhook Events endpoint:
+https://random-words.trycloudflare.com/discord/webhooks
+```
+
+Keep both terminals open. A Quick Tunnel URL changes whenever the tunnel is
+restarted, so it is intended only for development.
+
+The helper hides `cloudflared`'s verbose internal logs. If the tunnel does not
+start and more diagnostics are needed, run:
+
+```sh
+WEBHOOK_TUNNEL_DEBUG=1 pnpm tunnel
+```
+
+### 4. Configure Discord
+
+In the [Discord Developer Portal](https://discord.com/developers/applications):
+
+1. Open the application.
+2. Open **Webhooks**.
+3. Paste the complete URL printed by `pnpm tunnel` into **Endpoint URL**.
+4. Enable Webhook Events.
+5. Select **Application Deauthorized**.
+6. Save the changes.
+
+Discord sends a signed `PING` while saving the endpoint. The package verifies
+the Ed25519 signature and answers with `204`. Discord also sends invalid
+signatures periodically; a `401` for those requests is expected.
+
+You can confirm that unsigned traffic is rejected:
+
+```sh
+curl -i \
+  -X POST \
+  -H "content-type: application/json" \
+  --data '{}' \
+  "https://random-words.trycloudflare.com/discord/webhooks"
+```
+
+Replace the hostname with the one printed by `pnpm tunnel`. The response should
+be `401`, because the request was not signed by Discord.
+
+### What is exposed?
+
+No inbound router port is opened, and the home public IP is not used as the
+Discord endpoint. Cloudflare receives the public request and forwards it over
+the outbound tunnel. The example accepts only `/discord/webhooks`; other paths
+return `404`, and deliveries without a valid Discord signature are rejected.
+
+Do not place Cloudflare Access authentication in front of this endpoint:
+Discord cannot complete an interactive login. Ed25519 verification authenticates
+the sender instead.
+
+## Stable tunnel
+
+Quick Tunnel URLs are temporary. For a bot that stays online, either deploy the
+bot to a public host or create a
+[remotely-managed Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/):
+
+1. In Cloudflare, open **Networking > Tunnels** and create a tunnel.
+2. Install the connector using the command shown by Cloudflare.
+3. Add a **Published application** route such as
+   `discord-events.example.com`.
+4. Set its service URL to `http://127.0.0.1:3000`.
+5. Configure Discord with
+   `https://discord-events.example.com/discord/webhooks`.
+
+The named tunnel provides a stable hostname and still requires no inbound router
+port. Treat its connector token as a secret and never commit it.
+
+Keep `WEBHOOK_HOST=127.0.0.1` when `cloudflared` runs on the same machine. Change
+it to `0.0.0.0` only when a private container or reverse proxy must reach the
+bot, and protect that port with the container network or firewall.
+
+Discord signs the exact request bytes, so the native server preserves the raw
+body before passing it to `@arcscord/webhooks`.
 
 ## Database
 
@@ -186,3 +311,6 @@ pnpm typecheck
 pnpm lint
 pnpm dev
 ```
+
+For a temporary public Webhook Events endpoint, keep `pnpm dev` running and use
+`pnpm tunnel` in a second terminal.

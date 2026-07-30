@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node --import=tsx --env-file-if-exists=.env src/index.ts",
     "dev": "node --import=tsx --env-file-if-exists=.env src/index.ts dev debug",
+    "tunnel": "node --import=tsx --env-file-if-exists=.env src/webhooks/tunnel.ts",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "lint:fix": "eslint --fix ."

@@ -30,6 +30,32 @@ Copy the application public key from the Discord Developer Portal. Do not use th
 DISCORD_PUBLIC_KEY=your_application_public_key
 ```
 
+## Test locally without opening a router port
+
+Discord requires a public Webhook Events URL. For local development, an
+outbound-only [Cloudflare Quick Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/do-more-with-tunnels/trycloudflare/)
+can forward a temporary HTTPS URL to a server bound to the loopback interface:
+
+```sh
+cloudflared tunnel --url http://127.0.0.1:3000
+```
+
+Configure Discord with the generated hostname plus your application route:
+
+```text
+https://random-words.trycloudflare.com/discord/webhooks
+```
+
+No router port-forwarding rule is needed. Keep the local server bound to
+`127.0.0.1`, preserve its raw request body, and continue validating every
+Ed25519 signature. Do not enable interactive Cloudflare Access authentication
+for this route because Discord cannot complete an Access login.
+
+Quick Tunnel hostnames change when restarted and are intended only for
+development. Use a named tunnel or deploy the endpoint to a public host when a
+stable URL is required. The repository's reminder bot example provides a
+`pnpm tunnel` helper that prints the complete URL to paste into Discord.
+
 ## Use Arcscord event handlers
 
 `webhookEvents` is a typed event source. Handlers use the normal `createEvent` API and can be mixed with Gateway handlers:

@@ -22,3 +22,22 @@ export function readPortEnv(name: string, defaultValue: number): number {
 
   return value;
 }
+
+export function readHostEnv(name: string, defaultValue: string): string {
+  const raw = process.env[name];
+  if (!raw) {
+    return defaultValue;
+  }
+
+  const value = raw.trim();
+  if (
+    !value
+    || value.includes("/")
+    || value.includes("://")
+    || /\s/.test(value)
+  ) {
+    throw new TypeError(`${name} must be a hostname or IP address without a protocol, path, or whitespace.`);
+  }
+
+  return value;
+}
