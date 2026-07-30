@@ -185,26 +185,16 @@ Do not place Cloudflare Access authentication in front of this endpoint:
 Discord cannot complete an interactive login. Ed25519 verification authenticates
 the sender instead.
 
-## Stable tunnel
+## Production
 
-Quick Tunnel URLs are temporary. For a bot that stays online, either deploy the
-bot to a public host or create a
-[remotely-managed Cloudflare Tunnel](https://developers.cloudflare.com/cloudflare-one/networks/connectors/cloudflare-tunnel/get-started/create-remote-tunnel/):
+Cloudflare Quick Tunnel is documented here only as a development convenience.
+Do not use it to run the production endpoint.
 
-1. In Cloudflare, open **Networking > Tunnels** and create a tunnel.
-2. Install the connector using the command shown by Cloudflare.
-3. Add a **Published application** route such as
-   `discord-events.example.com`.
-4. Set its service URL to `http://127.0.0.1:3000`.
-5. Configure Discord with
-   `https://discord-events.example.com/discord/webhooks`.
-
-The named tunnel provides a stable hostname and still requires no inbound router
-port. Treat its connector token as a secret and never commit it.
-
-Keep `WEBHOOK_HOST=127.0.0.1` when `cloudflared` runs on the same machine. Change
-it to `0.0.0.0` only when a private container or reverse proxy must reach the
-bot, and protect that port with the container network or firewall.
+For production, deploy the bot and its Webhook Events endpoint to an appropriate
+public hosting environment with a stable HTTPS URL. Configure `WEBHOOK_HOST`
+according to that platform; use `0.0.0.0` only when its private container network
+or reverse proxy requires it, and do not expose the port outside the hosting
+environment unnecessarily.
 
 Discord signs the exact request bytes, so the native server preserves the raw
 body before passing it to `@arcscord/webhooks`.

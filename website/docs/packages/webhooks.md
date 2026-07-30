@@ -52,9 +52,10 @@ Ed25519 signature. Do not enable interactive Cloudflare Access authentication
 for this route because Discord cannot complete an Access login.
 
 Quick Tunnel hostnames change when restarted and are intended only for
-development. Use a named tunnel or deploy the endpoint to a public host when a
-stable URL is required. The repository's reminder bot example provides a
-`pnpm tunnel` helper that prints the complete URL to paste into Discord.
+development. Do not use a Quick Tunnel for production. Deploy the endpoint to
+an appropriate public hosting environment with a stable HTTPS URL instead. The
+repository's reminder bot example provides a `pnpm tunnel` development helper
+that prints the complete URL to paste into Discord.
 
 ## Use Arcscord event handlers
 

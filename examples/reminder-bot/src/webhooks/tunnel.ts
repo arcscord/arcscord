@@ -50,6 +50,7 @@ function inspectOutput(chunk: Buffer, output: NodeJS.WriteStream): void {
     "",
     `  ${endpoint}`,
     "",
+    "Development only — do not use this Quick Tunnel in production.",
     "Keep this terminal open while testing. The URL changes when the Quick Tunnel restarts.",
     "",
   ].join("\n"));
