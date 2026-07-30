@@ -66,3 +66,10 @@ const arcscordHandler = createEvent({
 });
 
 void arcscordHandler;
+
+// @ts-expect-error Discord.js Gateway events do not belong to webhookEvents.
+createEvent({
+  source: webhookEvents,
+  event: "messageCreate",
+  run() {},
+});

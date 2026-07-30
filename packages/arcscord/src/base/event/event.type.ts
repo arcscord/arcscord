@@ -5,6 +5,7 @@ import type {
   EventSource,
   EventSourceArgs,
   EventSourceEvent,
+  GatewayEventSource,
 } from "#/base/event/event_source";
 import type { MaybePromise } from "#/utils";
 
@@ -65,7 +66,7 @@ export type EventHandler<E extends keyof ClientEvents> = {
   /**
    * Event source. Omitted Gateway handlers use the built-in `gatewayEvents`.
    */
-  source?: EventSource<ClientEvents>;
+  source?: GatewayEventSource;
 
   /**
    * The name of the event.

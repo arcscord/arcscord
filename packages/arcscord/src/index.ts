@@ -349,6 +349,7 @@ export type {
   EventSourceArgs,
   EventSourceEvent,
   EventSourceMap,
+  GatewayEventSource,
 } from "./base/event/event_source";
 
 export { createExecutionControls } from "./base/manager/execution_handler";

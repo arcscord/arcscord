@@ -8,6 +8,7 @@ import type {
 import type {
   EventSource,
   EventSourceEvent,
+  GatewayEventSource,
 } from "#/base/event/event_source";
 import type { ContextDocs } from "#/base/utils";
 import type { LoggerInterface } from "#/utils/logger/logger.type";
@@ -18,7 +19,7 @@ import { gatewayEvents } from "#/base/event/event_source";
 export type EventContextHandler<
   E extends string,
   Source extends EventSource,
-> = Source extends EventSource<ClientEvents>
+> = Source extends GatewayEventSource
   ? EventHandler<Extract<E, keyof ClientEvents>>
   : E extends EventSourceEvent<Source>
     ? SourceEventHandler<Source, E>
@@ -56,7 +57,7 @@ export class EventContext<
   constructor(
     client: ArcClient,
     handler: EventContextHandler<E, Source>,
-    source: Source = gatewayEvents as Source,
+    source: Source = gatewayEvents as unknown as Source,
     logger: LoggerInterface = client.eventManager?.logger ?? client.logger,
   ) {
     this.client = client;

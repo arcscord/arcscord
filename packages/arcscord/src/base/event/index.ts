@@ -17,4 +17,5 @@ export type {
   EventSourceArgs,
   EventSourceEvent,
   EventSourceMap,
+  GatewayEventSource,
 } from "./event_source";

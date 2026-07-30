@@ -38,7 +38,7 @@ export function createEvent<E extends keyof ClientEvents>(
  */
 export function createEvent<
   Source extends EventSource,
-  const E extends EventSourceEvent<Source>,
+  const E extends EventSourceEvent<NoInfer<Source>>,
 >(
   options: OptionalProperties<SourceEventHandler<Source, E>, "name">,
 ): SourceEventHandler<Source, E>;

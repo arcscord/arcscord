@@ -121,7 +121,7 @@ export class EventManager extends BaseManager {
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>>;
   async loadEvent<
     Source extends EventSource,
-    E extends EventSourceEvent<Source>,
+    E extends EventSourceEvent<NoInfer<Source>>,
   >(
     event: SourceEventHandler<Source, E>,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>>;
@@ -176,7 +176,7 @@ export class EventManager extends BaseManager {
    */
   async dispatch<
     Source extends EventSource,
-    E extends EventSourceEvent<Source>,
+    E extends EventSourceEvent<NoInfer<Source>>,
   >(
     source: Source,
     eventName: E,

@@ -58,6 +58,7 @@ import { createEvent, createEventSource } from "arcscord";
 
 type JobEvents = {
   completed: [jobId: string];
+  failed: [jobId: string, reason: Error];
 };
 
 export const jobEvents = createEventSource<JobEvents>({ name: "jobs" });
@@ -76,6 +77,23 @@ const completed = createEvent({
 await client.loadEvents([completed]);
 await client.eventManager.dispatch(jobEvents, "completed", "job_123");
 ```
+
+External event names can be ordinary string literals; an enum is not required.
+Every value in the source map must be an argument tuple. Once `source` is
+present, both `createEvent` and `dispatch` accept only names and arguments from
+that source. Discord.js event names are therefore rejected for `jobEvents`:
+
+```ts
+// TypeScript error: "messageCreate" does not belong to jobEvents
+createEvent({
+  source: jobEvents,
+  event: "messageCreate",
+  run() {},
+});
+```
+
+The explicit `source: gatewayEvents` form is equivalent to omitting `source`
+and remains restricted to Discord.js `ClientEvents`.
 
 Source identity is symbol-based, so two sources can safely use the same event and handler names. Custom-source dispatches run matching handlers sequentially, await asynchronous handlers, respect `once` and `beforeReady`, and return a report whose `matched` field is `0` when no handler is registered.
 

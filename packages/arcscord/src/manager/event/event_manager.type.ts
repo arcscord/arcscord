@@ -9,6 +9,7 @@ import type {
   EventSource,
   EventSourceArgs,
   EventSourceEvent,
+  GatewayEventSource,
 } from "#/base/event/event_source";
 import type {
   ExecutionControls,
@@ -59,7 +60,7 @@ export type EventExecutionContext<E extends keyof ClientEvents>
     & {
       event: EventHandler<E>;
       eventName: E;
-      source: EventSource<ClientEvents>;
+      source: GatewayEventSource;
       context: EventContext<E>;
       args: ClientEvents[E];
     };
