@@ -18,7 +18,7 @@ template. A good reading order is:
 1. `src/index.ts` — creates the `ArcClient`, loads handlers, and starts the
    reminder scheduler when Discord says the client is ready.
 2. `src/handlers.ts` — Arcscord's central registry. It mixes the slash command
-   with an `APPLICATION_DEAUTHORIZED` Webhook Event.
+   with `APPLICATION_AUTHORIZED` and `APPLICATION_DEAUTHORIZED` Webhook Events.
 3. `src/commands/reminder/index.ts` — defines the user-install `/reminder`
    command and imports one subcommand per file.
 4. `src/commands/reminder/create.ts`, `src/commands/reminder/list.ts`, and
@@ -31,11 +31,13 @@ template. A good reading order is:
    with `node:http`.
 8. `src/webhooks/tunnel.ts` — starts a development-only Cloudflare Quick Tunnel
    and prints the Discord endpoint URL.
-9. `src/events/application_deauthorized.ts` — removes a user's reminders after
+9. `src/events/application_authorized.ts` — sends the user a short introduction
+   after they add the application.
+10. `src/events/application_deauthorized.ts` — removes a user's reminders after
    the user uninstalls the application.
-10. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
+11. `src/reminders/duration.ts` — parses values like `10m`, `1h30m`,
    `2 hours`, and `3 jours`.
-11. `src/utils/reply.ts` — builds the shared Components v2 replies used by the
+12. `src/utils/reply.ts` — builds the shared Components v2 replies used by the
    reminder commands.
 
 ## Install
@@ -154,7 +156,7 @@ In the [Discord Developer Portal](https://discord.com/developers/applications):
 2. Open **Webhooks**.
 3. Paste the complete URL printed by `pnpm tunnel` into **Endpoint URL**.
 4. Enable Webhook Events.
-5. Select **Application Deauthorized**.
+5. Select **Application Authorized** and **Application Deauthorized**.
 6. Save the changes.
 
 Discord sends a signed `PING` while saving the endpoint. The package verifies
@@ -242,11 +244,13 @@ If the user has closed their DMs, the error is logged and the reminder is still
 deleted to keep this example simple.
 
 The same `handlers.events` array can contain Gateway and HTTP-delivered events.
-When Discord sends `APPLICATION_DEAUTHORIZED`, the webhook transport verifies
-Ed25519, acknowledges the valid delivery with `204`, and dispatches its typed
-data through Arcscord. The handler deletes every reminder owned by that user.
-HTTP/signature errors stay in the webhook package; database or handler failures
-stay in Arcscord's event execution chain.
+When Discord sends `APPLICATION_AUTHORIZED`, the bot introduces `/reminder` to
+the user by DM. If their DMs are closed, it logs the delivery error without
+failing the webhook. On `APPLICATION_DEAUTHORIZED`, the handler deletes every
+reminder owned by that user. The webhook transport verifies Ed25519,
+acknowledges each valid delivery with `204`, and dispatches its typed data
+through Arcscord. HTTP/signature errors stay in the webhook package; database or
+handler failures stay in Arcscord's event execution chain.
 
 ## Extending the example
 

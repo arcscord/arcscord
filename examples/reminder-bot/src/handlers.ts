@@ -5,6 +5,7 @@
 // add it to the matching array.
 import type { HandlersList } from "arcscord";
 import { reminderCommand } from "./commands/reminder";
+import { applicationAuthorized } from "./events/application_authorized";
 import { applicationDeauthorized } from "./events/application_deauthorized";
 
 export default {
@@ -13,5 +14,5 @@ export default {
   // This example has no buttons, select menus or modals.
   components: [],
   // Webhook Events share this registry with optional Discord Gateway events.
-  events: [applicationDeauthorized],
+  events: [applicationAuthorized, applicationDeauthorized],
 } satisfies HandlersList;
