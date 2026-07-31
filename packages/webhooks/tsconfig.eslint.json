@@ -1,4 +1,13 @@
 {
   "extends": "../../tsconfig.eslint.json",
+  "compilerOptions": {
+    "paths": {
+      "#/*": ["../arcscord/src/*"],
+      "@arcscord/components": ["../components/src/index.ts"],
+      "@arcscord/error": ["../error/src/index.ts"],
+      "arcscord": ["../arcscord/src/index.ts"],
+      "arcscord/testing": ["../arcscord/src/testing/index.ts"]
+    }
+  },
   "include": ["src", "tsdown.config.mts", "vitest.config.mts"]
 }

@@ -3,6 +3,15 @@
   "compilerOptions": {
     "lib": ["ES2024", "dom"],
     "noEmit": true,
+    "paths": {
+      "#/*": ["../../packages/arcscord/src/*"],
+      "@arcscord/components": ["../../packages/components/src/index.ts"],
+      "@arcscord/error": ["../../packages/error/src/index.ts"],
+      "@arcscord/webhooks": ["../../packages/webhooks/src/index.ts"],
+      "@arcscord/webhooks/testing": ["../../packages/webhooks/src/testing/index.ts"],
+      "arcscord": ["../../packages/arcscord/src/index.ts"],
+      "arcscord/testing": ["../../packages/arcscord/src/testing/index.ts"]
+    },
     "types": ["node", "vitest/globals"]
   },
   "include": ["*.ts"]
