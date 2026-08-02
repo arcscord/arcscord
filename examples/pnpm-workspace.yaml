@@ -4,6 +4,7 @@ packages:
 minimumReleaseAgeExclude:
   - "@arcscord/error"
   - "@arcscord/middleware"
+  - "@arcscord/webhooks"
   - arcscord
 
 shellEmulator: true
