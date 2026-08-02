@@ -48,6 +48,11 @@
         "src/**/*.ts"
       ]
     },
+    "packages/webhooks": {
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
     "packages/create-arcscord-bot": {
       "project": [
         "src/**/*.ts"
@@ -69,6 +74,18 @@
     "test/logger_demo": {
       "project": [
         "src/**/*.ts"
+      ]
+    },
+    "test/compat/bun-consumer": {
+      "entry": [
+        "*.ts"
+      ],
+      "ignoreDependencies": [
+        "@arcscord/error",
+        "discord.js"
+      ],
+      "project": [
+        "*.ts"
       ]
     }
   }

@@ -1,10 +1,24 @@
 import type { Result } from "@arcscord/error";
 import type { ClientEvents, GatewayIntentsString } from "discord.js";
 import type { ArcClient } from "#/base/client/client.class";
-import type { AnyEventHandler, EventHandler, EventHandlerForRegistry } from "#/base/event/event.type";
+import type {
+  AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
+  EventHandler,
+  EventHandlerForRegistry,
+  SourceEventHandler,
+} from "#/base/event/event.type";
+import type {
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+} from "#/base/event/event_source";
 import type {
   AnyEventExecutionContext,
-  EventExecutionContext,
+  AnySourceEventExecutionContext,
+  EventDispatcher,
+  EventDispatchResult,
   EventExecutionHandler,
   EventExecutionOutcome,
   EventIntentCheckCoverage,
@@ -14,26 +28,31 @@ import type {
   EventResultHandler,
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
+  SourceEventExecutionHandler,
 } from "./event_manager.type";
 import { error, ok } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
+import { gatewayEvents } from "#/base/event/event_source";
 import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
 import { intentsMap } from "#/manager/event/intents_map";
 import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerReturn } from "#/utils";
 import {
   defaultEventExecutionHandler,
+  defaultSourceEventExecutionHandler,
   eventResultHandlerAdapter,
   runDefaultEventExecution,
 } from "./event_execution_handler";
 
 type EventRegistration = {
+  source: EventSource;
   event: EventHandlerForRegistry;
-  listener: (...args: unknown[]) => Promise<void>;
+  listener: (...args: unknown[]) => Promise<EventExecutionOutcome>;
 };
 
 type NormalizedEventManagerOptions = {
   executionHandlers: readonly EventExecutionHandler[];
+  sourceExecutionHandlers: readonly SourceEventExecutionHandler[];
   resultHandler: EventResultHandler;
   intentCheck: false | RequiredEventIntentCheckOptions;
 };
@@ -44,7 +63,7 @@ type NormalizedEventManagerOptions = {
 export class EventManager extends BaseManager {
   readonly options: NormalizedEventManagerOptions;
 
-  private events: Map<string, EventRegistration> = new Map();
+  private events: Map<symbol, Map<string, EventRegistration>> = new Map();
 
   private readonly preExecutionResultHandler?: EventResultHandler;
 
@@ -68,6 +87,8 @@ export class EventManager extends BaseManager {
 
     this.options = {
       executionHandlers,
+      sourceExecutionHandlers: options?.sourceExecutionHandlers
+        ?? [defaultSourceEventExecutionHandler],
       resultHandler: options?.resultHandler ?? this.defaultResultHandler.bind(this),
       intentCheck: this.normalizeIntentCheckOptions(options?.intentCheck),
     };
@@ -83,7 +104,7 @@ export class EventManager extends BaseManager {
    * @returns The number of loaded handlers, or the loading failure.
    */
   async loadEvents(
-    events: AnyEventHandler[],
+    events: AnyLoadableEventHandler[],
   ): Promise<Result<number, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     let loaded = 0;
     for (const event of events) {
@@ -105,103 +126,124 @@ export class EventManager extends BaseManager {
    */
   async loadEvent<E extends keyof ClientEvents>(
     event: EventHandler<E>,
+  ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>>;
+  async loadEvent<
+    Source extends EventSource,
+    E extends EventSourceEvent<NoInfer<Source>>,
+  >(
+    event: SourceEventHandler<Source, E>,
+  ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>>;
+  async loadEvent(
+    event: AnyLoadableEventHandler,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
-    if (this.events.has(event.name)) {
+    const source = this.eventSource(event);
+    const registry = this.sourceRegistry(source, true)!;
+
+    if (registry.has(event.name)) {
       return error(new ArcscordError({
         code: arcscordErrorCodes.EventHandlerDuplicate,
         message: `duplicate event handler name "${event.name}"`,
-        metadata: { handlerName: event.name, eventName: event.event },
+        metadata: {
+          handlerName: event.name,
+          eventName: event.event,
+        },
       }));
     }
 
-    const [intentErr] = this.checkIntents(event);
+    const [intentErr] = this.checkIntents(event, source);
     if (intentErr !== null) {
       return error(intentErr);
     }
 
-    this.trace(`bind event ${event.event} for ${event.name} handler !`);
-
-    const listener = async (...args: ClientEvents[E]): Promise<void> => {
-      const receivedAt = Date.now();
-      if (event.options?.once) {
-        this.events.delete(event.name);
-      }
-
-      const beforeReady = event.options?.beforeReady ?? "run";
-      if (!this.client.ready) {
-        if (beforeReady === "drop") {
-          return;
-        }
-        if (beforeReady === "queue") {
-          try {
-            await this.client.waitReady();
-          }
-          catch (e) {
-            const endedAt = Date.now();
-            const exit = executionDefect(e);
-            const infos: EventResultHandlerInfos = {
-              exit,
-              event: event as unknown as AnyEventHandler,
-              eventName: event.event,
-              startedAt: receivedAt,
-              endedAt,
-              durationMs: endedAt - receivedAt,
-              incidentId: crypto.randomUUID(),
-            };
-            if (this.preExecutionResultHandler) {
-              await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
-            }
-            else if (this.useDefaultPreExecutionHandler) {
-              runDefaultEventExecution(infos, {
-                kind: "completed",
-                exit,
-                startedAt: receivedAt,
-                endedAt,
-                durationMs: endedAt - receivedAt,
-                incidentId: infos.incidentId,
-              }, this);
-            }
-            else {
-              this.logger.logError(exit.defect, { source: "eventBeforeReady" });
-            }
-            return;
-          }
-        }
-      }
-
-      await this.runEvent(event, args);
-    };
-
-    this.events.set(event.name, {
+    let registration: EventRegistration;
+    const listener = (...args: unknown[]): Promise<EventExecutionOutcome> => (
+      this.receiveEvent(registration, args)
+    );
+    registration = {
+      source,
       event: event as unknown as EventHandlerForRegistry,
-      listener: listener as (...args: unknown[]) => Promise<void>,
-    });
+      listener,
+    };
+    registry.set(event.name, registration);
 
-    if (event.options?.once) {
-      this.client.once(event.event, listener);
+    if (source.id === gatewayEvents.id) {
+      this.trace(`bind event ${event.event} for ${event.name} handler !`);
+      this.bindGatewayEvent(registration);
     }
     else {
-      this.client.on(event.event, listener);
+      this.trace(`register ${source.name} event ${event.event} for ${event.name} handler !`);
     }
 
     return ok(true);
   }
 
   /**
-   * Removes a loaded event handler by name.
+   * Dispatches one event independently of Discord.js.
+   *
+   * Matching handlers run sequentially in registration order.
+   */
+  async dispatch<
+    Source extends EventSource,
+    E extends EventSourceEvent<NoInfer<Source>>,
+  >(
+    source: Source,
+    eventName: E,
+    ...args: EventSourceArgs<Source, E>
+  ): Promise<EventDispatchResult<Source, E>> {
+    this.assertEventSource(source);
+
+    const registrations = [...(this.sourceRegistry(source, false)?.values() ?? [])]
+      .filter(registration => registration.event.event === eventName);
+    const executions = [];
+
+    for (const registration of registrations) {
+      const outcome = await registration.listener(...args);
+      executions.push({
+        event: registration.event as unknown as AnyLoadableEventHandler,
+        outcome,
+      });
+    }
+
+    return {
+      source,
+      eventName,
+      matched: registrations.length,
+      executions,
+    };
+  }
+
+  /** Returns a typed dispatcher permanently bound to one source. */
+  dispatcher<Source extends EventSource>(source: Source): EventDispatcher<Source> {
+    this.assertEventSource(source);
+    return (event, ...args) => this.dispatch(source, event, ...args);
+  }
+
+  /**
+   * Removes a loaded Gateway handler by name.
    *
    * @param name - The event handler name to unload.
    * @returns `true` when a listener was removed.
    */
-  unloadEvent(name: string): boolean {
-    const registration = this.events.get(name);
+  unloadEvent(name: string): boolean;
+  /** Removes a loaded handler from a custom source. */
+  unloadEvent(source: EventSource, name: string): boolean;
+  unloadEvent(sourceOrName: EventSource | string, customName?: string): boolean {
+    const source = typeof sourceOrName === "string" ? gatewayEvents : sourceOrName;
+    const name = typeof sourceOrName === "string" ? sourceOrName : customName!;
+    const registry = this.sourceRegistry(source, false);
+    const registration = registry?.get(name);
     if (!registration) {
       return false;
     }
 
-    this.client.off(registration.event.event, registration.listener);
-    this.events.delete(name);
-    this.trace(`unloaded event ${registration.event.event} for ${name} handler !`);
+    if (source.id === gatewayEvents.id) {
+      this.unbindGatewayEvent(registration);
+    }
+    registry!.delete(name);
+    if (registry!.size === 0) {
+      this.events.delete(source.id);
+    }
+    this.trace(`unloaded ${source.name} event ${registration.event.event} for ${name} handler !`);
 
     return true;
   }
@@ -226,43 +268,213 @@ export class EventManager extends BaseManager {
     }, this);
   }
 
-  private async runEvent<E extends keyof ClientEvents>(
-    event: EventHandler<E>,
-    args: ClientEvents[E],
-  ): Promise<void> {
+  private async runEvent(
+    event: EventHandlerForRegistry,
+    source: EventSource,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
+    if (source.id === gatewayEvents.id) {
+      return this.runGatewayEvent(event, args);
+    }
+
+    return this.runSourceEvent(event, source, args);
+  }
+
+  private async runGatewayEvent(
+    event: EventHandlerForRegistry,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
     const startedAt = Date.now();
-    const context = new EventContext(this.client, event);
-    const execution: EventExecutionContext<E> = {
+    const context = new EventContext(
+      this.client,
+      event as unknown as EventHandler<keyof ClientEvents>,
+      gatewayEvents,
+      this.logger,
+    );
+    const execution = {
       event,
       eventName: event.event,
+      source: gatewayEvents,
       context,
       args,
       ...createExecutionControls<string | true>(startedAt),
-    };
+    } as unknown as AnyEventExecutionContext;
 
-    await this.runExecutionHandlers(
+    const outcome = await this.runExecutionHandlers(
       this.options.executionHandlers,
-      execution as unknown as AnyEventExecutionContext,
+      execution,
       () => this.executeEvent(execution, event),
       this,
     );
+    if (outcome) {
+      return outcome;
+    }
+
+    return execution.complete(executionDefect(
+      new Error(`event execution handler failed for "${event.name}"`),
+    ));
   }
 
-  private async executeEvent<E extends keyof ClientEvents>(
-    execution: EventExecutionContext<E>,
-    event: EventHandler<E>,
+  private async runSourceEvent(
+    event: EventHandlerForRegistry,
+    source: EventSource,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
+    const startedAt = Date.now();
+    type RegistrySource = EventSource<Record<string, readonly unknown[]>>;
+    const context = new EventContext<string, RegistrySource>(
+      this.client,
+      event as unknown as SourceEventHandler<RegistrySource, string>,
+      source as RegistrySource,
+      this.logger,
+    );
+    const execution = {
+      event: event as unknown as AnySourceEventHandler,
+      eventName: event.event,
+      source,
+      context,
+      args,
+      ...createExecutionControls<string | true>(startedAt),
+    } as AnySourceEventExecutionContext;
+
+    const outcome = await this.runExecutionHandlers(
+      this.options.sourceExecutionHandlers,
+      execution,
+      () => this.executeEvent(execution, event),
+      this,
+    );
+    if (outcome) {
+      return outcome;
+    }
+
+    return execution.complete(executionDefect(
+      new Error(`event execution handler failed for "${event.name}"`),
+    ));
+  }
+
+  private async executeEvent(
+    execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
+    event: EventHandlerForRegistry,
   ): Promise<EventExecutionOutcome> {
     try {
-      const rawResult = await event.run(execution.context, ...execution.args);
+      const rawResult = await event.run(
+        execution.context as EventContext,
+        ...execution.args as unknown[],
+      );
       this.logger.debug(`Event handled: ${event.name}`, {
         handler: event.name,
         event: event.event,
+        source: execution.source?.name ?? gatewayEvents.name,
       });
       return execution.complete(normalizeHandlerReturn(rawResult));
     }
     catch (e) {
       return execution.complete(executionDefect(e));
     }
+  }
+
+  private async receiveEvent(
+    registration: EventRegistration,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
+    const receivedAt = Date.now();
+    const controls = createExecutionControls<string | true>(receivedAt);
+    const { event, source } = registration;
+
+    if (event.options?.once) {
+      this.unloadEvent(source, event.name);
+    }
+
+    const beforeReady = event.options?.beforeReady ?? "run";
+    if (!this.client.ready) {
+      if (beforeReady === "drop") {
+        return controls.cancel();
+      }
+      if (beforeReady === "queue") {
+        try {
+          await this.client.waitReady();
+        }
+        catch (e) {
+          const exit = executionDefect(e);
+          const outcome = controls.complete(exit);
+          if (source.id === gatewayEvents.id) {
+            const infos: EventResultHandlerInfos = {
+              exit,
+              event: event as unknown as AnyEventHandler,
+              eventName: event.event,
+              source: gatewayEvents,
+              startedAt: outcome.startedAt,
+              endedAt: outcome.endedAt,
+              durationMs: outcome.durationMs,
+              incidentId: outcome.incidentId,
+            };
+            if (this.preExecutionResultHandler) {
+              await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
+            }
+            else if (this.useDefaultPreExecutionHandler) {
+              runDefaultEventExecution(infos, outcome, this);
+            }
+            else {
+              this.logger.logError(exit.defect, { source: "eventBeforeReady" });
+            }
+          }
+          else {
+            this.logger.logError(exit.defect, {
+              source: "eventBeforeReady",
+              eventSource: source.name,
+            });
+          }
+          return outcome;
+        }
+      }
+    }
+
+    return this.runEvent(event, source, args);
+  }
+
+  private eventSource(event: AnyLoadableEventHandler | EventHandlerForRegistry): EventSource {
+    return event.source ?? gatewayEvents;
+  }
+
+  private sourceRegistry(
+    source: EventSource,
+    create: boolean,
+  ): Map<string, EventRegistration> | undefined {
+    const current = this.events.get(source.id);
+    if (current || !create) {
+      return current;
+    }
+
+    const registry = new Map<string, EventRegistration>();
+    this.events.set(source.id, registry);
+    return registry;
+  }
+
+  private assertEventSource(source: EventSource): void {
+    if (
+      typeof source !== "object"
+      || source === null
+      || typeof source.name !== "string"
+      || source.name.length === 0
+      || typeof source.id !== "symbol"
+    ) {
+      throw new TypeError("invalid event source");
+    }
+  }
+
+  private bindGatewayEvent(registration: EventRegistration): void {
+    const client = this.client;
+    if (registration.event.options?.once) {
+      client.once(registration.event.event, registration.listener);
+    }
+    else {
+      client.on(registration.event.event, registration.listener);
+    }
+  }
+
+  private unbindGatewayEvent(registration: EventRegistration): void {
+    const client = this.client;
+    client.off(registration.event.event, registration.listener);
   }
 
   private normalizeIntentCheckOptions(
@@ -283,14 +495,20 @@ export class EventManager extends BaseManager {
     };
   }
 
-  private checkIntents<E extends keyof ClientEvents>(
-    event: EventHandler<E>,
+  private checkIntents(
+    event: AnyLoadableEventHandler,
+    source: EventSource,
   ): Result<true, ArcscordError<"EVENT_INTENT_MISSING">> {
-    if (this.options.intentCheck === false || this.options.intentCheck.ignore.includes(event.event)) {
+    if (source.id !== gatewayEvents.id || this.options.intentCheck === false) {
       return ok(true);
     }
 
-    const issue = this.resolveIntentIssue(event);
+    const gatewayEvent = event as unknown as EventHandler<keyof ClientEvents>;
+    if (this.options.intentCheck.ignore.includes(gatewayEvent.event)) {
+      return ok(true);
+    }
+
+    const issue = this.resolveIntentIssue(gatewayEvent);
     if (!issue) {
       return ok(true);
     }
@@ -399,7 +617,7 @@ export class EventManager extends BaseManager {
   }
 
   private async loadAnyEvent(
-    event: AnyEventHandler,
+    event: AnyLoadableEventHandler,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     return this.loadEvent(event as unknown as EventHandler<keyof ClientEvents>);
   }

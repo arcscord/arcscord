@@ -333,13 +333,26 @@ export type {
 export { createEvent } from "./base/event/event.func";
 export type {
   AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
   EventBeforeReadyMode,
   EventHandler,
   EventHandleResult,
   EventHandleReturn,
   EventHandlerOptions,
+  SourceEventHandler,
 } from "./base/event/event.type";
 export { EventContext } from "./base/event/event_context";
+export type { EventContextHandler } from "./base/event/event_context";
+export { createEventSource, gatewayEvents } from "./base/event/event_source";
+export type {
+  EventMap,
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+  EventSourceMap,
+  GatewayEventSource,
+} from "./base/event/event_source";
 
 export { createExecutionControls } from "./base/manager/execution_handler";
 export type {
@@ -366,6 +379,7 @@ export {
   defaultCommandExecutionHandler,
   defaultComponentExecutionHandler,
   defaultEventExecutionHandler,
+  defaultSourceEventExecutionHandler,
   EventManager,
   LocaleManager,
 } from "./manager";
@@ -401,7 +415,11 @@ export type {
 
 export type {
   AnyEventExecutionContext,
+  AnySourceEventExecutionContext,
   BaseEventExecutionInfos,
+  EventDispatcher,
+  EventDispatchExecution,
+  EventDispatchResult,
   EventExecutionContext,
   EventExecutionHandler,
   EventExecutionOutcome,
@@ -413,6 +431,8 @@ export type {
   EventManagerOptions,
   EventResultHandler,
   EventResultHandlerInfos,
+  SourceEventExecutionContext,
+  SourceEventExecutionHandler,
 } from "./manager/event/event_manager.type";
 export type {
   EventIntentAlternatives,

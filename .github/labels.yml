@@ -46,6 +46,9 @@
 - name: packages/middleware
   color: 0E8A16
   description: About middleware package
+- name: packages/webhooks
+  color: 0E8A16
+  description: About Discord Webhook Events package
 - name: packages/create-arcscord-bot
   color: 0E8A16
   description: About create-arcscord-bot package

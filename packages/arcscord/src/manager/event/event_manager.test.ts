@@ -6,6 +6,10 @@ import { ok } from "@arcscord/error";
 import { IntentsBitField } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { createEvent } from "../../base/event";
+import {
+  createEventSource,
+  gatewayEvents,
+} from "../../base/event/event_source";
 import { ArcscordError, arcscordErrorCodes } from "../../utils";
 import { EventManager } from "./event_manager.class";
 import { intentsMap } from "./intents_map";
@@ -81,6 +85,145 @@ function createMockClient(
 }
 
 describe("event manager", () => {
+  it("creates uniquely identified event sources", () => {
+    type Jobs = {
+      completed: [id: string];
+    };
+    const first = createEventSource<Jobs>({ name: "jobs" });
+    const second = createEventSource<Jobs>({ name: "jobs" });
+
+    expect(first.name).toBe("jobs");
+    expect(first.id).not.toBe(second.id);
+    expect(gatewayEvents.name).toBe("discord-gateway");
+  });
+
+  it("dispatches custom-source handlers sequentially with typed context", async () => {
+    type Jobs = {
+      completed: [id: string];
+    };
+    const jobs = createEventSource<Jobs>({ name: "jobs" });
+    const { client, manager } = createMockClient([], {
+      intentCheck: {
+        missing: "error",
+      },
+    });
+    const calls: string[] = [];
+    const first = createEvent({
+      source: jobs,
+      event: "completed",
+      run: async (ctx, id) => {
+        expect(ctx.source).toBe(jobs);
+        expect(ctx.event).toBe("completed");
+        expect(ctx.logger).toBe(manager.logger);
+        calls.push(`first:${id}`);
+        await Promise.resolve();
+        calls.push("first:done");
+      },
+    });
+    const second = createEvent({
+      source: jobs,
+      event: "completed",
+      name: "second",
+      run: (_ctx, id) => {
+        calls.push(`second:${id}`);
+      },
+    });
+
+    await expect(manager.loadEvents([first, second])).resolves.toEqual([null, 2]);
+    expect(client.on).not.toHaveBeenCalled();
+
+    const result = await manager.dispatch(jobs, "completed", "job_1");
+
+    expect(result.matched).toBe(2);
+    expect(result.executions).toHaveLength(2);
+    expect(calls).toEqual([
+      "first:job_1",
+      "first:done",
+      "second:job_1",
+    ]);
+  });
+
+  it("keeps Gateway and custom-source execution handlers isolated", async () => {
+    type Jobs = {
+      completed: [id: string];
+    };
+    const jobs = createEventSource<Jobs>({ name: "jobs" });
+    const gatewayExecution = vi.fn();
+    const sourceExecution = vi.fn(async (execution, next) => {
+      expect(execution.source).toBe(jobs);
+      expect(execution.eventName).toBe("completed");
+      expect(execution.context.source).toBe(jobs);
+      expect(execution.args).toEqual(["job_1"]);
+      return next();
+    });
+    const { manager } = createMockClient([], {
+      intentCheck: false,
+      executionHandlers: [gatewayExecution],
+      sourceExecutionHandlers: [sourceExecution],
+    });
+
+    await manager.loadEvent(createEvent({
+      source: jobs,
+      event: "completed",
+      run: () => {},
+    }));
+    await manager.dispatch(jobs, "completed", "job_1");
+
+    expect(sourceExecution).toHaveBeenCalledOnce();
+    expect(gatewayExecution).not.toHaveBeenCalled();
+  });
+
+  it("isolates duplicate names by source and supports source-bound dispatchers", async () => {
+    type Signals = {
+      changed: [value: number];
+    };
+    const firstSource = createEventSource<Signals>({ name: "same-name" });
+    const secondSource = createEventSource<Signals>({ name: "same-name" });
+    const { manager } = createMockClient();
+    const firstRun = vi.fn();
+    const secondRun = vi.fn();
+
+    await expect(manager.loadEvent(createEvent({
+      source: firstSource,
+      event: "changed",
+      run: firstRun,
+    }))).resolves.toEqual([null, true]);
+    await expect(manager.loadEvent(createEvent({
+      source: secondSource,
+      event: "changed",
+      run: secondRun,
+    }))).resolves.toEqual([null, true]);
+
+    const dispatchSecond = manager.dispatcher(secondSource);
+    const result = await dispatchSecond("changed", 42);
+
+    expect(result.matched).toBe(1);
+    expect(firstRun).not.toHaveBeenCalled();
+    expect(secondRun).toHaveBeenCalledWith(expect.anything(), 42);
+    expect(manager.unloadEvent(firstSource, "changed")).toBe(true);
+    expect(manager.unloadEvent(secondSource, "changed")).toBe(true);
+  });
+
+  it("removes custom once handlers before a second dispatch", async () => {
+    type Signals = {
+      tick: [];
+    };
+    const source = createEventSource<Signals>({ name: "signals" });
+    const { manager } = createMockClient();
+    const run = vi.fn();
+
+    await manager.loadEvent(createEvent({
+      source,
+      event: "tick",
+      options: { once: true },
+      run,
+    }));
+
+    await expect(manager.dispatch(source, "tick")).resolves.toMatchObject({ matched: 1 });
+    await expect(manager.dispatch(source, "tick")).resolves.toMatchObject({ matched: 0 });
+    expect(run).toHaveBeenCalledOnce();
+  });
+
   it("runs execution handlers around events with typed context and arguments", async () => {
     const calls: string[] = [];
     let messageId: string | undefined;

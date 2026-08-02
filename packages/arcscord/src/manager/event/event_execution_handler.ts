@@ -1,10 +1,12 @@
+import type { EventSource } from "#/base/event/event_source";
+import type { EventManager } from "./event_manager.class";
 import type {
   AnyEventExecutionContext,
-  BaseEventExecutionInfos,
   EventExecutionHandler,
   EventExecutionOutcome,
   EventResultHandler,
   EventResultHandlerInfos,
+  SourceEventExecutionHandler,
 } from "./event_manager.type";
 
 type CompletedEventExecutionOutcome = Extract<
@@ -12,15 +14,22 @@ type CompletedEventExecutionOutcome = Extract<
   { kind: "completed" }
 >;
 
+type DefaultEventExecutionInfos = {
+  event: { name: string };
+  eventName: string;
+  source?: EventSource;
+};
+
 /** @internal */
 export function runDefaultEventExecution(
-  execution: BaseEventExecutionInfos,
+  execution: DefaultEventExecutionInfos,
   outcome: CompletedEventExecutionOutcome,
-  manager: Parameters<EventExecutionHandler>[2],
+  manager: EventManager,
 ): void {
   const meta = {
     handler: execution.event.name,
     event: execution.eventName,
+    source: execution.source?.name ?? "discord-gateway",
     durationMs: outcome.durationMs,
     incidentId: outcome.incidentId,
   };
@@ -42,6 +51,7 @@ function toResultHandlerInfos(
   return {
     event: execution.event,
     eventName: execution.eventName,
+    source: execution.source,
     exit: outcome.exit,
     startedAt: outcome.startedAt,
     endedAt: outcome.endedAt,
@@ -75,6 +85,16 @@ export function eventResultHandlerAdapter(
  * failure and defect logging.
  */
 export const defaultEventExecutionHandler: EventExecutionHandler
+  = async (execution, next, manager) => {
+    const outcome = await next();
+    if (outcome.kind === "completed") {
+      runDefaultEventExecution(execution, outcome, manager);
+    }
+    return outcome;
+  };
+
+/** Default failure and defect logger for custom-source event executions. */
+export const defaultSourceEventExecutionHandler: SourceEventExecutionHandler
   = async (execution, next, manager) => {
     const outcome = await next();
     if (outcome.kind === "completed") {

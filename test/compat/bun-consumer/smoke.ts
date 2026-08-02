@@ -9,6 +9,11 @@
 import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
+  createWebhookHandler,
+  webhookEvents,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import {
   ArcClient,
   button,
   createButton,
@@ -21,6 +26,12 @@ const client = new ArcClient("smoke-token", {
   intents: [],
 });
 const standaloneMessage = v2Message(container("standalone"));
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.EntitlementCreate]: delivery => void delivery.event.data.id,
+  },
+});
 
 // 2. Build a slash command.
 const pingCommand = createCommand({
@@ -49,6 +60,11 @@ const readyEvent = createEvent({
   event: "clientReady",
   run: ctx => ctx.ok(true),
 });
+const deauthorizedEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (_ctx, data) => void data.user.id,
+});
 
 // 5. Exercise the logger.
 client.logger.info("bun smoke: client ready");
@@ -59,6 +75,9 @@ if (!(client instanceof ArcClient)) {
 if (standaloneMessage.components.length !== 1) {
   throw new Error("standalone components build failed");
 }
+if (typeof webhooks.handleRequest !== "function") {
+  throw new TypeError("standalone webhooks build failed");
+}
 if (pingCommand.slash?.name !== "ping") {
   throw new Error("command build failed");
 }
@@ -67,6 +86,9 @@ if (!builtButton) {
 }
 if (readyEvent.event !== "clientReady") {
   throw new Error("event registration failed");
+}
+if (deauthorizedEvent.source.id !== webhookEvents.id) {
+  throw new Error("webhook event source failed");
 }
 
 process.stdout.write("bun ok\n");

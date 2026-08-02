@@ -1,0 +1,25 @@
+{
+  "name": "@arcscord/webhooks-standalone-consumer",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Standalone packed @arcscord/webhooks consumer without Arcscord installed",
+  "scripts": {
+    "check:no-arcscord": "node assert-no-arcscord.mjs",
+    "smoke:esm": "node smoke.mjs",
+    "smoke:cjs": "node smoke.cjs",
+    "smoke": "pnpm check:no-arcscord && pnpm smoke:esm && pnpm smoke:cjs",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@arcscord/webhooks": "file:vendor/webhooks.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.3",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=24.11.0"
+  },
+  "packageManager": "pnpm@11.8.0"
+}

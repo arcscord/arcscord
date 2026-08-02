@@ -1,7 +1,18 @@
 import type { ClientEvents } from "discord.js";
-import type { AnyEventHandler } from "#/base/event";
-import type { EventHandler } from "#/base/event/event.type";
+import type {
+  AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
+  EventHandler,
+  SourceEventHandler,
+} from "#/base/event/event.type";
 import type { EventContext } from "#/base/event/event_context";
+import type {
+  EventSource,
+  EventSourceArgs,
+  EventSourceEvent,
+  GatewayEventSource,
+} from "#/base/event/event_source";
 import type {
   ExecutionControls,
   ExecutionNext,
@@ -25,6 +36,9 @@ export type BaseEventExecutionInfos = {
    * The Discord.js event name.
    */
   eventName: keyof ClientEvents | string;
+
+  /** Gateway source that delivered the event. */
+  source?: GatewayEventSource;
 };
 
 /**
@@ -48,11 +62,42 @@ export type EventExecutionContext<E extends keyof ClientEvents>
     & {
       event: EventHandler<E>;
       eventName: E;
+      source?: GatewayEventSource;
       context: EventContext<E>;
       args: ClientEvents[E];
     };
 
-/** Union of execution contexts for every Discord.js client event. */
+/** Execution context for an event from a custom source. */
+export type SourceEventExecutionContext<
+  Source extends EventSource,
+  E extends EventSourceEvent<Source>,
+> = ExecutionControls<string | true, unknown> & {
+  event: SourceEventHandler<Source, E>;
+  eventName: E;
+  source: Source;
+  context: EventContext<E, Source>;
+  args: EventSourceArgs<Source, E>;
+};
+
+/** Type-erased execution context received by custom-source interceptors. */
+export type AnySourceEventExecutionContext
+  = ExecutionControls<string | true, unknown> & {
+    event: AnySourceEventHandler;
+    eventName: string;
+    source: EventSource;
+    context: EventContext<
+      string,
+      EventSource<Record<string, readonly unknown[]>>
+    >;
+    args: readonly unknown[];
+  };
+
+/**
+ * Union of execution contexts for every Discord.js Gateway event.
+ *
+ * This remains Gateway-correlated for backward-compatible narrowing. Custom
+ * source authors can use {@link SourceEventExecutionContext} explicitly.
+ */
 export type AnyEventExecutionContext = {
   [E in keyof ClientEvents]: EventExecutionContext<E>;
 }[keyof ClientEvents];
@@ -60,9 +105,41 @@ export type AnyEventExecutionContext = {
 /** Outcome returned by event execution interceptors. */
 export type EventExecutionOutcome = ExecutionOutcome<string | true, unknown>;
 
+/** One handler execution produced by a source dispatch. */
+export type EventDispatchExecution = {
+  event: AnyLoadableEventHandler;
+  outcome: EventExecutionOutcome;
+};
+
+/** Structured result of dispatching one event from a typed source. */
+export type EventDispatchResult<
+  Source extends EventSource = EventSource,
+  E extends string = string,
+> = {
+  source: Source;
+  eventName: E;
+  matched: number;
+  executions: EventDispatchExecution[];
+};
+
+/** Bound dispatcher for one typed event source. */
+export type EventDispatcher<Source extends EventSource> = <
+  E extends EventSourceEvent<Source>,
+>(
+  event: E,
+  ...args: EventSourceArgs<Source, E>
+) => Promise<EventDispatchResult<Source, E>>;
+
 /** Koa-style interceptor around an event handler's `run()` call. */
 export type EventExecutionHandler = (
   execution: AnyEventExecutionContext,
+  next: ExecutionNext<EventExecutionOutcome>,
+  manager: EventManager,
+) => MaybePromise<EventExecutionOutcome>;
+
+/** Koa-style interceptor around a custom-source event handler. */
+export type SourceEventExecutionHandler = (
+  execution: AnySourceEventExecutionContext,
   next: ExecutionNext<EventExecutionOutcome>,
   manager: EventManager,
 ) => MaybePromise<EventExecutionOutcome>;
@@ -186,6 +263,14 @@ type BaseEventManagerOptions = {
    * @default { missing: "warn", partialCoverage: "off", ignore: [] }
    */
   intentCheck?: false | EventIntentCheckOptions;
+
+  /**
+   * Ordered interceptors around custom-source event handlers.
+   *
+   * Gateway {@link EventExecutionHandler}s remain isolated from custom events,
+   * preserving their Discord.js-only execution contract.
+   */
+  sourceExecutionHandlers?: readonly SourceEventExecutionHandler[];
 };
 
 type EventExecutionHandlerOptions = {

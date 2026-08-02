@@ -103,7 +103,7 @@ jobs:
             echo "| Typecheck | \`pnpm typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
             echo "| Pack | \`pnpm pack:local --skip-build\` | \`${{ steps.pack.outcome }}\` |"
             echo ""
-            echo "One build feeds the compatibility (\`bun\`/\`typescript\`/\`node\`) and example jobs via the \`compat-packages\` artifact."
+            echo "One build feeds the compatibility (\`bun\`/\`typescript\`/\`node\`/standalone webhooks) and example jobs via the \`compat-packages\` artifact."
           } >> "$GITHUB_STEP_SUMMARY"
 
   UnitTesting:
@@ -202,6 +202,44 @@ jobs:
         run: pnpm smoke:esm
       - name: Run CJS smoke (require)
         working-directory: test/compat/node-consumer
+        run: pnpm smoke:cjs
+
+  WebhooksStandaloneCompatibility:
+    name: Standalone Webhooks Compatibility
+    needs: Building
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Project
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - name: Download compatibility packages
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          name: compat-packages
+          path: test/compat/webhooks-consumer/vendor
+      - name: Install pnpm
+        uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
+        with:
+          version: 11.8.0
+      - name: Use Node.js v24.11.0
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: 24.11.0
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - name: Install standalone consumer dependencies
+        working-directory: test/compat/webhooks-consumer
+        run: pnpm install --no-lockfile
+      - name: Verify Arcscord is absent
+        working-directory: test/compat/webhooks-consumer
+        run: pnpm check:no-arcscord
+      - name: Typecheck packed declarations
+        working-directory: test/compat/webhooks-consumer
+        run: pnpm typecheck
+      - name: Run ESM smoke (import)
+        working-directory: test/compat/webhooks-consumer
+        run: pnpm smoke:esm
+      - name: Run CJS smoke (require)
+        working-directory: test/compat/webhooks-consumer
         run: pnpm smoke:cjs
 
   BunCompatibility:

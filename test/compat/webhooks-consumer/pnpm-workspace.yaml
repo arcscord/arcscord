@@ -1,0 +1,9 @@
+shellEmulator: true
+confirmModulesPurge: false
+
+trustPolicy: no-downgrade
+
+strictStorePkgContentCheck: false
+
+overrides:
+  "@arcscord/webhooks": file:vendor/webhooks.tgz

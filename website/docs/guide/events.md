@@ -40,6 +40,91 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 await client.loadEvents([messageEvent]);
 ```
 
+## Typed event sources
+
+Discord.js Gateway events use Arcscord's implicit `gatewayEvents` source, so existing handlers do not need to change:
+
+```ts
+createEvent({
+  event: "messageCreate",
+  run: (_ctx, message) => console.log(message.id),
+});
+```
+
+Packages and applications can define independent sources whose event names map to argument tuples:
+
+```ts
+import { createEvent, createEventSource } from "arcscord";
+
+type JobEvents = {
+  completed: [jobId: string];
+  failed: [jobId: string, reason: Error];
+};
+
+export const jobEvents = createEventSource<JobEvents>({ name: "jobs" });
+
+const completed = createEvent({
+  source: jobEvents,
+  event: "completed",
+  run: (ctx, jobId) => {
+    ctx.logger.info("Job completed", {
+      jobId,
+      source: ctx.source.name,
+    });
+  },
+});
+
+await client.loadEvents([completed]);
+await client.eventManager.dispatch(jobEvents, "completed", "job_123");
+```
+
+External event names can be ordinary string literals; an enum is not required.
+Every value in the source map must be an argument tuple. Once `source` is
+present, both `createEvent` and `dispatch` accept only names and arguments from
+that source. Discord.js event names are therefore rejected for `jobEvents`:
+
+```ts
+// TypeScript error: "messageCreate" does not belong to jobEvents
+createEvent({
+  source: jobEvents,
+  event: "messageCreate",
+  run() {},
+});
+```
+
+The explicit `source: gatewayEvents` form is equivalent to omitting `source`
+and remains restricted to Discord.js `ClientEvents`.
+
+Source identity is symbol-based, so two sources can safely use the same event and handler names. Custom-source dispatches run matching handlers sequentially, await asynchronous handlers, respect `once` and `beforeReady`, and return a report whose `matched` field is `0` when no handler is registered.
+
+Use `client.eventManager.dispatcher(source)` when a transport needs a bound callback. [`@arcscord/webhooks`](/packages/webhooks) uses this API for signed Discord Webhook Events.
+
+Gateway intent diagnostics apply only to `gatewayEvents`; custom sources never consult the Gateway intent map.
+
+Gateway `executionHandlers` keep their existing Discord.js-only contract and
+never receive custom-source events. Configure `sourceExecutionHandlers` when a
+custom transport needs its own execution interceptors:
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    event: {
+      sourceExecutionHandlers: [async (execution, next) => {
+        execution.context.logger.debug("custom event", {
+          event: execution.eventName,
+          source: execution.source.name,
+        });
+        return next();
+      }],
+    },
+  },
+});
+```
+
+This separation preserves the existing `EventExecutionHandler` API while
+giving custom sources a sound context through `SourceEventExecutionHandler`.
+
 ## Common examples
 
 ### `clientReady`

@@ -10,6 +10,12 @@ import assert from "node:assert/strict";
 import process from "node:process";
 import { container, v2Message } from "@arcscord/components";
 import {
+  createWebhookHandler,
+  webhookEvents,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
+import {
   ArcClient,
   button,
   createButton,
@@ -18,7 +24,40 @@ import {
 } from "arcscord";
 
 const client = new ArcClient("smoke-token", { intents: [] });
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.EntitlementCreate]: () => {},
+  },
+});
 assert.equal(v2Message(container("standalone")).components[0].type, 17, "standalone components ESM failed");
+assert.equal(typeof webhooks.handleRequest, "function", "standalone webhooks ESM failed");
+assert.equal(typeof createWebhookTestClient, "function", "webhooks testing subpath ESM failed");
+
+async function assertPackedWebhookRoundTrip() {
+  let handledWebhookEvents = 0;
+  const webhookTestClient = await createWebhookTestClient();
+  const packedWebhookHandler = createWebhookHandler({
+    publicKey: webhookTestClient.publicKey,
+    handlers: {
+      [WebhookEventType.QuestUserEnrollment]: () => {
+        handledWebhookEvents += 1;
+      },
+    },
+  });
+  const signedWebhookRequest = await webhookTestClient.createEventRequest(
+    "https://example.test/webhooks",
+    {
+      type: WebhookEventType.QuestUserEnrollment,
+      data: undefined,
+    },
+  );
+  const packedWebhookResult = await packedWebhookHandler.handleRequest(signedWebhookRequest);
+  assert.equal(packedWebhookResult.response.status, 204, "packed webhooks ESM response failed");
+  assert.equal((await packedWebhookResult.completion).status, "handled", "packed webhooks ESM dispatch failed");
+  assert.equal(handledWebhookEvents, 1, "packed webhooks ESM handler failed");
+}
+
 assert.ok(client instanceof ArcClient, "ArcClient instantiation failed");
 assert.equal(typeof client.logger.info, "function", "logger missing");
 
@@ -40,6 +79,17 @@ const readyEvent = createEvent({
   run: ctx => ctx.ok(true),
 });
 assert.equal(readyEvent.event, "clientReady", "event registration failed");
+const deauthorizedEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (_ctx, data) => void data.user.id,
+});
+assert.equal(deauthorizedEvent.source.id, webhookEvents.id, "webhook event source failed");
 
-client.logger.info("node esm smoke: client ready");
-process.stdout.write("node esm ok\n");
+assertPackedWebhookRoundTrip().then(() => {
+  client.logger.info("node esm smoke: client ready");
+  process.stdout.write("node esm ok\n");
+}).catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

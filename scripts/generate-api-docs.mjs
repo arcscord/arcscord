@@ -55,6 +55,12 @@ const packages = [
     slug: "better-error",
     tsconfig: "packages/better_error/tsconfig.json",
   },
+  {
+    dir: "packages/webhooks",
+    slug: "webhooks",
+    tsconfig: "packages/webhooks/tsconfig.json",
+    docsEntryPoints: ["src/testing/index.ts"],
+  },
 ];
 
 const arcscordTypedocOptions = {
@@ -159,6 +165,20 @@ const componentsTypedocOptions = {
   ],
 };
 
+const webhooksTypedocOptions = {
+  treatWarningsAsErrors: true,
+  validation: {
+    notExported: true,
+    notDocumented: true,
+    invalidLink: true,
+  },
+  requiredToBeDocumented: [
+    "Variable",
+    "Function",
+    "TypeAlias",
+  ],
+};
+
 const apiRoot = join(outputRoot, "website/static/api");
 const typedocConfigRoot = join(outputRoot, "website/.typedoc");
 mkdirSync(apiRoot, { recursive: true });
@@ -207,6 +227,7 @@ for (const pkg of packages) {
       excludeInternal: true,
       ...(pkg.slug === "arcscord" ? arcscordTypedocOptions : {}),
       ...(pkg.slug === "components" ? componentsTypedocOptions : {}),
+      ...(pkg.slug === "webhooks" ? webhooksTypedocOptions : {}),
       ...(pkg.slug === "error" ? errorTypedocOptions : {}),
       includeVersion: true,
       json: outFile,

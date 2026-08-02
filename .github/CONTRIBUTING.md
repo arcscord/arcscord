@@ -41,6 +41,7 @@ The default `pnpm lint` script applies fixes. Use `pnpm lint --fix=false` when y
 - `packages/middleware`: reusable middleware
 - `packages/error`: result-style error helpers
 - `packages/better_error`: richer error class utilities
+- `packages/webhooks`: standalone typed Discord Webhook Events handling
 - `website`: documentation site
 - `test/test_bot`: local integration test bot
 

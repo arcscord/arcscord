@@ -12,5 +12,5 @@
     "noEmit": true,
     "verbatimModuleSyntax": true
   },
-  "include": ["smoke.ts", "bun-consumer.test.ts"]
+  "include": ["smoke.ts", "bun-consumer.test.ts", "webhooks-elysia.test.ts"]
 }

@@ -10,9 +10,16 @@ import type { Attachment, GuildBasedChannel, Role, User } from "discord.js";
 import { container, v2Message } from "@arcscord/components";
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import {
+  createWebhookHandler,
+  webhookEvents,
+  WebhookEventType,
+} from "@arcscord/webhooks";
+import { createWebhookTestClient } from "@arcscord/webhooks/testing";
+import {
   ArcClient,
   buildModal,
   createCommand,
+  createEvent,
   createModal,
   createTypedStringMenu,
   modalStringSelect,
@@ -37,6 +44,32 @@ expectExactType<IsExact<LegacyMessageTopLevelComponent, MessageV2Child>>(true);
 
 const standaloneMessage = v2Message(container("TypeScript 5.4"));
 void standaloneMessage;
+
+const webhooks = createWebhookHandler({
+  publicKey: "00".repeat(32),
+  handlers: {
+    [WebhookEventType.ApplicationAuthorized]: (_delivery) => {
+      expectExactType<IsExact<typeof _delivery.event.data.user.id, string>>(true);
+    },
+    [WebhookEventType.LobbyMessageDelete]: (_delivery) => {
+      expectExactType<IsExact<typeof _delivery.event.data.lobby_id, string>>(true);
+    },
+  },
+});
+void webhooks;
+
+const webhookEvent = createEvent({
+  source: webhookEvents,
+  event: WebhookEventType.ApplicationDeauthorized,
+  run: (ctx, _data) => {
+    expectExactType<IsExact<typeof _data.user.id, string>>(true);
+    expectExactType<IsExact<typeof ctx.event, WebhookEventType.ApplicationDeauthorized>>(true);
+  },
+});
+void webhookEvent;
+
+const testClient = createWebhookTestClient();
+void testClient;
 
 const command = createCommand({
   slash: {

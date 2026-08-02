@@ -7,7 +7,7 @@ import type { LocaleManagerOptions } from "#/manager/locale/locale_manager.type"
 import type { LoggerConstructor, LoggerOptions } from "#/utils/logger/logger.type";
 import type { Command } from "../command";
 import type { ComponentHandler } from "../components";
-import type { AnyEventHandler } from "../event";
+import type { AnyLoadableEventHandler } from "../event";
 
 /**
  * Represents the options for configuring the ArcClient Logger.
@@ -190,7 +190,7 @@ export type HandlersList = {
   /**
    * List of events
    */
-  events?: AnyEventHandler[];
+  events?: AnyLoadableEventHandler[];
 };
 
 /**

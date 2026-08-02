@@ -14,6 +14,7 @@ const packages = [
   { dir: "packages/middleware", name: "@arcscord/middleware", version: "1.0.0" },
   { dir: "packages/error", name: "@arcscord/error", version: "3.0.0" },
   { dir: "packages/better_error", name: "@arcscord/better-error", version: "1.0.0" },
+  { dir: "packages/webhooks", name: "@arcscord/webhooks", version: "0.1.0" },
 ];
 
 function createSourceRoot() {
@@ -56,6 +57,13 @@ describe("release documentation package resolver", () => {
 
     assert.equal(result.status, 0);
     assert.match(result.stdout, /snapshots: components/);
+  });
+
+  it("resolves the webhooks package release tag", () => {
+    const result = resolveRelease("@arcscord/webhooks@v0.1.0");
+
+    assert.equal(result.status, 0);
+    assert.match(result.stdout, /snapshots: webhooks/);
   });
 
   it("keeps resolving version-only release tags", () => {
