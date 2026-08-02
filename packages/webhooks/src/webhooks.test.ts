@@ -522,7 +522,7 @@ describe("arcscord event dispatch", () => {
       managers: {
         event: {
           intentCheck: false,
-          executionHandlers: [
+          sourceExecutionHandlers: [
             () => {
               throw executionError;
             },

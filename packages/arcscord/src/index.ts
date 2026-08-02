@@ -333,6 +333,8 @@ export type {
 export { createEvent } from "./base/event/event.func";
 export type {
   AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
   EventBeforeReadyMode,
   EventHandler,
   EventHandleResult,
@@ -377,6 +379,7 @@ export {
   defaultCommandExecutionHandler,
   defaultComponentExecutionHandler,
   defaultEventExecutionHandler,
+  defaultSourceEventExecutionHandler,
   EventManager,
   LocaleManager,
 } from "./manager";
@@ -412,6 +415,7 @@ export type {
 
 export type {
   AnyEventExecutionContext,
+  AnySourceEventExecutionContext,
   BaseEventExecutionInfos,
   EventDispatcher,
   EventDispatchExecution,
@@ -428,6 +432,7 @@ export type {
   EventResultHandler,
   EventResultHandlerInfos,
   SourceEventExecutionContext,
+  SourceEventExecutionHandler,
 } from "./manager/event/event_manager.type";
 export type {
   EventIntentAlternatives,

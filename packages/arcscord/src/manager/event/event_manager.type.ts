@@ -1,6 +1,8 @@
 import type { ClientEvents } from "discord.js";
 import type {
   AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
   EventHandler,
   SourceEventHandler,
 } from "#/base/event/event.type";
@@ -35,8 +37,8 @@ export type BaseEventExecutionInfos = {
    */
   eventName: keyof ClientEvents | string;
 
-  /** Typed source that delivered the event. */
-  source: EventSource;
+  /** Gateway source that delivered the event. */
+  source?: GatewayEventSource;
 };
 
 /**
@@ -60,7 +62,7 @@ export type EventExecutionContext<E extends keyof ClientEvents>
     & {
       event: EventHandler<E>;
       eventName: E;
-      source: GatewayEventSource;
+      source?: GatewayEventSource;
       context: EventContext<E>;
       args: ClientEvents[E];
     };
@@ -77,6 +79,19 @@ export type SourceEventExecutionContext<
   args: EventSourceArgs<Source, E>;
 };
 
+/** Type-erased execution context received by custom-source interceptors. */
+export type AnySourceEventExecutionContext
+  = ExecutionControls<string | true, unknown> & {
+    event: AnySourceEventHandler;
+    eventName: string;
+    source: EventSource;
+    context: EventContext<
+      string,
+      EventSource<Record<string, readonly unknown[]>>
+    >;
+    args: readonly unknown[];
+  };
+
 /**
  * Union of execution contexts for every Discord.js Gateway event.
  *
@@ -92,7 +107,7 @@ export type EventExecutionOutcome = ExecutionOutcome<string | true, unknown>;
 
 /** One handler execution produced by a source dispatch. */
 export type EventDispatchExecution = {
-  event: AnyEventHandler;
+  event: AnyLoadableEventHandler;
   outcome: EventExecutionOutcome;
 };
 
@@ -118,6 +133,13 @@ export type EventDispatcher<Source extends EventSource> = <
 /** Koa-style interceptor around an event handler's `run()` call. */
 export type EventExecutionHandler = (
   execution: AnyEventExecutionContext,
+  next: ExecutionNext<EventExecutionOutcome>,
+  manager: EventManager,
+) => MaybePromise<EventExecutionOutcome>;
+
+/** Koa-style interceptor around a custom-source event handler. */
+export type SourceEventExecutionHandler = (
+  execution: AnySourceEventExecutionContext,
   next: ExecutionNext<EventExecutionOutcome>,
   manager: EventManager,
 ) => MaybePromise<EventExecutionOutcome>;
@@ -241,6 +263,14 @@ type BaseEventManagerOptions = {
    * @default { missing: "warn", partialCoverage: "off", ignore: [] }
    */
   intentCheck?: false | EventIntentCheckOptions;
+
+  /**
+   * Ordered interceptors around custom-source event handlers.
+   *
+   * Gateway {@link EventExecutionHandler}s remain isolated from custom events,
+   * preserving their Discord.js-only execution contract.
+   */
+  sourceExecutionHandlers?: readonly SourceEventExecutionHandler[];
 };
 
 type EventExecutionHandlerOptions = {

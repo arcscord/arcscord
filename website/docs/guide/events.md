@@ -101,6 +101,30 @@ Use `client.eventManager.dispatcher(source)` when a transport needs a bound call
 
 Gateway intent diagnostics apply only to `gatewayEvents`; custom sources never consult the Gateway intent map.
 
+Gateway `executionHandlers` keep their existing Discord.js-only contract and
+never receive custom-source events. Configure `sourceExecutionHandlers` when a
+custom transport needs its own execution interceptors:
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: ["Guilds"],
+  managers: {
+    event: {
+      sourceExecutionHandlers: [async (execution, next) => {
+        execution.context.logger.debug("custom event", {
+          event: execution.eventName,
+          source: execution.source.name,
+        });
+        return next();
+      }],
+    },
+  },
+});
+```
+
+This separation preserves the existing `EventExecutionHandler` API while
+giving custom sources a sound context through `SourceEventExecutionHandler`.
+
 ## Common examples
 
 ### `clientReady`

@@ -1,5 +1,10 @@
 import type { ClientEvents } from "discord.js";
-import type { EventManager } from "#/index";
+import type {
+  AnyEventHandler,
+  BaseEventExecutionInfos,
+  EventManager,
+  EventResultHandlerInfos,
+} from "#/index";
 import { expectTypeOf } from "vitest";
 import {
   createEvent,
@@ -30,6 +35,24 @@ const externalHandler = createEvent({
 expectTypeOf(externalHandler.event).toEqualTypeOf<"started">();
 
 declare const eventManager: EventManager;
+declare const gatewayHandler: AnyEventHandler;
+
+const legacyBaseInfos: BaseEventExecutionInfos = {
+  event: gatewayHandler,
+  eventName: gatewayHandler.event,
+};
+const legacyResultInfos: EventResultHandlerInfos = {
+  ...legacyBaseInfos,
+  exit: undefined as never,
+  startedAt: 0,
+  endedAt: 0,
+  durationMs: 0,
+};
+
+expectTypeOf(gatewayHandler.run).toBeFunction();
+expectTypeOf(legacyResultInfos.source).toEqualTypeOf<
+  typeof gatewayEvents | undefined
+>();
 
 eventManager.dispatch(externalEvents, "completed", "job_1");
 

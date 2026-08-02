@@ -1,6 +1,8 @@
 export { createEvent } from "./event.func";
 export type {
   AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
   EventBeforeReadyMode,
   EventHandler,
   EventHandleResult,

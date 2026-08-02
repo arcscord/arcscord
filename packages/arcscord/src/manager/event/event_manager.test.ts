@@ -143,6 +143,36 @@ describe("event manager", () => {
     ]);
   });
 
+  it("keeps Gateway and custom-source execution handlers isolated", async () => {
+    type Jobs = {
+      completed: [id: string];
+    };
+    const jobs = createEventSource<Jobs>({ name: "jobs" });
+    const gatewayExecution = vi.fn();
+    const sourceExecution = vi.fn(async (execution, next) => {
+      expect(execution.source).toBe(jobs);
+      expect(execution.eventName).toBe("completed");
+      expect(execution.context.source).toBe(jobs);
+      expect(execution.args).toEqual(["job_1"]);
+      return next();
+    });
+    const { manager } = createMockClient([], {
+      intentCheck: false,
+      executionHandlers: [gatewayExecution],
+      sourceExecutionHandlers: [sourceExecution],
+    });
+
+    await manager.loadEvent(createEvent({
+      source: jobs,
+      event: "completed",
+      run: () => {},
+    }));
+    await manager.dispatch(jobs, "completed", "job_1");
+
+    expect(sourceExecution).toHaveBeenCalledOnce();
+    expect(gatewayExecution).not.toHaveBeenCalled();
+  });
+
   it("isolates duplicate names by source and supports source-bound dispatchers", async () => {
     type Signals = {
       changed: [value: number];

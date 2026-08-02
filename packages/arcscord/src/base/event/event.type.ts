@@ -130,12 +130,20 @@ export type SourceEventHandler<
  * Discord events, such as handler lists and `loadEvents` inputs.
  */
 export type AnyEventHandler = {
-  source?: EventSource;
+  [E in keyof ClientEvents]: EventHandler<E>;
+}[keyof ClientEvents];
+
+/** Type-erased custom-source handler used by heterogeneous handler lists. */
+export type AnySourceEventHandler = {
+  source: EventSource;
   event: string;
   name: string;
   options?: EventHandlerOptions;
   run: unknown;
 };
+
+/** Any Gateway or custom-source handler accepted by Arcscord loaders. */
+export type AnyLoadableEventHandler = AnyEventHandler | AnySourceEventHandler;
 
 /**
  * Type-erased event handler used by manager registries and diagnostics.

@@ -10,7 +10,7 @@ import type {
 } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
-import type { AnyEventHandler } from "#/base/event/event.type";
+import type { AnyLoadableEventHandler } from "#/base/event/event.type";
 import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
@@ -256,7 +256,7 @@ export class ArcClient extends DJSClient {
    * @returns The number of loaded event handlers, or the loading failure.
    */
   loadEvents(
-    events: AnyEventHandler[],
+    events: AnyLoadableEventHandler[],
   ): Promise<Result<number, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     return this.eventManager.loadEvents(events);
   }

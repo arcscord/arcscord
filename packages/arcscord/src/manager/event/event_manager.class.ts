@@ -3,6 +3,8 @@ import type { ClientEvents, GatewayIntentsString } from "discord.js";
 import type { ArcClient } from "#/base/client/client.class";
 import type {
   AnyEventHandler,
+  AnyLoadableEventHandler,
+  AnySourceEventHandler,
   EventHandler,
   EventHandlerForRegistry,
   SourceEventHandler,
@@ -14,6 +16,7 @@ import type {
 } from "#/base/event/event_source";
 import type {
   AnyEventExecutionContext,
+  AnySourceEventExecutionContext,
   EventDispatcher,
   EventDispatchResult,
   EventExecutionHandler,
@@ -25,6 +28,7 @@ import type {
   EventResultHandler,
   EventResultHandlerInfos,
   RequiredEventIntentCheckOptions,
+  SourceEventExecutionHandler,
 } from "./event_manager.type";
 import { error, ok } from "@arcscord/error";
 import { EventContext } from "#/base/event/event_context";
@@ -35,6 +39,7 @@ import { intentsMap } from "#/manager/event/intents_map";
 import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerReturn } from "#/utils";
 import {
   defaultEventExecutionHandler,
+  defaultSourceEventExecutionHandler,
   eventResultHandlerAdapter,
   runDefaultEventExecution,
 } from "./event_execution_handler";
@@ -47,6 +52,7 @@ type EventRegistration = {
 
 type NormalizedEventManagerOptions = {
   executionHandlers: readonly EventExecutionHandler[];
+  sourceExecutionHandlers: readonly SourceEventExecutionHandler[];
   resultHandler: EventResultHandler;
   intentCheck: false | RequiredEventIntentCheckOptions;
 };
@@ -81,6 +87,8 @@ export class EventManager extends BaseManager {
 
     this.options = {
       executionHandlers,
+      sourceExecutionHandlers: options?.sourceExecutionHandlers
+        ?? [defaultSourceEventExecutionHandler],
       resultHandler: options?.resultHandler ?? this.defaultResultHandler.bind(this),
       intentCheck: this.normalizeIntentCheckOptions(options?.intentCheck),
     };
@@ -96,7 +104,7 @@ export class EventManager extends BaseManager {
    * @returns The number of loaded handlers, or the loading failure.
    */
   async loadEvents(
-    events: AnyEventHandler[],
+    events: AnyLoadableEventHandler[],
   ): Promise<Result<number, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     let loaded = 0;
     for (const event of events) {
@@ -126,7 +134,7 @@ export class EventManager extends BaseManager {
     event: SourceEventHandler<Source, E>,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>>;
   async loadEvent(
-    event: AnyEventHandler,
+    event: AnyLoadableEventHandler,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     const source = this.eventSource(event);
     const registry = this.sourceRegistry(source, true)!;
@@ -191,7 +199,7 @@ export class EventManager extends BaseManager {
     for (const registration of registrations) {
       const outcome = await registration.listener(...args);
       executions.push({
-        event: registration.event as unknown as AnyEventHandler,
+        event: registration.event as unknown as AnyLoadableEventHandler,
         outcome,
       });
     }
@@ -265,18 +273,28 @@ export class EventManager extends BaseManager {
     source: EventSource,
     args: unknown[],
   ): Promise<EventExecutionOutcome> {
+    if (source.id === gatewayEvents.id) {
+      return this.runGatewayEvent(event, args);
+    }
+
+    return this.runSourceEvent(event, source, args);
+  }
+
+  private async runGatewayEvent(
+    event: EventHandlerForRegistry,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
     const startedAt = Date.now();
-    type RegistrySource = EventSource<Record<string, unknown[]>>;
-    const context = new EventContext<string, RegistrySource>(
+    const context = new EventContext(
       this.client,
-      event as unknown as SourceEventHandler<RegistrySource, string>,
-      source as RegistrySource,
+      event as unknown as EventHandler<keyof ClientEvents>,
+      gatewayEvents,
       this.logger,
     );
     const execution = {
       event,
       eventName: event.event,
-      source,
+      source: gatewayEvents,
       context,
       args,
       ...createExecutionControls<string | true>(startedAt),
@@ -297,8 +315,45 @@ export class EventManager extends BaseManager {
     ));
   }
 
+  private async runSourceEvent(
+    event: EventHandlerForRegistry,
+    source: EventSource,
+    args: unknown[],
+  ): Promise<EventExecutionOutcome> {
+    const startedAt = Date.now();
+    type RegistrySource = EventSource<Record<string, readonly unknown[]>>;
+    const context = new EventContext<string, RegistrySource>(
+      this.client,
+      event as unknown as SourceEventHandler<RegistrySource, string>,
+      source as RegistrySource,
+      this.logger,
+    );
+    const execution = {
+      event: event as unknown as AnySourceEventHandler,
+      eventName: event.event,
+      source,
+      context,
+      args,
+      ...createExecutionControls<string | true>(startedAt),
+    } as AnySourceEventExecutionContext;
+
+    const outcome = await this.runExecutionHandlers(
+      this.options.sourceExecutionHandlers,
+      execution,
+      () => this.executeEvent(execution, event),
+      this,
+    );
+    if (outcome) {
+      return outcome;
+    }
+
+    return execution.complete(executionDefect(
+      new Error(`event execution handler failed for "${event.name}"`),
+    ));
+  }
+
   private async executeEvent(
-    execution: AnyEventExecutionContext,
+    execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
     event: EventHandlerForRegistry,
   ): Promise<EventExecutionOutcome> {
     try {
@@ -309,7 +364,7 @@ export class EventManager extends BaseManager {
       this.logger.debug(`Event handled: ${event.name}`, {
         handler: event.name,
         event: event.event,
-        source: execution.source.name,
+        source: execution.source?.name ?? gatewayEvents.name,
       });
       return execution.complete(normalizeHandlerReturn(rawResult));
     }
@@ -342,21 +397,26 @@ export class EventManager extends BaseManager {
         catch (e) {
           const exit = executionDefect(e);
           const outcome = controls.complete(exit);
-          const infos: EventResultHandlerInfos = {
-            exit,
-            event: event as unknown as AnyEventHandler,
-            eventName: event.event,
-            source,
-            startedAt: outcome.startedAt,
-            endedAt: outcome.endedAt,
-            durationMs: outcome.durationMs,
-            incidentId: outcome.incidentId,
-          };
-          if (this.preExecutionResultHandler) {
-            await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
-          }
-          else if (this.useDefaultPreExecutionHandler) {
-            runDefaultEventExecution(infos, outcome, this);
+          if (source.id === gatewayEvents.id) {
+            const infos: EventResultHandlerInfos = {
+              exit,
+              event: event as unknown as AnyEventHandler,
+              eventName: event.event,
+              source: gatewayEvents,
+              startedAt: outcome.startedAt,
+              endedAt: outcome.endedAt,
+              durationMs: outcome.durationMs,
+              incidentId: outcome.incidentId,
+            };
+            if (this.preExecutionResultHandler) {
+              await this.runResultHandler(() => this.preExecutionResultHandler!(infos, this));
+            }
+            else if (this.useDefaultPreExecutionHandler) {
+              runDefaultEventExecution(infos, outcome, this);
+            }
+            else {
+              this.logger.logError(exit.defect, { source: "eventBeforeReady" });
+            }
           }
           else {
             this.logger.logError(exit.defect, {
@@ -372,7 +432,7 @@ export class EventManager extends BaseManager {
     return this.runEvent(event, source, args);
   }
 
-  private eventSource(event: AnyEventHandler | EventHandlerForRegistry): EventSource {
+  private eventSource(event: AnyLoadableEventHandler | EventHandlerForRegistry): EventSource {
     return event.source ?? gatewayEvents;
   }
 
@@ -436,7 +496,7 @@ export class EventManager extends BaseManager {
   }
 
   private checkIntents(
-    event: AnyEventHandler,
+    event: AnyLoadableEventHandler,
     source: EventSource,
   ): Result<true, ArcscordError<"EVENT_INTENT_MISSING">> {
     if (source.id !== gatewayEvents.id || this.options.intentCheck === false) {
@@ -557,7 +617,7 @@ export class EventManager extends BaseManager {
   }
 
   private async loadAnyEvent(
-    event: AnyEventHandler,
+    event: AnyLoadableEventHandler,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     return this.loadEvent(event as unknown as EventHandler<keyof ClientEvents>);
   }
