@@ -157,6 +157,10 @@ Payload properties stay in Discord's native `snake_case` form. The complete oute
 
 Use `handleRequest()` in frameworks based on the Fetch API, including Next.js route handlers, Hono, and Bun:
 
+`handleRequest()` limits request bodies to 1 MiB. It rejects larger bodies with
+`413` before signature verification, using `Content-Length` when available and
+enforcing the same limit while reading streamed bodies.
+
 ```ts title="app/api/discord-webhooks/route.ts"
 import type { WebhookDispatchResult } from "@arcscord/webhooks";
 import { webhooks } from "./webhooks";
