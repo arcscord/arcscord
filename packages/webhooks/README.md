@@ -17,6 +17,13 @@ Typed handling for [Discord Webhook Events](https://docs.discord.com/developers/
 pnpm add @arcscord/webhooks
 ```
 
+Standalone callbacks do not require Arcscord. To dispatch through Arcscord's
+`EventManager`, install Arcscord 1.2 or newer as well:
+
+```sh
+pnpm add @arcscord/webhooks arcscord
+```
+
 ## Arcscord EventManager mode
 
 Webhook Events can live in the same `handlers.events` array as Gateway events. The `source + event` pair determines the arguments passed to `run`:
@@ -48,18 +55,30 @@ const webhooks = createWebhookHandler({
 
 The standalone callback mode remains available in every HTTP adapter below.
 
-## Officially tested integrations
+## Official HTTP support matrix
 
-The package runs integration tests against real framework request pipelines:
+Every contract or integration in this table is executed with a real signed
+Ed25519 request. “Fetch contract” means the framework-facing function passes a
+standard `Request` through and returns the resulting `Response`; “framework
+integration” additionally executes the framework's router or raw-body parser.
 
-| Runtime/API | Officially tested integrations |
-| --- | --- |
-| Fetch `Request`/`Response` | Next.js App Router, SvelteKit, React Router/Remix, Astro, Cloudflare Workers |
-| Fetch-native routers | Hono 4, H3 2 / Nitro 3 |
-| Node raw body | Express 5, Fastify 5, Koa 3 |
-| Bun | Elysia 1.4 |
+| Framework/runtime | Tested API | Coverage |
+| --- | --- | --- |
+| Next.js App Router | `POST(request: Request)` | Fetch contract |
+| SvelteKit | `POST({ request })` | Fetch contract |
+| React Router / Remix | `action({ request })` | Fetch contract |
+| Astro | `POST({ request })` | Fetch contract |
+| Cloudflare Workers | `fetch(request)` and `waitUntil()` | Fetch contract |
+| Hono 4 | `context.req.raw` and `app.request()` | Framework integration |
+| H3 2 / Nitro 3 | `fromWebHandler()` and `app.request()` | Framework integration |
+| Express 5 | `express.raw()` | Framework integration |
+| Fastify 5 | buffer content-type parser | Framework integration |
+| Koa 3 | unparsed Node request stream | Framework integration |
+| Elysia 1.4 on Bun | `request` and `app.handle()` | Framework integration |
 
-Framework dependencies live only in the repository's integration-test workspace. They are not dependencies or peers of the published package.
+The package is independent of these HTTP frameworks: none is a dependency or
+peer dependency. Arcscord is an optional peer used only when an application
+connects `webhookEvents` to its `EventManager`.
 
 ## Fetch API frameworks
 

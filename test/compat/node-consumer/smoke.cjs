@@ -63,5 +63,34 @@ const deauthorizedEvent = createEvent({
 });
 assert.equal(deauthorizedEvent.source.id, webhookEvents.id, "webhook event source failed");
 
-client.logger.info("node cjs smoke: client ready");
-process.stdout.write("node cjs ok\n");
+async function assertPackedWebhookRoundTrip() {
+  let handledWebhookEvents = 0;
+  const webhookTestClient = await createWebhookTestClient();
+  const packedWebhookHandler = createWebhookHandler({
+    publicKey: webhookTestClient.publicKey,
+    handlers: {
+      [WebhookEventType.QuestUserEnrollment]: () => {
+        handledWebhookEvents += 1;
+      },
+    },
+  });
+  const signedWebhookRequest = await webhookTestClient.createEventRequest(
+    "https://example.test/webhooks",
+    {
+      type: WebhookEventType.QuestUserEnrollment,
+      data: undefined,
+    },
+  );
+  const packedWebhookResult = await packedWebhookHandler.handleRequest(signedWebhookRequest);
+  assert.equal(packedWebhookResult.response.status, 204, "packed webhooks CJS response failed");
+  assert.equal((await packedWebhookResult.completion).status, "handled", "packed webhooks CJS dispatch failed");
+  assert.equal(handledWebhookEvents, 1, "packed webhooks CJS handler failed");
+}
+
+assertPackedWebhookRoundTrip().then(() => {
+  client.logger.info("node cjs smoke: client ready");
+  process.stdout.write("node cjs ok\n");
+}).catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});

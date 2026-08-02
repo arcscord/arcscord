@@ -11,8 +11,8 @@
  * (CI's `Building` job does this).
  *
  * The staging tarballs are what CI uploads as artifacts; the consumer copies
- * let local `pnpm test:bun` / `test:typescript-compat` / `test:node-compat`
- * install from `file:vendor/*.tgz` without repacking.
+ * let local compatibility commands install from `file:vendor/*.tgz` without
+ * repacking.
  */
 import { execFileSync } from "node:child_process";
 import { copyFile, mkdir, readdir, rename, rm } from "node:fs/promises";
@@ -62,6 +62,7 @@ const consumers = [
   { dir: "test/compat/bun-consumer/", packages: ["error", "components", "webhooks", "arcscord"] },
   { dir: "test/compat/typescript-consumer/", packages: ["error", "components", "webhooks", "arcscord", "middleware"] },
   { dir: "test/compat/node-consumer/", packages: ["error", "components", "webhooks", "arcscord"] },
+  { dir: "test/compat/webhooks-consumer/", packages: ["webhooks"] },
 ];
 
 function runPnpm(args, cwd) {

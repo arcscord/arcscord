@@ -2,6 +2,7 @@ export { webhookEvents } from "./event_source";
 export type {
   WebhookEventDispatcher,
   WebhookEventMap,
+  WebhookEventSource,
 } from "./event_source";
 export { createWebhookHandler } from "./handler";
 export {

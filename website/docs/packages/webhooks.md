@@ -24,6 +24,13 @@ The HTTP layer does not depend on Express, Fastify, Next.js, or another server f
 pnpm add @arcscord/webhooks
 ```
 
+Standalone callbacks do not require Arcscord. To dispatch through Arcscord's
+`EventManager`, install Arcscord 1.2 or newer as well:
+
+```sh
+pnpm add @arcscord/webhooks arcscord
+```
+
 Copy the application public key from the Discord Developer Portal. Do not use the bot token or client secret:
 
 ```env
@@ -90,7 +97,7 @@ The handler receives the event-specific `data` object. `ctx.source` is `webhookE
 
 ## Official HTTP support matrix
 
-Every integration in this table is executed in the repository test suite with a real signed Ed25519 request. “Fetch contract” means the framework passes the standard `Request` to the route and accepts the returned `Response`; “framework integration” additionally executes that framework's router or raw-body parser.
+Every contract or integration in this table is executed in the repository test suite with a real signed Ed25519 request. “Fetch contract” means the framework-facing function passes the standard `Request` through and returns the resulting `Response`; “framework integration” additionally executes that framework's router or raw-body parser.
 
 | Framework/runtime | Tested API | Coverage |
 | --- | --- | --- |
@@ -106,7 +113,7 @@ Every integration in this table is executed in the repository test suite with a 
 | Koa 3 | unparsed Node request stream | Framework integration |
 | Elysia 1.4 on Bun | `request` and `app.handle()` | Framework integration |
 
-The package remains framework-independent: none of these frameworks is a dependency or peer dependency of `@arcscord/webhooks`.
+The package remains independent of these HTTP frameworks: none is a dependency or peer dependency of `@arcscord/webhooks`. Arcscord is an optional peer used only when an application connects `webhookEvents` to its `EventManager`.
 
 ## Standalone typed callbacks
 

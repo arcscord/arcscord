@@ -1,8 +1,10 @@
+import type { EventDispatcher } from "arcscord";
 import type {
   APIEntitlement,
   APIUser,
   OAuth2Scopes,
 } from "discord-api-types/v10";
+import type { WebhookEventDispatcher } from "./event_source";
 import type {
   WebhookEventDataMap,
   WebhookEventHandlers,
@@ -66,6 +68,11 @@ const arcscordHandler = createEvent({
 });
 
 void arcscordHandler;
+
+const arcscordDispatcher
+  = null as unknown as EventDispatcher<typeof webhookEvents>;
+const compatibleDispatcher: WebhookEventDispatcher = arcscordDispatcher;
+void compatibleDispatcher;
 
 // @ts-expect-error Discord.js Gateway events do not belong to webhookEvents.
 createEvent({

@@ -253,7 +253,10 @@ describe("fetch-native framework integrations", () => {
   });
 });
 
-const fetchAdapters: FetchAdapter[] = [
+// These exercise the Fetch contracts documented by each framework without
+// claiming to execute the framework's own router. Real router integrations are
+// covered separately above (and Elysia is covered by the Bun consumer).
+const fetchContractAdapters: FetchAdapter[] = [
   {
     name: "Next.js App Router",
     dispatch: async (receive, request) => {
@@ -307,7 +310,7 @@ const fetchAdapters: FetchAdapter[] = [
   },
 ];
 
-describe.each(fetchAdapters)("$name Fetch contract", ({ dispatch, usesWaitUntil }) => {
+describe.each(fetchContractAdapters)("$name Fetch contract", ({ dispatch, usesWaitUntil }) => {
   it("passes the untouched signed Request and returns the acknowledgement", async () => {
     const fixture = await createFixture();
     const backgroundTasks: Array<Promise<unknown>> = [];
