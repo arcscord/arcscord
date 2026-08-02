@@ -26,6 +26,8 @@ const jsonHeaders = Object.freeze({
   "content-type": "application/json; charset=utf-8",
 });
 
+const maxFetchBodySize = 1024 * 1024;
+
 const knownEventTypes = new Set<string>(Object.values(WebhookEventTypes));
 
 type ParsedWebhook
@@ -43,7 +45,7 @@ function rawResponse(
 }
 
 function rejectedResult(
-  status: 400 | 401 | 405,
+  status: 400 | 401 | 405 | 413,
   message: string,
 ): WebhookHandleResult<RawWebhookResponse> {
   return {
@@ -53,6 +55,70 @@ function rejectedResult(
       reason: "rejected",
     }),
   };
+}
+
+type ReadRequestBodyResult
+  = { status: "ok"; body: ArrayBuffer }
+    | { status: "invalid" | "too-large" };
+
+async function readRequestBody(request: Request): Promise<ReadRequestBodyResult> {
+  const contentLength = request.headers.get("content-length");
+  if (
+    contentLength !== null
+    && /^\d+$/.test(contentLength)
+    && Number(contentLength) > maxFetchBodySize
+  ) {
+    return { status: "too-large" };
+  }
+
+  if (!request.body) {
+    return { status: "ok", body: new ArrayBuffer(0) };
+  }
+
+  let reader: ReadableStreamDefaultReader<Uint8Array>;
+  try {
+    reader = request.body.getReader();
+  }
+  catch {
+    return { status: "invalid" };
+  }
+
+  const chunks: Uint8Array[] = [];
+  let size = 0;
+
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) {
+        const body = new Uint8Array(size);
+        let offset = 0;
+        for (const chunk of chunks) {
+          body.set(chunk, offset);
+          offset += chunk.byteLength;
+        }
+        return { status: "ok", body: body.buffer };
+      }
+
+      if (value.byteLength > maxFetchBodySize - size) {
+        try {
+          await reader.cancel();
+        }
+        catch {
+          // The request is already rejected even if stream cancellation fails.
+        }
+        return { status: "too-large" };
+      }
+
+      chunks.push(value);
+      size += value.byteLength;
+    }
+  }
+  catch {
+    return { status: "invalid" };
+  }
+  finally {
+    reader.releaseLock();
+  }
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -292,12 +358,11 @@ export function createWebhookHandler(
       };
     }
 
-    let body: ArrayBuffer;
-    try {
-      body = await request.arrayBuffer();
-    }
-    catch {
-      const result = rejectedResult(400, "invalid request body");
+    const requestBody = await readRequestBody(request);
+    if (requestBody.status !== "ok") {
+      const result = requestBody.status === "too-large"
+        ? rejectedResult(413, "request body too large")
+        : rejectedResult(400, "invalid request body");
       return {
         response: fetchResponse(result.response),
         completion: result.completion,
@@ -305,7 +370,7 @@ export function createWebhookHandler(
     }
 
     const result = await handleRaw({
-      body,
+      body: requestBody.body,
       signature,
       timestamp,
     });

@@ -11,6 +11,7 @@ import {
 import { verifyWebhookSignature } from "./verification";
 
 const timestamp = "2026-07-26T12:00:00.000000+00:00";
+const maxFetchBodySize = 1024 * 1024;
 
 let publicKey = "";
 let privateKey: CryptoKey;
@@ -257,6 +258,70 @@ describe("request handling", () => {
     expect(get.response.status).toBe(405);
     expect(get.response.headers.get("allow")).toBe("POST");
     expect(unsigned.response.status).toBe(401);
+  });
+
+  it("rejects an oversized Content-Length before consuming the Fetch body", async () => {
+    const handler = createWebhookHandler({ publicKey, handlers: {} });
+    const request = new Request("https://example.com", {
+      method: "POST",
+      headers: {
+        "content-length": String(maxFetchBodySize + 1),
+        "x-signature-ed25519": "00",
+        "x-signature-timestamp": timestamp,
+      },
+      body: new ReadableStream(),
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    const result = await handler.handleRequest(request);
+
+    expect(result.response.status).toBe(413);
+    expect(request.bodyUsed).toBe(false);
+  });
+
+  it("stops reading a chunked Fetch body when it exceeds the size limit", async () => {
+    const handler = createWebhookHandler({ publicKey, handlers: {} });
+    const chunk = new Uint8Array(maxFetchBodySize / 2 + 1);
+    const cancel = vi.fn();
+    const request = new Request("https://example.com", {
+      method: "POST",
+      headers: {
+        "x-signature-ed25519": "00",
+        "x-signature-timestamp": timestamp,
+      },
+      body: new ReadableStream({
+        start(controller) {
+          controller.enqueue(chunk);
+          controller.enqueue(chunk);
+          controller.enqueue(chunk);
+        },
+        cancel,
+      }),
+      duplex: "half",
+    } as RequestInit & { duplex: "half" });
+
+    const result = await handler.handleRequest(request);
+
+    expect(result.response.status).toBe(413);
+    expect(cancel).toHaveBeenCalledOnce();
+  });
+
+  it("returns 400 when the Fetch body cannot be read", async () => {
+    const handler = createWebhookHandler({ publicKey, handlers: {} });
+    const request = new Request("https://example.com", {
+      method: "POST",
+      headers: {
+        "x-signature-ed25519": "00",
+        "x-signature-timestamp": timestamp,
+      },
+      body: "{}",
+    });
+    const reader = request.body!.getReader();
+
+    const result = await handler.handleRequest(request);
+    reader.releaseLock();
+
+    expect(result.response.status).toBe(400);
   });
 });
 

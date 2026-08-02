@@ -84,6 +84,10 @@ connects `webhookEvents` to its `EventManager`.
 
 `handleRequest()` accepts a standard Fetch `Request`. Return its `response` immediately, and attach `completion` to the framework's background-task mechanism when one is available:
 
+For safety, `handleRequest()` accepts request bodies up to 1 MiB. Larger bodies
+are rejected with `413` before signature verification; the handler checks
+`Content-Length` first and also enforces the limit while reading streamed bodies.
+
 ```ts
 import {
   createWebhookHandler,

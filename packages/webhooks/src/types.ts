@@ -202,7 +202,7 @@ export type RawWebhookRequest = {
 
 /** Serializable HTTP response returned by {@link WebhookHandler.handleRaw}. */
 export type RawWebhookResponse = {
-  status: 204 | 400 | 401 | 405;
+  status: 204 | 400 | 401 | 405 | 413;
   headers: Readonly<Record<string, string>>;
   body: string | null;
 };
@@ -267,7 +267,7 @@ export type ConfiguredWebhookSignatureOptions = Omit<
 /** Framework-neutral Discord Webhook Events request handler. */
 export type WebhookHandler = {
   /**
-   * Handles a Fetch API request and returns a Fetch response plus dispatch completion.
+   * Handles a Fetch API request up to 1 MiB and returns a Fetch response plus dispatch completion.
    */
   handleRequest: (
     request: Request,
