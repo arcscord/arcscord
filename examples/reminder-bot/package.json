@@ -12,8 +12,8 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "@arcscord/webhooks": "file:../../packages/webhooks",
-    "arcscord": "^1.1.0",
+    "@arcscord/webhooks": "^0.1.0",
+    "arcscord": "^1.2.0",
     "better-sqlite3": "^12.5.0",
     "discord.js": "^14.26.4"
   },
