@@ -143,6 +143,7 @@ export class ComponentManager extends BaseManager {
   ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
     const components = [component];
     const diagnostic = managerDiagnosticChannels.component.load.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:component:load") : undefined;
     const startedAt = diagnostic ? Date.now() : 0;
     if (diagnostic) {
       managerDiagnosticChannels.component.load.publish({
@@ -150,6 +151,7 @@ export class ComponentManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         components,
       });
@@ -161,6 +163,7 @@ export class ComponentManager extends BaseManager {
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: operationId!,
           components,
           error: err,
         });
@@ -218,6 +221,7 @@ export class ComponentManager extends BaseManager {
         phase: "end",
         manager: this,
         client: this.client,
+        operationId: operationId!,
         ...diagnosticTiming(startedAt),
         components,
         loaded: 1,
@@ -396,6 +400,7 @@ export class ComponentManager extends BaseManager {
     type: keyof ComponentList,
   ): Promise<void> {
     const dispatchDiagnostic = managerDiagnosticChannels.component.dispatch.hasSubscribers;
+    const dispatchOperationId = dispatchDiagnostic ? Symbol("arcscord:manager:component:dispatch") : undefined;
     const dispatchStartedAt = dispatchDiagnostic ? Date.now() : 0;
     if (dispatchDiagnostic) {
       managerDiagnosticChannels.component.dispatch.publish({
@@ -403,6 +408,7 @@ export class ComponentManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: dispatchStartedAt,
+        operationId: dispatchOperationId!,
         startedAt: dispatchStartedAt,
         interaction,
       });
@@ -417,7 +423,7 @@ export class ComponentManager extends BaseManager {
     /* Route matching */
     const [matchErr, matchedComponents] = this.findMatchingComponents(interaction, type);
     if (matchErr !== null) {
-      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "match", matchErr, locale);
+      this.publishComponentDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "match", matchErr, locale);
       /* findMatchingComponents returns an error for both "not found" and "multiple matches" */
       const isMultiple = matchErr.code === arcscordErrorCodes.ComponentMultipleMatches;
       return this.sendDispatchError(
@@ -439,7 +445,7 @@ export class ComponentManager extends BaseManager {
         interaction as StringSelectMenuInteraction,
       );
       if (validationErr !== null) {
-        this.publishComponentDispatchError(dispatchDiagnostic, interaction, "values", validationErr, locale);
+        this.publishComponentDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "values", validationErr, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.typedSelectInvalidValues,
           "error",
@@ -452,7 +458,7 @@ export class ComponentManager extends BaseManager {
     /* Context creation */
     const [ctxErr, context] = this.createContext(interaction, type, locale, matched.params, matched.component);
     if (ctxErr !== null) {
-      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "context", ctxErr, locale);
+      this.publishComponentDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "context", ctxErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
@@ -464,7 +470,7 @@ export class ComponentManager extends BaseManager {
     /* Defer */
     const [deferErr] = await this.handlePreReply(matched.component, context);
     if (deferErr !== null) {
-      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "defer", deferErr, locale);
+      this.publishComponentDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "defer", deferErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.deferFailed,
         "warn",
@@ -486,12 +492,14 @@ export class ComponentManager extends BaseManager {
     };
 
     const executeDiagnostic = managerDiagnosticChannels.component.execute.hasSubscribers;
+    const executeOperationId = executeDiagnostic ? Symbol("arcscord:manager:component:execute") : undefined;
     if (executeDiagnostic) {
       managerDiagnosticChannels.component.execute.publish({
         phase: "start",
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: executeOperationId!,
         startedAt,
         execution,
       });
@@ -510,11 +518,12 @@ export class ComponentManager extends BaseManager {
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: executeOperationId!,
           execution,
           error: err,
         });
       }
-      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "execution", err, locale);
+      this.publishComponentDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "execution", err, locale);
       return;
     }
     if (executeDiagnostic && managerDiagnosticChannels.component.execute.hasSubscribers) {
@@ -523,6 +532,7 @@ export class ComponentManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: outcome.endedAt,
+        operationId: executeOperationId!,
         startedAt: outcome.startedAt,
         endedAt: outcome.endedAt,
         durationMs: outcome.durationMs,
@@ -535,6 +545,7 @@ export class ComponentManager extends BaseManager {
         phase: "end",
         manager: this,
         client: this.client,
+        operationId: dispatchOperationId!,
         ...diagnosticTiming(dispatchStartedAt),
         interaction,
         outcome,
@@ -544,6 +555,7 @@ export class ComponentManager extends BaseManager {
 
   private publishComponentDispatchError(
     active: boolean,
+    operationId: symbol | undefined,
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     stage: import("#/manager/diagnostics").ComponentDispatchStage,
     err: unknown,
@@ -555,6 +567,7 @@ export class ComponentManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: Date.now(),
+        operationId: operationId!,
         interaction,
         stage,
         locale,

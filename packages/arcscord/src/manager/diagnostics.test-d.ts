@@ -14,6 +14,7 @@ expectTypeOf(managerDiagnosticChannels.event.intent)
   .toEqualTypeOf<DiagnosticChannel<EventIntentDiagnosticMessage>>();
 
 managerDiagnosticChannels.command.execute.subscribe((message) => {
+  expectTypeOf(message.operationId).toEqualTypeOf<symbol>();
   if (message.phase === "end") {
     expectTypeOf(message.outcome).not.toBeUnknown();
     expectTypeOf(message.durationMs).toBeNumber();

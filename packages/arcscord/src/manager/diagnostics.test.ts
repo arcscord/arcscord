@@ -44,6 +44,8 @@ describe("manager diagnostics channels", () => {
 
     expect(messages.map(message => message.phase)).toEqual(["start", "end"]);
     expect(messages[0]).toMatchObject({ manager, commands: [command], group: "diagnostics" });
+    expect(messages[0]!.operationId).toBe(messages[1]!.operationId);
+    expect(typeof messages[0]!.operationId).toBe("symbol");
     expect(managerDiagnosticChannels.command.load.hasSubscribers).toBe(false);
   });
 
@@ -77,6 +79,32 @@ describe("manager diagnostics channels", () => {
     manager.loadCommands([command]);
 
     expect(phases).toEqual(["start"]);
+  });
+
+  it("lets replacement subscribers identify an unmatched terminal phase", () => {
+    const manager = new CommandManager(createMockClient());
+    const command = createCommand({
+      slash: { name: "replacement", description: "Replacement" },
+      run: ctx => ctx.ok(true),
+    });
+    const firstMessages: CommandLoadDiagnosticMessage[] = [];
+    const replacementMessages: CommandLoadDiagnosticMessage[] = [];
+    const replacement = (message: CommandLoadDiagnosticMessage): void => {
+      replacementMessages.push(message);
+    };
+    const first = (message: CommandLoadDiagnosticMessage): void => {
+      firstMessages.push(message);
+      managerDiagnosticChannels.command.load.unsubscribe(first);
+      managerDiagnosticChannels.command.load.subscribe(replacement);
+    };
+
+    managerDiagnosticChannels.command.load.subscribe(first);
+    manager.loadCommands([command]);
+    managerDiagnosticChannels.command.load.unsubscribe(replacement);
+
+    expect(firstMessages.map(message => message.phase)).toEqual(["start"]);
+    expect(replacementMessages.map(message => message.phase)).toEqual(["end"]);
+    expect(replacementMessages[0]!.operationId).toBe(firstMessages[0]!.operationId);
   });
 
   it("publishes component registry mutations", () => {
@@ -121,6 +149,54 @@ describe("manager diagnostics channels", () => {
     expect(messages.map(message => message.phase)).toEqual(["start", "end"]);
     expect(messages[0]).toMatchObject({ source, event, args: ["job-1"] });
     expect(messages[1]).toMatchObject({ outcome: { kind: "completed", exit: { status: "success" } } });
+    expect(messages[0]!.operationId).toBe(messages[1]!.operationId);
+    expect(messages[0]!.startedAt).toBe(messages[1]!.startedAt);
+  });
+
+  it("includes pre-ready queueing in event dispatch duration", async () => {
+    type Jobs = { completed: [] };
+    const source = createEventSource<Jobs>({ name: "queued-jobs" });
+    const client = createMockClient();
+    let resolveReady: () => void = () => {};
+    const ready = new Promise<void>((resolve) => {
+      resolveReady = resolve;
+    });
+    Object.assign(client, {
+      ready: false,
+      waitReady: vi.fn(() => ready),
+    });
+    const manager = new EventManager(client, { intentCheck: false });
+    const event = createEvent({
+      source,
+      event: "completed",
+      options: { beforeReady: "queue" },
+      run: ctx => ctx.ok(true),
+    });
+    await manager.loadEvent(event);
+
+    const messages: EventDispatchDiagnosticMessage[] = [];
+    const listener = (message: EventDispatchDiagnosticMessage): void => {
+      messages.push(message);
+    };
+    managerDiagnosticChannels.event.dispatch.subscribe(listener);
+    vi.useFakeTimers();
+    vi.setSystemTime(1_000);
+
+    const dispatched = manager.dispatch(source, "completed");
+    await vi.advanceTimersByTimeAsync(500);
+    resolveReady();
+    await dispatched;
+
+    managerDiagnosticChannels.event.dispatch.unsubscribe(listener);
+    vi.useRealTimers();
+
+    expect(messages.map(message => message.phase)).toEqual(["start", "end"]);
+    expect(messages[0]!.startedAt).toBe(1_000);
+    expect(messages[1]).toMatchObject({
+      startedAt: 1_000,
+      endedAt: 1_500,
+      durationMs: 500,
+    });
   });
 
   it("publishes structured intent diagnostics", async () => {

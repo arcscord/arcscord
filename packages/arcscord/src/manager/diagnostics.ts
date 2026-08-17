@@ -39,15 +39,20 @@ export type DiagnosticBase<Manager> = {
   timestamp: number;
 };
 
+/** Opaque, process-local identifier shared by every phase of one operation. */
+export type DiagnosticOperationId = symbol;
+
 /** Common lifecycle fields for the start of an observed operation. */
 export type Started<Manager> = DiagnosticBase<Manager> & {
   phase: "start";
+  operationId: DiagnosticOperationId;
   startedAt: number;
 };
 
 /** Common lifecycle fields for the successful end of an observed operation. */
 export type Ended<Manager> = DiagnosticBase<Manager> & {
   phase: "end";
+  operationId: DiagnosticOperationId;
   startedAt: number;
   endedAt: number;
   durationMs: number;
@@ -56,6 +61,7 @@ export type Ended<Manager> = DiagnosticBase<Manager> & {
 /** Common lifecycle fields for an observed operation that failed. */
 export type Failed<Manager> = DiagnosticBase<Manager> & {
   phase: "error";
+  operationId: DiagnosticOperationId;
   error: unknown;
 };
 

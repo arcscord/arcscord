@@ -130,6 +130,7 @@ export class CommandManager
     group = "globalCommands",
   ): Result<RESTPostAPIApplicationCommandsJSONBody[], ArcscordError> {
     const diagnostic = managerDiagnosticChannels.command.load.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:command:load") : undefined;
     const startedAt = diagnostic ? Date.now() : 0;
     if (diagnostic) {
       managerDiagnosticChannels.command.load.publish({
@@ -137,6 +138,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         commands,
         group,
@@ -150,6 +152,7 @@ export class CommandManager
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: operationId!,
           commands,
           group,
           error: err,
@@ -254,6 +257,7 @@ export class CommandManager
         phase: "end",
         manager: this,
         client: this.client,
+        operationId: operationId!,
         ...diagnosticTiming(startedAt),
         commands,
         group,
@@ -421,6 +425,7 @@ export class CommandManager
   ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
     const config = this.options.registration[scope];
     const diagnostic = managerDiagnosticChannels.command.register.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:command:register") : undefined;
     const startedAt = diagnostic ? Date.now() : 0;
     if (diagnostic) {
       managerDiagnosticChannels.command.register.publish({
@@ -428,6 +433,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         scope,
         guildId,
@@ -451,6 +457,7 @@ export class CommandManager
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: operationId!,
           scope,
           guildId,
           config,
@@ -463,6 +470,7 @@ export class CommandManager
           phase: "end",
           manager: this,
           client: this.client,
+          operationId: operationId!,
           ...diagnosticTiming(startedAt),
           scope,
           guildId,
@@ -792,6 +800,7 @@ export class CommandManager
 
   private async handleInteraction(interaction: CommandInteraction): Promise<void> {
     const dispatchDiagnostic = managerDiagnosticChannels.command.dispatch.hasSubscribers;
+    const dispatchOperationId = dispatchDiagnostic ? Symbol("arcscord:manager:command:dispatch") : undefined;
     const dispatchStartedAt = dispatchDiagnostic ? Date.now() : 0;
     if (dispatchDiagnostic) {
       managerDiagnosticChannels.command.dispatch.publish({
@@ -799,6 +808,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: dispatchStartedAt,
+        operationId: dispatchOperationId!,
         startedAt: dispatchStartedAt,
         interaction,
       });
@@ -815,7 +825,7 @@ export class CommandManager
     /* Resolve command from registry */
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr !== null) {
-      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "resolve", cmdErr, locale);
+      this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "resolve", cmdErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.commandNotFound,
         "error",
@@ -835,7 +845,7 @@ export class CommandManager
           : [null, null];
 
         if (optErr !== null) {
-          this.publishCommandDispatchError(dispatchDiagnostic, interaction, "options", optErr, locale);
+          this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "options", optErr, locale);
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -861,7 +871,7 @@ export class CommandManager
           : [null, null];
 
         if (optErr !== null) {
-          this.publishCommandDispatchError(dispatchDiagnostic, interaction, "options", optErr, locale);
+          this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "options", optErr, locale);
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -888,7 +898,7 @@ export class CommandManager
           message: `invalid command, get slash command interaction for command ${infos.resolvedName}`,
           metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "slash-context-mismatch" },
         });
-        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
+        this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
@@ -913,7 +923,7 @@ export class CommandManager
           message: `invalid command, got user command interaction for command ${infos.resolvedName}`,
           metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "user-context-mismatch" },
         });
-        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
+        this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
@@ -937,7 +947,7 @@ export class CommandManager
           message: `invalid command, got message command interaction for command ${infos.resolvedName}`,
           metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "message-context-mismatch" },
         });
-        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
+        this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
@@ -952,7 +962,7 @@ export class CommandManager
         message: `invalid interaction type: ${interaction.type}`,
         metadata: { interactionId: interaction.id, reason: "unsupported-interaction-type" },
       });
-      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
+      this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "context", err, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
@@ -972,7 +982,7 @@ export class CommandManager
       });
 
       if (deferErr !== null) {
-        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "defer", deferErr, locale);
+        this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "defer", deferErr, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.deferFailed,
           "warn",
@@ -995,12 +1005,14 @@ export class CommandManager
     };
 
     const executeDiagnostic = managerDiagnosticChannels.command.execute.hasSubscribers;
+    const executeOperationId = executeDiagnostic ? Symbol("arcscord:manager:command:execute") : undefined;
     if (executeDiagnostic) {
       managerDiagnosticChannels.command.execute.publish({
         phase: "start",
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: executeOperationId!,
         startedAt,
         execution,
       });
@@ -1018,11 +1030,12 @@ export class CommandManager
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: executeOperationId!,
           execution,
           error: new Error("command execution handler failed"),
         });
       }
-      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "execution", new Error("command execution handler failed"), locale);
+      this.publishCommandDispatchError(dispatchDiagnostic, dispatchOperationId, interaction, "execution", new Error("command execution handler failed"), locale);
       return;
     }
     if (executeDiagnostic && managerDiagnosticChannels.command.execute.hasSubscribers) {
@@ -1031,6 +1044,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: outcome.endedAt,
+        operationId: executeOperationId!,
         startedAt: outcome.startedAt,
         endedAt: outcome.endedAt,
         durationMs: outcome.durationMs,
@@ -1043,6 +1057,7 @@ export class CommandManager
         phase: "end",
         manager: this,
         client: this.client,
+        operationId: dispatchOperationId!,
         ...diagnosticTiming(dispatchStartedAt),
         interaction,
         outcome,
@@ -1052,6 +1067,7 @@ export class CommandManager
 
   private publishCommandDispatchError(
     active: boolean,
+    operationId: symbol | undefined,
     interaction: CommandInteraction,
     stage: import("#/manager/diagnostics").CommandDispatchStage,
     err: unknown,
@@ -1063,6 +1079,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: Date.now(),
+        operationId: operationId!,
         interaction,
         stage,
         locale,
@@ -1097,6 +1114,7 @@ export class CommandManager
 
   private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
     const diagnostic = managerDiagnosticChannels.command.autocomplete.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:command:autocomplete") : undefined;
     const startedAt = diagnostic ? Date.now() : 0;
     if (diagnostic) {
       managerDiagnosticChannels.command.autocomplete.publish({
@@ -1104,13 +1122,14 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         interaction,
       });
     }
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr !== null) {
-      this.publishAutocompleteError(diagnostic, interaction, cmdErr);
+      this.publishAutocompleteError(diagnostic, operationId, interaction, cmdErr);
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
       applyDiagnosticLevel(this.logger, level, cmdErr);
       return;
@@ -1120,7 +1139,7 @@ export class CommandManager
     const focused = interaction.options.getFocused(true);
 
     if (!hasAutocomplete(command)) {
-      this.publishAutocompleteError(diagnostic, interaction, new Error("autocomplete handler unavailable"), command, focused);
+      this.publishAutocompleteError(diagnostic, operationId, interaction, new Error("autocomplete handler unavailable"), command, focused);
       this.logger.warn(`Got autocomplete for command without autocomplete handler: ${infos.resolvedName}`);
       return;
     }
@@ -1133,7 +1152,7 @@ export class CommandManager
         metadata: { commandName: infos.resolvedName, focused, handlers: Object.keys(command.autocomplete) },
       });
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
-      this.publishAutocompleteError(diagnostic, interaction, err, command, focused);
+      this.publishAutocompleteError(diagnostic, operationId, interaction, err, command, focused);
       applyDiagnosticLevel(this.logger, level, err);
       return;
     }
@@ -1154,7 +1173,7 @@ export class CommandManager
     try {
       const [acErr] = await handler(context);
       if (acErr !== null) {
-        this.publishAutocompleteError(diagnostic, interaction, acErr, command, focused, locale);
+        this.publishAutocompleteError(diagnostic, operationId, interaction, acErr, command, focused, locale);
         const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
         if (isArcscordError(acErr)) {
           applyDiagnosticLevel(this.logger, level, acErr);
@@ -1170,6 +1189,7 @@ export class CommandManager
           phase: "end",
           manager: this,
           client: this.client,
+          operationId: operationId!,
           ...diagnosticTiming(startedAt),
           interaction,
           command,
@@ -1185,13 +1205,14 @@ export class CommandManager
         metadata: { commandName: infos.resolvedName },
         cause: e,
       });
-      this.publishAutocompleteError(diagnostic, interaction, err, command, focused, locale);
+      this.publishAutocompleteError(diagnostic, operationId, interaction, err, command, focused, locale);
       this.logger.logError(err);
     }
   }
 
   private publishAutocompleteError(
     active: boolean,
+    operationId: symbol | undefined,
     interaction: AutocompleteInteraction,
     err: unknown,
     command?: CommandExecutionContext["command"],
@@ -1204,6 +1225,7 @@ export class CommandManager
         manager: this,
         client: this.client,
         timestamp: Date.now(),
+        operationId: operationId!,
         interaction,
         command,
         focused,

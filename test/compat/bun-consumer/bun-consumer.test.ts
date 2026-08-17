@@ -134,8 +134,10 @@ describe("arcscord bun consumer", () => {
       run: ctx => ctx.ok(true),
     });
     const phases: string[] = [];
+    const operationIds: symbol[] = [];
     const listener: Parameters<typeof managerDiagnosticChannels.command.load.subscribe>[0] = (message) => {
       phases.push(message.phase);
+      operationIds.push(message.operationId);
       expect(message.manager).toBe(client.commandManager);
     };
 
@@ -145,6 +147,7 @@ describe("arcscord bun consumer", () => {
     client.commandManager.loadCommands([command], "unobserved");
 
     expect(phases).toEqual(["start", "end"]);
+    expect(operationIds[0]).toBe(operationIds[1]);
     expect(managerDiagnosticChannels.command.load.hasSubscribers).toBe(false);
   });
 });

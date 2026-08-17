@@ -139,6 +139,7 @@ export class EventManager extends BaseManager {
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
     const events = [event];
     const diagnostic = managerDiagnosticChannels.event.load.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:load") : undefined;
     const startedAt = diagnostic ? Date.now() : 0;
     if (diagnostic) {
       managerDiagnosticChannels.event.load.publish({
@@ -146,6 +147,7 @@ export class EventManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         events,
       });
@@ -157,6 +159,7 @@ export class EventManager extends BaseManager {
           manager: this,
           client: this.client,
           timestamp: Date.now(),
+          operationId: operationId!,
           events,
           error: err,
         });
@@ -206,6 +209,7 @@ export class EventManager extends BaseManager {
         phase: "end",
         manager: this,
         client: this.client,
+        operationId: operationId!,
         ...diagnosticTiming(startedAt),
         events,
         loaded: 1,
@@ -355,12 +359,14 @@ export class EventManager extends BaseManager {
     } as unknown as AnyEventExecutionContext;
 
     const diagnostic = managerDiagnosticChannels.event.execute.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:execute") : undefined;
     if (diagnostic) {
       managerDiagnosticChannels.event.execute.publish({
         phase: "start",
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         execution,
       });
@@ -372,12 +378,12 @@ export class EventManager extends BaseManager {
       this,
     );
     if (outcome) {
-      this.publishEventExecutionEnd(diagnostic, execution, outcome);
+      this.publishEventExecutionEnd(diagnostic, operationId, execution, outcome);
       return outcome;
     }
     const err = new Error(`event execution handler failed for "${event.name}"`);
     const failed = execution.complete(executionDefect(err));
-    this.publishEventExecutionError(diagnostic, execution, err);
+    this.publishEventExecutionError(diagnostic, operationId, execution, err);
     return failed;
   }
 
@@ -404,12 +410,14 @@ export class EventManager extends BaseManager {
     } as AnySourceEventExecutionContext;
 
     const diagnostic = managerDiagnosticChannels.event.execute.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:execute") : undefined;
     if (diagnostic) {
       managerDiagnosticChannels.event.execute.publish({
         phase: "start",
         manager: this,
         client: this.client,
         timestamp: startedAt,
+        operationId: operationId!,
         startedAt,
         execution,
       });
@@ -421,17 +429,18 @@ export class EventManager extends BaseManager {
       this,
     );
     if (outcome) {
-      this.publishEventExecutionEnd(diagnostic, execution, outcome);
+      this.publishEventExecutionEnd(diagnostic, operationId, execution, outcome);
       return outcome;
     }
     const err = new Error(`event execution handler failed for "${event.name}"`);
     const failed = execution.complete(executionDefect(err));
-    this.publishEventExecutionError(diagnostic, execution, err);
+    this.publishEventExecutionError(diagnostic, operationId, execution, err);
     return failed;
   }
 
   private publishEventExecutionEnd(
     active: boolean,
+    operationId: symbol | undefined,
     execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
     outcome: EventExecutionOutcome,
   ): void {
@@ -441,6 +450,7 @@ export class EventManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: outcome.endedAt,
+        operationId: operationId!,
         startedAt: outcome.startedAt,
         endedAt: outcome.endedAt,
         durationMs: outcome.durationMs,
@@ -452,6 +462,7 @@ export class EventManager extends BaseManager {
 
   private publishEventExecutionError(
     active: boolean,
+    operationId: symbol | undefined,
     execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
     err: unknown,
   ): void {
@@ -461,6 +472,7 @@ export class EventManager extends BaseManager {
         manager: this,
         client: this.client,
         timestamp: Date.now(),
+        operationId: operationId!,
         execution,
         error: err,
       });
@@ -496,12 +508,14 @@ export class EventManager extends BaseManager {
     const controls = createExecutionControls<string | true>(receivedAt);
     const { event, source } = registration;
     const diagnostic = managerDiagnosticChannels.event.dispatch.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:dispatch") : undefined;
     if (diagnostic) {
       managerDiagnosticChannels.event.dispatch.publish({
         phase: "start",
         manager: this,
         client: this.client,
         timestamp: receivedAt,
+        operationId: operationId!,
         startedAt: receivedAt,
         source,
         event: event as unknown as AnyLoadableEventHandler,
@@ -517,7 +531,7 @@ export class EventManager extends BaseManager {
     if (!this.client.ready) {
       if (beforeReady === "drop") {
         const outcome = controls.cancel();
-        this.publishEventDispatchEnd(diagnostic, source, event, args, outcome);
+        this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
         return outcome;
       }
       if (beforeReady === "queue") {
@@ -554,19 +568,21 @@ export class EventManager extends BaseManager {
               eventSource: source.name,
             });
           }
-          this.publishEventDispatchEnd(diagnostic, source, event, args, outcome);
+          this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
           return outcome;
         }
       }
     }
 
     const outcome = await this.runEvent(event, source, args);
-    this.publishEventDispatchEnd(diagnostic, source, event, args, outcome);
+    this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
     return outcome;
   }
 
   private publishEventDispatchEnd(
     active: boolean,
+    operationId: symbol | undefined,
+    startedAt: number,
     source: EventSource,
     event: EventHandlerForRegistry,
     args: unknown[],
@@ -577,10 +593,8 @@ export class EventManager extends BaseManager {
         phase: "end",
         manager: this,
         client: this.client,
-        timestamp: outcome.endedAt,
-        startedAt: outcome.startedAt,
-        endedAt: outcome.endedAt,
-        durationMs: outcome.durationMs,
+        operationId: operationId!,
+        ...diagnosticTiming(startedAt),
         source,
         event: event as unknown as AnyLoadableEventHandler,
         args,

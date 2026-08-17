@@ -429,6 +429,7 @@ export type {
   DiagnosticBase,
   DiagnosticChannel,
   DiagnosticListener,
+  DiagnosticOperationId,
   Ended,
   EventDispatchDiagnosticMessage,
   EventExecuteDiagnosticMessage,

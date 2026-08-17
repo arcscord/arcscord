@@ -91,9 +91,14 @@ Lifecycle phases add the following fields consistently:
 
 | Phase | Additional fields |
 | --- | --- |
-| `start` | `startedAt: number` |
-| `end` | `startedAt: number`, `endedAt: number`, `durationMs: number` |
-| `error` | `error: unknown` or a narrower channel-specific error type |
+| `start` | `operationId: DiagnosticOperationId`, `startedAt: number` |
+| `end` | `operationId: DiagnosticOperationId`, `startedAt: number`, `endedAt: number`, `durationMs: number` |
+| `error` | `operationId: DiagnosticOperationId`, `error: unknown` or a narrower channel-specific error type |
+
+[`DiagnosticOperationId`](https://arcscord.dev/api?package=arcscord&version=main#DiagnosticOperationId)
+is an opaque, process-local `symbol`. Every phase produced for one operation
+contains the same identifier. It is intended as a `Map` or `Set` key and is not
+JSON-serializable.
 
 One-shot registry channels publish only `end`; they therefore have no
 `startedAt`, `endedAt`, or `durationMs`. The tables below list only fields that
@@ -314,10 +319,17 @@ references. Use their identity or stable Discord IDs to correlate messages.
 `cancelled`); completed outcomes expose an `exit` discriminated by `status`
 (`success`, `failure`, or `defect`).
 
-An operation is observed only when the channel has a subscriber at its start.
-Arcscord checks again before a terminal publication. Unsubscribing during an
-operation prevents construction of remaining messages; subscribing midway does
-not produce an orphaned `end` or `error` message.
+Arcscord starts diagnostic work only when the channel has a subscriber. It
+checks `hasSubscribers` again before constructing a terminal message, so no
+terminal payload or diagnostic timestamp is calculated when the channel has
+become empty.
+
+Subscriptions otherwise follow the native Node.js semantics: `publish()` calls
+the subscribers present at publication time. A subscriber installed midway can
+therefore receive an `end` or `error` without its corresponding `start`, for
+example when it replaces another subscriber synchronously. Track
+`operationId`s received during `start` and ignore unknown terminal identifiers
+when complete lifecycle pairs are required.
 
 ## Subscriber safety
 
@@ -337,10 +349,19 @@ This example records command latency and outcomes without changing manager
 configuration:
 
 ```ts
+import type { DiagnosticOperationId } from "arcscord";
 import { managerDiagnosticChannels } from "arcscord";
 
+const activeCommands = new Set<DiagnosticOperationId>();
+
 managerDiagnosticChannels.command.execute.subscribe((message) => {
-  if (message.phase !== "end") {
+  if (message.phase === "start") {
+    activeCommands.add(message.operationId);
+    return;
+  }
+
+  // A subscriber installed during an operation may see only its terminal phase.
+  if (!activeCommands.delete(message.operationId) || message.phase !== "end") {
     return;
   }
 
