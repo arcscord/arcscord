@@ -39,6 +39,7 @@ import {
 import { compileComponentRoute, matchComponentRoute } from "#/base/components/interaction/route";
 import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
+import { diagnosticTiming, managerDiagnosticChannels } from "#/manager/diagnostics";
 import {
   ArcscordError,
   arcscordErrorCodes,
@@ -140,15 +141,41 @@ export class ComponentManager extends BaseManager {
   loadComponent(
     component: ComponentHandler,
   ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
+    const components = [component];
+    const diagnostic = managerDiagnosticChannels.component.load.hasSubscribers;
+    const startedAt = diagnostic ? Date.now() : 0;
+    if (diagnostic) {
+      managerDiagnosticChannels.component.load.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        components,
+      });
+    }
+    const fail = (err: ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">): Result<true, typeof err> => {
+      if (diagnostic && managerDiagnosticChannels.component.load.hasSubscribers) {
+        managerDiagnosticChannels.component.load.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          components,
+          error: err,
+        });
+      }
+      return error(err);
+    };
     let compiledRoute: CompiledComponentRoute;
     try {
       compiledRoute = compileComponentRoute(component.route);
     }
     catch (e) {
       if (isArcscordError(e) && e.code === arcscordErrorCodes.ComponentRouteInvalid) {
-        return error(e as ArcscordError<"COMPONENT_ROUTE_INVALID">);
+        return fail(e as ArcscordError<"COMPONENT_ROUTE_INVALID">);
       }
-      return error(new ArcscordError({
+      return fail(new ArcscordError({
         code: arcscordErrorCodes.ComponentRouteInvalid,
         message: `Invalid component route "${component.route}"`,
         metadata: { route: component.route, reason: anyToError(e).message },
@@ -158,7 +185,7 @@ export class ComponentManager extends BaseManager {
 
     const [middlewareValidationErr] = validateComponentMiddlewareNames(component.use, component.route);
     if (middlewareValidationErr !== null) {
-      return error(middlewareValidationErr);
+      return fail(middlewareValidationErr);
     }
 
     const componentsList = component.handlerType === componentHandlerTypeEnum.modal
@@ -166,7 +193,7 @@ export class ComponentManager extends BaseManager {
       : this.components[component.type];
 
     if (componentsList.has(compiledRoute.canonical)) {
-      return error(new ArcscordError({
+      return fail(new ArcscordError({
         code: arcscordErrorCodes.ComponentRouteDuplicate,
         message: `Duplicate component route ${component.route}`,
         metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
@@ -186,6 +213,16 @@ export class ComponentManager extends BaseManager {
       `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
     );
 
+    if (diagnostic && managerDiagnosticChannels.component.load.hasSubscribers) {
+      managerDiagnosticChannels.component.load.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        ...diagnosticTiming(startedAt),
+        components,
+        loaded: 1,
+      });
+    }
     return ok(true);
   }
 
@@ -201,6 +238,7 @@ export class ComponentManager extends BaseManager {
       canonical = compileComponentRoute(route).canonical;
     }
     catch {
+      this.publishComponentUnload(route, undefined, false);
       return false;
     }
 
@@ -210,11 +248,27 @@ export class ComponentManager extends BaseManager {
         list.delete(canonical);
         this.compiledRoutes.delete(component);
         this.trace(`unloaded component with route ${route}`);
+        this.publishComponentUnload(route, component, true);
         return true;
       }
     }
 
+    this.publishComponentUnload(route, undefined, false);
     return false;
+  }
+
+  private publishComponentUnload(route: string, component: ComponentHandler | undefined, removed: boolean): void {
+    if (managerDiagnosticChannels.component.unload.hasSubscribers) {
+      managerDiagnosticChannels.component.unload.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        route,
+        component,
+        removed,
+      });
+    }
   }
 
   private setComponent<K extends Exclude<keyof ComponentList, "modal">>(
@@ -341,6 +395,18 @@ export class ComponentManager extends BaseManager {
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
   ): Promise<void> {
+    const dispatchDiagnostic = managerDiagnosticChannels.component.dispatch.hasSubscribers;
+    const dispatchStartedAt = dispatchDiagnostic ? Date.now() : 0;
+    if (dispatchDiagnostic) {
+      managerDiagnosticChannels.component.dispatch.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: dispatchStartedAt,
+        startedAt: dispatchStartedAt,
+        interaction,
+      });
+    }
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
       user: interaction.user,
@@ -351,6 +417,7 @@ export class ComponentManager extends BaseManager {
     /* Route matching */
     const [matchErr, matchedComponents] = this.findMatchingComponents(interaction, type);
     if (matchErr !== null) {
+      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "match", matchErr, locale);
       /* findMatchingComponents returns an error for both "not found" and "multiple matches" */
       const isMultiple = matchErr.code === arcscordErrorCodes.ComponentMultipleMatches;
       return this.sendDispatchError(
@@ -372,6 +439,7 @@ export class ComponentManager extends BaseManager {
         interaction as StringSelectMenuInteraction,
       );
       if (validationErr !== null) {
+        this.publishComponentDispatchError(dispatchDiagnostic, interaction, "values", validationErr, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.typedSelectInvalidValues,
           "error",
@@ -384,6 +452,7 @@ export class ComponentManager extends BaseManager {
     /* Context creation */
     const [ctxErr, context] = this.createContext(interaction, type, locale, matched.params, matched.component);
     if (ctxErr !== null) {
+      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "context", ctxErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
@@ -395,6 +464,7 @@ export class ComponentManager extends BaseManager {
     /* Defer */
     const [deferErr] = await this.handlePreReply(matched.component, context);
     if (deferErr !== null) {
+      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "defer", deferErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.deferFailed,
         "warn",
@@ -415,12 +485,82 @@ export class ComponentManager extends BaseManager {
       ...createExecutionControls<string | true>(startedAt),
     };
 
-    await this.runExecutionHandlers(
+    const executeDiagnostic = managerDiagnosticChannels.component.execute.hasSubscribers;
+    if (executeDiagnostic) {
+      managerDiagnosticChannels.component.execute.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        execution,
+      });
+    }
+    const outcome = await this.runExecutionHandlers(
       this.options.executionHandlers,
       execution,
       () => this.executeComponent(execution),
       this,
     );
+    if (!outcome) {
+      const err = new Error("component execution handler failed");
+      if (executeDiagnostic && managerDiagnosticChannels.component.execute.hasSubscribers) {
+        managerDiagnosticChannels.component.execute.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          execution,
+          error: err,
+        });
+      }
+      this.publishComponentDispatchError(dispatchDiagnostic, interaction, "execution", err, locale);
+      return;
+    }
+    if (executeDiagnostic && managerDiagnosticChannels.component.execute.hasSubscribers) {
+      managerDiagnosticChannels.component.execute.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: outcome.endedAt,
+        startedAt: outcome.startedAt,
+        endedAt: outcome.endedAt,
+        durationMs: outcome.durationMs,
+        execution,
+        outcome,
+      });
+    }
+    if (dispatchDiagnostic && managerDiagnosticChannels.component.dispatch.hasSubscribers) {
+      managerDiagnosticChannels.component.dispatch.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        ...diagnosticTiming(dispatchStartedAt),
+        interaction,
+        outcome,
+      });
+    }
+  }
+
+  private publishComponentDispatchError(
+    active: boolean,
+    interaction: MessageComponentInteraction | ModalSubmitInteraction,
+    stage: import("#/manager/diagnostics").ComponentDispatchStage,
+    err: unknown,
+    locale?: string,
+  ): void {
+    if (active && managerDiagnosticChannels.component.dispatch.hasSubscribers) {
+      managerDiagnosticChannels.component.dispatch.publish({
+        phase: "error",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        interaction,
+        stage,
+        locale,
+        error: err,
+      });
+    }
   }
 
   /**

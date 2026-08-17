@@ -11,6 +11,7 @@ import {
   createEvent,
   createModal,
   createTypedStringMenu,
+  managerDiagnosticChannels,
   modalStringSelect,
   modalTextInput,
 } from "arcscord";
@@ -124,5 +125,26 @@ describe("arcscord bun consumer", () => {
     });
     expect(event.event).toBe("clientReady");
     expect(event.name).toBe("clientReady");
+  });
+
+  test("publishes typed manager diagnostics through node:diagnostics_channel", () => {
+    const client = new ArcClient("test-token", { intents: [] });
+    const command = createCommand({
+      slash: { name: "diagnostics", description: "Diagnostics" },
+      run: ctx => ctx.ok(true),
+    });
+    const phases: string[] = [];
+    const listener: Parameters<typeof managerDiagnosticChannels.command.load.subscribe>[0] = (message) => {
+      phases.push(message.phase);
+      expect(message.manager).toBe(client.commandManager);
+    };
+
+    managerDiagnosticChannels.command.load.subscribe(listener);
+    client.commandManager.loadCommands([command], "bun");
+    managerDiagnosticChannels.command.load.unsubscribe(listener);
+    client.commandManager.loadCommands([command], "unobserved");
+
+    expect(phases).toEqual(["start", "end"]);
+    expect(managerDiagnosticChannels.command.load.hasSubscribers).toBe(false);
   });
 });

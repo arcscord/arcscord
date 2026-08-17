@@ -48,6 +48,7 @@ import { commandToAPI, subCommandListToAPI } from "#/base/command/command_transf
 import { parseOptions } from "#/base/command/option_parser";
 import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
+import { diagnosticTiming, managerDiagnosticChannels } from "#/manager/diagnostics";
 import {
   ArcscordError,
   arcscordErrorCodes,
@@ -128,11 +129,40 @@ export class CommandManager
     commands: Command[],
     group = "globalCommands",
   ): Result<RESTPostAPIApplicationCommandsJSONBody[], ArcscordError> {
+    const diagnostic = managerDiagnosticChannels.command.load.hasSubscribers;
+    const startedAt = diagnostic ? Date.now() : 0;
+    if (diagnostic) {
+      managerDiagnosticChannels.command.load.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        commands,
+        group,
+      });
+    }
+
+    const fail = (err: ArcscordError): Result<RESTPostAPIApplicationCommandsJSONBody[], ArcscordError> => {
+      if (diagnostic && managerDiagnosticChannels.command.load.hasSubscribers) {
+        managerDiagnosticChannels.command.load.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          commands,
+          group,
+          error: err,
+        });
+      }
+      return error(err);
+    };
+
     const [commandsValidationErr] = validateCommands(commands, this.client, {
       group,
     });
     if (commandsValidationErr !== null) {
-      return error(commandsValidationErr);
+      return fail(commandsValidationErr);
     }
 
     const commandsBody: RESTPostAPIApplicationCommandsJSONBody[] = [];
@@ -146,12 +176,12 @@ export class CommandManager
         const commandName = command.slash?.name ?? command.message?.name ?? command.user?.name ?? "unknown";
         const [middlewareValidationErr] = validateCommandMiddlewareNames(command.use, commandName, group);
         if (middlewareValidationErr !== null) {
-          return error(middlewareValidationErr);
+          return fail(middlewareValidationErr);
         }
 
         const [validationErr] = this.validateCommandAutocomplete(command, group);
         if (validationErr !== null) {
-          return error(validationErr);
+          return fail(validationErr);
         }
 
         let hasPush = false;
@@ -184,7 +214,7 @@ export class CommandManager
           );
         }
         if (!hasPush) {
-          return error(new ArcscordError({
+          return fail(new ArcscordError({
             code: arcscordErrorCodes.CommandValidationFailed,
             message: `no builder found for command "${commandName}" in group "${group}"`,
             metadata: {
@@ -199,12 +229,12 @@ export class CommandManager
       else {
         const [middlewareValidationErr] = this.validateSubCommandListMiddlewareNames(command, group);
         if (middlewareValidationErr !== null) {
-          return error(middlewareValidationErr);
+          return fail(middlewareValidationErr);
         }
 
         const [validationErr] = this.validateSubCommandListAutocomplete(command, group);
         if (validationErr !== null) {
-          return error(validationErr);
+          return fail(validationErr);
         }
 
         commandsBody.push(subCommandListToAPI(command, this.client));
@@ -219,6 +249,17 @@ export class CommandManager
       + `, ${messageCommands} message, ${userCommands} user)`,
     );
 
+    if (diagnostic && managerDiagnosticChannels.command.load.hasSubscribers) {
+      managerDiagnosticChannels.command.load.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        ...diagnosticTiming(startedAt),
+        commands,
+        group,
+        apiCommands: commandsBody,
+      });
+    }
     return ok(commandsBody);
   }
 
@@ -370,13 +411,68 @@ export class CommandManager
   async pushGlobalCommands(
     commands: RESTPostAPIApplicationCommandsJSONBody[],
   ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
-    return await registerCommands({
+    return this.registerCommandsWithDiagnostics("global", commands);
+  }
+
+  private async registerCommandsWithDiagnostics(
+    scope: "global" | "guild",
+    commands: RESTPostAPIApplicationCommandsJSONBody[],
+    guildId?: string,
+  ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
+    const config = this.options.registration[scope];
+    const diagnostic = managerDiagnosticChannels.command.register.hasSubscribers;
+    const startedAt = diagnostic ? Date.now() : 0;
+    if (diagnostic) {
+      managerDiagnosticChannels.command.register.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        scope,
+        guildId,
+        config,
+        commands,
+      });
+    }
+    const result = await registerCommands({
       client: this.client,
       logger: this.logger,
-      scope: "global",
-      config: this.options.registration.global,
+      scope,
+      config,
       commands,
+      guildId,
     });
+    if (diagnostic && managerDiagnosticChannels.command.register.hasSubscribers) {
+      const [err, registrations] = result;
+      if (err !== null) {
+        managerDiagnosticChannels.command.register.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          scope,
+          guildId,
+          config,
+          commands,
+          error: err,
+        });
+      }
+      else {
+        managerDiagnosticChannels.command.register.publish({
+          phase: "end",
+          manager: this,
+          client: this.client,
+          ...diagnosticTiming(startedAt),
+          scope,
+          guildId,
+          config,
+          commands,
+          registrations,
+        });
+      }
+    }
+    return result;
   }
 
   /**
@@ -390,14 +486,7 @@ export class CommandManager
     guildId: string,
     commands: RESTPostAPIApplicationCommandsJSONBody[],
   ): Promise<Result<ApplicationCommandRegistration[], ArcscordError>> {
-    return await registerCommands({
-      client: this.client,
-      logger: this.logger,
-      scope: "guild",
-      config: this.options.registration.guild,
-      commands,
-      guildId,
-    });
+    return this.registerCommandsWithDiagnostics("guild", commands, guildId);
   }
 
   /**
@@ -562,6 +651,21 @@ export class CommandManager
         this.commands.set(this.resolveCommandName(apiCommand), command);
       }
     }
+
+    if (managerDiagnosticChannels.command.resolve.hasSubscribers) {
+      const registration = apiCommands.find(apiCommand => (
+        this.commands.get(this.resolveCommandName(apiCommand)) === command
+      ));
+      managerDiagnosticChannels.command.resolve.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        command,
+        registration,
+        resolvedName: registration ? this.resolveCommandName(registration) : undefined,
+      });
+    }
   }
 
   /**
@@ -687,6 +791,19 @@ export class CommandManager
   }
 
   private async handleInteraction(interaction: CommandInteraction): Promise<void> {
+    const dispatchDiagnostic = managerDiagnosticChannels.command.dispatch.hasSubscribers;
+    const dispatchStartedAt = dispatchDiagnostic ? Date.now() : 0;
+    if (dispatchDiagnostic) {
+      managerDiagnosticChannels.command.dispatch.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: dispatchStartedAt,
+        startedAt: dispatchStartedAt,
+        interaction,
+      });
+    }
+
     /* Locale — resolved first so dispatch error replies are translated */
     const locale = await this.client.localeManager.detectLanguage({
       interaction,
@@ -698,6 +815,7 @@ export class CommandManager
     /* Resolve command from registry */
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr !== null) {
+      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "resolve", cmdErr, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.commandNotFound,
         "error",
@@ -717,6 +835,7 @@ export class CommandManager
           : [null, null];
 
         if (optErr !== null) {
+          this.publishCommandDispatchError(dispatchDiagnostic, interaction, "options", optErr, locale);
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -742,6 +861,7 @@ export class CommandManager
           : [null, null];
 
         if (optErr !== null) {
+          this.publishCommandDispatchError(dispatchDiagnostic, interaction, "options", optErr, locale);
           return this.sendDispatchError(
             this.options.dispatchDiagnostics.optionParsingFailed,
             "error",
@@ -763,14 +883,16 @@ export class CommandManager
         });
       }
       else {
+        const err = new ArcscordError({
+          code: arcscordErrorCodes.CommandContextCreationFailed,
+          message: `invalid command, get slash command interaction for command ${infos.resolvedName}`,
+          metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "slash-context-mismatch" },
+        });
+        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new ArcscordError({
-            code: arcscordErrorCodes.CommandContextCreationFailed,
-            message: `invalid command, get slash command interaction for command ${infos.resolvedName}`,
-            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "slash-context-mismatch" },
-          }),
+          err,
           { interaction, locale },
         );
       }
@@ -786,14 +908,16 @@ export class CommandManager
         });
       }
       else {
+        const err = new ArcscordError({
+          code: arcscordErrorCodes.CommandContextCreationFailed,
+          message: `invalid command, got user command interaction for command ${infos.resolvedName}`,
+          metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "user-context-mismatch" },
+        });
+        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new ArcscordError({
-            code: arcscordErrorCodes.CommandContextCreationFailed,
-            message: `invalid command, got user command interaction for command ${infos.resolvedName}`,
-            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "user-context-mismatch" },
-          }),
+          err,
           { interaction, locale },
         );
       }
@@ -808,27 +932,31 @@ export class CommandManager
         });
       }
       else {
+        const err = new ArcscordError({
+          code: arcscordErrorCodes.CommandContextCreationFailed,
+          message: `invalid command, got message command interaction for command ${infos.resolvedName}`,
+          metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "message-context-mismatch" },
+        });
+        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.contextCreationFailed,
           "error",
-          new ArcscordError({
-            code: arcscordErrorCodes.CommandContextCreationFailed,
-            message: `invalid command, got message command interaction for command ${infos.resolvedName}`,
-            metadata: { commandName: infos.resolvedName, interactionId: interaction.id, reason: "message-context-mismatch" },
-          }),
+          err,
           { interaction, locale },
         );
       }
     }
     else {
+      const err = new ArcscordError({
+        code: arcscordErrorCodes.CommandContextCreationFailed,
+        message: `invalid interaction type: ${interaction.type}`,
+        metadata: { interactionId: interaction.id, reason: "unsupported-interaction-type" },
+      });
+      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "context", err, locale);
       return this.sendDispatchError(
         this.options.dispatchDiagnostics.contextCreationFailed,
         "error",
-        new ArcscordError({
-          code: arcscordErrorCodes.CommandContextCreationFailed,
-          message: `invalid interaction type: ${interaction.type}`,
-          metadata: { interactionId: interaction.id, reason: "unsupported-interaction-type" },
-        }),
+        err,
         { interaction, locale },
       );
     }
@@ -844,6 +972,7 @@ export class CommandManager
       });
 
       if (deferErr !== null) {
+        this.publishCommandDispatchError(dispatchDiagnostic, interaction, "defer", deferErr, locale);
         return this.sendDispatchError(
           this.options.dispatchDiagnostics.deferFailed,
           "warn",
@@ -865,12 +994,81 @@ export class CommandManager
       ...createExecutionControls<string | true>(startedAt),
     };
 
-    await this.runExecutionHandlers(
+    const executeDiagnostic = managerDiagnosticChannels.command.execute.hasSubscribers;
+    if (executeDiagnostic) {
+      managerDiagnosticChannels.command.execute.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        execution,
+      });
+    }
+    const outcome = await this.runExecutionHandlers(
       this.options.executionHandlers,
       execution,
       () => this.executeCommand(execution),
       this,
     );
+    if (!outcome) {
+      if (executeDiagnostic && managerDiagnosticChannels.command.execute.hasSubscribers) {
+        managerDiagnosticChannels.command.execute.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          execution,
+          error: new Error("command execution handler failed"),
+        });
+      }
+      this.publishCommandDispatchError(dispatchDiagnostic, interaction, "execution", new Error("command execution handler failed"), locale);
+      return;
+    }
+    if (executeDiagnostic && managerDiagnosticChannels.command.execute.hasSubscribers) {
+      managerDiagnosticChannels.command.execute.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: outcome.endedAt,
+        startedAt: outcome.startedAt,
+        endedAt: outcome.endedAt,
+        durationMs: outcome.durationMs,
+        execution,
+        outcome,
+      });
+    }
+    if (dispatchDiagnostic && managerDiagnosticChannels.command.dispatch.hasSubscribers) {
+      managerDiagnosticChannels.command.dispatch.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        ...diagnosticTiming(dispatchStartedAt),
+        interaction,
+        outcome,
+      });
+    }
+  }
+
+  private publishCommandDispatchError(
+    active: boolean,
+    interaction: CommandInteraction,
+    stage: import("#/manager/diagnostics").CommandDispatchStage,
+    err: unknown,
+    locale?: string,
+  ): void {
+    if (active && managerDiagnosticChannels.command.dispatch.hasSubscribers) {
+      managerDiagnosticChannels.command.dispatch.publish({
+        phase: "error",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        interaction,
+        stage,
+        locale,
+        error: err,
+      });
+    }
   }
 
   private async executeCommand(
@@ -898,8 +1096,21 @@ export class CommandManager
   }
 
   private async handleAutocomplete(interaction: AutocompleteInteraction): Promise<void> {
+    const diagnostic = managerDiagnosticChannels.command.autocomplete.hasSubscribers;
+    const startedAt = diagnostic ? Date.now() : 0;
+    if (diagnostic) {
+      managerDiagnosticChannels.command.autocomplete.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        startedAt,
+        interaction,
+      });
+    }
     const [cmdErr, infos] = this.getCommand(interaction);
     if (cmdErr !== null) {
+      this.publishAutocompleteError(diagnostic, interaction, cmdErr);
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
       applyDiagnosticLevel(this.logger, level, cmdErr);
       return;
@@ -909,6 +1120,7 @@ export class CommandManager
     const focused = interaction.options.getFocused(true);
 
     if (!hasAutocomplete(command)) {
+      this.publishAutocompleteError(diagnostic, interaction, new Error("autocomplete handler unavailable"), command, focused);
       this.logger.warn(`Got autocomplete for command without autocomplete handler: ${infos.resolvedName}`);
       return;
     }
@@ -921,6 +1133,7 @@ export class CommandManager
         metadata: { commandName: infos.resolvedName, focused, handlers: Object.keys(command.autocomplete) },
       });
       const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
+      this.publishAutocompleteError(diagnostic, interaction, err, command, focused);
       applyDiagnosticLevel(this.logger, level, err);
       return;
     }
@@ -941,6 +1154,7 @@ export class CommandManager
     try {
       const [acErr] = await handler(context);
       if (acErr !== null) {
+        this.publishAutocompleteError(diagnostic, interaction, acErr, command, focused, locale);
         const level = this.options.dispatchDiagnostics.autocompleteError ?? "warn";
         if (isArcscordError(acErr)) {
           applyDiagnosticLevel(this.logger, level, acErr);
@@ -951,6 +1165,18 @@ export class CommandManager
         return;
       }
       this.trace(`Autocomplete handled for command ${infos.resolvedName}`);
+      if (diagnostic && managerDiagnosticChannels.command.autocomplete.hasSubscribers) {
+        managerDiagnosticChannels.command.autocomplete.publish({
+          phase: "end",
+          manager: this,
+          client: this.client,
+          ...diagnosticTiming(startedAt),
+          interaction,
+          command,
+          focused,
+          locale,
+        });
+      }
     }
     catch (e) {
       const err = new ArcscordError({
@@ -959,7 +1185,31 @@ export class CommandManager
         metadata: { commandName: infos.resolvedName },
         cause: e,
       });
+      this.publishAutocompleteError(diagnostic, interaction, err, command, focused, locale);
       this.logger.logError(err);
+    }
+  }
+
+  private publishAutocompleteError(
+    active: boolean,
+    interaction: AutocompleteInteraction,
+    err: unknown,
+    command?: CommandExecutionContext["command"],
+    focused?: { name: string; value: string | number },
+    locale?: string,
+  ): void {
+    if (active && managerDiagnosticChannels.command.autocomplete.hasSubscribers) {
+      managerDiagnosticChannels.command.autocomplete.publish({
+        phase: "error",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        interaction,
+        command,
+        focused,
+        locale,
+        error: err,
+      });
     }
   }
 
