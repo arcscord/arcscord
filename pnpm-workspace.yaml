@@ -25,8 +25,6 @@ overrides:
   serialize-javascript: ^7.0.5
   uuid: ^11.1.1
 
-patchedDependencies:
-  image-size@2.0.2: patches/image-size@2.0.2.patch
 onlyBuiltDependencies:
   - "@prisma/engines"
   - better-sqlite3
@@ -39,10 +37,3 @@ allowBuilds:
   core-js: false
   esbuild: true
   sharp: true
-
-# The upstream package is archived and has no published fixed release.
-# Both advisories are mitigated by patches/image-size@2.0.2.patch.
-auditConfig:
-  ignoreGhsas:
-    - GHSA-5p2g-fcmc-qvqq
-    - GHSA-w3rx-r6r6-pgpr
