@@ -55,8 +55,8 @@
   "dependencies": {
     "@arcscord/components": "workspace:^",
     "@arcscord/error": "workspace:^",
-    "discord-api-types": "^0.38.51",
-    "i18next": "^26.3.6"
+    "discord-api-types": "^0.38.53",
+    "i18next": "^26.4.0"
   },
   "peerDependencies": {
     "discord.js": "^14.26.4",
@@ -68,7 +68,7 @@
     "tsdown": "0.22.14",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.11"
   },
   "engines": {
     "node": ">=24.11.0",

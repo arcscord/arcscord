@@ -13,7 +13,15 @@ packages:
 
 overrides:
   ansi-regex: ^5.0.1
+  brace-expansion@1.1.16: 1.1.18
+  brace-expansion@5.0.8: 5.0.9
+  dompurify@3.4.12: 3.4.13
+  fast-uri@3.1.4: 3.1.5
+  fast-uri@4.1.1: 4.1.2
+  js-yaml@4.3.0: 4.3.1
+  mermaid@11.16.0: 11.16.1
   minimist: ^1.2.8
+  nanoid@3.3.16: 3.3.18
   serialize-javascript: ^7.0.5
   uuid: ^11.1.1
 

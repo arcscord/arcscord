@@ -28,19 +28,19 @@
     "preinstall": "npx only-allow pnpm"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.2.0",
-    "@commitlint/cli": "^21.2.1",
-    "@commitlint/config-conventional": "^21.2.0",
+    "@antfu/eslint-config": "^9.3.0",
+    "@commitlint/cli": "^21.2.2",
+    "@commitlint/config-conventional": "^21.2.2",
     "@types/node": "^24.13.3",
-    "eslint": "^10.8.0",
+    "eslint": "^10.9.0",
     "husky": "^9.1.7",
-    "knip": "^6.29.0",
-    "lint-staged": "^17.2.0",
+    "knip": "^6.32.2",
+    "lint-staged": "^17.3.0",
     "only-allow": "^1.2.2",
     "tsdown": "0.22.14",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "vitest": "4.1.10"
+    "vitest": "4.1.11"
   },
   "repository": {
     "type": "git",
