@@ -35,6 +35,7 @@ import { EventContext } from "#/base/event/event_context";
 import { gatewayEvents } from "#/base/event/event_source";
 import { createExecutionControls } from "#/base/manager/execution_handler";
 import { BaseManager } from "#/base/manager/manager.class";
+import { diagnosticTiming, managerDiagnosticChannels } from "#/manager/diagnostics";
 import { intentsMap } from "#/manager/event/intents_map";
 import { ArcscordError, arcscordErrorCodes, executionDefect, normalizeHandlerReturn } from "#/utils";
 import {
@@ -136,11 +137,40 @@ export class EventManager extends BaseManager {
   async loadEvent(
     event: AnyLoadableEventHandler,
   ): Promise<Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">>> {
+    const events = [event];
+    const diagnostic = managerDiagnosticChannels.event.load.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:load") : undefined;
+    const startedAt = diagnostic ? Date.now() : 0;
+    if (diagnostic) {
+      managerDiagnosticChannels.event.load.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        operationId: operationId!,
+        startedAt,
+        events,
+      });
+    }
+    const fail = (err: ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">): Result<true, typeof err> => {
+      if (diagnostic && managerDiagnosticChannels.event.load.hasSubscribers) {
+        managerDiagnosticChannels.event.load.publish({
+          phase: "error",
+          manager: this,
+          client: this.client,
+          timestamp: Date.now(),
+          operationId: operationId!,
+          events,
+          error: err,
+        });
+      }
+      return error(err);
+    };
     const source = this.eventSource(event);
     const registry = this.sourceRegistry(source, true)!;
 
     if (registry.has(event.name)) {
-      return error(new ArcscordError({
+      return fail(new ArcscordError({
         code: arcscordErrorCodes.EventHandlerDuplicate,
         message: `duplicate event handler name "${event.name}"`,
         metadata: {
@@ -152,7 +182,7 @@ export class EventManager extends BaseManager {
 
     const [intentErr] = this.checkIntents(event, source);
     if (intentErr !== null) {
-      return error(intentErr);
+      return fail(intentErr);
     }
 
     let registration: EventRegistration;
@@ -174,6 +204,17 @@ export class EventManager extends BaseManager {
       this.trace(`register ${source.name} event ${event.event} for ${event.name} handler !`);
     }
 
+    if (diagnostic && managerDiagnosticChannels.event.load.hasSubscribers) {
+      managerDiagnosticChannels.event.load.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        operationId: operationId!,
+        ...diagnosticTiming(startedAt),
+        events,
+        loaded: 1,
+      });
+    }
     return ok(true);
   }
 
@@ -233,6 +274,7 @@ export class EventManager extends BaseManager {
     const registry = this.sourceRegistry(source, false);
     const registration = registry?.get(name);
     if (!registration) {
+      this.publishEventUnload(source, name, undefined, false);
       return false;
     }
 
@@ -244,8 +286,24 @@ export class EventManager extends BaseManager {
       this.events.delete(source.id);
     }
     this.trace(`unloaded ${source.name} event ${registration.event.event} for ${name} handler !`);
+    this.publishEventUnload(source, name, registration.event as unknown as AnyLoadableEventHandler, true);
 
     return true;
+  }
+
+  private publishEventUnload(source: EventSource, name: string, event: AnyLoadableEventHandler | undefined, removed: boolean): void {
+    if (managerDiagnosticChannels.event.unload.hasSubscribers) {
+      managerDiagnosticChannels.event.unload.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        source,
+        name,
+        event,
+        removed,
+      });
+    }
   }
 
   /**
@@ -300,6 +358,19 @@ export class EventManager extends BaseManager {
       ...createExecutionControls<string | true>(startedAt),
     } as unknown as AnyEventExecutionContext;
 
+    const diagnostic = managerDiagnosticChannels.event.execute.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:execute") : undefined;
+    if (diagnostic) {
+      managerDiagnosticChannels.event.execute.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        operationId: operationId!,
+        startedAt,
+        execution,
+      });
+    }
     const outcome = await this.runExecutionHandlers(
       this.options.executionHandlers,
       execution,
@@ -307,12 +378,13 @@ export class EventManager extends BaseManager {
       this,
     );
     if (outcome) {
+      this.publishEventExecutionEnd(diagnostic, operationId, execution, outcome);
       return outcome;
     }
-
-    return execution.complete(executionDefect(
-      new Error(`event execution handler failed for "${event.name}"`),
-    ));
+    const err = new Error(`event execution handler failed for "${event.name}"`);
+    const failed = execution.complete(executionDefect(err));
+    this.publishEventExecutionError(diagnostic, operationId, execution, err);
+    return failed;
   }
 
   private async runSourceEvent(
@@ -337,6 +409,19 @@ export class EventManager extends BaseManager {
       ...createExecutionControls<string | true>(startedAt),
     } as AnySourceEventExecutionContext;
 
+    const diagnostic = managerDiagnosticChannels.event.execute.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:execute") : undefined;
+    if (diagnostic) {
+      managerDiagnosticChannels.event.execute.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: startedAt,
+        operationId: operationId!,
+        startedAt,
+        execution,
+      });
+    }
     const outcome = await this.runExecutionHandlers(
       this.options.sourceExecutionHandlers,
       execution,
@@ -344,12 +429,54 @@ export class EventManager extends BaseManager {
       this,
     );
     if (outcome) {
+      this.publishEventExecutionEnd(diagnostic, operationId, execution, outcome);
       return outcome;
     }
+    const err = new Error(`event execution handler failed for "${event.name}"`);
+    const failed = execution.complete(executionDefect(err));
+    this.publishEventExecutionError(diagnostic, operationId, execution, err);
+    return failed;
+  }
 
-    return execution.complete(executionDefect(
-      new Error(`event execution handler failed for "${event.name}"`),
-    ));
+  private publishEventExecutionEnd(
+    active: boolean,
+    operationId: symbol | undefined,
+    execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
+    outcome: EventExecutionOutcome,
+  ): void {
+    if (active && managerDiagnosticChannels.event.execute.hasSubscribers) {
+      managerDiagnosticChannels.event.execute.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: outcome.endedAt,
+        operationId: operationId!,
+        startedAt: outcome.startedAt,
+        endedAt: outcome.endedAt,
+        durationMs: outcome.durationMs,
+        execution,
+        outcome,
+      });
+    }
+  }
+
+  private publishEventExecutionError(
+    active: boolean,
+    operationId: symbol | undefined,
+    execution: AnyEventExecutionContext | AnySourceEventExecutionContext,
+    err: unknown,
+  ): void {
+    if (active && managerDiagnosticChannels.event.execute.hasSubscribers) {
+      managerDiagnosticChannels.event.execute.publish({
+        phase: "error",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        operationId: operationId!,
+        execution,
+        error: err,
+      });
+    }
   }
 
   private async executeEvent(
@@ -380,6 +507,21 @@ export class EventManager extends BaseManager {
     const receivedAt = Date.now();
     const controls = createExecutionControls<string | true>(receivedAt);
     const { event, source } = registration;
+    const diagnostic = managerDiagnosticChannels.event.dispatch.hasSubscribers;
+    const operationId = diagnostic ? Symbol("arcscord:manager:event:dispatch") : undefined;
+    if (diagnostic) {
+      managerDiagnosticChannels.event.dispatch.publish({
+        phase: "start",
+        manager: this,
+        client: this.client,
+        timestamp: receivedAt,
+        operationId: operationId!,
+        startedAt: receivedAt,
+        source,
+        event: event as unknown as AnyLoadableEventHandler,
+        args,
+      });
+    }
 
     if (event.options?.once) {
       this.unloadEvent(source, event.name);
@@ -388,7 +530,9 @@ export class EventManager extends BaseManager {
     const beforeReady = event.options?.beforeReady ?? "run";
     if (!this.client.ready) {
       if (beforeReady === "drop") {
-        return controls.cancel();
+        const outcome = controls.cancel();
+        this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
+        return outcome;
       }
       if (beforeReady === "queue") {
         try {
@@ -424,12 +568,39 @@ export class EventManager extends BaseManager {
               eventSource: source.name,
             });
           }
+          this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
           return outcome;
         }
       }
     }
 
-    return this.runEvent(event, source, args);
+    const outcome = await this.runEvent(event, source, args);
+    this.publishEventDispatchEnd(diagnostic, operationId, receivedAt, source, event, args, outcome);
+    return outcome;
+  }
+
+  private publishEventDispatchEnd(
+    active: boolean,
+    operationId: symbol | undefined,
+    startedAt: number,
+    source: EventSource,
+    event: EventHandlerForRegistry,
+    args: unknown[],
+    outcome: EventExecutionOutcome,
+  ): void {
+    if (active && managerDiagnosticChannels.event.dispatch.hasSubscribers) {
+      managerDiagnosticChannels.event.dispatch.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        operationId: operationId!,
+        ...diagnosticTiming(startedAt),
+        source,
+        event: event as unknown as AnyLoadableEventHandler,
+        args,
+        outcome,
+      });
+    }
   }
 
   private eventSource(event: AnyLoadableEventHandler | EventHandlerForRegistry): EventSource {
@@ -516,6 +687,17 @@ export class EventManager extends BaseManager {
     const action = issue.type === "missing"
       ? this.options.intentCheck.missing
       : this.options.intentCheck.partialCoverage;
+
+    if (managerDiagnosticChannels.event.intent.hasSubscribers) {
+      managerDiagnosticChannels.event.intent.publish({
+        phase: "end",
+        manager: this,
+        client: this.client,
+        timestamp: Date.now(),
+        issue,
+        action,
+      });
+    }
 
     if (action === "off") {
       return ok(true);

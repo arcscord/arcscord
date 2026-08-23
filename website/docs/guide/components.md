@@ -4,6 +4,9 @@ sidebar_position: 5
 
 # Components
 
+Component registry mutations, dispatch, and execution expose opt-in
+[diagnostics channels](/guide/diagnostics-channels).
+
 Discord components are interactive UI elements attached to messages — buttons, select menus, and modals. Arcscord provides typed handlers for all of them, with automatic custom ID routing and middleware support.
 
 ## How it works

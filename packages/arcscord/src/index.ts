@@ -382,6 +382,7 @@ export {
   defaultSourceEventExecutionHandler,
   EventManager,
   LocaleManager,
+  managerDiagnosticChannels,
 } from "./manager";
 export type {
   ApplicationCommandRegistration,
@@ -412,6 +413,33 @@ export type {
   ComponentResultHandler,
   ComponentResultHandlerInfos,
 } from "./manager/component/component_manager.type";
+export type {
+  CommandAutocompleteDiagnosticMessage,
+  CommandDispatchDiagnosticMessage,
+  CommandDispatchStage,
+  CommandExecuteDiagnosticMessage,
+  CommandLoadDiagnosticMessage,
+  CommandRegisterDiagnosticMessage,
+  CommandResolveDiagnosticMessage,
+  ComponentDispatchDiagnosticMessage,
+  ComponentDispatchStage,
+  ComponentExecuteDiagnosticMessage,
+  ComponentLoadDiagnosticMessage,
+  ComponentUnloadDiagnosticMessage,
+  DiagnosticBase,
+  DiagnosticChannel,
+  DiagnosticListener,
+  DiagnosticOperationId,
+  Ended,
+  EventDispatchDiagnosticMessage,
+  EventExecuteDiagnosticMessage,
+  EventIntentDiagnosticMessage,
+  EventLoadDiagnosticMessage,
+  EventUnloadDiagnosticMessage,
+  Failed,
+  ManagerDiagnosticChannels,
+  Started,
+} from "./manager/diagnostics";
 
 export type {
   AnyEventExecutionContext,
