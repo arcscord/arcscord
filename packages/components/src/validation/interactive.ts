@@ -4,6 +4,7 @@ import type {
 } from "discord-api-types/v10";
 import type {
   ChannelSelectMenuComponentData,
+  EmojiIdentifierResolvable,
   InteractionButtonComponentData,
   LinkButtonComponentData,
   MentionableSelectMenuComponentData,
@@ -29,6 +30,7 @@ import {
   ComponentType,
   SelectMenuDefaultValueType,
 } from "discord-api-types/v10";
+import { resolvePartialEmoji } from "discord.js";
 import {
   actionRowComponentTypes,
   buttonStyleAliases,
@@ -78,6 +80,20 @@ function decodeButtonStyle(value: unknown, context: ValidationContext): ValidBut
 }
 
 function decodeEmoji(value: unknown, context: ValidationContext): APIMessageComponentEmoji {
+  if (typeof value === "string") {
+    let resolved: ReturnType<typeof resolvePartialEmoji>;
+    try {
+      resolved = resolvePartialEmoji(value as EmojiIdentifierResolvable);
+    }
+    catch (cause) {
+      validationFailure(context, "emoji-identity", `${context.path} must be a valid emoji`, ComponentType.Button, {}, cause);
+    }
+    if (resolved === null) {
+      validationFailure(context, "emoji-identity", `${context.path} must be a valid emoji`, ComponentType.Button);
+    }
+    return decodeEmoji(resolved, context);
+  }
+
   const record = decodeRecord(value, context, ComponentType.Button);
   const id = optionalField(record, "id", context, (field, fieldContext) => decodeSnowflake(field, fieldContext, ComponentType.Button));
   const name = optionalField(record, "name", context, (field, fieldContext) => decodeString(field, fieldContext, id === undefined ? 1 : 0, Number.MAX_SAFE_INTEGER, ComponentType.Button));
