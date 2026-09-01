@@ -35,6 +35,18 @@ describe("actionRow", () => {
     });
   });
 
+  it("resolves string button emojis", () => {
+    expect(actionRow({ style: "primary", customId: "confirm", emoji: "✅" }).components[0]).toEqual({
+      type: ComponentType.Button,
+      style: ButtonStyle.Primary,
+      customId: "confirm",
+      emoji: {
+        animated: false,
+        name: "✅",
+      },
+    });
+  });
+
   it.each([
     ["string", new StringSelectMenuBuilder().setCustomId("string").addOptions({ label: "One", value: "one" }), ComponentType.StringSelect],
     ["user", new UserSelectMenuBuilder().setCustomId("user"), ComponentType.UserSelect],
