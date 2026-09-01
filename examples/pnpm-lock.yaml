@@ -74,10 +74,10 @@ importers:
         specifier: ^1.0.0
         version: 1.0.0(arcscord@1.0.1(discord.js@14.26.5)(typescript@6.0.3))(discord.js@14.26.5)(typescript@6.0.3)
       '@prisma/adapter-better-sqlite3':
-        specifier: ^7.0.0
+        specifier: 7.8.0
         version: 7.8.0
       '@prisma/client':
-        specifier: ^7.0.0
+        specifier: 7.8.0
         version: 7.8.0(prisma@7.8.0(@types/react@19.2.17)(better-sqlite3@12.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3))(typescript@6.0.3)
       arcscord:
         specifier: ^1.0.1
@@ -105,7 +105,7 @@ importers:
         specifier: ^10.6.0
         version: 10.7.0(jiti@2.7.0)
       prisma:
-        specifier: ^7.0.0
+        specifier: 7.8.0
         version: 7.8.0(@types/react@19.2.17)(better-sqlite3@12.11.1)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)(typescript@6.0.3)
       tsx:
         specifier: ^4.23.0

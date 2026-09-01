@@ -81,15 +81,17 @@ function decodeButtonStyle(value: unknown, context: ValidationContext): ValidBut
 
 function decodeEmoji(value: unknown, context: ValidationContext): APIMessageComponentEmoji {
   if (typeof value === "string") {
-    const resolved = resolvePartialEmoji(value as EmojiIdentifierResolvable);
+    let resolved: ReturnType<typeof resolvePartialEmoji>;
+    try {
+      resolved = resolvePartialEmoji(value as EmojiIdentifierResolvable);
+    }
+    catch (cause) {
+      validationFailure(context, "emoji-identity", `${context.path} must be a valid emoji`, ComponentType.Button, {}, cause);
+    }
     if (resolved === null) {
       validationFailure(context, "emoji-identity", `${context.path} must be a valid emoji`, ComponentType.Button);
     }
-    return {
-      ...(resolved.id === undefined ? {} : { id: resolved.id }),
-      ...("name" in resolved ? { name: resolved.name } : {}),
-      ...("animated" in resolved ? { animated: resolved.animated } : {}),
-    } satisfies APIMessageComponentEmoji;
+    return decodeEmoji(resolved, context);
   }
 
   const record = decodeRecord(value, context, ComponentType.Button);
