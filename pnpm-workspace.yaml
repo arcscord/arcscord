@@ -1,10 +1,16 @@
-shellEmulator: true
+minimumReleaseAgeExcludePrune: true
 
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - detect-port@1.6.1
   - semver@6.3.1
+
+peerDependencyRules:
+  allowedVersions:
+    tsconfck>typescript: "6"
+
+shellEmulator: true
 
 packages:
   - "packages/*"
@@ -13,19 +19,19 @@ packages:
 
 overrides:
   ansi-regex: ^5.0.1
+  lodash-es: ^4.17.24
   minimist: ^1.2.8
+  qs: ^6.16.0
   serialize-javascript: ^7.0.5
   uuid: ^11.1.1
-
-onlyBuiltDependencies:
-  - "@prisma/engines"
-  - better-sqlite3
-  - prisma
-peerDependencyRules:
-  allowedVersions:
-    tsconfck>typescript: "6"
+  webpack-dev-middleware: 7.4.5
 
 allowBuilds:
   core-js: false
   esbuild: true
   sharp: true
+
+onlyBuiltDependencies:
+  - "@prisma/engines"
+  - better-sqlite3
+  - prisma
