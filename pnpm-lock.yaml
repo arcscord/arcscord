@@ -73,9 +73,6 @@ importers:
       discord-api-types:
         specifier: ^0.38.53
         version: 0.38.53
-      i18next:
-        specifier: ^26.4.0
-        version: 26.4.0(typescript@6.0.3)
     devDependencies:
       '@types/node':
         specifier: ^24.13.3
@@ -83,6 +80,9 @@ importers:
       discord.js:
         specifier: ^14.27.0
         version: 14.27.0
+      i18next:
+        specifier: ^26.4.0
+        version: 26.4.0(typescript@6.0.3)
       tsdown:
         specifier: 0.22.14
         version: 0.22.14(oxc-resolver@11.24.2)(tsx@4.23.12)(typescript@6.0.3)

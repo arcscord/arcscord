@@ -1,9 +1,10 @@
+import type { Buffer } from "node:buffer";
 import { spawn } from "node:child_process";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const root = fileURLToPath(new URL("..", import.meta.url));
+const root = fileURLToPath(new URL("../..", import.meta.url));
 const vitest = path.join(root, "node_modules/vitest/vitest.mjs");
 const targets = [
   ["arcscord", "packages/arcscord"],
@@ -13,12 +14,15 @@ const targets = [
   ["@arcscord/middleware", "packages/middleware"],
   ["@arcscord/webhooks", "packages/webhooks"],
   ["@arcscord/webhooks framework integrations", "test/webhooks_frameworks"],
-  ["scripts", "scripts/tests"],
-];
+  ["scripts", "scripts"],
+] as const;
 
-function runTarget([name, directory]) {
-  return new Promise((resolve, reject) => {
-    const chunks = [];
+type TestTarget = typeof targets[number];
+type TestResult = { code: number; name: string };
+
+function runTarget([name, directory]: TestTarget): Promise<TestResult> {
+  return new Promise<TestResult>((resolve, reject) => {
+    const chunks: Buffer[] = [];
     const child = spawn(process.execPath, [vitest, "run"], {
       cwd: path.join(root, directory),
       stdio: ["ignore", "pipe", "pipe"],

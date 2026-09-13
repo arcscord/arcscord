@@ -7,11 +7,11 @@
  *
  * The example's committed `package.json` keeps the published version spec (so a
  * user who clones the branch gets a runnable example against the release); this
- * override is applied only in CI on the ephemeral checkout, before running
- * `pnpm install --no-lockfile` (because the override changes resolution for
- * arcscord/middleware).
+ * override is applied only in CI on the ephemeral checkout. CI allows an
+ * ephemeral lockfile update for the local tarballs while retaining all other
+ * committed dependency resolutions.
  *
- * Usage: node scripts/link-local-arcscord.mjs <exampleDir> <tarballDir>
+ * Usage: node scripts/compat/link-local-packages.mts <exampleDir> <tarballDir>
  *   <exampleDir>  path to the example (e.g. examples/starter-bot)
  *   <tarballDir>  dir holding error.tgz / arcscord.tgz / middleware.tgz
  *                 (staging or the downloaded CI artifact)
@@ -22,7 +22,7 @@ import process from "node:process";
 
 const [exampleArg, tarballArg] = process.argv.slice(2);
 if (!exampleArg || !tarballArg) {
-  console.error("Usage: node scripts/link-local-arcscord.mjs <exampleDir> <tarballDir>");
+  console.error("Usage: node scripts/compat/link-local-packages.mts <exampleDir> <tarballDir>");
   process.exit(1);
 }
 
@@ -30,8 +30,18 @@ const exampleDir = path.resolve(exampleArg);
 const tarballDir = path.resolve(tarballArg);
 
 // Local packages that can shadow their published counterparts, mapped to the
-// stable tarball name produced by scripts/pack-local.mjs.
-const localPackages = {
+// stable tarball name produced by scripts/compat/pack-local.mts.
+type LocalPackage = {
+  tarball: string;
+  transitiveOf?: string[];
+};
+
+type ExampleManifest = {
+  dependencies?: Record<string, string>;
+  devDependencies?: Record<string, string>;
+};
+
+const localPackages: Record<string, LocalPackage> = {
   "@arcscord/components": {
     tarball: "components.tgz",
     transitiveOf: ["arcscord"],
@@ -45,7 +55,9 @@ const localPackages = {
   "@arcscord/webhooks": { tarball: "webhooks.tgz" },
 };
 
-const pkg = JSON.parse(await readFile(path.join(exampleDir, "package.json"), "utf8"));
+const pkg = JSON.parse(
+  await readFile(path.join(exampleDir, "package.json"), "utf8"),
+) as ExampleManifest;
 const declared = { ...pkg.dependencies, ...pkg.devDependencies };
 
 const overrides = [];

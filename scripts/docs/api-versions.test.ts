@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { describe, it } from "vitest";
 
-import { compareSemver, parseSemver, resolveApiDocVersions } from "../api-doc-versions.mjs";
+import { compareSemver, parseSemver, resolveApiDocVersions } from "./api-versions.mts";
 
 describe("api documentation versions", () => {
   it("detects prereleases from their SemVer tag", () => {

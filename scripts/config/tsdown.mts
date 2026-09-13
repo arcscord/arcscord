@@ -14,21 +14,21 @@ const baseOptions: UserConfig = {
   tsconfig: "tsconfig.json",
 };
 
-export function createTsdownConfig(options?: EnhancedTsdownOptions): UserConfig[] {
+export function createTsdownConfig(options: EnhancedTsdownOptions = {}): UserConfig[] {
   return [
     defineConfig({
       ...baseOptions,
       format: "cjs",
       outDir: "dist/cjs",
       outExtensions: () => ({ js: ".cjs", dts: ".d.ts" }),
-      ...options?.cjsOptions,
+      ...options.cjsOptions,
     }) as UserConfig,
     defineConfig({
       ...baseOptions,
       format: "esm",
       outDir: "dist/esm",
       outExtensions: () => ({ js: ".mjs", dts: ".d.mts" }),
-      ...options?.esmOptions,
+      ...options.esmOptions,
     }) as UserConfig,
   ];
 }
