@@ -61,9 +61,6 @@
     "test/test_bot": {
       "project": [
         "src/**/*.ts"
-      ],
-      "ignoreDependencies": [
-        "i18next"
       ]
     },
     "test/components_bot": {

@@ -55,16 +55,17 @@
   "dependencies": {
     "@arcscord/components": "workspace:^",
     "@arcscord/error": "workspace:^",
-    "discord-api-types": "^0.38.51",
-    "i18next": "^26.3.6"
+    "discord-api-types": "^0.38.51"
   },
   "peerDependencies": {
     "discord.js": "^14.26.4",
+    "i18next": "^26.3.6",
     "typescript": "^5.4.0 || ^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.13.3",
     "discord.js": "^14.27.0",
+    "i18next": "^26.3.6",
     "tsdown": "0.22.14",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
