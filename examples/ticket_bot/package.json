@@ -18,8 +18,8 @@
   },
   "dependencies": {
     "@arcscord/middleware": "^1.0.0",
-    "@prisma/adapter-better-sqlite3": "^7.0.0",
-    "@prisma/client": "^7.0.0",
+    "@prisma/adapter-better-sqlite3": "7.8.0",
+    "@prisma/client": "7.8.0",
     "arcscord": "^1.0.1",
     "discord.js": "^14.26.4",
     "dotenv": "^17.2.3",
@@ -30,7 +30,7 @@
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^24.10.0",
     "eslint": "^10.6.0",
-    "prisma": "^7.0.0",
+    "prisma": "7.8.0",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3"
   }
