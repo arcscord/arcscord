@@ -4,7 +4,7 @@ import process from "node:process";
 const pnpm = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
 const eslintArgs = ["--fix", ...process.argv.slice(2)];
 
-const commands = [
+const commands: string[][] = [
   ["-r", "--parallel", "exec", "eslint", ".", ...eslintArgs],
   [
     "exec",
@@ -19,7 +19,7 @@ const commands = [
   ],
 ];
 
-const exitCodes = await Promise.all(commands.map(args => new Promise((resolve, reject) => {
+const exitCodes = await Promise.all(commands.map(args => new Promise<number>((resolve, reject) => {
   const child = spawn(pnpm, args, { stdio: "inherit" });
 
   child.on("error", reject);
