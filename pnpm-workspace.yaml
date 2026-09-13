@@ -1,16 +1,12 @@
 minimumReleaseAgeExcludePrune: true
 
+shellEmulator: true
+
 trustPolicy: no-downgrade
 trustPolicyExclude:
   - chokidar@4.0.3
   - detect-port@1.6.1
   - semver@6.3.1
-
-peerDependencyRules:
-  allowedVersions:
-    tsconfck>typescript: "6"
-
-shellEmulator: true
 
 packages:
   - "packages/*"
@@ -23,6 +19,7 @@ overrides:
   brace-expansion@5.0.8: 5.0.9
   colord: ^2.9.4
   dompurify@3.4.12: 3.4.13
+  eslint-plugin-command: 3.5.3
   fast-uri@^3.0.0: ^3.1.6
   fast-uri@^4.0.0: ^4.1.3
   joi: ^17.13.6
@@ -36,12 +33,15 @@ overrides:
   uuid: ^11.1.1
   webpack-dev-middleware: 7.4.5
 
-allowBuilds:
-  core-js: false
-  esbuild: true
-  sharp: true
-
 onlyBuiltDependencies:
   - "@prisma/engines"
   - better-sqlite3
   - prisma
+peerDependencyRules:
+  allowedVersions:
+    tsconfck>typescript: "6"
+
+allowBuilds:
+  core-js: false
+  esbuild: true
+  sharp: true
