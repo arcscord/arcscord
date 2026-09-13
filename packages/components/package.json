@@ -39,7 +39,7 @@
     "docs": "typedoc"
   },
   "dependencies": {
-    "discord-api-types": "^0.38.53"
+    "discord-api-types": "^0.38.55"
   },
   "peerDependencies": {
     "discord.js": "^14.26.4",

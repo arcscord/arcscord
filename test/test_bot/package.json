@@ -15,11 +15,11 @@
     "@arcscord/middleware": "workspace:*",
     "arcscord": "workspace:*",
     "discord.js": "^14.27.0",
-    "i18next": "^26.4.0"
+    "i18next": "^26.4.2"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
-    "tsx": "^4.23.12",
+    "@types/node": "^24.13.4",
+    "tsx": "^4.23.13",
     "typescript": "^6.0.3"
   }
 }
