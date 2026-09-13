@@ -22,6 +22,7 @@
     "test:node-compat": "pnpm pack:local && cd test/compat/node-consumer && pnpm install --no-lockfile && pnpm smoke:esm && pnpm smoke:cjs",
     "docs:api": "node scripts/generate-api-docs.mjs --channel dev",
     "docs:api:release": "node scripts/generate-api-docs.mjs --channel release",
+    "docs:check-release": "node scripts/check-release-api-snapshots.mjs",
     "docs:build": "pnpm docs:api && pnpm --filter @arcscord/website build",
     "docs:start": "pnpm docs:api && pnpm --filter @arcscord/website start",
     "prepare": "husky",

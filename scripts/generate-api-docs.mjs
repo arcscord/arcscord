@@ -5,6 +5,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { resolveApiDocVersions } from "./api-doc-versions.mjs";
+import { DOCUMENTED_RELEASE_PACKAGES } from "./release-packages.mjs";
 
 const scriptRoot = dirname(dirname(fileURLToPath(import.meta.url)));
 const sourceRootArgIndex = process.argv.indexOf("--source-root");
@@ -28,40 +29,20 @@ if (!["dev", "release"].includes(channel)) {
   process.exit(1);
 }
 
-const packages = [
-  {
-    dir: "packages/arcscord",
-    slug: "arcscord",
-    tsconfig: "packages/arcscord/tsconfig.json",
+const packageDocsOptions = {
+  arcscord: {
     docsEntryPoints: ["src/base/utils/context.type.ts"],
   },
-  {
-    dir: "packages/components",
-    slug: "components",
-    tsconfig: "packages/components/tsconfig.json",
-  },
-  {
-    dir: "packages/middleware",
-    slug: "middleware",
-    tsconfig: "packages/middleware/tsconfig.json",
-  },
-  {
-    dir: "packages/error",
-    slug: "error",
-    tsconfig: "packages/error/tsconfig.json",
-  },
-  {
-    dir: "packages/better_error",
-    slug: "better-error",
-    tsconfig: "packages/better_error/tsconfig.json",
-  },
-  {
-    dir: "packages/webhooks",
-    slug: "webhooks",
-    tsconfig: "packages/webhooks/tsconfig.json",
+  webhooks: {
     docsEntryPoints: ["src/testing/index.ts"],
   },
-];
+};
+
+const packages = DOCUMENTED_RELEASE_PACKAGES.map(pkg => ({
+  ...pkg,
+  ...packageDocsOptions[pkg.slug],
+  tsconfig: `${pkg.directory}/tsconfig.json`,
+}));
 
 const arcscordTypedocOptions = {
   // Fail the docs build on undocumented public exports, broken {@link} targets,
@@ -191,7 +172,7 @@ const manifest = {
 };
 
 for (const pkg of packages) {
-  const packageJson = JSON.parse(readFileSync(join(sourceRoot, pkg.dir, "package.json"), "utf8"));
+  const packageJson = JSON.parse(readFileSync(join(sourceRoot, pkg.directory, "package.json"), "utf8"));
   const version = channel === "dev" ? "dev" : packageJson.version;
   const outDir = join(apiRoot, pkg.slug);
   const outFile = join(outDir, `${version}.json`);
@@ -209,19 +190,19 @@ for (const pkg of packages) {
   else if (shouldGenerate) {
     writeFileSync(docsTsconfig, `${JSON.stringify({
       extends: join(sourceRoot, pkg.tsconfig),
-      include: [join(sourceRoot, pkg.dir, "src/**/*.ts")],
+      include: [join(sourceRoot, pkg.directory, "src/**/*.ts")],
       exclude: [
-        join(sourceRoot, pkg.dir, "src/**/*.test.ts"),
-        join(sourceRoot, pkg.dir, "src/**/*.test-d.ts"),
-        join(sourceRoot, pkg.dir, "src/**/*.no.test.ts"),
-        join(sourceRoot, pkg.dir, "tests/**"),
+        join(sourceRoot, pkg.directory, "src/**/*.test.ts"),
+        join(sourceRoot, pkg.directory, "src/**/*.test-d.ts"),
+        join(sourceRoot, pkg.directory, "src/**/*.no.test.ts"),
+        join(sourceRoot, pkg.directory, "tests/**"),
       ],
     }, null, 2)}\n`);
     writeFileSync(typedocConfig, `${JSON.stringify({
       $schema: "https://typedoc.org/schema.json",
       entryPoints: [
-        join(sourceRoot, pkg.dir, "src/index.ts"),
-        ...(pkg.docsEntryPoints ?? []).map(entryPoint => join(sourceRoot, pkg.dir, entryPoint)),
+        join(sourceRoot, pkg.directory, "src/index.ts"),
+        ...(pkg.docsEntryPoints ?? []).map(entryPoint => join(sourceRoot, pkg.directory, entryPoint)),
       ],
       entryPointStrategy: "resolve",
       excludeInternal: true,

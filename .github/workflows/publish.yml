@@ -1,78 +1,180 @@
-name: Publish
+name: Stage npm release
 
 on:
-  workflow_dispatch:
-    inputs:
-      package:
-        description: the package to publish
-        required: true
-        type: choice
-        options:
-          - arcscord
-          - components
-          - middleware
-          - error
-          - better_error
-          - webhooks
-          - create-arcscord-bot
-      tag:
-        description: the version tag to publish
-        required: false
-        type: string
+  push:
+    tags:
+      - "arcscord@v*"
+      - "@arcscord/*@v*"
+      - "create-arcscord-bot@v*"
+
+concurrency:
+  group: npm-stage-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
 
 jobs:
-  Publish:
-    name: Build & Publish
-    runs-on: ubuntu-latest
+  stage:
+    name: Validate, build, and stage
+    runs-on: ubuntu-24.04
+    timeout-minutes: 35
     environment: npm-publish
     permissions:
       contents: read
       id-token: write
     steps:
-      - name: Checkout Project
+      - name: Checkout tagged source
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
-      - name: Guard prerelease publishes without a dist-tag
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Resolve and validate release tag
+        id: release
         env:
-          PACKAGE_NAME: ${{ inputs.package }}
-          PUBLISH_TAG: ${{ inputs.tag }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/release-tag.mjs --tag "$RELEASE_TAG"
+
+      - name: Verify tagged commit belongs to main
+        env:
+          RELEASE_SHA: ${{ github.sha }}
         run: |
-          VERSION=$(node -p "require('./packages/' + process.env.PACKAGE_NAME + '/package.json').version")
-          if [[ "$VERSION" == *-* && -z "$PUBLISH_TAG" ]]; then
-            echo "::error::Version $VERSION looks like a prerelease but no dist-tag (tag input) was provided. Refusing to publish to 'latest'."
+          git fetch --no-tags origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$RELEASE_SHA" refs/remotes/origin/main; then
+            echo "::error::The release tag must point to a commit contained in main."
             exit 1
           fi
+
       - name: Install pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         with:
           version: 11.8.0
+
       - name: Use Node.js v24.11.0
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
         with:
           node-version: 24.11.0
-          cache: pnpm
           registry-url: "https://registry.npmjs.org"
-      - name: Install Dependencies
+          package-manager-cache: false
+
+      - name: Install staging-capable npm CLI
+        run: |
+          npm install --global npm@11.15.0
+          npm --version
+
+      - name: Refuse an existing npm version
+        env:
+          PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set +e
+          npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > "$RUNNER_TEMP/npm-view.log" 2>&1
+          STATUS=$?
+          set -e
+
+          if [ "$STATUS" -eq 0 ]; then
+            echo "::error::$PACKAGE_NAME@$PACKAGE_VERSION already exists on npm."
+            exit 1
+          fi
+
+          if ! grep -q "E404" "$RUNNER_TEMP/npm-view.log"; then
+            cat "$RUNNER_TEMP/npm-view.log"
+            echo "::error::Unable to verify whether the version already exists on npm."
+            exit 1
+          fi
+
+      - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
       - name: Clean build artifacts
         run: pnpm clean
+
       - name: Build code
         run: pnpm build
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
+
       - name: Lint code
         run: pnpm lint --fix=false
+
+      - name: Check unused code
+        run: pnpm knip
+
       - name: Typecheck code
         run: pnpm typecheck
+
       - name: Run unit tests
         run: pnpm test
-      - name: Validate package contents
-        run: pnpm pack --pack-destination /tmp
-        working-directory: "packages/${{inputs.package}}"
-      - name: Publish
-        run: |
-          if [ -n "$PUBLISH_TAG" ]; then
-            pnpm publish --provenance --access public --no-git-checks --tag "$PUBLISH_TAG"
-          else
-            pnpm publish --provenance --access public --no-git-checks
-          fi
-        working-directory: "packages/${{inputs.package}}"
+
+      - name: Build documentation
+        run: pnpm docs:build
+
+      - name: Verify committed release API snapshots
+        run: pnpm docs:check-release
+
+      - name: Pack the selected package
+        id: pack
         env:
-          PUBLISH_TAG: ${{ inputs.tag }}
+          PACKAGE_DIRECTORY: ${{ steps.release.outputs.package_dir }}
+          PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          RELEASE_DIRECTORY="$RUNNER_TEMP/arcscord-release"
+          mkdir -p "$RELEASE_DIRECTORY"
+          pnpm --dir "$PACKAGE_DIRECTORY" pack --pack-destination "$RELEASE_DIRECTORY"
+
+          TARBALL=$(find "$RELEASE_DIRECTORY" -maxdepth 1 -type f -name '*.tgz' -print -quit)
+          if [ -z "$TARBALL" ]; then
+            echo "::error::pnpm did not create a release tarball."
+            exit 1
+          fi
+
+          tar -xOf "$TARBALL" package/package.json > "$RUNNER_TEMP/packed-package.json"
+          node -e '
+            const manifest = require(process.env.RUNNER_TEMP + "/packed-package.json")
+            if (manifest.name !== process.env.PACKAGE_NAME || manifest.version !== process.env.PACKAGE_VERSION)
+              throw new Error(`Packed manifest is ${manifest.name}@${manifest.version}`)
+            if (JSON.stringify(manifest).includes("workspace:"))
+              throw new Error("Packed manifest still contains a workspace protocol")
+          '
+
+          SHA256=$(sha256sum "$TARBALL" | cut -d ' ' -f 1)
+          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
+          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+
+      - name: Upload release candidate
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: npm-release-candidate-${{ github.run_id }}
+          path: ${{ steps.pack.outputs.tarball }}
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Stage package on npm
+        env:
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+        run: npm stage publish "$TARBALL" --access public --tag "$DIST_TAG"
+
+      - name: Write release summary
+        env:
+          DIST_TAG: ${{ steps.release.outputs.dist_tag }}
+          PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
+          PACKAGE_VERSION: ${{ steps.release.outputs.version }}
+          RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
+          SHA256: ${{ steps.pack.outputs.sha256 }}
+        run: |
+          {
+            echo "## npm release staged"
+            echo ""
+            echo "| Field | Value |"
+            echo "| --- | --- |"
+            echo "| Package | \`$PACKAGE_NAME\` |"
+            echo "| Version | \`$PACKAGE_VERSION\` |"
+            echo "| Git tag | \`$RELEASE_TAG\` |"
+            echo "| npm dist-tag | \`$DIST_TAG\` |"
+            echo "| Tarball SHA-256 | \`$SHA256\` |"
+            echo ""
+            echo "Review the staged tarball on npm, approve it with 2FA, then create the GitHub Release from \`$RELEASE_TAG\`."
+          } >> "$GITHUB_STEP_SUMMARY"
