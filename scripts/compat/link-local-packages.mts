@@ -7,9 +7,9 @@
  *
  * The example's committed `package.json` keeps the published version spec (so a
  * user who clones the branch gets a runnable example against the release); this
- * override is applied only in CI on the ephemeral checkout, before running
- * `pnpm install --no-lockfile` (because the override changes resolution for
- * arcscord/middleware).
+ * override is applied only in CI on the ephemeral checkout. CI allows an
+ * ephemeral lockfile update for the local tarballs while retaining all other
+ * committed dependency resolutions.
  *
  * Usage: node scripts/compat/link-local-packages.mts <exampleDir> <tarballDir>
  *   <exampleDir>  path to the example (e.g. examples/starter-bot)

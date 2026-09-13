@@ -366,7 +366,9 @@ jobs:
       - name: Install example dependencies
         id: install
         working-directory: examples
-        run: pnpm --filter '${{ matrix.name }}' install --no-lockfile
+        # Keep the committed dependency resolutions (notably Prisma) while
+        # allowing the temporary local-tarball overrides to update the lockfile.
+        run: pnpm --filter '${{ matrix.name }}' install --no-frozen-lockfile
       - name: Generate database client
         id: db_generate
         working-directory: ${{ matrix.path }}
@@ -396,7 +398,7 @@ jobs:
             echo ""
             echo "| Check | Command | Result |"
             echo "| --- | --- | --- |"
-            echo "| Install | \`pnpm --filter '${{ matrix.name }}' install --no-lockfile\` | \`${{ steps.install.outcome }}\` |"
+            echo "| Install | \`pnpm --filter '${{ matrix.name }}' install --no-frozen-lockfile\` | \`${{ steps.install.outcome }}\` |"
             echo "| Database client | \`pnpm db:generate\` when available | \`${{ steps.db_generate.outcome }}\` |"
             echo "| Typecheck | \`pnpm --filter '${{ matrix.name }}' typecheck\` | \`${{ steps.typecheck.outcome }}\` |"
             echo "| Lint | \`pnpm --filter '${{ matrix.name }}' lint\` | \`${{ steps.lint.outcome }}\` |"
