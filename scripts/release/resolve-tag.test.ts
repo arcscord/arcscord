@@ -3,10 +3,10 @@ import { mkdirSync, mkdtempSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "vitest";
-import { RELEASE_PACKAGES } from "../release-packages.mjs";
-import { parseReleaseTag, resolveReleaseTag } from "../release-tag.mjs";
+import { RELEASE_PACKAGES } from "./packages.mts";
+import { parseReleaseTag, resolveReleaseTag } from "./resolve-tag.mts";
 
-function createSourceRoot(overrides = {}) {
+function createSourceRoot(overrides: Readonly<Record<string, string>> = {}): string {
   const sourceRoot = mkdtempSync(join(tmpdir(), "arcscord-release-tag-"));
 
   for (const pkg of RELEASE_PACKAGES) {

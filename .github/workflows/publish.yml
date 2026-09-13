@@ -30,22 +30,6 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
 
-      - name: Resolve and validate release tag
-        id: release
-        env:
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: node scripts/release-tag.mjs --tag "$RELEASE_TAG"
-
-      - name: Verify tagged commit belongs to main
-        env:
-          RELEASE_SHA: ${{ github.sha }}
-        run: |
-          git fetch --no-tags origin main:refs/remotes/origin/main
-          if ! git merge-base --is-ancestor "$RELEASE_SHA" refs/remotes/origin/main; then
-            echo "::error::The release tag must point to a commit contained in main."
-            exit 1
-          fi
-
       - name: Install pnpm
         uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6
         with:
@@ -58,6 +42,17 @@ jobs:
           registry-url: "https://registry.npmjs.org"
           package-manager-cache: false
 
+      - name: Resolve and validate release tag
+        id: release
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: node scripts/release/resolve-tag.mts --tag "$RELEASE_TAG"
+
+      - name: Verify tagged commit belongs to main
+        env:
+          RELEASE_SHA: ${{ github.sha }}
+        run: node scripts/release/verify-main.mts --sha "$RELEASE_SHA"
+
       - name: Install staging-capable npm CLI
         run: |
           npm install --global npm@11.15.0
@@ -67,22 +62,7 @@ jobs:
         env:
           PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
           PACKAGE_VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          set +e
-          npm view "$PACKAGE_NAME@$PACKAGE_VERSION" version > "$RUNNER_TEMP/npm-view.log" 2>&1
-          STATUS=$?
-          set -e
-
-          if [ "$STATUS" -eq 0 ]; then
-            echo "::error::$PACKAGE_NAME@$PACKAGE_VERSION already exists on npm."
-            exit 1
-          fi
-
-          if ! grep -q "E404" "$RUNNER_TEMP/npm-view.log"; then
-            cat "$RUNNER_TEMP/npm-view.log"
-            echo "::error::Unable to verify whether the version already exists on npm."
-            exit 1
-          fi
+        run: node scripts/release/check-npm-version.mts --package "$PACKAGE_NAME" --version "$PACKAGE_VERSION"
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
@@ -119,29 +99,7 @@ jobs:
           PACKAGE_DIRECTORY: ${{ steps.release.outputs.package_dir }}
           PACKAGE_NAME: ${{ steps.release.outputs.package_name }}
           PACKAGE_VERSION: ${{ steps.release.outputs.version }}
-        run: |
-          RELEASE_DIRECTORY="$RUNNER_TEMP/arcscord-release"
-          mkdir -p "$RELEASE_DIRECTORY"
-          pnpm --dir "$PACKAGE_DIRECTORY" pack --pack-destination "$RELEASE_DIRECTORY"
-
-          TARBALL=$(find "$RELEASE_DIRECTORY" -maxdepth 1 -type f -name '*.tgz' -print -quit)
-          if [ -z "$TARBALL" ]; then
-            echo "::error::pnpm did not create a release tarball."
-            exit 1
-          fi
-
-          tar -xOf "$TARBALL" package/package.json > "$RUNNER_TEMP/packed-package.json"
-          node -e '
-            const manifest = require(process.env.RUNNER_TEMP + "/packed-package.json")
-            if (manifest.name !== process.env.PACKAGE_NAME || manifest.version !== process.env.PACKAGE_VERSION)
-              throw new Error(`Packed manifest is ${manifest.name}@${manifest.version}`)
-            if (JSON.stringify(manifest).includes("workspace:"))
-              throw new Error("Packed manifest still contains a workspace protocol")
-          '
-
-          SHA256=$(sha256sum "$TARBALL" | cut -d ' ' -f 1)
-          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
-          echo "sha256=$SHA256" >> "$GITHUB_OUTPUT"
+        run: node scripts/release/pack.mts --directory "$PACKAGE_DIRECTORY" --package "$PACKAGE_NAME" --version "$PACKAGE_VERSION"
 
       - name: Upload release candidate
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
@@ -164,17 +122,4 @@ jobs:
           PACKAGE_VERSION: ${{ steps.release.outputs.version }}
           RELEASE_TAG: ${{ steps.release.outputs.release_tag }}
           SHA256: ${{ steps.pack.outputs.sha256 }}
-        run: |
-          {
-            echo "## npm release staged"
-            echo ""
-            echo "| Field | Value |"
-            echo "| --- | --- |"
-            echo "| Package | \`$PACKAGE_NAME\` |"
-            echo "| Version | \`$PACKAGE_VERSION\` |"
-            echo "| Git tag | \`$RELEASE_TAG\` |"
-            echo "| npm dist-tag | \`$DIST_TAG\` |"
-            echo "| Tarball SHA-256 | \`$SHA256\` |"
-            echo ""
-            echo "Review the staged tarball on npm, approve it with 2FA, then create the GitHub Release from \`$RELEASE_TAG\`."
-          } >> "$GITHUB_STEP_SUMMARY"
+        run: node scripts/release/write-summary.mts

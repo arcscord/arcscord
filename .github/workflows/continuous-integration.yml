@@ -362,7 +362,7 @@ jobs:
           cache: pnpm
           cache-dependency-path: examples/pnpm-lock.yaml
       - name: Point example at the local repo build
-        run: node scripts/link-local-arcscord.mjs ${{ matrix.path }} ${{ github.workspace }}/vendor-artifact
+        run: node scripts/compat/link-local-packages.mts ${{ matrix.path }} ${{ github.workspace }}/vendor-artifact
       - name: Install example dependencies
         id: install
         working-directory: examples

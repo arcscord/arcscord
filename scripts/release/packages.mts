@@ -1,7 +1,26 @@
 import { readFileSync } from "node:fs";
-import { join, resolve } from "node:path";
-import process from "node:process";
-import { pathToFileURL } from "node:url";
+import { join } from "node:path";
+
+export type ReleasePackage = {
+  directory: string;
+  name: string;
+  slug?: string;
+};
+
+export type DocumentedReleasePackage = ReleasePackage & {
+  slug: string;
+};
+
+export type PackageManifest = {
+  description?: string;
+  name: string;
+  version: string;
+};
+
+export type ResolvedReleasePackage<TPackage extends ReleasePackage = ReleasePackage> = TPackage & {
+  manifest: PackageManifest;
+  version: string;
+};
 
 export const RELEASE_PACKAGES = Object.freeze([
   { directory: "packages/arcscord", name: "arcscord", slug: "arcscord" },
@@ -11,15 +30,18 @@ export const RELEASE_PACKAGES = Object.freeze([
   { directory: "packages/better_error", name: "@arcscord/better-error", slug: "better-error" },
   { directory: "packages/webhooks", name: "@arcscord/webhooks", slug: "webhooks" },
   { directory: "packages/create-arcscord-bot", name: "create-arcscord-bot" },
-]);
+] satisfies readonly ReleasePackage[]);
 
 export const DOCUMENTED_RELEASE_PACKAGES = Object.freeze(
-  RELEASE_PACKAGES.filter(pkg => pkg.slug !== undefined),
+  RELEASE_PACKAGES.filter((pkg): pkg is DocumentedReleasePackage => pkg.slug !== undefined),
 );
 
-export function readReleasePackage(sourceRoot, pkg) {
+export function readReleasePackage<TPackage extends ReleasePackage>(
+  sourceRoot: string,
+  pkg: TPackage,
+): ResolvedReleasePackage<TPackage> {
   const manifestPath = join(sourceRoot, pkg.directory, "package.json");
-  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8")) as PackageManifest;
 
   if (manifest.name !== pkg.name) {
     throw new Error(
@@ -28,11 +50,4 @@ export function readReleasePackage(sourceRoot, pkg) {
   }
 
   return { ...pkg, manifest, version: manifest.version };
-}
-
-export function isMainModule(metaUrl) {
-  return Boolean(
-    process.argv[1]
-    && metaUrl === pathToFileURL(resolve(process.argv[1])).href,
-  );
 }

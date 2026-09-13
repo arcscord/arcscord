@@ -1,13 +1,14 @@
+import type { PackageManifest } from "../release/packages.mts";
 import { spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
-import { dirname, join, resolve } from "node:path";
+import { join, resolve } from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import { resolveApiDocVersions } from "./api-doc-versions.mjs";
-import { DOCUMENTED_RELEASE_PACKAGES } from "./release-packages.mjs";
+import { DOCUMENTED_RELEASE_PACKAGES } from "../release/packages.mts";
+import { resolveApiDocVersions } from "./api-versions.mts";
 
-const scriptRoot = dirname(dirname(fileURLToPath(import.meta.url)));
+const scriptRoot = fileURLToPath(new URL("../../", import.meta.url));
 const sourceRootArgIndex = process.argv.indexOf("--source-root");
 const outputRootArgIndex = process.argv.indexOf("--output-root");
 const sourceRoot = sourceRootArgIndex === -1
@@ -29,7 +30,21 @@ if (!["dev", "release"].includes(channel)) {
   process.exit(1);
 }
 
-const packageDocsOptions = {
+type PackageDocsOptions = {
+  docsEntryPoints?: string[];
+};
+
+type ApiManifestPackage = {
+  currentVersion: string;
+  defaultVersion: string | undefined;
+  description: string;
+  files: Record<string, string>;
+  latest: string | undefined;
+  name: string;
+  versions: string[];
+};
+
+const packageDocsOptions: Partial<Record<string, PackageDocsOptions>> = {
   arcscord: {
     docsEntryPoints: ["src/base/utils/context.type.ts"],
   },
@@ -168,11 +183,13 @@ mkdirSync(typedocConfigRoot, { recursive: true });
 const manifest = {
   generatedAt: new Date().toISOString(),
   defaultPackage: "arcscord",
-  packages: {},
+  packages: {} as Record<string, ApiManifestPackage>,
 };
 
 for (const pkg of packages) {
-  const packageJson = JSON.parse(readFileSync(join(sourceRoot, pkg.directory, "package.json"), "utf8"));
+  const packageJson = JSON.parse(
+    readFileSync(join(sourceRoot, pkg.directory, "package.json"), "utf8"),
+  ) as PackageManifest;
   const version = channel === "dev" ? "dev" : packageJson.version;
   const outDir = join(apiRoot, pkg.slug);
   const outFile = join(outDir, `${version}.json`);

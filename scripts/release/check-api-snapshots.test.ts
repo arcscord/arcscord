@@ -4,10 +4,10 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { describe, it } from "vitest";
 
-import { findMissingReleaseSnapshots } from "../check-release-api-snapshots.mjs";
-import { DOCUMENTED_RELEASE_PACKAGES } from "../release-packages.mjs";
+import { findMissingReleaseSnapshots } from "./check-api-snapshots.mts";
+import { DOCUMENTED_RELEASE_PACKAGES } from "./packages.mts";
 
-function createSourceRoot(missingSlug) {
+function createSourceRoot(missingSlug?: string): string {
   const sourceRoot = mkdtempSync(join(tmpdir(), "arcscord-release-snapshots-"));
 
   for (const pkg of DOCUMENTED_RELEASE_PACKAGES) {

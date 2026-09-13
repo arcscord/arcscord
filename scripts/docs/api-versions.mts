@@ -1,6 +1,19 @@
 const SEMVER_PATTERN = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-([0-9A-Z-]+(?:\.[0-9A-Z-]+)*))?(?:\+[0-9A-Z-]+(?:\.[0-9A-Z-]+)*)?$/i;
 
-export function parseSemver(version) {
+export type ParsedSemver = {
+  major: number;
+  minor: number;
+  patch: number;
+  prerelease: string[];
+};
+
+export type ApiDocVersions = {
+  defaultVersion: string | undefined;
+  latest: string | undefined;
+  versions: string[];
+};
+
+export function parseSemver(version: string): ParsedSemver | undefined {
   const match = SEMVER_PATTERN.exec(version);
 
   if (!match)
@@ -14,7 +27,7 @@ export function parseSemver(version) {
   };
 }
 
-function comparePrerelease(left, right) {
+function comparePrerelease(left: readonly string[], right: readonly string[]): number {
   if (left.length === 0 || right.length === 0)
     return left.length === 0 ? (right.length === 0 ? 0 : 1) : -1;
 
@@ -45,7 +58,7 @@ function comparePrerelease(left, right) {
   return 0;
 }
 
-export function compareSemver(leftVersion, rightVersion) {
+export function compareSemver(leftVersion: string, rightVersion: string): number {
   const left = parseSemver(leftVersion);
   const right = parseSemver(rightVersion);
 
@@ -58,7 +71,7 @@ export function compareSemver(leftVersion, rightVersion) {
     || comparePrerelease(left.prerelease, right.prerelease);
 }
 
-export function resolveApiDocVersions(versions) {
+export function resolveApiDocVersions(versions: string[]): ApiDocVersions {
   const releaseVersions = versions
     .filter(version => version !== "dev")
     .sort((left, right) => compareSemver(right, left));

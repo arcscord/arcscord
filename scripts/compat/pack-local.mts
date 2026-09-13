@@ -19,12 +19,21 @@ import { copyFile, mkdir, readdir, rename, rm } from "node:fs/promises";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-const rootDir = new URL("../", import.meta.url);
+const rootDir = new URL("../../", import.meta.url);
 const stagingDir = new URL("test/compat/vendor/", rootDir);
 
 // Publishable packages to pack. `prefix` is how `pnpm pack` names the tarball
 // before we normalize it to the stable `target` name.
-const packages = {
+type LocalPackage = {
+  directory: URL;
+  installedName: string;
+  prefix: string;
+  target: string;
+};
+
+type LocalPackageName = "arcscord" | "components" | "error" | "middleware" | "webhooks";
+
+const packages: Record<LocalPackageName, LocalPackage> = {
   error: {
     directory: new URL("packages/error/", rootDir),
     prefix: "arcscord-error",
@@ -58,14 +67,14 @@ const packages = {
 };
 
 // Which packages each consumer fixture installs from its own `vendor/`.
-const consumers = [
+const consumers: { dir: string; packages: LocalPackageName[] }[] = [
   { dir: "test/compat/bun-consumer/", packages: ["error", "components", "webhooks", "arcscord"] },
   { dir: "test/compat/typescript-consumer/", packages: ["error", "components", "webhooks", "arcscord", "middleware"] },
   { dir: "test/compat/node-consumer/", packages: ["error", "components", "webhooks", "arcscord"] },
   { dir: "test/compat/webhooks-consumer/", packages: ["webhooks"] },
 ];
 
-function runPnpm(args, cwd) {
+function runPnpm(args: readonly string[], cwd: URL): void {
   const command = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
   execFileSync(command, args, { cwd: fileURLToPath(cwd), stdio: "inherit" });
 }
