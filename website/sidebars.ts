@@ -54,6 +54,7 @@ const sidebars: SidebarsConfig = {
         "guide/logger",
         "guide/middleware",
         "guide/execution-handlers",
+        "guide/diagnostics-channels",
         "guide/error-handling",
       ],
     },

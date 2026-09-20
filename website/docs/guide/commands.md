@@ -4,6 +4,9 @@ sidebar_position: 3
 
 # Commands
 
+Command loading, Discord registration, resolution, dispatch, execution, and
+autocomplete expose opt-in [diagnostics channels](/guide/diagnostics-channels).
+
 Commands are declared with `createCommand` and loaded with `ArcClient`. This page covers the minimum setup needed to create and register a command.
 
 ## Create a command

@@ -4,6 +4,9 @@ sidebar_position: 7
 
 # Logger
 
+For typed lifecycle telemetry in addition to log output, see
+[Diagnostics channels](/guide/diagnostics-channels).
+
 The built-in logger (`ArcLogger`) works out of the box with no configuration: `console` output, human-readable in development, JSON in production. Every level accepts an optional structured `meta` object, and the whole thing is swappable — see [Bring your own logger](#bring-your-own-logger) below.
 
 ## Pretty vs JSON output

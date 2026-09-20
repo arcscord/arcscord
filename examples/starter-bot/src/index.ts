@@ -6,7 +6,10 @@
  */
 import * as process from "node:process";
 import { ArcClient } from "arcscord";
+import { installDiagnostics } from "./diagnostics";
 import handlers from "./handlers";
+
+installDiagnostics();
 
 const client = new ArcClient(process.env.TOKEN ?? "", {
   // Intents needed by src/events/react_to_arcscord.ts: `Guilds` for guild

@@ -145,6 +145,7 @@ Per-manager configuration. All fields are optional.
 | `managers.command` | Slash, user, and message commands — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
 | `managers.component` | Buttons, select menus, modals — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
 | `managers.event` | Discord.js event listeners — intent checks, execution handlers | [Execution handlers](/guide/execution-handlers) |
+| Diagnostics channels | Typed, opt-in manager lifecycle telemetry for Node.js and Bun | [Diagnostics channels](/guide/diagnostics-channels) |
 | `managers.locale` | i18next integration — language map, detection, resources | [Localization](/guide/localization) |
 
 Example with event intent check configuration:

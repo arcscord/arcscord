@@ -15,17 +15,19 @@ template. A good reading order is:
 
 1. `src/index.ts` — creates the `ArcClient`, declares the gateway intents, loads
    every handler when Discord says the client is ready, then logs in.
-2. `src/handlers.ts` — Arcscord's central registry. Commands, components and
+2. `src/diagnostics.ts` — installs typed, zero-config diagnostics-channel
+   listeners for command/component timings and Gateway intent issues.
+3. `src/handlers.ts` — Arcscord's central registry. Commands, components and
    events become active when they are imported and added to the matching array.
-3. `src/commands/ping.ts` — the simplest command: a Components v2 reply with a
+4. `src/commands/ping.ts` — the simplest command: a Components v2 reply with a
    button attached to it.
-4. `src/components/ping_button.ts` — the button behind `/ping`. Shows a dynamic
+5. `src/components/ping_button.ts` — the button behind `/ping`. Shows a dynamic
    route param and a self-updating message.
-5. `src/middleware/author_only.ts` — a component middleware that restricts the
+6. `src/middleware/author_only.ts` — a component middleware that restricts the
    refresh button to the user who ran the command.
-6. `src/commands/avatar.ts` — one handler exposed as both a slash command and a
+7. `src/commands/avatar.ts` — one handler exposed as both a slash command and a
    user context-menu command, with option choices and an embed reply.
-7. `src/events/react_to_arcscord.ts` — a `messageCreate` listener that reacts to
+8. `src/events/react_to_arcscord.ts` — a `messageCreate` listener that reacts to
    messages mentioning "arcscord".
 
 ## Install
@@ -81,6 +83,11 @@ for the `react_to_arcscord` event.
 
 Alongside the commands, the `reactToArcscord` event reacts with 🚀 to any message
 that mentions "arcscord".
+
+The listeners in `src/diagnostics.ts` log command and component execution
+durations and report missing Gateway intents. Removing that import disables the
+diagnostic work: Arcscord does not construct diagnostic payloads when no listener
+is attached.
 
 ## Extending the example
 
