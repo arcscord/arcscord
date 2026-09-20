@@ -42,3 +42,4 @@ package-lock.json
 .agents/
 CLAUDE.md
 AGENTS.md
+.pnpm-store/
