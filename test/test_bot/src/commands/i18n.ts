@@ -1,18 +1,19 @@
 import { actionRow, createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 import { i18nButton } from "../components/i18n_button";
+import { localization } from "../localization";
 
 export const i18nCommand = createCommand({
   slash: {
     name: "i18n",
-    nameLocalizations: t => t($ => $.i18n.command.name),
+    nameLocalizations: localization.localizations(t => t($ => $.i18n.command.name)),
     description: "default description",
-    descriptionLocalizations: t => t($ => $.i18n.command.description),
+    descriptionLocalizations: localization.localizations(t => t($ => $.i18n.command.description)),
     options: {
       topic: {
         description: "Localized autocomplete topic",
-        nameLocalizations: t => t($ => $.i18n.autocomplete.option.name),
-        descriptionLocalizations: t => t($ => $.i18n.autocomplete.option.description),
+        nameLocalizations: localization.localizations(t => t($ => $.i18n.autocomplete.option.name)),
+        descriptionLocalizations: localization.localizations(t => t($ => $.i18n.autocomplete.option.description)),
         type: "string",
         autocomplete: true,
         required: true,
@@ -22,7 +23,7 @@ export const i18nCommand = createCommand({
   run: (ctx) => {
     return ctx.reply({
       components: [actionRow(i18nButton.build())],
-      content: ctx.t($ => $.i18n.command.run, {
+      content: localization.localize(ctx)($ => $.i18n.command.run, {
         topic: ctx.options.topic,
       }),
       flags: MessageFlags.Ephemeral,
@@ -32,15 +33,15 @@ export const i18nCommand = createCommand({
     topic: (ctx) => {
       return ctx.sendChoices([
         {
-          name: ctx.t($ => $.i18n.autocomplete.choices.command),
+          name: localization.localize(ctx)($ => $.i18n.autocomplete.choices.command),
           value: "command",
         },
         {
-          name: ctx.t($ => $.i18n.autocomplete.choices.component),
+          name: localization.localize(ctx)($ => $.i18n.autocomplete.choices.component),
           value: "component",
         },
         {
-          name: ctx.t($ => $.i18n.autocomplete.choices.autocomplete),
+          name: localization.localize(ctx)($ => $.i18n.autocomplete.choices.autocomplete),
           value: "autocomplete",
         },
       ]);

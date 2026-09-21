@@ -15,6 +15,7 @@ import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
 import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
+import { LocalizationService } from "#/localization";
 import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
@@ -55,8 +56,13 @@ export class ArcClient extends DJSClient {
 
   /**
    * The manager for localization
+   *
+   * @deprecated Use {@link localization}. This property will be removed in v2.
    */
   localeManager: LocaleManager;
+
+  /** Provider-independent localization service. */
+  localization: LocalizationService;
 
   /**
    * The logger instance
@@ -97,6 +103,10 @@ export class ArcClient extends DJSClient {
   constructor(token: string, options: ArcClientOptions) {
     super(options);
 
+    if (options.localization && options.managers?.locale) {
+      throw new TypeError("ArcClientOptions.localization and managers.locale cannot be configured together");
+    }
+
     this.loggerConstructor = options.logger?.customLogger ?? ArcLogger;
 
     this.logger = createLogger(
@@ -136,6 +146,7 @@ export class ArcClient extends DJSClient {
     this.eventManager = new EventManager(this, options.managers?.event);
     this.componentManager = new ComponentManager(this, options.managers?.component);
     this.localeManager = new LocaleManager(this, options.managers?.locale);
+    this.localization = new LocalizationService(this, options.localization, this.localeManager);
     this.trace("created managers");
 
     this.token = token;
@@ -226,13 +237,15 @@ export class ArcClient extends DJSClient {
    * @param commands - The commands to load
    * @param group - The group to assign the commands to
    * @param guild - The guild to register the commands in (optional)
+   * @throws `LocalizationReadyTimeoutError` when the configured localization
+   * adapter does not become ready before `localization.readyTimeout`.
    */
   async loadCommands(
     commands: Command[],
     group = "default",
     guild?: string,
   ): Promise<Result<number, ArcscordError>> {
-    await this.localeManager.ready;
+    await this.localization.waitReady();
     const [err, data] = this.commandManager.loadCommands(commands, group);
     if (err !== null) {
       return error(err);

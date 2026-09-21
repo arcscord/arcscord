@@ -8,6 +8,8 @@ const root = fileURLToPath(new URL("../..", import.meta.url));
 const vitest = path.join(root, "node_modules/vitest/vitest.mjs");
 const targets = [
   ["arcscord", "packages/arcscord"],
+  ["@arcscord/adapter-i18next", "packages/adapter-i18next"],
+  ["@arcscord/adapter-paraglide", "packages/adapter-paraglide"],
   ["@arcscord/better-error", "packages/better_error"],
   ["@arcscord/components", "packages/components"],
   ["@arcscord/error", "packages/error"],

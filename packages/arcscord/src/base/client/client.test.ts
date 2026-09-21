@@ -1,6 +1,7 @@
 import type { ArcClientReadyTimeoutError } from "#/utils/error/class/client_ready_timeout_error";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { button, createButton } from "#/base/components";
+import { createLocalizationAdapter } from "#/localization";
 import { ArcscordError } from "#/utils";
 import { ArcClient } from "./client.class";
 
@@ -18,6 +19,20 @@ afterEach(() => {
 });
 
 describe("arc client messages", () => {
+  it("rejects modern and legacy localization configured together", () => {
+    const adapter = createLocalizationAdapter({
+      defaultLocale: "en",
+      locales: ["en"],
+      localize: locale => locale,
+    });
+
+    expect(() => new ArcClient("token", {
+      intents: [],
+      localization: { adapter },
+      managers: { locale: { enabled: false } },
+    })).toThrow("cannot be configured together");
+  });
+
   it("passes locale context to user-visible base messages", async () => {
     const client = new ArcClient("token", {
       intents: [],

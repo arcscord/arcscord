@@ -5,6 +5,7 @@
 | Code | Meaning | Important metadata |
 |---|---|---|
 | `CLIENT_READY_TIMEOUT` | Client readiness timed out | `timeoutMs` |
+| `LOCALIZATION_READY_TIMEOUT` | Localization adapter initialization timed out | `timeoutMs` |
 | `APPLICATION_UNAVAILABLE` | Discord application data was unavailable | `operation` |
 | `COMMAND_VALIDATION_FAILED` | A command definition is invalid | `rule`, `path`, `commandName`, `group` |
 | `COMMAND_REGISTRATION_FAILED` | Discord command synchronization failed | `scope`, `guildId`, `operation` |

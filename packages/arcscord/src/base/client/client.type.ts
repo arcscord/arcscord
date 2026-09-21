@@ -1,5 +1,6 @@
 import type { BaseMessageOptions, ClientOptions } from "discord.js";
 import type i18next from "i18next";
+import type { LocalizationOptions } from "#/localization";
 import type { EventManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
@@ -71,6 +72,14 @@ export type ArcClientLoggerOptions = {
  */
 export type ArcClientOptions = ClientOptions & {
   /**
+   * Provider-independent localization configuration.
+   *
+   * Use an adapter package such as `@arcscord/adapter-i18next` or
+   * `@arcscord/adapter-paraglide`.
+   */
+  localization?: LocalizationOptions;
+
+  /**
    * Discord application id used to register commands before the client is ready.
    *
    * When provided, command registration can use the REST API directly instead
@@ -130,6 +139,9 @@ export type WaitReadyOptions = {
 export type ManagersOptions = {
   /**
    * Configuration of {@link LocaleManager} for customize localization of arcscord
+   *
+   * @deprecated Use {@link ArcClientOptions.localization}. This compatibility
+   * layer will be removed in Arcscord v2.
    */
   locale?: LocaleManagerOptions;
 
@@ -160,6 +172,8 @@ export type BaseMessageContext = {
 
   /**
    * Fixed i18next translation function for `locale`.
+   *
+   * @deprecated Use the configured adapter's `localize(context)` method.
    */
   t?: typeof i18next.t;
 };

@@ -63,6 +63,14 @@ export function createMockClient(options: MockClientOptions = {}): MockArcClient
       detectLanguage: createMockFunction(async () => "en"),
       ready: Promise.resolve(),
     },
+    localization: {
+      enabled: false,
+      detectLanguage: createMockFunction(async (...args: Parameters<MockArcClient["localeManager"]["detectLanguage"]>) => {
+        return client.localeManager.detectLanguage(...args);
+      }),
+      ready: Promise.resolve(),
+      waitReady: createMockFunction(() => Promise.resolve()),
+    },
     getErrorMessage: createMockFunction(() => ({ content: "An error occurred." })),
     createMessageContext: createMockFunction(() => ({ t: (key: string) => key })),
     createLogger: () => createMockLogger(),

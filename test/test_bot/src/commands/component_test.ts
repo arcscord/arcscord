@@ -30,6 +30,7 @@ import { stringSelectMenu } from "../components/string_select_menu";
 import { typedSingleStringSelectMenu } from "../components/typed_single_string_select_menu";
 import { typedStringSelectMenu } from "../components/typed_string_select_menu";
 import { userSelectMenu } from "../components/user_select_menu";
+import { localization } from "../localization";
 
 export const componentTestCommand = createCommand({
   slash: {
@@ -264,14 +265,14 @@ export const componentTestCommand = createCommand({
           v2Message(
             container(
               section(
-                ctx.t($ => $.componentsV2.i18n.support.title),
-                ctx.t($ => $.componentsV2.i18n.support.description),
+                localization.localize(ctx)($ => $.componentsV2.i18n.support.title),
+                localization.localize(ctx)($ => $.componentsV2.i18n.support.description),
                 accessory(i18nButton.build()),
               ),
               separator({ spacing: "large" }),
               section(
-                ctx.t($ => $.componentsV2.i18n.bug.title),
-                ctx.t($ => $.componentsV2.i18n.bug.description),
+                localization.localize(ctx)($ => $.componentsV2.i18n.bug.title),
+                localization.localize(ctx)($ => $.componentsV2.i18n.bug.description),
                 accessory(redSimpleButton.build()),
               ),
             ),

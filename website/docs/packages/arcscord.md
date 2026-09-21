@@ -24,7 +24,7 @@ Links:
 | Commands | Slash commands, context menu commands, subcommands, autocomplete, command middleware, and result-style command errors. | [Commands](/guide/commands) |
 | Events | Typed Discord.js event handlers, readiness behavior, intent diagnostics, and event result handling. | [Events](/guide/events) |
 | Middleware | Base command and component middleware classes with `next`, `cancel`, and `fail` control flow. | [Middleware](/guide/middleware) |
-| Localization | i18next-backed command metadata localization and runtime `ctx.t(...)` helpers. | [Localization](/guide/localization) |
+| Localization | Adapter-based locale detection, command metadata localization, and typed runtime helpers. | [Localization](/guide/localization) |
 | Logging | Built-in logger utilities and optional diagnostics sink. | [Logger](/guide/logger) |
 
 Most projects only need to import from `arcscord` directly:

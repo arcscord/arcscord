@@ -2,16 +2,24 @@ import type { APIApplicationCommandBasicOption, APIApplicationCommandOptionChoic
 import type { ArcClient } from "#/base";
 import type { CommandContexts, CommandIntegrationType } from "#/base/command/command_definition.type";
 import type { ChoiceNumber, ChoiceString, CommandOptionType, Option, OptionsList } from "#/base/command/option.type";
+import type { LocalizationDefinition } from "#/localization";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils";
 import type { ChannelType } from "#/utils/discord/type/channel.type";
 import { commandContextsEnum, commandIntegrationTypesEnum, commandOptionTypesEnum } from "#/base/command/command.enum";
+import { isLocalizationDefinition } from "#/localization";
 import { channelTypeEnum } from "#/utils/discord/type/channel.enum";
 import { localizationCallbackToMap } from "./localization";
 
-export function localizationToAPI(locales: LocaleMap | LocaleCallback | undefined, client: ArcClient): LocaleMap | undefined {
+export function localizationToAPI(
+  locales: LocaleMap | LocaleCallback | LocalizationDefinition | undefined,
+  client: ArcClient,
+): LocaleMap | undefined {
   if (typeof locales === "undefined") {
     return undefined;
+  }
+  if (isLocalizationDefinition(locales)) {
+    return client.localization.resolveLocalizations(locales);
   }
   if (typeof locales !== "function") {
     return locales;
@@ -50,6 +58,7 @@ function choicesToAPI(
     | (string | number | APIApplicationCommandOptionChoice<string | number>)[]
     | Record<string, string | number>
     | undefined,
+  client: ArcClient,
 ): APIApplicationCommandOptionChoice<string | number>[] | undefined {
   if (!choices) {
     return undefined;
@@ -60,7 +69,13 @@ function choicesToAPI(
       if (typeof choice === "string" || typeof choice === "number") {
         return { name: `${choice}`, value: choice };
       }
-      return choice;
+      const localizedChoice = choice as ChoiceString | ChoiceNumber;
+      const nameLocalizations = localizationToAPI(localizedChoice.nameLocalizations, client);
+      return {
+        name: localizedChoice.name,
+        ...(nameLocalizations ? { name_localizations: nameLocalizations } : {}),
+        value: localizedChoice.value,
+      };
     });
   }
 
@@ -74,14 +89,16 @@ function choicesToAPI(
 
 export function stringChoiceToAPI(
   choices: (string | ChoiceString)[] | Record<string, string> | undefined,
+  client: ArcClient,
 ): APIApplicationCommandOptionChoice<string>[] | undefined {
-  return choicesToAPI(choices) as APIApplicationCommandOptionChoice<string>[] | undefined;
+  return choicesToAPI(choices, client) as APIApplicationCommandOptionChoice<string>[] | undefined;
 }
 
 export function numberChoiceToAPI(
   choices: (number | ChoiceNumber)[] | Record<string, number> | undefined,
+  client: ArcClient,
 ): APIApplicationCommandOptionChoice<number>[] | undefined {
-  return choicesToAPI(choices) as APIApplicationCommandOptionChoice<number>[] | undefined;
+  return choicesToAPI(choices, client) as APIApplicationCommandOptionChoice<number>[] | undefined;
 }
 
 export function optionToAPI(
@@ -110,7 +127,7 @@ export function optionToAPI(
           min_length: option.min_length,
           max_length: option.max_length,
           autocomplete: option.autocomplete,
-          choices: stringChoiceToAPI(option.choices),
+          choices: stringChoiceToAPI(option.choices, client),
         };
       }
       return {
@@ -133,7 +150,7 @@ export function optionToAPI(
           min_value: option.min_value,
           max_value: option.max_value,
           autocomplete: option.autocomplete,
-          choices: numberChoiceToAPI(option.choices),
+          choices: numberChoiceToAPI(option.choices, client),
         };
       }
 

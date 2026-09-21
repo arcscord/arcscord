@@ -1,0 +1,538 @@
+{
+	"schemaVersion": "2.0",
+	"id": 0,
+	"name": "@arcscord/adapter-paraglide",
+	"variant": "project",
+	"kind": 1,
+	"flags": {},
+	"children": [
+		{
+			"id": 13,
+			"name": "ParaglideAdapterOptions",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "Configuration for "
+					},
+					{
+						"kind": "inline-tag",
+						"tag": "@link",
+						"text": "createParaglideAdapter",
+						"target": 1
+					},
+					{
+						"kind": "text",
+						"text": "."
+					}
+				]
+			},
+			"children": [
+				{
+					"id": 15,
+					"name": "messages",
+					"variant": "declaration",
+					"kind": 1024,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Generated "
+							},
+							{
+								"kind": "code",
+								"text": "`messages.js`"
+							},
+							{
+								"kind": "text",
+								"text": " exports."
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 16,
+							"character": 2
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 17,
+						"name": "Messages",
+						"package": "@arcscord/adapter-paraglide",
+						"refersToTypeParameter": true
+					}
+				},
+				{
+					"id": 16,
+					"name": "runtime",
+					"variant": "declaration",
+					"kind": 1024,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "code",
+								"text": "`baseLocale`"
+							},
+							{
+								"kind": "text",
+								"text": " and "
+							},
+							{
+								"kind": "code",
+								"text": "`locales`"
+							},
+							{
+								"kind": "text",
+								"text": " from generated "
+							},
+							{
+								"kind": "code",
+								"text": "`runtime.js`"
+							},
+							{
+								"kind": "text",
+								"text": "."
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 18,
+							"character": 2
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": 9,
+						"name": "ParaglideRuntime",
+						"package": "@arcscord/adapter-paraglide"
+					}
+				}
+			],
+			"groups": [
+				{
+					"title": "Properties",
+					"children": [
+						15,
+						16
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 14,
+					"character": 12
+				}
+			],
+			"typeParameters": [
+				{
+					"id": 17,
+					"name": "Messages",
+					"variant": "typeParam",
+					"kind": 131072,
+					"flags": {},
+					"type": {
+						"type": "intrinsic",
+						"name": "object"
+					}
+				}
+			]
+		},
+		{
+			"id": 5,
+			"name": "ParaglideMessages",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "Minimal structural shape of a generated Paraglide messages module."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 5,
+					"character": 12
+				}
+			],
+			"type": {
+				"type": "reference",
+				"target": {
+					"packageName": "typescript",
+					"packagePath": "lib/lib.es5.d.ts",
+					"qualifiedName": "Record"
+				},
+				"typeArguments": [
+					{
+						"type": "intrinsic",
+						"name": "string"
+					},
+					{
+						"type": "reflection",
+						"declaration": {
+							"id": 6,
+							"name": "__type",
+							"variant": "declaration",
+							"kind": 65536,
+							"flags": {},
+							"signatures": [
+								{
+									"id": 7,
+									"name": "__type",
+									"variant": "signature",
+									"kind": 4096,
+									"flags": {},
+									"parameters": [
+										{
+											"id": 8,
+											"name": "args",
+											"variant": "param",
+											"kind": 32768,
+											"flags": {
+												"isRest": true
+											},
+											"type": {
+												"type": "array",
+												"elementType": {
+													"type": "intrinsic",
+													"name": "never"
+												}
+											}
+										}
+									],
+									"type": {
+										"type": "intrinsic",
+										"name": "string"
+									}
+								}
+							]
+						}
+					}
+				],
+				"name": "Record",
+				"package": "typescript"
+			}
+		},
+		{
+			"id": 9,
+			"name": "ParaglideRuntime",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "Generated Paraglide runtime values required by the adapter."
+					}
+				]
+			},
+			"children": [
+				{
+					"id": 11,
+					"name": "baseLocale",
+					"variant": "declaration",
+					"kind": 1024,
+					"flags": {
+						"isReadonly": true
+					},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 9,
+							"character": 11
+						}
+					],
+					"type": {
+						"type": "intrinsic",
+						"name": "string"
+					}
+				},
+				{
+					"id": 12,
+					"name": "locales",
+					"variant": "declaration",
+					"kind": 1024,
+					"flags": {
+						"isReadonly": true
+					},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 10,
+							"character": 11
+						}
+					],
+					"type": {
+						"type": "typeOperator",
+						"operator": "readonly",
+						"target": {
+							"type": "array",
+							"elementType": {
+								"type": "intrinsic",
+								"name": "string"
+							}
+						}
+					}
+				}
+			],
+			"groups": [
+				{
+					"title": "Properties",
+					"children": [
+						11,
+						12
+					]
+				}
+			],
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 8,
+					"character": 12
+				}
+			]
+		},
+		{
+			"id": 1,
+			"name": "createParaglideAdapter",
+			"variant": "declaration",
+			"kind": 64,
+			"flags": {},
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 22,
+					"character": 16
+				}
+			],
+			"signatures": [
+				{
+					"id": 2,
+					"name": "createParaglideAdapter",
+					"variant": "signature",
+					"kind": 4096,
+					"flags": {},
+					"comment": {
+						"summary": [
+							{
+								"kind": "text",
+								"text": "Creates a Paraglide adapter without changing Paraglide's global locale."
+							}
+						]
+					},
+					"sources": [
+						{
+							"fileName": "index.ts",
+							"line": 22,
+							"character": 16
+						}
+					],
+					"typeParameters": [
+						{
+							"id": 3,
+							"name": "Messages",
+							"variant": "typeParam",
+							"kind": 131072,
+							"flags": {},
+							"type": {
+								"type": "intrinsic",
+								"name": "object"
+							}
+						}
+					],
+					"parameters": [
+						{
+							"id": 4,
+							"name": "options",
+							"variant": "param",
+							"kind": 32768,
+							"flags": {},
+							"type": {
+								"type": "reference",
+								"target": 13,
+								"typeArguments": [
+									{
+										"type": "reference",
+										"target": 3,
+										"name": "Messages",
+										"package": "@arcscord/adapter-paraglide",
+										"refersToTypeParameter": true
+									}
+								],
+								"name": "ParaglideAdapterOptions",
+								"package": "@arcscord/adapter-paraglide"
+							}
+						}
+					],
+					"type": {
+						"type": "reference",
+						"target": {
+							"packageName": "arcscord",
+							"packagePath": "src/utils/discord/type/channel.enum.ts",
+							"qualifiedName": "LocalizationAdapter"
+						},
+						"typeArguments": [
+							{
+								"type": "reference",
+								"target": 3,
+								"name": "Messages",
+								"package": "@arcscord/adapter-paraglide",
+								"refersToTypeParameter": true
+							}
+						],
+						"name": "LocalizationAdapter",
+						"package": "arcscord"
+					}
+				}
+			]
+		}
+	],
+	"groups": [
+		{
+			"title": "Type Aliases",
+			"children": [
+				13,
+				5,
+				9
+			]
+		},
+		{
+			"title": "Functions",
+			"children": [
+				1
+			]
+		}
+	],
+	"packageName": "@arcscord/adapter-paraglide",
+	"packageVersion": "0.1.0",
+	"readme": [
+		{
+			"kind": "text",
+			"text": "# @arcscord/adapter-paraglide\n\nOfficial Paraglide JS localization adapter for [Arcscord](https://arcscord.dev/). It consumes generated Paraglide modules and has no Paraglide runtime dependency of its own.\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```sh\npnpm add arcscord @arcscord/adapter-paraglide\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\n"
+		},
+		{
+			"kind": "code",
+			"text": "```ts\nimport { createParaglideAdapter } from \"@arcscord/adapter-paraglide\";\nimport { ArcClient } from \"arcscord\";\nimport * as messages from \"./paraglide/messages.js\";\nimport { baseLocale, locales } from \"./paraglide/runtime.js\";\n\nconst localization = createParaglideAdapter({\n  messages,\n  runtime: { baseLocale, locales },\n});\n\nconst client = new ArcClient(token, {\n  intents: [\"Guilds\"],\n  localization: { adapter: localization },\n});\n```"
+		},
+		{
+			"kind": "text",
+			"text": "\n\nSee the [localization guide](https://arcscord.dev/guide/localization#paraglide-js) and [API reference](https://arcscord.dev/api?package=adapter-paraglide)."
+		}
+	],
+	"symbolIdMap": {
+		"0": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": ""
+		},
+		"1": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "createParaglideAdapter"
+		},
+		"2": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "createParaglideAdapter"
+		},
+		"3": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "Messages"
+		},
+		"4": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "options"
+		},
+		"5": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "ParaglideMessages"
+		},
+		"6": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"7": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"8": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "args"
+		},
+		"9": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "ParaglideRuntime"
+		},
+		"11": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.baseLocale"
+		},
+		"12": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.locales"
+		},
+		"13": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "ParaglideAdapterOptions"
+		},
+		"15": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.messages"
+		},
+		"16": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.runtime"
+		},
+		"17": {
+			"packageName": "@arcscord/adapter-paraglide",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "Messages"
+		}
+	},
+	"files": {
+		"entries": {
+			"1": "packages/adapter-paraglide/src/index.ts",
+			"2": "packages/adapter-paraglide/README.md",
+			"3": "packages/adapter-paraglide"
+		},
+		"reflections": {
+			"1": 0,
+			"2": 0,
+			"3": 0
+		}
+	}
+}
