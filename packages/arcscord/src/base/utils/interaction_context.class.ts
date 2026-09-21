@@ -71,7 +71,7 @@ export class InteractionContext<InGuild extends true | false = true | false> {
   /**
    * get a locale text, with language detected self
    *
-   * @deprecated Use the configured localization adapter's `localize(this)` method.
+   * @deprecated Use the configured localization adapter's `getFixed(this)` method.
    * This i18next compatibility property will be removed in Arcscord v2.
    */
   t: typeof i18next.t;

@@ -265,14 +265,14 @@ export const componentTestCommand = createCommand({
           v2Message(
             container(
               section(
-                localization.localize(ctx)($ => $.componentsV2.i18n.support.title),
-                localization.localize(ctx)($ => $.componentsV2.i18n.support.description),
+                localization.getFixed(ctx)($ => $.componentsV2.i18n.support.title),
+                localization.getFixed(ctx)($ => $.componentsV2.i18n.support.description),
                 accessory(i18nButton.build()),
               ),
               separator({ spacing: "large" }),
               section(
-                localization.localize(ctx)($ => $.componentsV2.i18n.bug.title),
-                localization.localize(ctx)($ => $.componentsV2.i18n.bug.description),
+                localization.getFixed(ctx)($ => $.componentsV2.i18n.bug.title),
+                localization.getFixed(ctx)($ => $.componentsV2.i18n.bug.description),
                 accessory(redSimpleButton.build()),
               ),
             ),

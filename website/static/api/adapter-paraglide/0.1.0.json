@@ -16,7 +16,7 @@
 				"summary": [
 					{
 						"kind": "text",
-						"text": "Paraglide adapter with provider-native Discord metadata builders."
+						"text": "Paraglide adapter with its provider-native Discord metadata builder."
 					}
 				]
 			},
@@ -25,12 +25,12 @@
 					"fileName": "index.ts",
 					"line": 40,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L40"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L40"
 				}
 			],
 			"typeParameters": [
 				{
-					"id": 35,
+					"id": 34,
 					"name": "Messages",
 					"variant": "typeParam",
 					"kind": 131072,
@@ -54,7 +54,7 @@
 						"typeArguments": [
 							{
 								"type": "reference",
-								"target": 35,
+								"target": 34,
 								"name": "Messages",
 								"package": "@arcscord/adapter-paraglide",
 								"refersToTypeParameter": true
@@ -73,58 +73,8 @@
 							"flags": {},
 							"children": [
 								{
-									"id": 34,
-									"name": "l",
-									"variant": "declaration",
-									"kind": 1024,
-									"flags": {
-										"isReadonly": true
-									},
-									"comment": {
-										"summary": [
-											{
-												"kind": "text",
-												"text": "Short alias of "
-											},
-											{
-												"kind": "inline-tag",
-												"tag": "@link",
-												"text": "ParaglideAdapter.localizations",
-												"target": 33
-											},
-											{
-												"kind": "text",
-												"text": "."
-											}
-										]
-									},
-									"sources": [
-										{
-											"fileName": "index.ts",
-											"line": 44,
-											"character": 11,
-											"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L44"
-										}
-									],
-									"type": {
-										"type": "reference",
-										"target": 15,
-										"typeArguments": [
-											{
-												"type": "reference",
-												"target": 35,
-												"name": "Messages",
-												"package": "@arcscord/adapter-paraglide",
-												"refersToTypeParameter": true
-											}
-										],
-										"name": "ParaglideLocalizationBuilder",
-										"package": "@arcscord/adapter-paraglide"
-									}
-								},
-								{
 									"id": 33,
-									"name": "localizations",
+									"name": "discord",
 									"variant": "declaration",
 									"kind": 1024,
 									"flags": {
@@ -143,7 +93,7 @@
 											"fileName": "index.ts",
 											"line": 42,
 											"character": 11,
-											"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L42"
+											"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L42"
 										}
 									],
 									"type": {
@@ -152,7 +102,7 @@
 										"typeArguments": [
 											{
 												"type": "reference",
-												"target": 35,
+												"target": 34,
 												"name": "Messages",
 												"package": "@arcscord/adapter-paraglide",
 												"refersToTypeParameter": true
@@ -167,7 +117,6 @@
 								{
 									"title": "Properties",
 									"children": [
-										34,
 										33
 									]
 								}
@@ -229,7 +178,7 @@
 							"fileName": "index.ts",
 							"line": 34,
 							"character": 2,
-							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L34"
+							"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L34"
 						}
 					],
 					"type": {
@@ -279,7 +228,7 @@
 							"fileName": "index.ts",
 							"line": 36,
 							"character": 2,
-							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L36"
+							"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L36"
 						}
 					],
 					"type": {
@@ -304,7 +253,7 @@
 					"fileName": "index.ts",
 					"line": 32,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L32"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L32"
 				}
 			],
 			"typeParameters": [
@@ -340,7 +289,7 @@
 					"fileName": "index.ts",
 					"line": 18,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L18"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L18"
 				}
 			],
 			"typeParameters": [
@@ -493,7 +442,7 @@
 					"fileName": "index.ts",
 					"line": 8,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L8"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L8"
 				}
 			],
 			"type": {
@@ -557,7 +506,7 @@
 					"fileName": "index.ts",
 					"line": 11,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L11"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L11"
 				}
 			],
 			"typeParameters": [
@@ -728,7 +677,7 @@
 					"fileName": "index.ts",
 					"line": 5,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L5"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L5"
 				}
 			],
 			"type": {
@@ -817,7 +766,7 @@
 							"fileName": "index.ts",
 							"line": 27,
 							"character": 11,
-							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L27"
+							"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L27"
 						}
 					],
 					"type": {
@@ -838,7 +787,7 @@
 							"fileName": "index.ts",
 							"line": 28,
 							"character": 11,
-							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L28"
+							"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L28"
 						}
 					],
 					"type": {
@@ -868,7 +817,7 @@
 					"fileName": "index.ts",
 					"line": 26,
 					"character": 12,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L26"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L26"
 				}
 			]
 		},
@@ -881,9 +830,9 @@
 			"sources": [
 				{
 					"fileName": "index.ts",
-					"line": 48,
+					"line": 46,
 					"character": 16,
-					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L48"
+					"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L46"
 				}
 			],
 			"signatures": [
@@ -904,9 +853,9 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 48,
+							"line": 46,
 							"character": 16,
-							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-paraglide/src/index.ts#L48"
+							"url": "https://github.com/arcscord/arcscord/blob/e03685111ba68bd423626162d848c9c340a9d40b/packages/adapter-paraglide/src/index.ts#L46"
 						}
 					],
 					"typeParameters": [
@@ -1002,7 +951,7 @@
 		},
 		{
 			"kind": "code",
-			"text": "```ts\nimport { createParaglideAdapter } from \"@arcscord/adapter-paraglide\";\nimport { ArcClient } from \"arcscord\";\nimport * as messages from \"./paraglide/messages.js\";\nimport { baseLocale, locales } from \"./paraglide/runtime.js\";\n\nconst localization = createParaglideAdapter({\n  messages,\n  runtime: { baseLocale, locales },\n});\n\nconst client = new ArcClient(token, {\n  intents: [\"Guilds\"],\n  localization: { adapter: localization },\n});\n\nconst nameLocalizations = localization.l(messages.commands_ping_name);\n```"
+			"text": "```ts\nimport { createParaglideAdapter } from \"@arcscord/adapter-paraglide\";\nimport { ArcClient } from \"arcscord\";\nimport * as messages from \"./paraglide/messages.js\";\nimport { baseLocale, locales } from \"./paraglide/runtime.js\";\n\nconst localization = createParaglideAdapter({\n  messages,\n  runtime: { baseLocale, locales },\n});\n\nconst client = new ArcClient(token, {\n  intents: [\"Guilds\"],\n  localization: { adapter: localization },\n});\n\nconst nameLocalizations = localization.discord(messages.commands_ping_name);\n```"
 		},
 		{
 			"kind": "text",
@@ -1168,14 +1117,9 @@
 		"33": {
 			"packageName": "@arcscord/adapter-paraglide",
 			"packagePath": "src/index.ts",
-			"qualifiedName": "__type.localizations"
+			"qualifiedName": "__type.discord"
 		},
 		"34": {
-			"packageName": "@arcscord/adapter-paraglide",
-			"packagePath": "src/index.ts",
-			"qualifiedName": "__type.l"
-		},
-		"35": {
 			"packageName": "@arcscord/adapter-paraglide",
 			"packagePath": "src/index.ts",
 			"qualifiedName": "Messages"

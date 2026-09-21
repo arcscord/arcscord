@@ -53,7 +53,7 @@ import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { locale } from "../localization";
 
 const missingBotPermissionMessage: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext> = ({ ctx, missingPermissions }) => ({
-  content: locale.localize(ctx)($ => $.middleware.bot_missing_permissions, {
+  content: locale.getFixed(ctx)($ => $.middleware.bot_missing_permissions, {
     permissions: missingPermissions.join(", "),
   }),
 });

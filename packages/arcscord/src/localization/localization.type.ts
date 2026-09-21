@@ -42,7 +42,7 @@ export type LocalizationAdapter<Surface = unknown> = {
   /** Resolves when the provider can synchronously translate messages. */
   readonly ready: Promise<void>;
   /** Returns the provider-specific translation surface fixed to a locale. */
-  localize: (value: Localizable) => Surface;
+  getFixed: (value: Localizable) => Surface;
 };
 
 /** Inputs used by {@link createLocalizationAdapter}. */
@@ -50,7 +50,7 @@ export type CreateLocalizationAdapterOptions<Surface> = {
   /** Provider locale used when detection cannot produce a usable locale. */
   defaultLocale: string;
   /** Creates a translation surface fixed to `locale`. */
-  localize: (locale: string) => Surface;
+  getFixed: (locale: string) => Surface;
   /** Provider locales for which translations are available. */
   locales: Iterable<string>;
   /** Provider initialization promise. */

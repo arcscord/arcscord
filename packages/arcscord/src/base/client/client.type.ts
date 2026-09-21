@@ -173,7 +173,7 @@ export type BaseMessageContext = {
   /**
    * Fixed i18next translation function for `locale`.
    *
-   * @deprecated Use the configured adapter's `localize(context)` method.
+   * @deprecated Use the configured adapter's `getFixed(context)` method.
    */
   t?: typeof i18next.t;
 };

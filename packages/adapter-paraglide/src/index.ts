@@ -36,12 +36,10 @@ export type ParaglideAdapterOptions<Messages extends object> = {
   runtime: ParaglideRuntime;
 };
 
-/** Paraglide adapter with provider-native Discord metadata builders. */
+/** Paraglide adapter with its provider-native Discord metadata builder. */
 export type ParaglideAdapter<Messages extends object> = LocalizationAdapter<Messages> & {
   /** Creates a lazy Discord localization from a generated message function. */
-  readonly localizations: ParaglideLocalizationBuilder<Messages>;
-  /** Short alias of {@link ParaglideAdapter.localizations}. */
-  readonly l: ParaglideLocalizationBuilder<Messages>;
+  readonly discord: ParaglideLocalizationBuilder<Messages>;
 };
 
 /** Creates a Paraglide adapter without changing Paraglide's global locale. */
@@ -53,7 +51,7 @@ export function createParaglideAdapter<Messages extends object>(
   const adapter = createLocalizationAdapter<Messages>({
     defaultLocale: options.runtime.baseLocale,
     locales: options.runtime.locales,
-    localize: (locale) => {
+    getFixed: (locale) => {
       const cached = cache.get(locale);
       if (cached) {
         return cached;
@@ -82,7 +80,7 @@ export function createParaglideAdapter<Messages extends object>(
       return localized;
     },
   });
-  const localizations = ((message: ParaglideMessage, inputs?: unknown) => {
+  const discord = ((message: ParaglideMessage, inputs?: unknown) => {
     return createLocalizationDefinition(adapter, (locale) => {
       const result = (message as unknown as (
         inputs: unknown,
@@ -96,7 +94,6 @@ export function createParaglideAdapter<Messages extends object>(
   }) as ParaglideLocalizationBuilder<Messages>;
 
   return Object.assign(adapter, {
-    l: localizations,
-    localizations,
+    discord,
   });
 }

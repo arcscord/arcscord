@@ -30,13 +30,11 @@ export type I18nextLocalizationBuilder = TypeOptions["enableSelector"] extends f
   ? (key: string | string[], options?: TOptions) => LocalizationDefinition
   : (selector: SelectorParam, options?: TOptions) => LocalizationDefinition;
 
-/** i18next adapter with access to its underlying instance and metadata builders. */
+/** i18next adapter with access to its underlying instance and Discord metadata builder. */
 export type I18nextAdapter = LocalizationAdapter<TFunction> & {
   readonly i18n: i18n;
   /** Creates a lazy Discord localization using a native i18next selector or key. */
-  readonly localizations: I18nextLocalizationBuilder;
-  /** Short alias of {@link I18nextAdapter.localizations}. */
-  readonly l: I18nextLocalizationBuilder;
+  readonly discord: I18nextLocalizationBuilder;
 };
 
 /** Creates an isolated or custom-instance i18next adapter for Arcscord. */
@@ -72,9 +70,9 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
     defaultLocale: options.defaultLocale ?? resolveFallbackLocale(instance, options.options),
     locales: localeSet,
     ready: initialized,
-    localize: locale => instance.getFixedT(locale),
+    getFixed: locale => instance.getFixedT(locale),
   });
-  const localizations = ((key: SelectorParam | string | string[], translationOptions?: TOptions) => {
+  const discord = ((key: SelectorParam | string | string[], translationOptions?: TOptions) => {
     return createLocalizationDefinition(adapter, (locale) => {
       const translate = instance.getFixedT(locale) as (
         key: SelectorParam | string | string[],
@@ -89,9 +87,8 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
   }) as I18nextLocalizationBuilder;
 
   return Object.assign(adapter, {
+    discord,
     i18n: instance,
-    l: localizations,
-    localizations,
   });
 }
 

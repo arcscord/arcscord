@@ -25,7 +25,7 @@ const client = new ArcClient(token, {
   localization: { adapter: localization },
 });
 
-const nameLocalizations = localization.l("greeting");
+const nameLocalizations = localization.discord("greeting");
 ```
 
 See the [localization guide](https://arcscord.dev/guide/localization#i18next) and [API reference](https://arcscord.dev/api?package=adapter-i18next).

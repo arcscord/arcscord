@@ -30,10 +30,10 @@ describe("i18next adapter", () => {
     });
     await adapter.ready;
 
-    expect(adapter.localize("fr")($ => $.greeting)).toBe("Bonjour");
+    expect(adapter.getFixed("fr")($ => $.greeting)).toBe("Bonjour");
     expect(adapter.locales).toEqual(new Set(["en", "fr"]));
-    expect(adapter.localizations($ => $.greeting).resolve("en")).toBe("Hello");
-    expect(adapter.l($ => $.greeting).resolve("fr")).toBe("Bonjour");
+    expect(adapter.discord($ => $.greeting).resolve("en")).toBe("Hello");
+    expect(adapter.discord($ => $.greeting).resolve("fr")).toBe("Bonjour");
   });
 
   it("uses a custom instance without mutating it", async () => {
@@ -48,7 +48,7 @@ describe("i18next adapter", () => {
 
     expect(adapter.i18n).toBe(instance);
     expect(instance.options).toBe(before);
-    expect(adapter.localize({ locale: "fr" })($ => $.value)).toBe("oui");
+    expect(adapter.getFixed({ locale: "fr" })($ => $.value)).toBe("oui");
   });
 
   it("filters locales without resources in the configured namespaces", async () => {

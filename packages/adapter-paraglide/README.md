@@ -22,7 +22,7 @@ const client = new ArcClient(token, {
   localization: { adapter: localization },
 });
 
-const nameLocalizations = localization.l(messages.commands_ping_name);
+const nameLocalizations = localization.discord(messages.commands_ping_name);
 ```
 
 See the [localization guide](https://arcscord.dev/guide/localization#paraglide-js) and [API reference](https://arcscord.dev/api?package=adapter-paraglide).

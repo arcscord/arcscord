@@ -14,7 +14,7 @@ export function createLocalizationAdapter<Surface>(
     defaultLocale: options.defaultLocale,
     locales,
     ready,
-    localize: value => options.localize(typeof value === "string" ? value : value.locale),
+    getFixed: value => options.getFixed(typeof value === "string" ? value : value.locale),
   };
 
   return adapter;
@@ -24,7 +24,7 @@ export function createLocalizationAdapter<Surface>(
  * Creates an opaque Discord metadata localization owned by an adapter.
  *
  * Adapter packages should wrap this low-level helper with a provider-native,
- * typed `localizations` API.
+ * typed `discord` API.
  */
 export function createLocalizationDefinition<Surface>(
   adapter: LocalizationAdapter<Surface>,

@@ -11,8 +11,8 @@ describe("paraglide adapter", () => {
       runtime: { baseLocale: "en", locales: ["en", "fr"] },
     });
 
-    expect(adapter.localize({ locale: "fr" }).greeting({ name: "Ada" })).toBe("fr:Ada");
-    expect(adapter.localize({ locale: "en" }).greeting({ name: "Lin" })).toBe("en:Lin");
+    expect(adapter.getFixed({ locale: "fr" }).greeting({ name: "Ada" })).toBe("fr:Ada");
+    expect(adapter.getFixed({ locale: "en" }).greeting({ name: "Lin" })).toBe("en:Lin");
     expect(greeting).toHaveBeenNthCalledWith(1, { name: "Ada" }, { locale: "fr" });
     expect(greeting).toHaveBeenNthCalledWith(2, { name: "Lin" }, { locale: "en" });
   });
@@ -25,11 +25,11 @@ describe("paraglide adapter", () => {
       messages,
       runtime: { baseLocale: "en", locales: ["en", "fr"] },
     });
-    const localizations = adapter.localizations(messages.ping);
+    const localizations = adapter.discord(messages.ping);
 
-    expect(adapter.localize("fr").ping()).toBe("fr:pong");
+    expect(adapter.getFixed("fr").ping()).toBe("fr:pong");
     expect(localizations.resolve("en")).toBe("en:pong");
-    expect(adapter.l(messages.ping).resolve("fr")).toBe("fr:pong");
+    expect(adapter.discord(messages.ping).resolve("fr")).toBe("fr:pong");
   });
 
   it("passes native message inputs when localizing Discord metadata", () => {
@@ -43,7 +43,7 @@ describe("paraglide adapter", () => {
       runtime: { baseLocale: "en", locales: ["en", "fr"] },
     });
 
-    expect(adapter.l(messages.command, { name: "ping" }).resolve("fr")).toBe("fr:ping");
+    expect(adapter.discord(messages.command, { name: "ping" }).resolve("fr")).toBe("fr:ping");
   });
 
   it("isolates locales across concurrent interaction work", async () => {
@@ -58,8 +58,8 @@ describe("paraglide adapter", () => {
     });
 
     await expect(Promise.all([
-      adapter.localize("fr").greeting({ name: "Ada" }),
-      adapter.localize("en").greeting({ name: "Lin" }),
+      adapter.getFixed("fr").greeting({ name: "Ada" }),
+      adapter.getFixed("en").greeting({ name: "Lin" }),
     ])).resolves.toEqual(["fr:Ada", "en:Lin"]);
   });
 });

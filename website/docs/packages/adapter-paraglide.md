@@ -9,7 +9,7 @@ The official Paraglide adapter consumes the application's generated `messages`, 
 Pass generated message functions directly when defining Discord metadata:
 
 ```ts
-nameLocalizations: localization.l(messages.commands_ping_name)
+nameLocalizations: localization.discord(messages.commands_ping_name)
 ```
 
 - [Localization guide](/guide/localization#paraglide-js)

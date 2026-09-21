@@ -23,7 +23,7 @@ describe("arc client messages", () => {
     const adapter = createLocalizationAdapter({
       defaultLocale: "en",
       locales: ["en"],
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
 
     expect(() => new ArcClient("token", {

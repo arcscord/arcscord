@@ -30,18 +30,18 @@ describe("localization adapters", () => {
     const adapter = createLocalizationAdapter({
       defaultLocale: "en",
       locales: ["en", "fr"],
-      localize: locale => ({ message: (name: string) => `${locale}:${name}` }),
+      getFixed: locale => ({ message: (name: string) => `${locale}:${name}` }),
     });
 
-    expect(adapter.localize({ locale: "fr" }).message("Ada")).toBe("fr:Ada");
-    expect(adapter.localize("en").message("Ada")).toBe("en:Ada");
+    expect(adapter.getFixed({ locale: "fr" }).message("Ada")).toBe("fr:Ada");
+    expect(adapter.getFixed("en").message("Ada")).toBe("en:Ada");
   });
 
   it("maps Discord locales and resolves lazy command metadata", async () => {
     const adapter = createLocalizationAdapter({
       defaultLocale: "en",
       locales: ["en", "fr"],
-      localize: locale => ({ label: () => `${locale}-label` }),
+      getFixed: locale => ({ label: () => `${locale}-label` }),
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -49,7 +49,7 @@ describe("localization adapters", () => {
     }, createLegacyManager());
     const definition = createLocalizationDefinition(
       adapter,
-      locale => adapter.localize(locale).label(),
+      locale => adapter.getFixed(locale).label(),
     );
 
     await expect(service.detectLanguage({
@@ -72,7 +72,7 @@ describe("localization adapters", () => {
       ready: new Promise<void>((resolve) => {
         finishInitialization = resolve;
       }),
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -102,7 +102,7 @@ describe("localization adapters", () => {
       defaultLocale: "en",
       locales: ["en"],
       ready: new Promise<void>(() => {}),
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -124,7 +124,7 @@ describe("localization adapters", () => {
       defaultLocale: "en",
       locales: ["en"],
       ready: new Promise<void>(() => {}),
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), { adapter }, createLegacyManager());
     const rejection = expect(service.waitReady()).rejects.toMatchObject({
@@ -144,7 +144,7 @@ describe("localization adapters", () => {
       defaultLocale: "en",
       locales: ["en"],
       ready: Promise.reject(failure),
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -165,7 +165,7 @@ describe("localization adapters", () => {
       ready: new Promise<void>((resolve) => {
         finishInitialization = resolve;
       }),
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -189,7 +189,7 @@ describe("localization adapters", () => {
       const adapter = createLocalizationAdapter({
         defaultLocale: "en",
         locales: ["en"],
-        localize: locale => locale,
+        getFixed: locale => locale,
       });
 
       expect(() => new LocalizationService(createClient(), {
@@ -203,12 +203,12 @@ describe("localization adapters", () => {
     const adapter = createLocalizationAdapter({
       defaultLocale: "en",
       locales: ["en"],
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const foreign = createLocalizationAdapter({
       defaultLocale: "fr",
       locales: ["fr"],
-      localize: locale => locale,
+      getFixed: locale => locale,
     });
     const service = new LocalizationService(createClient(), {
       adapter,
@@ -221,7 +221,7 @@ describe("localization adapters", () => {
       user: null,
       channel: null,
     })).resolves.toBe("en");
-    const foreignDefinition = createLocalizationDefinition(foreign, locale => foreign.localize(locale));
+    const foreignDefinition = createLocalizationDefinition(foreign, locale => foreign.getFixed(locale));
     expect(() => service.resolveLocalizations(foreignDefinition)).toThrow(
       "different adapter instance",
     );

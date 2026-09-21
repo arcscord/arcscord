@@ -75,7 +75,7 @@ At runtime, bind i18next to the context locale:
 
 ```ts
 run: (ctx) => {
-  const t = localization.localize(ctx);
+  const t = localization.getFixed(ctx);
   return ctx.reply(t($ => $.commands.ping.reply));
 }
 ```
@@ -85,14 +85,14 @@ For command metadata, create a lazy definition. Arcscord resolves it after the a
 ```ts
 slash: {
   name: "ping",
-  nameLocalizations: localization.localizations($ => $.commands.ping.name),
+  nameLocalizations: localization.discord($ => $.commands.ping.name),
   description: "Replies with pong",
-  descriptionLocalizations: localization.l($ => $.commands.ping.description),
+  descriptionLocalizations: localization.discord($ => $.commands.ping.description),
 }
 ```
 
-`localizations(...)` follows i18next's native key or selector syntax. `l(...)` is its
-short alias, so no additional `t => t(...)` wrapper is needed. Translation options can
+`discord(...)` follows i18next's native key or selector syntax, so no additional
+`t => t(...)` wrapper is needed. Translation options can
 be passed as the second argument, just like with `t(...)`.
 
 Pass `instance` instead of `options` to use an already initialized i18next instance. Arcscord never mutates a supplied instance.
@@ -149,19 +149,19 @@ The returned messages surface keeps the generated Paraglide types and forces the
 
 ```ts
 run: (ctx) => {
-  const m = localization.localize(ctx);
+  const m = localization.getFixed(ctx);
   return ctx.reply(m.commands_ping_reply());
 }
 
-nameLocalizations: localization.localizations(messages.commands_ping_name)
-descriptionLocalizations: localization.l(messages.commands_ping_description)
+nameLocalizations: localization.discord(messages.commands_ping_name)
+descriptionLocalizations: localization.discord(messages.commands_ping_description)
 ```
 
 Metadata uses the generated message function directly, matching normal Paraglide usage.
 When a metadata message has parameters, pass its input object as the second argument:
 
 ```ts
-localization.l(messages.command_for_user, { name: "user" })
+localization.discord(messages.command_for_user, { name: "user" })
 ```
 
 ## Detection and Discord mapping
@@ -201,26 +201,25 @@ const adapter = createLocalizationAdapter({
   defaultLocale: "en",
   locales: ["en", "fr"],
   ready: loadCatalogs(),
-  localize: locale => ({
+  getFixed: locale => ({
     message: (key: MessageKey) => catalogs[locale][key],
   }),
 });
 
-const localizations = (key: MessageKey) => {
+const discord = (key: MessageKey) => {
   return createLocalizationDefinition(
     adapter,
-    locale => adapter.localize(locale).message(key),
+    locale => adapter.getFixed(locale).message(key),
   );
 };
 
 export const localization = Object.assign(adapter, {
-  localizations,
-  l: localizations,
+  discord,
 });
 ```
 
-Arcscord never calls `localizations` or `l`; it only consumes the opaque definition they
-return. An adapter may therefore accept a key, selector, generated function, object, or
+Arcscord never calls `discord`; it only consumes the opaque definition it returns. An
+adapter may therefore accept a key, selector, generated function, object, or
 any other provider-native typed input.
 
 ## Migrating from LocaleManager
@@ -241,7 +240,7 @@ ctx.t($ => $.commands.ping.reply);
 Migrate by creating `@arcscord/adapter-i18next`, moving the configuration to `localization.adapter`, and replacing `ctx.t(...)` with a locally bound translator:
 
 ```ts
-const t = localization.localize(ctx);
+const t = localization.getFixed(ctx);
 t($ => $.commands.ping.reply);
 ```
 
