@@ -6,14 +6,14 @@ import { localization } from "../localization";
 export const i18nCommand = createCommand({
   slash: {
     name: "i18n",
-    nameLocalizations: localization.localizations(t => t($ => $.i18n.command.name)),
+    nameLocalizations: localization.l($ => $.i18n.command.name),
     description: "default description",
-    descriptionLocalizations: localization.localizations(t => t($ => $.i18n.command.description)),
+    descriptionLocalizations: localization.localizations($ => $.i18n.command.description),
     options: {
       topic: {
         description: "Localized autocomplete topic",
-        nameLocalizations: localization.localizations(t => t($ => $.i18n.autocomplete.option.name)),
-        descriptionLocalizations: localization.localizations(t => t($ => $.i18n.autocomplete.option.description)),
+        nameLocalizations: localization.l($ => $.i18n.autocomplete.option.name),
+        descriptionLocalizations: localization.l($ => $.i18n.autocomplete.option.description),
         type: "string",
         autocomplete: true,
         required: true,

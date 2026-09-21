@@ -375,6 +375,7 @@ export {
 } from "./base/utils/interaction_context.class";
 export {
   createLocalizationAdapter,
+  createLocalizationDefinition,
   defaultLanguageMap,
   defaultLocaleDetector,
   defaultLocalizationReadyTimeout,

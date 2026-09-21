@@ -24,6 +24,8 @@ const client = new ArcClient(token, {
   intents: ["Guilds"],
   localization: { adapter: localization },
 });
+
+const nameLocalizations = localization.l("greeting");
 ```
 
 See the [localization guide](https://arcscord.dev/guide/localization#i18next) and [API reference](https://arcscord.dev/api?package=adapter-i18next).

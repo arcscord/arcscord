@@ -104,6 +104,6 @@ export type LocaleManagerOptions = WithCustomI18n | WithI18nOptions | {
 
 /**
  * Translation callback used for Discord command metadata.
- * @deprecated Use `adapter.localizations(callback)`.
+ * @deprecated Use the configured adapter's `localizations(...)` method.
  */
 export type LocaleCallback = (t: typeof i18next.t) => string;

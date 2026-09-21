@@ -1,7 +1,7 @@
 import type { ArcClient } from "#/base";
 import type { LocaleManager } from "#/manager";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { createLocalizationAdapter } from "./localization";
+import { createLocalizationAdapter, createLocalizationDefinition } from "./localization";
 import { defaultLocalizationReadyTimeout, LocalizationService } from "./localization_service";
 
 function createLegacyManager(): LocaleManager {
@@ -47,7 +47,10 @@ describe("localization adapters", () => {
       adapter,
       discordLocales: ["en-US", "fr", "de"],
     }, createLegacyManager());
-    const definition = adapter.localizations(surface => surface.label());
+    const definition = createLocalizationDefinition(
+      adapter,
+      locale => adapter.localize(locale).label(),
+    );
 
     await expect(service.detectLanguage({
       interaction: { locale: "fr" } as never,
@@ -218,7 +221,8 @@ describe("localization adapters", () => {
       user: null,
       channel: null,
     })).resolves.toBe("en");
-    expect(() => service.resolveLocalizations(foreign.localizations(value => value))).toThrow(
+    const foreignDefinition = createLocalizationDefinition(foreign, locale => foreign.localize(locale));
+    expect(() => service.resolveLocalizations(foreignDefinition)).toThrow(
       "different adapter instance",
     );
   });

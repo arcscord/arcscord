@@ -15,14 +15,26 @@ export function createLocalizationAdapter<Surface>(
     locales,
     ready,
     localize: value => options.localize(typeof value === "string" ? value : value.locale),
-    localizations: resolve => ({
-      adapter: adapter as LocalizationAdapter<unknown>,
-      resolve: locale => resolve(options.localize(locale)),
-      type: "arcscord.localization",
-    }),
   };
 
   return adapter;
+}
+
+/**
+ * Creates an opaque Discord metadata localization owned by an adapter.
+ *
+ * Adapter packages should wrap this low-level helper with a provider-native,
+ * typed `localizations` API.
+ */
+export function createLocalizationDefinition<Surface>(
+  adapter: LocalizationAdapter<Surface>,
+  resolve: (locale: string) => string,
+): LocalizationDefinition {
+  return {
+    adapter: adapter as LocalizationAdapter<unknown>,
+    resolve,
+    type: "arcscord.localization",
+  };
 }
 
 /** Returns whether a value is an Arcscord localization definition. */

@@ -1,8 +1,26 @@
-import type { LocalizationAdapter } from "arcscord";
-import { createLocalizationAdapter } from "arcscord";
+import type { LocalizationAdapter, LocalizationDefinition } from "arcscord";
+import { createLocalizationAdapter, createLocalizationDefinition } from "arcscord";
 
 /** Minimal structural shape of a generated Paraglide messages module. */
 export type ParaglideMessages = Record<string, (...args: never[]) => string>;
+
+/** A generated Paraglide message function. */
+export type ParaglideMessage = (...args: never[]) => string;
+
+/** Input tuple inferred from a generated Paraglide message function. */
+export type ParaglideMessageInputs<Message extends ParaglideMessage> = Parameters<Message> extends []
+  ? []
+  : undefined extends Parameters<Message>[0]
+    ? [inputs?: Parameters<Message>[0]]
+    : [inputs: Parameters<Message>[0]];
+
+/** Builds Discord metadata from generated Paraglide message functions. */
+export type ParaglideLocalizationBuilder<Messages extends object> = <
+  Message extends Extract<Messages[keyof Messages], ParaglideMessage>,
+>(
+  message: Message,
+  ...inputs: ParaglideMessageInputs<Message>
+) => LocalizationDefinition;
 
 /** Generated Paraglide runtime values required by the adapter. */
 export type ParaglideRuntime = {
@@ -18,13 +36,21 @@ export type ParaglideAdapterOptions<Messages extends object> = {
   runtime: ParaglideRuntime;
 };
 
+/** Paraglide adapter with provider-native Discord metadata builders. */
+export type ParaglideAdapter<Messages extends object> = LocalizationAdapter<Messages> & {
+  /** Creates a lazy Discord localization from a generated message function. */
+  readonly localizations: ParaglideLocalizationBuilder<Messages>;
+  /** Short alias of {@link ParaglideAdapter.localizations}. */
+  readonly l: ParaglideLocalizationBuilder<Messages>;
+};
+
 /** Creates a Paraglide adapter without changing Paraglide's global locale. */
 export function createParaglideAdapter<Messages extends object>(
   options: ParaglideAdapterOptions<Messages>,
-): LocalizationAdapter<Messages> {
+): ParaglideAdapter<Messages> {
   const cache = new Map<string, Messages>();
 
-  return createLocalizationAdapter<Messages>({
+  const adapter = createLocalizationAdapter<Messages>({
     defaultLocale: options.runtime.baseLocale,
     locales: options.runtime.locales,
     localize: (locale) => {
@@ -55,5 +81,22 @@ export function createParaglideAdapter<Messages extends object>(
       cache.set(locale, localized);
       return localized;
     },
+  });
+  const localizations = ((message: ParaglideMessage, inputs?: unknown) => {
+    return createLocalizationDefinition(adapter, (locale) => {
+      const result = (message as unknown as (
+        inputs: unknown,
+        options: { locale: string },
+      ) => unknown)(inputs ?? {}, { locale });
+      if (typeof result !== "string") {
+        throw new TypeError("Paraglide command metadata messages must resolve to a string");
+      }
+      return result;
+    });
+  }) as ParaglideLocalizationBuilder<Messages>;
+
+  return Object.assign(adapter, {
+    l: localizations,
+    localizations,
   });
 }

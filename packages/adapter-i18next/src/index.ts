@@ -1,6 +1,6 @@
-import type { LocalizationAdapter } from "arcscord";
-import type { i18n, InitOptions, TFunction } from "i18next";
-import { createLocalizationAdapter } from "arcscord";
+import type { LocalizationAdapter, LocalizationDefinition } from "arcscord";
+import type { i18n, InitOptions, SelectorParam, TFunction, TOptions, TypeOptions } from "i18next";
+import { createLocalizationAdapter, createLocalizationDefinition } from "arcscord";
 import i18next from "i18next";
 
 /** Options shared by both i18next adapter initialization modes. */
@@ -25,9 +25,18 @@ export type I18nextAdapterOptions = BaseI18nextAdapterOptions & (
   }
 );
 
-/** i18next adapter with access to its underlying instance. */
+/** Builds Discord metadata using i18next's native key or selector syntax. */
+export type I18nextLocalizationBuilder = TypeOptions["enableSelector"] extends false
+  ? (key: string | string[], options?: TOptions) => LocalizationDefinition
+  : (selector: SelectorParam, options?: TOptions) => LocalizationDefinition;
+
+/** i18next adapter with access to its underlying instance and metadata builders. */
 export type I18nextAdapter = LocalizationAdapter<TFunction> & {
   readonly i18n: i18n;
+  /** Creates a lazy Discord localization using a native i18next selector or key. */
+  readonly localizations: I18nextLocalizationBuilder;
+  /** Short alias of {@link I18nextAdapter.localizations}. */
+  readonly l: I18nextLocalizationBuilder;
 };
 
 /** Creates an isolated or custom-instance i18next adapter for Arcscord. */
@@ -65,8 +74,25 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
     ready: initialized,
     localize: locale => instance.getFixedT(locale),
   });
+  const localizations = ((key: SelectorParam | string | string[], translationOptions?: TOptions) => {
+    return createLocalizationDefinition(adapter, (locale) => {
+      const translate = instance.getFixedT(locale) as (
+        key: SelectorParam | string | string[],
+        options?: TOptions,
+      ) => unknown;
+      const result = translate(key, translationOptions);
+      if (typeof result !== "string") {
+        throw new TypeError("i18next command metadata translations must resolve to a string");
+      }
+      return result;
+    });
+  }) as I18nextLocalizationBuilder;
 
-  return Object.assign(adapter, { i18n: instance });
+  return Object.assign(adapter, {
+    i18n: instance,
+    l: localizations,
+    localizations,
+  });
 }
 
 function resolveFallbackLocale(instance: i18n, options: InitOptions | undefined): string {

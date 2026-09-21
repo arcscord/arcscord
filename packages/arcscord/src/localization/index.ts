@@ -1,4 +1,8 @@
-export { createLocalizationAdapter, isLocalizationDefinition } from "./localization";
+export {
+  createLocalizationAdapter,
+  createLocalizationDefinition,
+  isLocalizationDefinition,
+} from "./localization";
 export type {
   CreateLocalizationAdapterOptions,
   LocaleDetectionContext,

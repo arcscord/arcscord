@@ -25,10 +25,25 @@ describe("paraglide adapter", () => {
       messages,
       runtime: { baseLocale: "en", locales: ["en", "fr"] },
     });
-    const localizations = adapter.localizations(surface => surface.ping());
+    const localizations = adapter.localizations(messages.ping);
 
     expect(adapter.localize("fr").ping()).toBe("fr:pong");
     expect(localizations.resolve("en")).toBe("en:pong");
+    expect(adapter.l(messages.ping).resolve("fr")).toBe("fr:pong");
+  });
+
+  it("passes native message inputs when localizing Discord metadata", () => {
+    const messages = {
+      command: (inputs: { name: string }, options: { locale?: string } = {}) => {
+        return `${options.locale}:${inputs.name}`;
+      },
+    };
+    const adapter = createParaglideAdapter({
+      messages,
+      runtime: { baseLocale: "en", locales: ["en", "fr"] },
+    });
+
+    expect(adapter.l(messages.command, { name: "ping" }).resolve("fr")).toBe("fr:ping");
   });
 
   it("isolates locales across concurrent interaction work", async () => {

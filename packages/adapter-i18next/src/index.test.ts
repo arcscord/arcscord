@@ -2,6 +2,20 @@ import i18next from "i18next";
 import { describe, expect, it } from "vitest";
 import { createI18nextAdapter } from "./index";
 
+declare module "i18next" {
+  // eslint-disable-next-line ts/consistent-type-definitions
+  interface CustomTypeOptions {
+    defaultNS: "translation";
+    enableSelector: "optimize";
+    resources: {
+      translation: {
+        greeting: string;
+        value: string;
+      };
+    };
+  }
+}
+
 describe("i18next adapter", () => {
   it("initializes an isolated instance and resolves runtime and metadata translations", async () => {
     const adapter = createI18nextAdapter({
@@ -16,9 +30,10 @@ describe("i18next adapter", () => {
     });
     await adapter.ready;
 
-    expect(adapter.localize("fr")("greeting")).toBe("Bonjour");
+    expect(adapter.localize("fr")($ => $.greeting)).toBe("Bonjour");
     expect(adapter.locales).toEqual(new Set(["en", "fr"]));
-    expect(adapter.localizations(t => t("greeting")).resolve("en")).toBe("Hello");
+    expect(adapter.localizations($ => $.greeting).resolve("en")).toBe("Hello");
+    expect(adapter.l($ => $.greeting).resolve("fr")).toBe("Bonjour");
   });
 
   it("uses a custom instance without mutating it", async () => {
@@ -33,7 +48,7 @@ describe("i18next adapter", () => {
 
     expect(adapter.i18n).toBe(instance);
     expect(instance.options).toBe(before);
-    expect(adapter.localize({ locale: "fr" })("value")).toBe("oui");
+    expect(adapter.localize({ locale: "fr" })($ => $.value)).toBe("oui");
   });
 
   it("filters locales without resources in the configured namespaces", async () => {

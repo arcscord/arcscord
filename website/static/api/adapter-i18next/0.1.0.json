@@ -41,7 +41,8 @@
 						{
 							"fileName": "index.ts",
 							"line": 9,
-							"character": 2
+							"character": 2,
+							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L9"
 						}
 					],
 					"type": {
@@ -69,7 +70,8 @@
 						{
 							"fileName": "index.ts",
 							"line": 11,
-							"character": 2
+							"character": 2,
+							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L11"
 						}
 					],
 					"type": {
@@ -103,12 +105,13 @@
 				{
 					"fileName": "index.ts",
 					"line": 7,
-					"character": 12
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L7"
 				}
 			]
 		},
 		{
-			"id": 15,
+			"id": 24,
 			"name": "I18nextAdapter",
 			"variant": "declaration",
 			"kind": 2097152,
@@ -117,15 +120,16 @@
 				"summary": [
 					{
 						"kind": "text",
-						"text": "i18next adapter with access to its underlying instance."
+						"text": "i18next adapter with access to its underlying instance and metadata builders."
 					}
 				]
 			},
 			"sources": [
 				{
 					"fileName": "index.ts",
-					"line": 29,
-					"character": 12
+					"line": 34,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L34"
 				}
 			],
 			"type": {
@@ -156,14 +160,14 @@
 					{
 						"type": "reflection",
 						"declaration": {
-							"id": 16,
+							"id": 25,
 							"name": "__type",
 							"variant": "declaration",
 							"kind": 65536,
 							"flags": {},
 							"children": [
 								{
-									"id": 17,
+									"id": 26,
 									"name": "i18n",
 									"variant": "declaration",
 									"kind": 1024,
@@ -173,8 +177,9 @@
 									"sources": [
 										{
 											"fileName": "index.ts",
-											"line": 30,
-											"character": 11
+											"line": 35,
+											"character": 11,
+											"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L35"
 										}
 									],
 									"type": {
@@ -187,13 +192,87 @@
 										"name": "i18n",
 										"package": "i18next"
 									}
+								},
+								{
+									"id": 28,
+									"name": "l",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {
+										"isReadonly": true
+									},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Short alias of "
+											},
+											{
+												"kind": "inline-tag",
+												"tag": "@link",
+												"text": "I18nextAdapter.localizations",
+												"target": 27
+											},
+											{
+												"kind": "text",
+												"text": "."
+											}
+										]
+									},
+									"sources": [
+										{
+											"fileName": "index.ts",
+											"line": 39,
+											"character": 11,
+											"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L39"
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 15,
+										"name": "I18nextLocalizationBuilder",
+										"package": "@arcscord/adapter-i18next"
+									}
+								},
+								{
+									"id": 27,
+									"name": "localizations",
+									"variant": "declaration",
+									"kind": 1024,
+									"flags": {
+										"isReadonly": true
+									},
+									"comment": {
+										"summary": [
+											{
+												"kind": "text",
+												"text": "Creates a lazy Discord localization using a native i18next selector or key."
+											}
+										]
+									},
+									"sources": [
+										{
+											"fileName": "index.ts",
+											"line": 37,
+											"character": 11,
+											"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L37"
+										}
+									],
+									"type": {
+										"type": "reference",
+										"target": 15,
+										"name": "I18nextLocalizationBuilder",
+										"package": "@arcscord/adapter-i18next"
+									}
 								}
 							],
 							"groups": [
 								{
 									"title": "Properties",
 									"children": [
-										17
+										26,
+										28,
+										27
 									]
 								}
 							]
@@ -230,7 +309,8 @@
 				{
 					"fileName": "index.ts",
 					"line": 15,
-					"character": 12
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L15"
 				}
 			],
 			"type": {
@@ -272,7 +352,8 @@
 												{
 													"fileName": "index.ts",
 													"line": 18,
-													"character": 4
+													"character": 4,
+													"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L18"
 												}
 											],
 											"type": {
@@ -298,7 +379,8 @@
 												{
 													"fileName": "index.ts",
 													"line": 19,
-													"character": 4
+													"character": 4,
+													"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L19"
 												}
 											],
 											"type": {
@@ -347,7 +429,8 @@
 												{
 													"fileName": "index.ts",
 													"line": 23,
-													"character": 4
+													"character": 4,
+													"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L23"
 												}
 											],
 											"type": {
@@ -365,7 +448,8 @@
 												{
 													"fileName": "index.ts",
 													"line": 24,
-													"character": 4
+													"character": 4,
+													"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L24"
 												}
 											],
 											"type": {
@@ -397,6 +481,193 @@
 			}
 		},
 		{
+			"id": 15,
+			"name": "I18nextLocalizationBuilder",
+			"variant": "declaration",
+			"kind": 2097152,
+			"flags": {},
+			"comment": {
+				"summary": [
+					{
+						"kind": "text",
+						"text": "Builds Discord metadata using i18next's native key or selector syntax."
+					}
+				]
+			},
+			"sources": [
+				{
+					"fileName": "index.ts",
+					"line": 29,
+					"character": 12,
+					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L29"
+				}
+			],
+			"type": {
+				"type": "conditional",
+				"checkType": {
+					"type": "indexedAccess",
+					"indexType": {
+						"type": "literal",
+						"value": "enableSelector"
+					},
+					"objectType": {
+						"type": "reference",
+						"target": {
+							"packageName": "i18next",
+							"packagePath": "typescript/options.d.ts",
+							"qualifiedName": "TypeOptions"
+						},
+						"name": "TypeOptions",
+						"package": "i18next"
+					}
+				},
+				"extendsType": {
+					"type": "literal",
+					"value": false
+				},
+				"trueType": {
+					"type": "reflection",
+					"declaration": {
+						"id": 16,
+						"name": "__type",
+						"variant": "declaration",
+						"kind": 65536,
+						"flags": {},
+						"signatures": [
+							{
+								"id": 17,
+								"name": "__type",
+								"variant": "signature",
+								"kind": 4096,
+								"flags": {},
+								"parameters": [
+									{
+										"id": 18,
+										"name": "key",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "union",
+											"types": [
+												{
+													"type": "intrinsic",
+													"name": "string"
+												},
+												{
+													"type": "array",
+													"elementType": {
+														"type": "intrinsic",
+														"name": "string"
+													}
+												}
+											]
+										}
+									},
+									{
+										"id": 19,
+										"name": "options",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {
+											"isOptional": true
+										},
+										"type": {
+											"type": "reference",
+											"target": {
+												"packageName": "i18next",
+												"packagePath": "typescript/options.d.ts",
+												"qualifiedName": "TOptions"
+											},
+											"name": "TOptions",
+											"package": "i18next"
+										}
+									}
+								],
+								"type": {
+									"type": "reference",
+									"target": {
+										"packageName": "arcscord",
+										"packagePath": "src/utils/discord/type/channel.enum.ts",
+										"qualifiedName": "LocalizationDefinition"
+									},
+									"name": "LocalizationDefinition",
+									"package": "arcscord"
+								}
+							}
+						]
+					}
+				},
+				"falseType": {
+					"type": "reflection",
+					"declaration": {
+						"id": 20,
+						"name": "__type",
+						"variant": "declaration",
+						"kind": 65536,
+						"flags": {},
+						"signatures": [
+							{
+								"id": 21,
+								"name": "__type",
+								"variant": "signature",
+								"kind": 4096,
+								"flags": {},
+								"parameters": [
+									{
+										"id": 22,
+										"name": "selector",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {},
+										"type": {
+											"type": "reference",
+											"target": {
+												"packageName": "i18next",
+												"packagePath": "typescript/t.d.ts",
+												"qualifiedName": "SelectorParam"
+											},
+											"name": "SelectorParam",
+											"package": "i18next"
+										}
+									},
+									{
+										"id": 23,
+										"name": "options",
+										"variant": "param",
+										"kind": 32768,
+										"flags": {
+											"isOptional": true
+										},
+										"type": {
+											"type": "reference",
+											"target": {
+												"packageName": "i18next",
+												"packagePath": "typescript/options.d.ts",
+												"qualifiedName": "TOptions"
+											},
+											"name": "TOptions",
+											"package": "i18next"
+										}
+									}
+								],
+								"type": {
+									"type": "reference",
+									"target": {
+										"packageName": "arcscord",
+										"packagePath": "src/utils/discord/type/channel.enum.ts",
+										"qualifiedName": "LocalizationDefinition"
+									},
+									"name": "LocalizationDefinition",
+									"package": "arcscord"
+								}
+							}
+						]
+					}
+				}
+			}
+		},
+		{
 			"id": 1,
 			"name": "createI18nextAdapter",
 			"variant": "declaration",
@@ -405,8 +676,9 @@
 			"sources": [
 				{
 					"fileName": "index.ts",
-					"line": 34,
-					"character": 16
+					"line": 43,
+					"character": 16,
+					"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L43"
 				}
 			],
 			"signatures": [
@@ -427,8 +699,9 @@
 					"sources": [
 						{
 							"fileName": "index.ts",
-							"line": 34,
-							"character": 16
+							"line": 43,
+							"character": 16,
+							"url": "https://github.com/arcscord/arcscord/blob/224bb5bb3e806220af669bf308e5fde11990a457/packages/adapter-i18next/src/index.ts#L43"
 						}
 					],
 					"parameters": [
@@ -448,7 +721,7 @@
 					],
 					"type": {
 						"type": "reference",
-						"target": 15,
+						"target": 24,
 						"name": "I18nextAdapter",
 						"package": "@arcscord/adapter-i18next"
 					}
@@ -461,8 +734,9 @@
 			"title": "Type Aliases",
 			"children": [
 				4,
-				15,
-				8
+				24,
+				8,
+				15
 			]
 		},
 		{
@@ -489,7 +763,7 @@
 		},
 		{
 			"kind": "code",
-			"text": "```ts\nimport { createI18nextAdapter } from \"@arcscord/adapter-i18next\";\nimport { ArcClient } from \"arcscord\";\n\nconst localization = createI18nextAdapter({\n  options: {\n    fallbackLng: \"en\",\n    resources: {\n      en: { translation: { greeting: \"Hello\" } },\n      fr: { translation: { greeting: \"Bonjour\" } },\n    },\n  },\n});\n\nconst client = new ArcClient(token, {\n  intents: [\"Guilds\"],\n  localization: { adapter: localization },\n});\n```"
+			"text": "```ts\nimport { createI18nextAdapter } from \"@arcscord/adapter-i18next\";\nimport { ArcClient } from \"arcscord\";\n\nconst localization = createI18nextAdapter({\n  options: {\n    fallbackLng: \"en\",\n    resources: {\n      en: { translation: { greeting: \"Hello\" } },\n      fr: { translation: { greeting: \"Bonjour\" } },\n    },\n  },\n});\n\nconst client = new ArcClient(token, {\n  intents: [\"Guilds\"],\n  localization: { adapter: localization },\n});\n\nconst nameLocalizations = localization.l(\"greeting\");\n```"
 		},
 		{
 			"kind": "text",
@@ -570,7 +844,7 @@
 		"15": {
 			"packageName": "@arcscord/adapter-i18next",
 			"packagePath": "src/index.ts",
-			"qualifiedName": "I18nextAdapter"
+			"qualifiedName": "I18nextLocalizationBuilder"
 		},
 		"16": {
 			"packageName": "@arcscord/adapter-i18next",
@@ -580,7 +854,62 @@
 		"17": {
 			"packageName": "@arcscord/adapter-i18next",
 			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"18": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "key"
+		},
+		"19": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "options"
+		},
+		"20": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"21": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"22": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "selector"
+		},
+		"23": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "options"
+		},
+		"24": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "I18nextAdapter"
+		},
+		"25": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type"
+		},
+		"26": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
 			"qualifiedName": "__type.i18n"
+		},
+		"27": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.localizations"
+		},
+		"28": {
+			"packageName": "@arcscord/adapter-i18next",
+			"packagePath": "src/index.ts",
+			"qualifiedName": "__type.l"
 		}
 	},
 	"files": {

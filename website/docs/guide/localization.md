@@ -4,7 +4,12 @@ sidebar_position: 1
 
 # Localization
 
-Arcscord keeps locale detection and Discord command localization in the core, while translation libraries are selected through adapters. Official adapters are available for i18next and Paraglide JS, and the public adapter contract supports other libraries.
+Arcscord keeps only Discord-specific localization concerns in the core: locale detection,
+mapping, fallback, adapter readiness, and command metadata transformation. Catalog loading,
+translation syntax, and metadata selectors belong to adapter packages.
+
+Official adapters are available for i18next and Paraglide JS, and the minimal public
+adapter contract supports other libraries without imposing a shared selector syntax.
 
 Localization applies to both interaction-time messages and registration-time command names, descriptions, subcommands, groups, options, and static choices.
 
@@ -22,17 +27,35 @@ import { createI18nextAdapter } from "@arcscord/adapter-i18next";
 import en from "../locales/en.json";
 import fr from "../locales/fr.json";
 
+export const defaultNS = "translation";
+export const resources = {
+  en: { translation: en },
+  fr: { translation: fr },
+} as const;
+
 export const localization = createI18nextAdapter({
   options: {
-    resources: {
-      en: { translation: en },
-      fr: { translation: fr },
-    },
-    defaultNS: "translation",
+    resources,
+    defaultNS,
     fallbackLng: "en",
     enableSelector: "optimize",
   },
 });
+```
+
+Enable i18next's native selector typing through its standard module augmentation:
+
+```ts title="src/types/i18next.d.ts"
+import "i18next";
+import { defaultNS, resources } from "../localization";
+
+declare module "i18next" {
+  interface CustomTypeOptions {
+    defaultNS: typeof defaultNS;
+    enableSelector: "optimize";
+    resources: typeof resources.en;
+  }
+}
 ```
 
 ```ts title="src/index.ts"
@@ -62,13 +85,15 @@ For command metadata, create a lazy definition. Arcscord resolves it after the a
 ```ts
 slash: {
   name: "ping",
-  nameLocalizations: localization.localizations(t => t($ => $.commands.ping.name)),
+  nameLocalizations: localization.localizations($ => $.commands.ping.name),
   description: "Replies with pong",
-  descriptionLocalizations: localization.localizations(
-    t => t($ => $.commands.ping.description),
-  ),
+  descriptionLocalizations: localization.l($ => $.commands.ping.description),
 }
 ```
+
+`localizations(...)` follows i18next's native key or selector syntax. `l(...)` is its
+short alias, so no additional `t => t(...)` wrapper is needed. Translation options can
+be passed as the second argument, just like with `t(...)`.
 
 Pass `instance` instead of `options` to use an already initialized i18next instance. Arcscord never mutates a supplied instance.
 
@@ -128,7 +153,15 @@ run: (ctx) => {
   return ctx.reply(m.commands_ping_reply());
 }
 
-nameLocalizations: localization.localizations(m => m.commands_ping_name())
+nameLocalizations: localization.localizations(messages.commands_ping_name)
+descriptionLocalizations: localization.l(messages.commands_ping_description)
+```
+
+Metadata uses the generated message function directly, matching normal Paraglide usage.
+When a metadata message has parameters, pass its input object as the second argument:
+
+```ts
+localization.l(messages.command_for_user, { name: "user" })
 ```
 
 ## Detection and Discord mapping
@@ -155,12 +188,16 @@ localization: {
 
 ## Custom adapters
 
-Use `createLocalizationAdapter` to keep your library's native surface fully typed:
+Use `createLocalizationAdapter` for the runtime contract and
+`createLocalizationDefinition` to expose metadata syntax native to your library:
 
 ```ts
-import { createLocalizationAdapter } from "arcscord";
+import {
+  createLocalizationAdapter,
+  createLocalizationDefinition,
+} from "arcscord";
 
-export const localization = createLocalizationAdapter({
+const adapter = createLocalizationAdapter({
   defaultLocale: "en",
   locales: ["en", "fr"],
   ready: loadCatalogs(),
@@ -168,9 +205,23 @@ export const localization = createLocalizationAdapter({
     message: (key: MessageKey) => catalogs[locale][key],
   }),
 });
+
+const localizations = (key: MessageKey) => {
+  return createLocalizationDefinition(
+    adapter,
+    locale => adapter.localize(locale).message(key),
+  );
+};
+
+export const localization = Object.assign(adapter, {
+  localizations,
+  l: localizations,
+});
 ```
 
-The resulting adapter automatically provides `localize(ctx)` and `localizations(callback)` and satisfies `LocalizationAdapter<TSurface>`.
+Arcscord never calls `localizations` or `l`; it only consumes the opaque definition they
+return. An adapter may therefore accept a key, selector, generated function, object, or
+any other provider-native typed input.
 
 ## Migrating from LocaleManager
 

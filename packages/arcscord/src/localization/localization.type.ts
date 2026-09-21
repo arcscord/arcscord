@@ -18,7 +18,7 @@ export type Localizable = string | { locale: string };
 /**
  * Opaque lazy localization used for Discord command metadata.
  *
- * Create values through {@link LocalizationAdapter.localizations}.
+ * Adapter packages create values through {@link createLocalizationDefinition}.
  */
 export type LocalizationDefinition = {
   /** @internal */
@@ -43,8 +43,6 @@ export type LocalizationAdapter<Surface = unknown> = {
   readonly ready: Promise<void>;
   /** Returns the provider-specific translation surface fixed to a locale. */
   localize: (value: Localizable) => Surface;
-  /** Creates a lazy, typed Discord command metadata localization. */
-  localizations: (resolve: (surface: Surface) => string) => LocalizationDefinition;
 };
 
 /** Inputs used by {@link createLocalizationAdapter}. */
