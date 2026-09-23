@@ -1,10 +1,11 @@
 import type {
-  AnyCommandHandler,
-  AnySubCommandHandler,
+  AssembleFullDefinition,
   BaseCommandDefinition,
+  CommandHandler,
   FullCommandInput,
   SlashCommandDefinition,
   SlashWithSubsCommandDefinition,
+  SubCommandDefinition,
   SubCommandInput,
 } from "#/base";
 import type { CommandMiddleware } from "#/base/command/command_middleware";
@@ -35,8 +36,8 @@ export function createCommand<
   Middlewares extends CommandMiddleware[] = [],
 >(
   options: FullCommandInput<Slash, Message, User, Middlewares>,
-): AnyCommandHandler {
-  return options;
+): CommandHandler<AssembleFullDefinition<Slash, Message, User>, Middlewares> {
+  return options as CommandHandler<AssembleFullDefinition<Slash, Message, User>, Middlewares>;
 }
 
 /**
@@ -57,16 +58,25 @@ export function createCommand<
  */
 export function createSubCommand<
   const Options extends OptionsList = Record<string, never>,
+  const Name extends string = string,
   Middlewares extends CommandMiddleware[] = [],
 >(
-  options: SubCommandInput<Options, Middlewares>,
-): AnySubCommandHandler {
-  return options;
+  options: SubCommandInput<Options, Middlewares, Name>,
+): CommandHandler<
+  Omit<SubCommandDefinition, "name" | "options"> & { name: Name; options: Options },
+  Middlewares
+> {
+  return options as CommandHandler<
+    Omit<SubCommandDefinition, "name" | "options"> & { name: Name; options: Options },
+    Middlewares
+  >;
 }
 
 /**
  * Create a slash command that groups subcommands (and subcommand groups).
  */
-export function createCommandWithSubs(options: SlashWithSubsCommandDefinition): SlashWithSubsCommandDefinition {
+export function createCommandWithSubs<const Definition extends SlashWithSubsCommandDefinition>(
+  options: Definition,
+): Definition {
   return options;
 }

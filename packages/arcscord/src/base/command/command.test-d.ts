@@ -1,6 +1,63 @@
 import type { Attachment, GuildBasedChannel, Message, Role, User } from "discord.js";
+import type { CommandMiddlewareRun } from "./command_middleware";
 import { describe, expectTypeOf, it } from "vitest";
 import { createCommand, createCommandWithSubs, createSubCommand } from "./command_func";
+import { CommandMiddleware } from "./command_middleware";
+
+class SessionMiddleware extends CommandMiddleware {
+  readonly name = "session";
+
+  run(): CommandMiddlewareRun<{ accountId: string }> {
+    return this.next({ accountId: "account_1" });
+  }
+}
+
+it("preserves exported command handler option and middleware types", () => {
+  const command = createCommand({
+    slash: {
+      name: "search",
+      description: "Search",
+      options: {
+        query: { type: "string", description: "Query", required: true },
+      },
+    },
+    use: [new SessionMiddleware()],
+    run: ctx => ctx.ok(),
+  });
+  type Context = Parameters<typeof command.run>[0];
+
+  expectTypeOf(command.slash.name).toEqualTypeOf<"search">();
+  expectTypeOf<Context["options"]["query"]>().toEqualTypeOf<string>();
+  expectTypeOf<Context["additional"]["session"]>().toEqualTypeOf<{ accountId: string }>();
+});
+
+it("preserves exported subcommand and subcommand-list types", () => {
+  const inspect = createSubCommand({
+    name: "inspect",
+    description: "Inspect a user",
+    options: {
+      user: { type: "user", description: "User", required: true },
+    },
+    run: ctx => ctx.ok(),
+  });
+  const command = createCommandWithSubs({
+    name: "admin",
+    description: "Admin commands",
+    subCommands: [inspect],
+    subCommandsGroups: {
+      tools: {
+        description: "Tools",
+        subCommands: [inspect],
+      },
+    },
+  });
+  type Context = Parameters<typeof inspect.run>[0];
+
+  expectTypeOf<Context["options"]["user"]>().toEqualTypeOf<User>();
+  expectTypeOf(command.name).toEqualTypeOf<"admin">();
+  expectTypeOf(command.subCommands[0].name).toEqualTypeOf<"inspect">();
+  expectTypeOf(command.subCommandsGroups.tools.subCommands[0].name).toEqualTypeOf<"inspect">();
+});
 
 it("types autocomplete handlers from their option definitions", () => {
   const subCommand = createSubCommand({

@@ -133,7 +133,7 @@ type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : false;
  *
  * @internal
  */
-type AssembleFullDefinition<Slash, Message, User>
+export type AssembleFullDefinition<Slash, Message, User>
   = (IsOmitted<Slash, SlashCommandDefinition> extends true ? Record<never, never> : { slash: Slash })
     & (IsOmitted<Message, BaseCommandDefinition> extends true ? Record<never, never> : { message: Message })
     & (IsOmitted<User, BaseCommandDefinition> extends true ? Record<never, never> : { user: User });
@@ -173,9 +173,14 @@ export type FullCommandInput<
 export type SubCommandInput<
   Options extends OptionsList,
   Middlewares extends CommandMiddleware[] = CommandMiddleware[],
-> = Omit<SubCommandDefinition, "options"> & {
+  Name extends string = string,
+> = Omit<SubCommandDefinition, "name" | "options"> & {
+  name: Name;
   options?: Options;
-} & CommandExtras<SubCommandDefinition & { options: Options }, Middlewares>;
+} & CommandExtras<
+  Omit<SubCommandDefinition, "name" | "options"> & { name: Name; options: Options },
+  Middlewares
+>;
 
 /**
  * Broad command handler shape used when storing heterogeneous commands.
