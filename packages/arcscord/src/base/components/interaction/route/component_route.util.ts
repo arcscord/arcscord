@@ -1,4 +1,10 @@
-import type { IdInitialiseFunction, RouteVariablesObject } from "./component_route.type";
+import type {
+  ComponentRoute,
+  ComponentRouteBuild,
+  ComponentRouteParams,
+  IdInitialiseFunction,
+  RouteVariablesObject,
+} from "./component_route.type";
 import { ArcscordError, arcscordErrorCodes } from "#/utils/error";
 
 type RoutePart = {
@@ -174,36 +180,64 @@ export function matchComponentRoute(compiledRoute: CompiledComponentRoute, custo
   return params;
 }
 
+function buildComponentCustomId(
+  route: string,
+  compiledRoute: CompiledComponentRoute,
+  params?: Record<string, string>,
+): string {
+  const customId = compiledRoute.parts.map((part) => {
+    if (part.type === "static") {
+      return part.value;
+    }
+
+    const value = params?.[part.name];
+    if (value === undefined) {
+      throw new Error(`Missing route parameter ${part.name}`);
+    }
+
+    return `$${encodeURIComponent(value)}`;
+  }).join("/");
+
+  if (customId.length > maxComponentCustomIdLength) {
+    throw new ArcscordError({
+      code: arcscordErrorCodes.ComponentCustomIdTooLong,
+      message: `Component custom ID generated from route ${route} exceeds ${maxComponentCustomIdLength} characters`,
+      metadata: { route, length: customId.length, maximum: maxComponentCustomIdLength },
+    });
+  }
+
+  return customId;
+}
+
+/**
+ * Creates a reusable typed codec for one component route.
+ *
+ * The codec uses the same validation, encoding and matching rules as Arcscord's
+ * component handlers, making it suitable for custom IDs built outside a
+ * handler's `build()` function.
+ */
+export function createComponentRoute<const Route extends string>(
+  route: Route,
+): ComponentRoute<Route> {
+  const compiledRoute = compileComponentRoute(route);
+  const build = ((params?: ComponentRouteParams<Route>) => (
+    buildComponentCustomId(route, compiledRoute, params)
+  )) as ComponentRouteBuild<Route>;
+
+  return {
+    pattern: route,
+    build,
+    match: customId => matchComponentRoute(compiledRoute, customId) as ComponentRouteParams<Route> | null,
+  };
+}
+
 export function createRouteId<Route extends string>(
   route: Route,
   options?: RouteVariablesObject<Route>,
 ): IdInitialiseFunction {
-  const compiledRoute = compileComponentRoute(route);
+  const componentRoute = createComponentRoute(route);
 
-  return () => {
-    const customId = compiledRoute.parts.map((part) => {
-      if (part.type === "static") {
-        return part.value;
-      }
-
-      const value = options?.[part.name as keyof RouteVariablesObject<Route>];
-      if (value === undefined) {
-        throw new Error(`Missing route parameter ${part.name}`);
-      }
-
-      return `$${encodeURIComponent(value)}`;
-    }).join("/");
-
-    if (customId.length > maxComponentCustomIdLength) {
-      throw new ArcscordError({
-        code: arcscordErrorCodes.ComponentCustomIdTooLong,
-        message: `Component custom ID generated from route ${route} exceeds ${maxComponentCustomIdLength} characters`,
-        metadata: { route, length: customId.length, maximum: maxComponentCustomIdLength },
-      });
-    }
-
-    return customId;
-  };
+  return () => (componentRoute.build as (params?: RouteVariablesObject<Route>) => string)(options);
 }
 
 export function hasComponentRouteParams(route: string): boolean {

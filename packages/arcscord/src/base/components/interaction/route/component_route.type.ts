@@ -13,6 +13,30 @@ export type RouteVariablesObject<T extends string> = {
   [K in RouteVariables<T>]: string;
 };
 
+/** Parameters accepted by a compiled component route. */
+export type ComponentRouteParams<Route extends string>
+  = string extends Route ? Record<string, string> : RouteVariablesObject<Route>;
+
+/** Builds a custom ID for a component route. */
+export type ComponentRouteBuild<Route extends string>
+  = string extends Route
+    ? (params?: ComponentRouteParams<Route>) => string
+    : [RouteVariables<Route>] extends [never]
+        ? () => string
+        : (params: ComponentRouteParams<Route>) => string;
+
+/** Public codec for building and matching one component route. */
+export type ComponentRoute<Route extends string> = {
+  /** The original route pattern. */
+  readonly pattern: Route;
+
+  /** Builds a Discord custom ID from the route parameters. */
+  readonly build: ComponentRouteBuild<Route>;
+
+  /** Matches and decodes a Discord custom ID, or returns `null`. */
+  match: (customId: string) => ComponentRouteParams<Route> | null;
+};
+
 /**
  * Arguments accepted by a component build function.
  *

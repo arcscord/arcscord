@@ -65,6 +65,23 @@ export const closeTicketButton = createButton({
 closeTicketButton.build({ ticketId: "42" });
 ```
 
+When another part of your application needs the same custom ID without building
+the component, create a standalone route codec:
+
+```ts
+import { createComponentRoute } from "arcscord";
+
+const ticketRoute = createComponentRoute("ticket/close/{ticketId}");
+const customId = ticketRoute.build({ ticketId: "42" });
+
+ticketRoute.match(customId); // { ticketId: "42" }
+ticketRoute.match("another/route"); // null
+```
+
+`build()` applies the same percent-encoding and 100-character limit as component
+handlers. `match()` decodes parameters and returns `null` for malformed or
+unrelated custom IDs.
+
 ## Defer reply
 
 Use `preReply` to defer the interaction before middlewares and `run` execute:

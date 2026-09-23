@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   compileComponentRoute,
+  createComponentRoute,
   createRouteId,
   matchComponentRoute,
   readCustomIdParts,
@@ -80,6 +81,33 @@ describe("component route utils", () => {
     const id = createRouteId("test/info/{userId}/{filter}", { userId: "82882", filter: "all/active + pinned" });
 
     expect(id()).toBe("test/info/$82882/$all%2Factive%20%2B%20pinned");
+  });
+
+  it("builds and matches custom IDs through the public route codec", () => {
+    const route = createComponentRoute("ticket/{ticketId}/{filter}");
+    const customId = route.build({ ticketId: "42/#", filter: "café % pinned" });
+
+    expect(route.pattern).toBe("ticket/{ticketId}/{filter}");
+    expect(customId).toBe("ticket/$42%2F%23/$caf%C3%A9%20%25%20pinned");
+    expect(route.match(customId)).toEqual({ ticketId: "42/#", filter: "café % pinned" });
+    expect(route.match("ticket/$42/$%E0%A4%A")).toBeNull();
+    expect(route.match("other/$42/$all")).toBeNull();
+  });
+
+  it("supports static public route codecs", () => {
+    const route = createComponentRoute("ticket/create");
+
+    expect(route.build()).toBe("ticket/create");
+    expect(route.match("ticket/create")).toEqual({});
+  });
+
+  it("validates public route codecs and generated custom IDs", () => {
+    expect(() => createComponentRoute("ticket/{ticket-id}"))
+      .toThrow("route parameter \"ticket-id\" is invalid");
+
+    const route = createComponentRoute("ticket/{ticketId}");
+    expect(() => route.build({} as { ticketId: string })).toThrow("Missing route parameter ticketId");
+    expect(() => route.build({ ticketId: "a".repeat(96) })).toThrow("exceeds 100 characters");
   });
 
   it("throws when a generated custom ID exceeds the Discord custom ID limit", () => {
