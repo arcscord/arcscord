@@ -1,6 +1,7 @@
 import type { Attachment, GuildBasedChannel, ModalSubmitInteraction, Role, User } from "discord.js";
 import { ComponentType } from "discord-api-types/v10";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { createMockClient, createMockModalSubmitInteraction } from "#/testing";
 import {
   modalChannelSelect,
   modalCheckbox,
@@ -13,7 +14,7 @@ import {
   modalUserSelect,
 } from "../../modal";
 import { withModalFieldIds } from "../../modal/builders";
-import { parseModalFieldValues, readModalRawValues } from "./modal_context";
+import { ModalContext, parseModalFieldValues, readModalRawValues } from "./modal_context";
 
 function collection<T extends { id: string }>(values: T[]): Map<string, T> {
   return new Map(values.map(value => [value.id, value]));
@@ -167,5 +168,60 @@ describe("modal context values", () => {
       readModalRawValues(interaction),
       new Map(interaction.fields.fields.entries()),
     )).toThrow("received invalid values");
+  });
+});
+
+describe("message modal operations", () => {
+  function createContext(fromMessage: boolean) {
+    const interaction = createMockModalSubmitInteraction();
+    const update = vi.fn(async () => ({}));
+    Object.assign(interaction as unknown as Record<string, unknown>, {
+      isFromMessage: () => fromMessage,
+      update,
+    });
+    Object.defineProperty(interaction, "message", {
+      configurable: true,
+      value: fromMessage ? { id: "message_1" } : null,
+    });
+
+    return {
+      ctx: new ModalContext(createMockClient(), interaction, { locale: "en" }),
+      update,
+    };
+  }
+
+  it("narrows and updates a modal source message", async () => {
+    const { ctx, update } = createContext(true);
+
+    expect(ctx.isFromMessage()).toBe(true);
+    if (!ctx.isFromMessage()) {
+      throw new Error("expected a message modal context");
+    }
+
+    await expect(ctx.updateSourceMessage("Updated")).resolves.toEqual([null, true]);
+    expect(update).toHaveBeenCalledWith("Updated");
+    expect(ctx.hasReply).toBe(true);
+  });
+
+  it("does not narrow modals opened without a message", () => {
+    expect(createContext(false).ctx.isFromMessage()).toBe(false);
+  });
+
+  it("normalizes source-message update failures", async () => {
+    const { ctx } = createContext(true);
+    if (!ctx.isFromMessage()) {
+      throw new Error("expected a message modal context");
+    }
+    ctx.interaction.update = vi.fn(async () => {
+      throw new Error("Discord unavailable");
+    }) as unknown as typeof ctx.interaction.update;
+
+    const [failure] = await ctx.updateSourceMessage({ content: "Updated" });
+
+    expect(failure).toMatchObject({
+      code: "INTERACTION_OPERATION_FAILED",
+      metadata: { operation: "updateSourceMessage" },
+    });
+    expect(ctx.hasReply).toBe(false);
   });
 });

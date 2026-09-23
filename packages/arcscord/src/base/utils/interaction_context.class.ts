@@ -177,6 +177,27 @@ export class RepliableInteractionContext<
   }
 
   /**
+   * Sends an additional reply after the interaction has been acknowledged.
+   */
+  async followUp(
+    options: MessagePayload | InteractionReplyOptions | string,
+    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
+  ): Promise<Result<string | true, ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
+    try {
+      await this.interaction.followUp(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
+      this.hasReply = true;
+      return ok(true);
+    }
+    catch (e) {
+      return error(new InteractionOperationError("followUp", e));
+    }
+  }
+
+  /**
    * Defer the reply to the interaction
    */
   async deferReply(
