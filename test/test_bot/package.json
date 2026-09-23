@@ -12,6 +12,7 @@
     "typecheck": "tsc -p tsconfig.eslint.json"
   },
   "dependencies": {
+    "@arcscord/adapter-i18next": "workspace:*",
     "@arcscord/middleware": "workspace:*",
     "arcscord": "workspace:*",
     "discord.js": "^14.27.0",

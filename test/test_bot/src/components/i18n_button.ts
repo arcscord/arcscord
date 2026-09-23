@@ -1,5 +1,6 @@
 import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { localization } from "../localization";
 
 export const i18nButton = createButton({
   route: "i18n_button",
@@ -10,7 +11,7 @@ export const i18nButton = createButton({
       style: "primary",
     }),
   run: (ctx) => {
-    return ctx.reply(ctx.t($ => $.i18n.component.run), {
+    return ctx.reply(localization.getFixed(ctx)($ => $.i18n.component.run), {
       flags: MessageFlags.Ephemeral,
     });
   },

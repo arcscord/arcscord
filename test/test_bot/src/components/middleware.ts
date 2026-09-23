@@ -7,6 +7,7 @@ import {
 } from "@arcscord/middleware";
 import { button, createButton } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { localization } from "../localization";
 import {
   componentAllowListMessage,
   componentAuthorOnlyMessage,
@@ -28,7 +29,7 @@ export const middlewareAuthorOnlyButton = createButton({
   use: [
     new AuthorOnlyMiddleware(componentAuthorOnlyMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+  run: ctx => ctx.reply(localization.getFixed(ctx)($ => $.middleware.component.ok), {
     flags: MessageFlags.Ephemeral,
   }),
 });
@@ -43,7 +44,7 @@ export const middlewareUserAllowListButton = createButton({
   use: [
     new ComponentUserAllowListMiddleware(allowedUserIds, componentAllowListMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+  run: ctx => ctx.reply(localization.getFixed(ctx)($ => $.middleware.component.ok), {
     flags: MessageFlags.Ephemeral,
   }),
 });
@@ -58,7 +59,7 @@ export const middlewareBotPermissionButton = createButton({
   use: [
     new ComponentBotPermissionMiddleware(["ManageMessages"], componentBotPermissionMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+  run: ctx => ctx.reply(localization.getFixed(ctx)($ => $.middleware.component.ok), {
     flags: MessageFlags.Ephemeral,
   }),
 });
@@ -73,7 +74,7 @@ export const middlewareMemberPermissionButton = createButton({
   use: [
     new ComponentMemberPermissionMiddleware(["ManageMessages"], componentMemberPermissionMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.component.ok), {
+  run: ctx => ctx.reply(localization.getFixed(ctx)($ => $.middleware.component.ok), {
     flags: MessageFlags.Ephemeral,
   }),
 });

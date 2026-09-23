@@ -5,6 +5,7 @@ import type { Locale, MaybePromise } from "#/utils";
 
 /**
  * LangDetector is a type representing a function that detects the language for a given set of options.
+ * @deprecated Use `LocaleDetector` from Arcscord's localization API.
  */
 export type LangDetector = (options: {
   interaction: BaseInteraction | null;
@@ -15,6 +16,7 @@ export type LangDetector = (options: {
 
 /**
  * Options to configure the LocaleManager.
+ * @deprecated Use `LocalizationOptions` with `@arcscord/adapter-i18next`.
  */
 export type BaseLocaleManagerOptions = {
   /**
@@ -89,6 +91,7 @@ type WithI18nOptions = BaseLocaleManagerOptions & {
  * Options for the {@link LocaleManager}: supply a ready-made i18next instance
  * (`customI18n`), let the manager initialize one from `i18nOptions`, or disable
  * localization entirely with `{ enabled: false }`.
+ * @deprecated Use `LocalizationOptions` with `@arcscord/adapter-i18next`.
  */
 export type LocaleManagerOptions = WithCustomI18n | WithI18nOptions | {
   /**
@@ -101,5 +104,6 @@ export type LocaleManagerOptions = WithCustomI18n | WithI18nOptions | {
 
 /**
  * Translation callback used for Discord command metadata.
+ * @deprecated Use the configured adapter's `discord(...)` method.
  */
 export type LocaleCallback = (t: typeof i18next.t) => string;

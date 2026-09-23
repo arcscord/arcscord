@@ -1,6 +1,7 @@
 /** Stable public error codes emitted by the Arcscord framework. */
 export const arcscordErrorCodes = {
   ClientReadyTimeout: "CLIENT_READY_TIMEOUT",
+  LocalizationReadyTimeout: "LOCALIZATION_READY_TIMEOUT",
   ApplicationUnavailable: "APPLICATION_UNAVAILABLE",
   CommandValidationFailed: "COMMAND_VALIDATION_FAILED",
   CommandRegistrationFailed: "COMMAND_REGISTRATION_FAILED",
@@ -40,6 +41,7 @@ type InteractionErrorContext = {
 /** Code-specific structured metadata carried by {@link ArcscordError}. */
 export type ArcscordErrorMetadata = {
   CLIENT_READY_TIMEOUT: { timeoutMs: number };
+  LOCALIZATION_READY_TIMEOUT: { timeoutMs: number };
   APPLICATION_UNAVAILABLE: { operation: string };
   COMMAND_VALIDATION_FAILED: {
     rule: string;

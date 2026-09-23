@@ -17,6 +17,9 @@ import { supportedDiscordLocales } from "#/utils";
  *
  * The LocaleManager handles language detection, initialization of the i18next library,
  * and management of language resources and mappings.
+ *
+ * @deprecated Use `ArcClientOptions.localization` with
+ * `@arcscord/adapter-i18next`. This class will be removed in Arcscord v2.
  */
 export class LocaleManager extends BaseManager {
   /**

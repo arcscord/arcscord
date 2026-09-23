@@ -104,6 +104,18 @@ const packages: Pkg[] = [
     description: "Typed Components V2 helpers, available through Arcscord or standalone.",
   },
   {
+    name: "@arcscord/adapter-i18next",
+    npm: "@arcscord/adapter-i18next",
+    doc: "/packages/adapter-i18next",
+    description: "Typed i18next localization adapter.",
+  },
+  {
+    name: "@arcscord/adapter-paraglide",
+    npm: "@arcscord/adapter-paraglide",
+    doc: "/packages/adapter-paraglide",
+    description: "Typed Paraglide JS localization adapter.",
+  },
+  {
     name: "@arcscord/webhooks",
     npm: "@arcscord/webhooks",
     doc: "/packages/webhooks",

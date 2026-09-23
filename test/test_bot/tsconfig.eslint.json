@@ -3,6 +3,7 @@
   "compilerOptions": {
     "paths": {
       "#/*": ["../../packages/arcscord/src/*"],
+      "@arcscord/adapter-i18next": ["../../packages/adapter-i18next/src/index.ts"],
       "@arcscord/better-error": ["../../packages/better_error/src/index.ts"],
       "@arcscord/components": ["../../packages/components/src/index.ts"],
       "@arcscord/error": ["../../packages/error/src/index.ts"],
