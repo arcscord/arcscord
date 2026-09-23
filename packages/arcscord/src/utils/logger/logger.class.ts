@@ -1,5 +1,5 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
-import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel } from "#/utils/logger/logger.type";
+import type { LogFunc, LoggerInterface, LoggerOptions, LogLevel, LogSink, StructuredLogRecord } from "#/utils/logger/logger.type";
 import * as process from "node:process";
 import { stringifyDebugValues } from "#/utils";
 import {
@@ -43,6 +43,9 @@ export class ArcLogger implements LoggerInterface {
    */
   loggerFunction: LogFunc | undefined;
 
+  /** Structured primary output, before text or JSON-line formatting. */
+  structuredSink: LogSink | undefined;
+
   /**
    * Minimum level to emit.
    */
@@ -79,6 +82,7 @@ export class ArcLogger implements LoggerInterface {
   constructor(name: string, loggerFunction?: LogFunc, options: LoggerOptions = {}) {
     this.processName = name;
     this.loggerFunction = loggerFunction;
+    this.structuredSink = options.sink;
     this.logLevel = resolveLogLevel(options.level || process.env.ARCSCORD_LOG_LEVEL || process.env.LOG_LEVEL);
     this.logFormat = resolveLogFormat(options.format || process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT);
     this.diagnosticLoggerFunction = options.diagnostics?.loggerFunc;
@@ -152,6 +156,14 @@ export class ArcLogger implements LoggerInterface {
     }
 
     const includeStack = this.errorDetail === "full";
+    this.writeStructured({
+      timestamp: new Date().toISOString(),
+      level: "error",
+      scope: this.processName,
+      message: report.message,
+      metadata: report.debug,
+      errorReport: report,
+    });
     this.write(
       shouldUseJsonLogs(this.logFormat)
         ? renderJsonErrorReport(report, this.processName, { includeStack })
@@ -182,6 +194,14 @@ export class ArcLogger implements LoggerInterface {
     }
 
     const includeStack = this.errorDetail === "full";
+    this.writeStructured({
+      timestamp: new Date().toISOString(),
+      level: "fatal",
+      scope: this.processName,
+      message: report.message,
+      metadata: report.debug,
+      errorReport: report,
+    });
     this.write(
       shouldUseJsonLogs(this.logFormat)
         ? renderJsonErrorReport(report, this.processName, { includeStack })
@@ -206,6 +226,14 @@ export class ArcLogger implements LoggerInterface {
     const sanitizedMeta = meta ? sanitizeDebugValues(meta) : undefined;
     const hasMeta = sanitizedMeta !== undefined && Object.keys(sanitizedMeta).length > 0;
     const useJson = shouldUseJsonLogs(this.logFormat);
+
+    this.writeStructured({
+      timestamp: new Date().toISOString(),
+      level,
+      scope: this.processName,
+      message: sanitizedMessage,
+      ...(hasMeta ? { metadata: sanitizedMeta } : {}),
+    });
 
     this.write(
       useJson
@@ -241,8 +269,15 @@ export class ArcLogger implements LoggerInterface {
   }
 
   private write(line: string, level: LogLevel): void {
+    if (this.structuredSink && !this.loggerFunction) {
+      return;
+    }
     const fn = this.loggerFunction ?? resolveDefaultLogFunc(level);
     fn(line);
+  }
+
+  private writeStructured(record: StructuredLogRecord): void {
+    this.structuredSink?.(record);
   }
 
   private writeDiagnosticReport(report: ReturnType<typeof createErrorReport>): void {

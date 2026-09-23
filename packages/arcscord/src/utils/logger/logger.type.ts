@@ -1,5 +1,6 @@
 import type { DebugValues, DebugValueString } from "#/utils/error/error.type";
 import type { logLevels } from "#/utils/logger/logger.enum";
+import type { ErrorReport } from "#/utils/logger/logger.report";
 
 /**
  * @internal
@@ -23,6 +24,19 @@ export type LogLevel = keyof typeof logLevels;
  * Function type for logging, which accepts any data to be logged.
  */
 export type LogFunc = (...data: unknown[]) => void;
+
+/** A sanitized log entry ready for a structured logging backend. */
+export type StructuredLogRecord = Readonly<{
+  timestamp: string;
+  level: LogLevel;
+  scope: string;
+  message: string;
+  metadata?: DebugValues;
+  errorReport?: ErrorReport;
+}>;
+
+/** Receives sanitized structured log records before text formatting. */
+export type LogSink = (record: StructuredLogRecord) => void;
 
 /**
  * Options for a secondary diagnostic error output. Providing `diagnostics` with a
@@ -56,6 +70,12 @@ export type LoggerOptions = {
    * @default process.env.ARCSCORD_LOG_FORMAT || process.env.LOG_FORMAT || "pretty"
    */
   format?: "pretty" | "json";
+
+  /**
+   * Structured primary output. When configured without `loggerFunc`, this
+   * replaces the default console output.
+   */
+  sink?: LogSink;
 
   /**
    * Optional secondary output for full error diagnostics.

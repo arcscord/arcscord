@@ -53,6 +53,56 @@ describe("arcLogger", () => {
     });
   });
 
+  it("writes sanitized records to a structured sink without default console output", () => {
+    const records: unknown[] = [];
+    const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    const logSpy = vi.spyOn(console, "log").mockImplementation(() => {});
+    const logger = new ArcLogger("worker", undefined, {
+      sink: record => records.push(record),
+    });
+
+    logger.info("request token=secret", {
+      authorization: "Bearer hidden",
+      requestId: "request_1",
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      level: "info",
+      scope: "worker",
+      message: "request token=[redacted]",
+      metadata: {
+        authorization: "[redacted]",
+        requestId: "request_1",
+      },
+    });
+    expect(records[0]).toHaveProperty("timestamp");
+    expect(errorSpy).not.toHaveBeenCalled();
+    expect(logSpy).not.toHaveBeenCalled();
+
+    errorSpy.mockRestore();
+    logSpy.mockRestore();
+  });
+
+  it("writes both structured and formatted output when both sinks are explicit", () => {
+    const records: unknown[] = [];
+    const output: unknown[] = [];
+    const logger = new ArcLogger("worker", (...data) => output.push(...data), {
+      format: "json",
+      sink: record => records.push(record),
+    });
+
+    logger.warn("retrying", { attempt: 2 });
+
+    expect(records).toHaveLength(1);
+    expect(output).toHaveLength(1);
+    expect(JSON.parse(String(output[0]))).toMatchObject({
+      level: "warn",
+      message: "retrying",
+      meta: { attempt: 2 },
+    });
+  });
+
   it("renders meta fields as extra lines in pretty mode", () => {
     const output: unknown[] = [];
     const logger = new ArcLogger("test", (...data) => output.push(...data), {
@@ -118,6 +168,32 @@ describe("arcLogger", () => {
     expect(JSON.parse(rendered).debug).toMatchObject({
       token: "[redacted]",
       details: "password=[redacted]",
+    });
+  });
+
+  it("includes sanitized error reports in structured records", () => {
+    const records: unknown[] = [];
+    const logger = new ArcLogger("worker", undefined, {
+      sink: record => records.push(record),
+    });
+
+    logger.logError(new Error("token=error-secret"), {
+      password: "metadata-secret",
+      requestId: "request_1",
+    });
+
+    expect(records).toHaveLength(1);
+    expect(records[0]).toMatchObject({
+      level: "error",
+      scope: "worker",
+      message: "Error: token=[redacted]",
+      metadata: {
+        password: "[redacted]",
+        requestId: "request_1",
+      },
+      errorReport: {
+        error: { message: "token=[redacted]" },
+      },
     });
   });
 

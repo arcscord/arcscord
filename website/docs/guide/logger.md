@@ -51,6 +51,29 @@ In `pretty` format this renders as the message followed by short `key : value` l
 {"time":"2026-07-05T18:26:46.143Z","level":"info","process":"demo","message":"Command executed","meta":{"command":"ping","interactionId":"1234567890","guildId":"42","durationMs":12}}
 ```
 
+## Structured sink
+
+Use `sink` when a logging backend should receive typed records directly instead
+of reparsing Arcscord's JSON output:
+
+```ts
+const client = new ArcClient(process.env.DISCORD_TOKEN!, {
+  intents: [],
+  logger: {
+    sink: (record) => {
+      appLogger[record.level](record.metadata, record.message);
+    },
+  },
+});
+```
+
+Records contain `timestamp`, `level`, `scope`, `message`, optional `metadata`,
+and an `errorReport` for `logError()` and `fatalError()`. Messages, metadata and
+error reports are sanitized before the sink receives them.
+
+When `sink` is set by itself it replaces the default console output. Configure
+`loggerFunc` as well when both structured and formatted outputs are wanted.
+
 ## Scoped context with `child()`
 
 `child(bindings)` returns a logger that automatically merges `bindings` into every subsequent call, so you don't have to repeat the same fields (e.g. `interactionId`, `guildId`) on every log line for the duration of a request:

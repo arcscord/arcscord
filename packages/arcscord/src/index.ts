@@ -504,7 +504,9 @@ export type {
   LoggerInterface,
   LoggerOptions,
   LogLevel,
+  LogSink,
   SerializedError,
+  StructuredLogRecord,
 } from "./utils/logger";
 export { logLevels } from "./utils/logger/logger.enum";
 export type {
