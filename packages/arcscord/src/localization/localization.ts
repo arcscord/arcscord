@@ -10,6 +10,9 @@ export function createLocalizationAdapter<Surface>(
 ): LocalizationAdapter<Surface> {
   const locales = options.locales instanceof Set ? options.locales : new Set(options.locales);
   const ready = Promise.resolve(options.ready).then(() => undefined);
+  // Keep the original promise rejectable for consumers while observing early
+  // initialization failures before Arcscord reaches its first readiness wait.
+  void ready.catch(() => undefined);
   const adapter: LocalizationAdapter<Surface> = {
     defaultLocale: options.defaultLocale,
     locales,

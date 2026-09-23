@@ -156,6 +156,34 @@ describe("localization adapters", () => {
     expect(vi.getTimerCount()).toBe(existingTimers);
   });
 
+  it("observes initialization failures before a consumer awaits readiness", async () => {
+    const failure = new Error("catalog loading failed early");
+    let rejectInitialization: ((cause: Error) => void) | undefined;
+    const initialization = new Promise<void>((_resolve, reject) => {
+      rejectInitialization = reject;
+    });
+    const unhandled = vi.fn();
+    process.on("unhandledRejection", unhandled);
+
+    try {
+      const adapter = createLocalizationAdapter({
+        defaultLocale: "en",
+        locales: ["en"],
+        ready: initialization,
+        getFixed: locale => locale,
+      });
+
+      rejectInitialization?.(failure);
+      await new Promise(resolve => setTimeout(resolve, 0));
+
+      expect(unhandled).not.toHaveBeenCalled();
+      await expect(adapter.ready).rejects.toBe(failure);
+    }
+    finally {
+      process.off("unhandledRejection", unhandled);
+    }
+  });
+
   it("supports an explicit infinite initialization wait", async () => {
     vi.useFakeTimers();
     let finishInitialization: (() => void) | undefined;

@@ -70,6 +70,7 @@ export function createMockClient(options: MockClientOptions = {}): MockArcClient
       }),
       ready: Promise.resolve(),
       waitReady: createMockFunction(() => Promise.resolve()),
+      resolveLocalizations: createMockFunction(() => ({})),
     },
     getErrorMessage: createMockFunction(() => ({ content: "An error occurred." })),
     createMessageContext: createMockFunction(() => ({ t: (key: string) => key })),

@@ -8,6 +8,7 @@ import { MessageFlags } from "discord.js";
 import { describe, expect, it, vi } from "vitest";
 import { createCommand } from "#/base/command/command_func";
 import { CommandMiddleware } from "#/base/command/command_middleware";
+import { createLocalizationAdapter, createLocalizationDefinition } from "#/localization";
 import {
   createMockAutocompleteInteraction,
   createMockChatInputInteraction,
@@ -28,6 +29,37 @@ type HandleInteractionFn = (interaction: CommandInteraction) => Promise<void>;
 type ExposedHandleInteraction = { handleInteraction: HandleInteractionFn };
 
 describe("command manager", () => {
+  it("loads adapter-backed command localizations with the testing client", () => {
+    const adapter = createLocalizationAdapter({
+      defaultLocale: "en",
+      locales: ["en", "fr"],
+      getFixed: locale => locale,
+    });
+    const nameLocalizations = createLocalizationDefinition(adapter, locale => `${locale}-ping`);
+    const { client, manager } = createMockClientWithManager();
+    vi.mocked(client.localization.resolveLocalizations).mockReturnValue({ fr: "ping-fr" });
+
+    const [loadError, commands] = manager.loadCommands([
+      createCommand({
+        slash: {
+          name: "ping",
+          nameLocalizations,
+          description: "Ping command",
+        },
+        run: ctx => ctx.ok(),
+      }),
+    ]);
+
+    expect(loadError).toBeNull();
+    expect(client.localization.resolveLocalizations).toHaveBeenCalledWith(nameLocalizations);
+    expect(commands).toEqual([
+      expect.objectContaining({
+        name: "ping",
+        name_localizations: { fr: "ping-fr" },
+      }),
+    ]);
+  });
+
   it("registers global commands through REST when applicationId is available before ready", async () => {
     const { client, manager } = createMockClientWithManager();
     vi.mocked(client.rest.put).mockResolvedValue([
