@@ -49,7 +49,7 @@ return ctx.error({
 
 The tagged object above is only an example. The same helper accepts any value, such as `ctx.error("ticket limit reached")`, `ctx.error(new DomainError())`, or an untagged object.
 
-Interaction helpers such as `reply`, `editReply`, and `deferReply` return an `ArcscordError` with code `INTERACTION_OPERATION_FAILED` when Discord rejects the operation.
+Interaction helpers such as `reply`, `editReply`, `followUp`, and `deferReply` return an `ArcscordError` with code `INTERACTION_OPERATION_FAILED` when Discord rejects the operation.
 
 ## Dispatch errors
 

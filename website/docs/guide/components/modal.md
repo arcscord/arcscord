@@ -8,6 +8,22 @@ import { DiscordScreenshot } from '@site/src/components/DiscordScreenshot';
 
 Modals are pop-up forms that Discord shows when triggered by a button or command. Arcscord provides typed field helpers so `ctx.values` has the correct type for each field automatically.
 
+When a modal was opened from a message component, narrow its context before
+updating the message that opened it:
+
+```ts
+run: (ctx) => {
+  if (!ctx.isFromMessage()) {
+    return ctx.error("This modal has no source message");
+  }
+
+  return ctx.updateSourceMessage({ content: "Saved" });
+},
+```
+
+`updateSourceMessage()` and the shared `followUp()` helper return a `Result` and
+normalize Discord.js failures as `INTERACTION_OPERATION_FAILED`.
+
 ## Basic modal
 
 ```ts

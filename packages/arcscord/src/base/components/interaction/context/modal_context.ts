@@ -1,8 +1,18 @@
-import type { ModalSubmitInteraction } from "discord.js";
+import type {
+  InteractionUpdateOptions,
+  Message,
+  MessagePayload,
+  ModalMessageModalSubmitInteraction,
+  ModalSubmitInteraction,
+} from "discord.js";
 import type { ArcClient, BaseComponentContextOptions } from "#/base";
+import type { ComponentRunResult } from "#/base/components";
 import type { ComponentMiddleware } from "#/base/components/interaction/component_middleware";
 import type { ModalFields, ModalFieldValues } from "#/base/components/shared/component_definer.type";
+import type { ArcscordError } from "#/utils";
+import { error, ok } from "@arcscord/error";
 import { BaseComponentContext } from "#/base/components/interaction/context/base_context";
+import { InteractionOperationError } from "#/utils";
 
 /** A raw value read from a submitted modal field before it is parsed into a typed value. */
 export type ModalContextValue = string | readonly unknown[] | boolean | null | undefined;
@@ -21,6 +31,16 @@ export type ModalContextOptions<
   Fields extends ModalFields | undefined = ModalFields | undefined,
 > = BaseComponentContextOptions<M, Route> & {
   fields?: Fields;
+};
+
+/** A modal context whose modal was opened from a message component. */
+export type MessageModalContext<
+  M extends ComponentMiddleware[] = ComponentMiddleware[],
+  Route extends string = string,
+  Values = Record<string, ModalContextValue>,
+> = ModalContext<M, Route, Values> & {
+  interaction: ModalMessageModalSubmitInteraction;
+  message: Message;
 };
 
 export function readModalRawValues(interaction: ModalSubmitInteraction): Map<string, ModalContextValue> {
@@ -67,6 +87,11 @@ export class ModalContext<
 > extends BaseComponentContext<M, Route> {
   interaction: ModalSubmitInteraction;
 
+  /** The message that opened this modal, or `null` for command-opened modals. */
+  get message(): Message | null {
+    return this.interaction.message;
+  }
+
   /**
    * Parsed values by field name.
    */
@@ -106,5 +131,30 @@ export class ModalContext<
 
   isModalContext(): this is ModalContext<M, Route, Values> {
     return true;
+  }
+
+  /** Whether this modal was opened from a message component. */
+  isFromMessage(): this is MessageModalContext<M, Route, Values> {
+    return this.interaction.isFromMessage();
+  }
+
+  /**
+   * Updates the message that opened this modal.
+   *
+   * Call {@link isFromMessage} first so TypeScript can prove that the source
+   * message and Discord update operation are available.
+   */
+  async updateSourceMessage(
+    this: MessageModalContext<M, Route, Values>,
+    options: InteractionUpdateOptions | MessagePayload | string,
+  ): Promise<ComponentRunResult<ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
+    try {
+      await this.interaction.update(options);
+      this.hasReply = true;
+      return ok(true);
+    }
+    catch (e) {
+      return error(new InteractionOperationError("updateSourceMessage", e));
+    }
   }
 }

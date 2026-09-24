@@ -209,6 +209,7 @@ export {
 } from "./base/components/interaction/context";
 export type {
   ComponentContext,
+  MessageModalContext,
 } from "./base/components/interaction/context";
 export type {
   ComponentBuildArgs,

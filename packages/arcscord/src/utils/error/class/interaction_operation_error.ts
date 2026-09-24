@@ -11,10 +11,12 @@ export type InteractionOperation
 const operationMessages: Record<InteractionOperation, string> = {
   reply: "failed to reply to interaction",
   editReply: "failed to edit reply to interaction",
+  followUp: "failed to follow up interaction",
   deferReply: "failed to defer reply to interaction",
   showModal: "failed to show modal",
   deferUpdate: "failed to defer update message",
   updateMessage: "failed to update message",
+  updateSourceMessage: "failed to update modal source message",
   autocomplete: "failed to send choices for command",
 };
 
