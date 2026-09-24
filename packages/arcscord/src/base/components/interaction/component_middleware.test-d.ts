@@ -1,4 +1,5 @@
 import type { ComponentMiddlewareRun } from "./component_middleware";
+import type { ComponentContext } from "./context";
 import { expectTypeOf, it } from "vitest";
 import { button as buttonComponent } from "../shared/builders";
 import { createButton } from "./component_handler.func";
@@ -17,6 +18,20 @@ class RateLimitMiddleware extends ComponentMiddleware {
 
   run(): ComponentMiddlewareRun<{ remaining: number }> {
     return this.next({ remaining: 5 });
+  }
+}
+
+class RequiredParamMiddleware extends ComponentMiddleware {
+  readonly name = "requiredParam" as const;
+
+  run(ctx: ComponentContext): ComponentMiddlewareRun<{ itemId: string }> {
+    expectTypeOf(ctx.getParam("itemId")).toEqualTypeOf<string | undefined>();
+    if (!ctx.hasParam("itemId")) {
+      return this.fail("missing itemId");
+    }
+
+    expectTypeOf(ctx.params.itemId).toEqualTypeOf<string>();
+    return this.next({ itemId: ctx.params.itemId });
   }
 }
 
@@ -42,6 +57,18 @@ it("types ctx.additional from multiple component middlewares", () => {
       expectTypeOf(ctx.additional.authorCheck).toEqualTypeOf<{ isAuthor: boolean }>();
       expectTypeOf(ctx.additional.rateLimit).toEqualTypeOf<{ remaining: number }>();
       expectTypeOf(ctx.additional.rateLimit.remaining).toEqualTypeOf<number>();
+      return ctx.ok();
+    },
+  });
+});
+
+it("types route parameters read by reusable middleware", () => {
+  createButton({
+    route: "item/{itemId}",
+    build: id => buttonComponent({ customId: id(), style: "primary", label: "Open" }),
+    use: [new RequiredParamMiddleware()],
+    run: (ctx) => {
+      expectTypeOf(ctx.additional.requiredParam.itemId).toEqualTypeOf<string>();
       return ctx.ok();
     },
   });

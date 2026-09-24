@@ -28,4 +28,18 @@ describe("buttonContext", () => {
   it("stores customId from interaction", () => {
     expect(makeButtonContext("my_button").customId).toBe("my_button");
   });
+
+  it("reads and narrows route parameters without treating empty values as absent", () => {
+    const client = createMockClient();
+    const interaction = createMockButtonInteraction({ customId: "ticket/$" });
+    const ctx = new ButtonContext<[], "ticket/{ticketId}">(client, interaction, {
+      locale: "en",
+      params: { ticketId: "" },
+    });
+
+    expect(ctx.getParam("ticketId")).toBe("");
+    expect(ctx.hasParam("ticketId")).toBe(true);
+    expect(ctx.getParam("missing")).toBeUndefined();
+    expect(ctx.hasParam("missing")).toBe(false);
+  });
 });
