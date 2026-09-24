@@ -18,6 +18,7 @@ import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
 import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
+import { gatewayEvents } from "#/base/event/event_source";
 import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
@@ -213,7 +214,7 @@ export class ArcClient extends DJSClient {
 
   /** Whether Discord is ready and the latest handler batch loaded successfully. */
   isOperational(): boolean {
-    return this.ready && this.handlersState === "ready";
+    return this.isReady() && this.handlersState === "ready";
   }
 
   /**
@@ -337,8 +338,10 @@ export class ArcClient extends DJSClient {
    *
    * The complete batch is validated before local state changes. Commands are
    * then published to Discord before events, components, and resolved commands
-   * are registered locally. If local registration fails, every local mutation
-   * made by this call is rolled back without touching handlers that were loaded
+   * are registered locally. When command publication must wait for Discord,
+   * `clientReady` handlers are registered first so they can observe that
+   * lifecycle event. If local registration fails, every local mutation made by
+   * this call is rolled back without touching handlers that were loaded
    * previously. A Discord REST mutation that was already accepted cannot always
    * be reversed reliably.
    *
@@ -390,6 +393,17 @@ export class ArcClient extends DJSClient {
       let commandRegistrations: ApplicationCommandRegistration[] = [];
       if (commands.length > 0) {
         if (!this.ready && !this.arcOptions.applicationId) {
+          for (const event of events) {
+            const source = event.source ?? gatewayEvents;
+            if (source.id !== gatewayEvents.id || event.event !== "clientReady") {
+              continue;
+            }
+            const [err] = await this.eventManager.loadEvents([event]);
+            if (err !== null) {
+              throw err;
+            }
+            loadedEvents.push(event);
+          }
           await this.waitReady();
         }
         const [registrationErr, registrations] = await this.commandManager.pushGlobalCommands(commandBodies);
@@ -400,6 +414,9 @@ export class ArcClient extends DJSClient {
       }
 
       for (const event of events) {
+        if (loadedEvents.includes(event)) {
+          continue;
+        }
         const [err] = await this.eventManager.loadEvents([event]);
         if (err !== null) {
           throw err;
@@ -438,7 +455,7 @@ export class ArcClient extends DJSClient {
     }
     catch (cause) {
       for (const component of loadedComponents.toReversed()) {
-        this.componentManager.unloadComponent(component.route);
+        this.componentManager.unloadComponentHandler(component);
       }
       for (const event of loadedEvents.toReversed()) {
         if (event.source) {

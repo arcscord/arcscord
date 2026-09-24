@@ -272,6 +272,24 @@ export class ComponentManager extends BaseManager {
     return false;
   }
 
+  /** Removes a loaded component only when the registry still contains that exact handler. @internal */
+  unloadComponentHandler(component: ComponentHandler): boolean {
+    const compiledRoute = this.compiledRoutes.get(component);
+    if (!compiledRoute) {
+      return false;
+    }
+
+    const registry = this.componentList(component);
+    if (registry.get(compiledRoute.canonical) !== component) {
+      return false;
+    }
+
+    registry.delete(compiledRoute.canonical);
+    this.compiledRoutes.delete(component);
+    this.trace(`unloaded component with route ${component.route}`);
+    return true;
+  }
+
   private setComponent<K extends Exclude<keyof ComponentList, "modal">>(
     type: K,
     canonical: string,

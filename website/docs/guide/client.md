@@ -231,6 +231,9 @@ catch (err) {
 ```
 
 If `applicationId` is set, commands are registered immediately over REST without waiting for `clientReady`. Otherwise, `loadHandlers` waits for the client to be ready before pushing commands.
+Any `clientReady` handlers in the validated batch are registered before that
+wait so they still observe the lifecycle event; all other local handlers are
+registered after command publication.
 
 Local registration is atomic for each call. If a failure occurs after local
 registration starts, Arcscord removes only the events, components, and command

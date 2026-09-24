@@ -1,8 +1,9 @@
 import type { ArcClientReadyTimeoutError } from "#/utils/error/class/client_ready_timeout_error";
 import { error, ok } from "@arcscord/error";
+import { ComponentType } from "discord-api-types/v10";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCommand } from "#/base/command/command_func";
-import { button, createButton } from "#/base/components";
+import { button, createButton, createSelectMenu, stringSelectMenu } from "#/base/components";
 import { createEvent } from "#/base/event";
 import { ArcscordError, arcscordErrorCodes } from "#/utils";
 import { ArcClient } from "./client.class";
@@ -192,13 +193,14 @@ describe("arcClient.loadHandlers", () => {
   it("rolls back only the local handlers added by the failing call", async () => {
     const client = new ArcClient("token", { intents: [] });
     const existing = createButton({
-      route: "existing-button",
+      route: "shared-route",
       build: id => button({ label: "existing", style: "primary", customId: id() }),
       run: ctx => ctx.ok(),
     });
-    const first = createButton({
-      route: "first-new-button",
-      build: id => button({ label: "first", style: "primary", customId: id() }),
+    const first = createSelectMenu({
+      type: ComponentType.StringSelect,
+      route: "shared-route",
+      build: id => stringSelectMenu({ customId: id(), options: ["first"] }),
       run: ctx => ctx.ok(),
     });
     const second = createButton({
@@ -228,9 +230,10 @@ describe("arcClient.loadHandlers", () => {
       events: [event],
     })).rejects.toBeInstanceOf(ArcscordError);
 
-    expect(client.componentManager.unloadComponent(first.route)).toBe(false);
+    expect(client.componentManager.components[ComponentType.StringSelect].has(first.route)).toBe(false);
     expect(client.eventManager.unloadEvent(event.name)).toBe(false);
     expect(client.componentManager.unloadComponent(existing.route)).toBe(true);
+    expect(client.componentManager.unloadComponent(existing.route)).toBe(false);
     expect(client.handlersState).toBe("failed");
   });
 
@@ -276,7 +279,7 @@ describe("arcClient.loadHandlers", () => {
     expect(client.handlersState).toBe("ready");
     expect(client.isOperational()).toBe(false);
 
-    client.ready = true;
+    vi.spyOn(client, "isReady").mockReturnValue(true);
     expect(client.isOperational()).toBe(true);
 
     await expect(client.loadHandlers({})).resolves.toEqual({
@@ -286,5 +289,32 @@ describe("arcClient.loadHandlers", () => {
     });
     expect(client.handlersState).toBe("ready");
     expect(client.isOperational()).toBe(true);
+  });
+
+  it("registers clientReady handlers before waiting to publish commands", async () => {
+    const client = new ArcClient("token", { intents: [] });
+    const command = createCommand({
+      slash: { name: "ready-order", description: "Ready order" },
+      run: ctx => ctx.ok(),
+    });
+    let observedReady = false;
+    const readyEvent = createEvent({
+      event: "clientReady",
+      name: "observe-ready",
+      run: (ctx) => {
+        observedReady = true;
+        return ctx.ok();
+      },
+    });
+    vi.spyOn(client.commandManager, "pushGlobalCommands").mockResolvedValue(ok([]));
+    vi.spyOn(client, "waitReady").mockImplementation(async () => {
+      client.emit("clientReady", client as never);
+      await vi.waitFor(() => expect(observedReady).toBe(true));
+    });
+
+    await client.loadHandlers({ commands: [command], events: [readyEvent] });
+
+    expect(observedReady).toBe(true);
+    expect(client.handlersState).toBe("ready");
   });
 });
