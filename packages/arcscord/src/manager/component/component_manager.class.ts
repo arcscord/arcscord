@@ -133,6 +133,39 @@ export class ComponentManager extends BaseManager {
   }
 
   /**
+   * Validates a component batch without mutating the component registry.
+   *
+   * @internal
+   */
+  validateComponents(
+    components: ComponentHandler[],
+  ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
+    const stagedRoutes = new Map<string | number, Set<string>>();
+
+    for (const component of components) {
+      const [err, compiledRoute] = this.prepareComponent(component);
+      if (err !== null) {
+        return error(err);
+      }
+
+      const registry = this.componentList(component);
+      const registryKey = component.handlerType === componentHandlerTypeEnum.modal
+        ? "modal"
+        : component.type;
+      const staged = stagedRoutes.get(registryKey) ?? new Set<string>();
+
+      if (registry.has(compiledRoute.canonical) || staged.has(compiledRoute.canonical)) {
+        return error(this.componentRouteDuplicateError(component, compiledRoute));
+      }
+
+      staged.add(compiledRoute.canonical);
+      stagedRoutes.set(registryKey, staged);
+    }
+
+    return ok(true);
+  }
+
+  /**
    * Load a single component
    * @param component - component to load
    * @returns `ok(true)` when loaded, or the route validation/duplication failure.
@@ -140,6 +173,36 @@ export class ComponentManager extends BaseManager {
   loadComponent(
     component: ComponentHandler,
   ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
+    const [validationErr, compiledRoute] = this.prepareComponent(component);
+    if (validationErr !== null) {
+      return error(validationErr);
+    }
+
+    const componentsList = this.componentList(component);
+
+    if (componentsList.has(compiledRoute.canonical)) {
+      return error(this.componentRouteDuplicateError(component, compiledRoute));
+    }
+
+    this.compiledRoutes.set(component, compiledRoute);
+
+    if (component.handlerType === componentHandlerTypeEnum.modal) {
+      this.components.modal.set(compiledRoute.canonical, component);
+    }
+    else {
+      this.setComponent(component.type, compiledRoute.canonical, component);
+    }
+
+    this.trace(
+      `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
+    );
+
+    return ok(true);
+  }
+
+  private prepareComponent(
+    component: ComponentHandler,
+  ): Result<CompiledComponentRoute, ArcscordError<"COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
     let compiledRoute: CompiledComponentRoute;
     try {
       compiledRoute = compileComponentRoute(component.route);
@@ -161,32 +224,24 @@ export class ComponentManager extends BaseManager {
       return error(middlewareValidationErr);
     }
 
-    const componentsList = component.handlerType === componentHandlerTypeEnum.modal
+    return ok(compiledRoute);
+  }
+
+  private componentList(component: ComponentHandler): Map<string, ComponentHandler> {
+    return (component.handlerType === componentHandlerTypeEnum.modal
       ? this.components.modal
-      : this.components[component.type];
+      : this.components[component.type]) as Map<string, ComponentHandler>;
+  }
 
-    if (componentsList.has(compiledRoute.canonical)) {
-      return error(new ArcscordError({
-        code: arcscordErrorCodes.ComponentRouteDuplicate,
-        message: `Duplicate component route ${component.route}`,
-        metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
-      }));
-    }
-
-    this.compiledRoutes.set(component, compiledRoute);
-
-    if (component.handlerType === componentHandlerTypeEnum.modal) {
-      this.components.modal.set(compiledRoute.canonical, component);
-    }
-    else {
-      this.setComponent(component.type, compiledRoute.canonical, component);
-    }
-
-    this.trace(
-      `loaded ${component.handlerType || componentHandlerTypeEnum.messageComponent} ${"type" in component ? component.type : "modal"} with route ${component.route}`,
-    );
-
-    return ok(true);
+  private componentRouteDuplicateError(
+    component: ComponentHandler,
+    compiledRoute: CompiledComponentRoute,
+  ): ArcscordError<"COMPONENT_ROUTE_DUPLICATE"> {
+    return new ArcscordError({
+      code: arcscordErrorCodes.ComponentRouteDuplicate,
+      message: `Duplicate component route ${component.route}`,
+      metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
+    });
   }
 
   /**

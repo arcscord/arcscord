@@ -193,6 +193,9 @@ export type HandlersList = {
   events?: AnyLoadableEventHandler[];
 };
 
+/** Lifecycle state of the latest {@link ArcClient.loadHandlers} call. */
+export type HandlersState = "idle" | "loading" | "ready" | "failed";
+
 /**
  * Number of handlers loaded per category by {@link ArcClient.loadHandlers}.
  */

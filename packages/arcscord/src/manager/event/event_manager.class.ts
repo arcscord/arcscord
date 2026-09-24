@@ -119,6 +119,44 @@ export class EventManager extends BaseManager {
   }
 
   /**
+   * Validates an event batch without registering handlers or binding listeners.
+   *
+   * @internal
+   */
+  validateEvents(
+    events: AnyLoadableEventHandler[],
+  ): Result<true, ArcscordError<"EVENT_HANDLER_DUPLICATE" | "EVENT_INTENT_MISSING">> {
+    const stagedNames = new Map<symbol, Set<string>>();
+
+    for (const event of events) {
+      const source = this.eventSource(event);
+      const registry = this.sourceRegistry(source, false);
+      const staged = stagedNames.get(source.id) ?? new Set<string>();
+
+      if (registry?.has(event.name) || staged.has(event.name)) {
+        return error(new ArcscordError({
+          code: arcscordErrorCodes.EventHandlerDuplicate,
+          message: `duplicate event handler name "${event.name}"`,
+          metadata: {
+            handlerName: event.name,
+            eventName: event.event,
+          },
+        }));
+      }
+
+      const [intentErr] = this.checkIntents(event, source, false);
+      if (intentErr !== null) {
+        return error(intentErr);
+      }
+
+      staged.add(event.name);
+      stagedNames.set(source.id, staged);
+    }
+
+    return ok(true);
+  }
+
+  /**
    * Loads and registers a single event handler.
    *
    * @param event - The event handler to load.
@@ -498,6 +536,7 @@ export class EventManager extends BaseManager {
   private checkIntents(
     event: AnyLoadableEventHandler,
     source: EventSource,
+    emitWarnings = true,
   ): Result<true, ArcscordError<"EVENT_INTENT_MISSING">> {
     if (source.id !== gatewayEvents.id || this.options.intentCheck === false) {
       return ok(true);
@@ -522,7 +561,9 @@ export class EventManager extends BaseManager {
     }
 
     if (action === "warn") {
-      this.logger.warn(issue.message);
+      if (emitWarnings) {
+        this.logger.warn(issue.message);
+      }
       return ok(true);
     }
 
