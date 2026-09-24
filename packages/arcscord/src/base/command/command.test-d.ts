@@ -1,4 +1,5 @@
 import type { Attachment, GuildBasedChannel, Message, Role, User } from "discord.js";
+import type { SlashCommandDefinition } from "./command_definition.type";
 import type { CommandMiddlewareRun } from "./command_middleware";
 import { describe, expectTypeOf, it } from "vitest";
 import { createCommand, createCommandWithSubs, createSubCommand } from "./command_func";
@@ -31,6 +32,19 @@ it("preserves exported command handler option and middleware types", () => {
   expectTypeOf<Context["additional"]["session"]>().toEqualTypeOf<{ accountId: string }>();
 });
 
+it("preserves a provided broadly typed command surface", () => {
+  const slash: SlashCommandDefinition = {
+    name: "broad",
+    description: "Broadly typed",
+  };
+  const command = createCommand({
+    slash,
+    run: ctx => ctx.ok(),
+  });
+
+  expectTypeOf(command.slash).toEqualTypeOf<SlashCommandDefinition>();
+});
+
 it("preserves exported subcommand and subcommand-list types", () => {
   const inspect = createSubCommand({
     name: "inspect",
@@ -57,6 +71,34 @@ it("preserves exported subcommand and subcommand-list types", () => {
   expectTypeOf(command.name).toEqualTypeOf<"admin">();
   expectTypeOf(command.subCommands[0].name).toEqualTypeOf<"inspect">();
   expectTypeOf(command.subCommandsGroups.tools.subCommands[0].name).toEqualTypeOf<"inspect">();
+});
+
+it("keeps omitted subcommand options absent and preserves generic parameter order", () => {
+  const withoutOptions = createSubCommand({
+    name: "status",
+    description: "Status",
+    run: ctx => ctx.ok(),
+  });
+
+  // @ts-expect-error omitted options are not present on the returned object.
+  void withoutOptions.options;
+
+  createSubCommand<
+    { query: { type: "string"; description: string; required: true } },
+    [SessionMiddleware]
+  >({
+    name: "search",
+    description: "Search",
+    options: {
+      query: { type: "string", description: "Query", required: true },
+    },
+    use: [new SessionMiddleware()],
+    run: (ctx) => {
+      expectTypeOf(ctx.options.query).toEqualTypeOf<string>();
+      expectTypeOf(ctx.additional.session.accountId).toEqualTypeOf<string>();
+      return ctx.ok();
+    },
+  });
 });
 
 it("types autocomplete handlers from their option definitions", () => {
@@ -99,9 +141,9 @@ it("types autocomplete handlers from their option definitions", () => {
         void ctx.sendChoices(["Naruto"]);
         return ctx.ok();
       },
-      // @ts-expect-error only options with autocomplete: true can have handlers.
       hidden: ctx => ctx.ok(),
     },
+    // @ts-expect-error the invalid autocomplete map prevents a matching command overload.
     run: ctx => ctx.ok(),
   });
 });

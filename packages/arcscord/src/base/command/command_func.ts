@@ -1,8 +1,9 @@
 import type {
-  AssembleFullDefinition,
+  AnyCommandHandler,
+  AnySubCommandHandler,
   BaseCommandDefinition,
+  CommandExtras,
   CommandHandler,
-  FullCommandInput,
   SlashCommandDefinition,
   SlashWithSubsCommandDefinition,
   SubCommandDefinition,
@@ -35,9 +36,77 @@ export function createCommand<
   const User extends BaseCommandDefinition = BaseCommandDefinition,
   Middlewares extends CommandMiddleware[] = [],
 >(
-  options: FullCommandInput<Slash, Message, User, Middlewares>,
-): CommandHandler<AssembleFullDefinition<Slash, Message, User>, Middlewares> {
-  return options as CommandHandler<AssembleFullDefinition<Slash, Message, User>, Middlewares>;
+  options: {
+    slash: Slash;
+    message: Message;
+    user: User;
+  } & CommandExtras<{ slash: Slash; message: Message; user: User }, Middlewares>,
+): CommandHandler<{ slash: Slash; message: Message; user: User }, Middlewares>;
+export function createCommand<
+  const Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const _User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    slash: Slash;
+    message: Message;
+  } & CommandExtras<{ slash: Slash; message: Message }, Middlewares>,
+): CommandHandler<{ slash: Slash; message: Message }, Middlewares>;
+export function createCommand<
+  const Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const _Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    slash: Slash;
+    user: User;
+  } & CommandExtras<{ slash: Slash; user: User }, Middlewares>,
+): CommandHandler<{ slash: Slash; user: User }, Middlewares>;
+export function createCommand<
+  const _Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    message: Message;
+    user: User;
+  } & CommandExtras<{ message: Message; user: User }, Middlewares>,
+): CommandHandler<{ message: Message; user: User }, Middlewares>;
+export function createCommand<
+  const Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const _Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const _User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    slash: Slash;
+  } & CommandExtras<{ slash: Slash }, Middlewares>,
+): CommandHandler<{ slash: Slash }, Middlewares>;
+export function createCommand<
+  const _Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const _User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    message: Message;
+  } & CommandExtras<{ message: Message }, Middlewares>,
+): CommandHandler<{ message: Message }, Middlewares>;
+export function createCommand<
+  const _Slash extends SlashCommandDefinition = SlashCommandDefinition,
+  const _Message extends BaseCommandDefinition = BaseCommandDefinition,
+  const User extends BaseCommandDefinition = BaseCommandDefinition,
+  Middlewares extends CommandMiddleware[] = [],
+>(
+  options: {
+    user: User;
+  } & CommandExtras<{ user: User }, Middlewares>,
+): CommandHandler<{ user: User }, Middlewares>;
+export function createCommand(options: AnyCommandHandler): AnyCommandHandler {
+  return options;
 }
 
 /**
@@ -58,18 +127,26 @@ export function createCommand<
  */
 export function createSubCommand<
   const Options extends OptionsList = Record<string, never>,
-  const Name extends string = string,
   Middlewares extends CommandMiddleware[] = [],
+  const Name extends string = string,
 >(
-  options: SubCommandInput<Options, Middlewares, Name>,
+  options: SubCommandInput<Options, Middlewares, Name> & { options: Options },
 ): CommandHandler<
   Omit<SubCommandDefinition, "name" | "options"> & { name: Name; options: Options },
   Middlewares
-> {
-  return options as CommandHandler<
-    Omit<SubCommandDefinition, "name" | "options"> & { name: Name; options: Options },
-    Middlewares
-  >;
+>;
+export function createSubCommand<
+  const Options extends OptionsList = Record<string, never>,
+  Middlewares extends CommandMiddleware[] = [],
+  const Name extends string = string,
+>(
+  options: Omit<SubCommandInput<Options, Middlewares, Name>, "options">,
+): CommandHandler<
+  Omit<SubCommandDefinition, "name" | "options"> & { name: Name },
+  Middlewares
+>;
+export function createSubCommand(options: AnySubCommandHandler): AnySubCommandHandler {
+  return options;
 }
 
 /**

@@ -4,10 +4,8 @@ import type {
   RESTPostAPIContextMenuApplicationCommandsJSONBody,
 } from "discord-api-types/v10";
 import type {
-  BaseCommandDefinition,
   CommandContext,
   FullCommandDefinition,
-  SlashCommandDefinition,
   SubCommandDefinition,
 } from "#/base";
 import type { AutocompleteContext, AutocompleteHandlers } from "#/base/command/autocomplete_context";
@@ -120,46 +118,6 @@ export type CommandHandler<
   Build extends SubCommandDefinition | FullCommandDefinition = SubCommandDefinition | FullCommandDefinition,
   Middlewares extends CommandMiddleware[] = CommandMiddleware[],
 > = Build & CommandExtras<Build, Middlewares>;
-
-/**
- * @internal
- */
-type IsOmitted<T, Default> = [T, Default] extends [Default, T] ? true : false;
-
-/**
- * Reassembles a {@link FullCommandDefinition} from the individually inferred
- * surfaces. A surface only contributes a (required) key when it was provided, so
- * `CommandContext` discriminates the right context union.
- *
- * @internal
- */
-export type AssembleFullDefinition<Slash, Message, User>
-  = (IsOmitted<Slash, SlashCommandDefinition> extends true ? Record<never, never> : { slash: Slash })
-    & (IsOmitted<Message, BaseCommandDefinition> extends true ? Record<never, never> : { message: Message })
-    & (IsOmitted<User, BaseCommandDefinition> extends true ? Record<never, never> : { user: User });
-
-/**
- * Input type for {@link createCommand}.
- *
- * Each surface is a naked type-parameter property (constraint without
- * `undefined`) so that it is inferred independently of `run` — reliable
- * inference, exactly like the old single `build` property — while the
- * constraint provides contextual typing for callback values such as
- * localization callbacks. The inferred surfaces are reassembled to type the
- * command context.
- *
- * @internal
- */
-export type FullCommandInput<
-  Slash extends SlashCommandDefinition,
-  Message extends BaseCommandDefinition,
-  User extends BaseCommandDefinition,
-  Middlewares extends CommandMiddleware[] = CommandMiddleware[],
-> = {
-  slash?: Slash;
-  message?: Message;
-  user?: User;
-} & CommandExtras<AssembleFullDefinition<Slash, Message, User>, Middlewares>;
 
 /**
  * Input type for {@link createSubCommand}.
