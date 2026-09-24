@@ -103,6 +103,27 @@ describe("arcLogger", () => {
     });
   });
 
+  it("does not format sink-only records eagerly", () => {
+    const records: unknown[] = [];
+    const logger = new ArcLogger("worker", undefined, {
+      format: "json",
+      sink: record => records.push(record),
+    });
+
+    expect(() => logger.info("counted", { count: 1n })).not.toThrow();
+    expect(() => logger.logError(new Error("failed"), { count: 2n })).not.toThrow();
+
+    expect(records).toHaveLength(2);
+    expect(records[0]).toMatchObject({
+      message: "counted",
+      metadata: { count: 1n },
+    });
+    expect(records[1]).toMatchObject({
+      message: "Error: failed",
+      metadata: { count: 2n },
+    });
+  });
+
   it("renders meta fields as extra lines in pretty mode", () => {
     const output: unknown[] = [];
     const logger = new ArcLogger("test", (...data) => output.push(...data), {

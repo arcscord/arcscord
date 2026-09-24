@@ -164,12 +164,14 @@ export class ArcLogger implements LoggerInterface {
       metadata: report.debug,
       errorReport: report,
     });
-    this.write(
-      shouldUseJsonLogs(this.logFormat)
-        ? renderJsonErrorReport(report, this.processName, { includeStack })
-        : renderErrorReport(report, this.processName, { includeStack }),
-      "error",
-    );
+    if (this.shouldWriteFormattedOutput()) {
+      this.write(
+        shouldUseJsonLogs(this.logFormat)
+          ? renderJsonErrorReport(report, this.processName, { includeStack })
+          : renderErrorReport(report, this.processName, { includeStack }),
+        "error",
+      );
+    }
     this.writeDiagnosticReport(report);
   }
 
@@ -202,12 +204,14 @@ export class ArcLogger implements LoggerInterface {
       metadata: report.debug,
       errorReport: report,
     });
-    this.write(
-      shouldUseJsonLogs(this.logFormat)
-        ? renderJsonErrorReport(report, this.processName, { includeStack })
-        : renderErrorReport(report, this.processName, { includeStack }),
-      "fatal",
-    );
+    if (this.shouldWriteFormattedOutput()) {
+      this.write(
+        shouldUseJsonLogs(this.logFormat)
+          ? renderJsonErrorReport(report, this.processName, { includeStack })
+          : renderErrorReport(report, this.processName, { includeStack }),
+        "fatal",
+      );
+    }
     this.writeDiagnosticReport(report);
   }
 
@@ -234,6 +238,10 @@ export class ArcLogger implements LoggerInterface {
       message: sanitizedMessage,
       ...(hasMeta ? { metadata: sanitizedMeta } : {}),
     });
+
+    if (!this.shouldWriteFormattedOutput()) {
+      return;
+    }
 
     this.write(
       useJson
@@ -268,10 +276,11 @@ export class ArcLogger implements LoggerInterface {
     };
   }
 
+  private shouldWriteFormattedOutput(): boolean {
+    return !this.structuredSink || this.loggerFunction !== undefined;
+  }
+
   private write(line: string, level: LogLevel): void {
-    if (this.structuredSink && !this.loggerFunction) {
-      return;
-    }
     const fn = this.loggerFunction ?? resolveDefaultLogFunc(level);
     fn(line);
   }
