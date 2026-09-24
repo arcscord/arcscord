@@ -11,6 +11,10 @@ it("types public component route codecs", () => {
   // @ts-expect-error dynamic routes reject undeclared parameters.
   dynamicRoute.build({ ticketId: "42", action: "close", extra: "no" });
 
+  const leadingParamRoute = createComponentRoute("{id}/action");
+  expectTypeOf(leadingParamRoute.build).parameters.toEqualTypeOf<[{ id: string }]>();
+  leadingParamRoute.build({ id: "42" });
+
   const staticRoute = createComponentRoute("ticket/create");
   expectTypeOf(staticRoute.build).parameters.toEqualTypeOf<[]>();
   staticRoute.build();

@@ -2,8 +2,9 @@
  * Extracts dynamic segment names from a component route.
  */
 export type RouteVariables<T extends string>
-  = T extends `${string}/{${infer Var}}/${infer Rest}` ? Var | RouteVariables<`/${Rest}`>
-    : T extends `${string}/{${infer Var}}` ? Var
+  = T extends `${infer Segment}/${infer Rest}`
+    ? (Segment extends `{${infer Var}}` ? Var : never) | RouteVariables<Rest>
+    : T extends `{${infer Var}}` ? Var
       : never;
 
 /**

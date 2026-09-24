@@ -170,7 +170,12 @@ export function matchComponentRoute(compiledRoute: CompiledComponentRoute, custo
     }
 
     try {
-      params[routePart.name] = decodeURIComponent(customIdPart.slice(1));
+      Object.defineProperty(params, routePart.name, {
+        configurable: true,
+        enumerable: true,
+        value: decodeURIComponent(customIdPart.slice(1)),
+        writable: true,
+      });
     }
     catch {
       return null;
@@ -190,9 +195,9 @@ function buildComponentCustomId(
       return part.value;
     }
 
-    const value = params?.[part.name];
-    if (value === undefined) {
-      throw new Error(`Missing route parameter ${part.name}`);
+    const value = params && Object.hasOwn(params, part.name) ? params[part.name] : undefined;
+    if (typeof value !== "string") {
+      throw new TypeError(`Missing route parameter ${part.name}`);
     }
 
     return `$${encodeURIComponent(value)}`;

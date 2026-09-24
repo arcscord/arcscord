@@ -94,6 +94,18 @@ describe("component route utils", () => {
     expect(route.match("other/$42/$all")).toBeNull();
   });
 
+  it("supports first-segment and prototype-named route parameters", () => {
+    const leading = createComponentRoute("{id}/action");
+    expect(leading.match(leading.build({ id: "42" }))).toEqual({ id: "42" });
+
+    const prototypeNamed = createComponentRoute("x/{__proto__}");
+    const params = { ["__proto__"]: "safe" };
+    const matched = prototypeNamed.match(prototypeNamed.build(params));
+
+    expect(matched).toEqual({ ["__proto__"]: "safe" });
+    expect(Object.hasOwn(matched!, "__proto__")).toBe(true);
+  });
+
   it("supports static public route codecs", () => {
     const route = createComponentRoute("ticket/create");
 
