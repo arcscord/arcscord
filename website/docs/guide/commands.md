@@ -22,6 +22,11 @@ export const pingCommand = createCommand({
 });
 ```
 
+The handler returned by `createCommand()` keeps the exact option and middleware
+types inferred for its `run` context. The same applies to `createSubCommand()`
+and to subcommand lists returned by `createCommandWithSubs()`, so wrappers and
+tests can call or inspect an exported handler without erasing its context type.
+
 ## Register commands
 
 Load commands after the client is ready:
