@@ -27,6 +27,7 @@ export type MockCommandContextOptions = MockContextOptions & {
 
 export type MockComponentContextOptions = MockContextOptions & {
   interaction?: MockComponentInteractionOptions;
+  params?: Record<string, string>;
 };
 
 type MockContextReply = (
@@ -98,10 +99,20 @@ export function createMockComponentContext(options: MockComponentContextOptions 
       id: options.interaction?.user?.id ?? options.userId,
     },
   });
+  const params = options.params ?? {};
 
   return {
     ...createBaseContext(options),
     customId: interaction.customId,
+    getParam: (name: string) => {
+      if (!Object.hasOwn(params, name)) {
+        return undefined;
+      }
+      const value = params[name];
+      return typeof value === "string" ? value : undefined;
+    },
+    hasParam: (name: string) => Object.hasOwn(params, name) && typeof params[name] === "string",
     interaction,
+    params,
   } as unknown as ComponentContext;
 }

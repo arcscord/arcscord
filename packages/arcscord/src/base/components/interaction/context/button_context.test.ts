@@ -41,5 +41,7 @@ describe("buttonContext", () => {
     expect(ctx.hasParam("ticketId")).toBe(true);
     expect(ctx.getParam("missing")).toBeUndefined();
     expect(ctx.hasParam("missing")).toBe(false);
+    expect(ctx.getParam("toString")).toBeUndefined();
+    expect(ctx.hasParam("toString")).toBe(false);
   });
 });

@@ -90,7 +90,11 @@ export class BaseComponentContext<
 
   /** Returns a decoded route parameter when it is available. */
   getParam(name: string): string | undefined {
-    return (this.params as Record<string, string | undefined>)[name];
+    if (!Object.hasOwn(this.params, name)) {
+      return undefined;
+    }
+    const value = (this.params as Record<string, unknown>)[name];
+    return typeof value === "string" ? value : undefined;
   }
 
   /**
@@ -99,7 +103,7 @@ export class BaseComponentContext<
   hasParam<Name extends string>(
     name: Name,
   ): this is this & { params: RouteVariablesObject<Route> & Record<Name, string> } {
-    return Object.hasOwn(this.params, name) && typeof this.getParam(name) === "string";
+    return typeof this.getParam(name) === "string";
   }
 
   /**
