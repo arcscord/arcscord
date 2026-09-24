@@ -108,8 +108,8 @@ else {
 ```
 
 For applications that keep commands, components, and events in one generated
-handler list, use `client.loadHandlers` — it loads events first, then components,
-then commands:
+handler list, use `client.loadHandlers` — it validates the complete batch,
+publishes commands to Discord, then registers the local handlers atomically:
 
 ```ts
 import handlers from "./handlers";

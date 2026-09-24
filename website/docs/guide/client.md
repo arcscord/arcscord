@@ -173,6 +173,7 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 | `client.componentManager` | Routes component custom IDs and dispatches interactions. |
 | `client.eventManager` | Wraps discord.js event listeners with execution handling. |
 | `client.localeManager` | i18next wrapper used at registration time and per interaction. |
+| `client.handlersState` | Latest handler bootstrap state: `idle`, `loading`, `ready`, or `failed`. |
 
 ## Methods
 
@@ -194,6 +195,10 @@ await client.waitReady({
 
 The previous numeric form remains supported: `waitReady(100)` sets `checkInterval` to 100 ms and keeps the globally configured timeout.
 
+`client.isOperational()` is stricter than Discord readiness alone: it returns
+`true` only when the Discord client is ready and the latest `loadHandlers` call
+completed successfully.
+
 Loading comes in two tiers with deliberately different error handling:
 
 - The **per-category loaders** (`loadCommands`, `loadComponents`, `loadEvents`) are `async` and return an Arcscord [`Result`](./error-handling.md) — `[error, count]`. On failure the first tuple item is an [`ArcscordError`](../reference/error-codes.md) whose `code` identifies the problem. They never throw for expected failures such as a duplicate route or an unmet intent requirement — you inspect the outcome.
@@ -201,7 +206,10 @@ Loading comes in two tiers with deliberately different error handling:
 
 ### `loadHandlers(handlers, logs?)`
 
-Convenience method. Loads events, then components, then commands in a single call. **Throws** the first `ArcscordError` on failure; returns a `HandlersLoadReport` (`{ commands, components, events }` load counts) on success.
+Convenience method. It prevalidates commands, components, and events as one
+batch, publishes commands to Discord, then registers every handler locally.
+**Throws** the first `ArcscordError` on failure; returns a `HandlersLoadReport`
+(`{ commands, components, events }` load counts) on success.
 
 ```ts
 // Fail-fast: an unhandled throw crashes the process at startup.
@@ -223,6 +231,16 @@ catch (err) {
 ```
 
 If `applicationId` is set, commands are registered immediately over REST without waiting for `clientReady`. Otherwise, `loadHandlers` waits for the client to be ready before pushing commands.
+Any `clientReady` handlers in the validated batch are registered before that
+wait so they still observe the lifecycle event; all other local handlers are
+registered after command publication.
+
+Local registration is atomic for each call. If a failure occurs after local
+registration starts, Arcscord removes only the events, components, and command
+entries added by that call; handlers loaded by earlier calls remain available.
+Discord REST operations are external side effects: once Discord has accepted a
+command mutation, Arcscord cannot guarantee that the remote change can be rolled
+back if a later local registration step fails.
 
 ---
 

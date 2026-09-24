@@ -1,20 +1,24 @@
 import type { Result } from "@arcscord/error";
+import type { RESTPostAPIApplicationCommandsJSONBody } from "discord-api-types/v10";
 import type { BaseMessageOptions, BitFieldResolvable, GatewayIntentsString } from "discord.js";
 import type {
   ArcClientOptions,
   BaseMessageContext,
   HandlersList,
   HandlersLoadReport,
+  HandlersState,
   MessageOptions,
   WaitReadyOptions,
 } from "#/base/client/client.type";
 import type { Command } from "#/base/command/command_definition.type";
 import type { ComponentHandler } from "#/base/components/interaction/component_handlers.type";
 import type { AnyLoadableEventHandler } from "#/base/event/event.type";
+import type { ApplicationCommandRegistration } from "#/manager/command/command_registration";
 import type { ArcscordError } from "#/utils/error/arcscord_error";
 import type { LoggerConstructor, LoggerInterface } from "#/utils/logger/logger.type";
 import { error, ok } from "@arcscord/error";
 import { Client as DJSClient, EmbedBuilder, REST } from "discord.js";
+import { gatewayEvents } from "#/base/event/event_source";
 import { ComponentManager } from "#/manager";
 import { CommandManager } from "#/manager/command/command_manager.class";
 import { EventManager } from "#/manager/event/event_manager.class";
@@ -72,6 +76,9 @@ export class ArcClient extends DJSClient {
    * Indicates if the client is ready
    */
   ready = false;
+
+  /** State of the latest atomic handler-loading operation. */
+  handlersState: HandlersState = "idle";
 
   /**
    * Additional options for configuring the client
@@ -205,6 +212,11 @@ export class ArcClient extends DJSClient {
     });
   }
 
+  /** Whether Discord is ready and the latest handler batch loaded successfully. */
+  isOperational(): boolean {
+    return this.isReady() && this.handlersState === "ready";
+  }
+
   /**
    * Creates a new logger instance with the provided name
    *
@@ -324,12 +336,17 @@ export class ArcClient extends DJSClient {
   /**
    * Loads and registers handlers in one convenience call.
    *
-   * Events, then components, then commands are loaded in order. Unlike the
-   * per-category loaders — which return a {@link Result} — this bootstrap helper
-   * fails fast: it **throws** the first {@link ArcscordError} so a broken startup
-   * crashes loudly instead of silently continuing. Use the granular
-   * `loadCommands` / `loadComponents` / `loadEvents` when you want to inspect the
-   * failure instead.
+   * The complete batch is validated before local state changes. Commands are
+   * then published to Discord before events, components, and resolved commands
+   * are registered locally. When command publication must wait for Discord,
+   * `clientReady` handlers are registered first so they can observe that
+   * lifecycle event. If local registration fails, every local mutation made by
+   * this call is rolled back without touching handlers that were loaded
+   * previously. A Discord REST mutation that was already accepted cannot always
+   * be reversed reliably.
+   *
+   * Unlike the per-category loaders — which return a {@link Result} — this
+   * bootstrap helper fails fast: it **throws** the first {@link ArcscordError}.
    *
    * @param handlers - The handlers to load
    * @param logs - Whether to emit an info log per loaded category
@@ -337,42 +354,125 @@ export class ArcClient extends DJSClient {
    * @throws {@link ArcscordError} on the first loading failure.
    */
   async loadHandlers(handlers: HandlersList, logs = false): Promise<HandlersLoadReport> {
-    const report: HandlersLoadReport = { commands: 0, components: 0, events: 0 };
+    const commands = handlers.commands ?? [];
+    const components = handlers.components ?? [];
+    const events = handlers.events ?? [];
+    const report: HandlersLoadReport = {
+      commands: commands.length,
+      components: components.length,
+      events: events.length,
+    };
+    const loadedComponents: ComponentHandler[] = [];
+    const loadedEvents: AnyLoadableEventHandler[] = [];
+    const previousCommands = new Map(this.commandManager.commands);
+    let commandsPublishedLocally = false;
 
-    if (handlers.events && handlers.events.length > 0) {
-      const [err, count] = await this.loadEvents(handlers.events);
-      if (err !== null) {
-        throw err;
-      }
-      report.events = count;
-      if (logs) {
-        this.eventManager.logger.info(`Loaded ${count} events`);
-      }
-    }
-    if (handlers.components && handlers.components.length > 0) {
-      const [err, count] = await this.loadComponents(handlers.components);
-      if (err !== null) {
-        throw err;
-      }
-      report.components = count;
-      if (logs) {
-        this.componentManager.logger.info(`Loaded ${count} components`);
-      }
-    }
-    if (handlers.commands && handlers.commands.length > 0) {
-      if (!this.ready && !this.arcOptions.applicationId) {
-        await this.waitReady();
-      }
-      const [err, count] = await this.loadCommands(handlers.commands);
-      if (err !== null) {
-        throw err;
-      }
-      report.commands = count;
-      if (logs) {
-        this.commandManager.logger.info(`Loaded ${count} commands`);
-      }
-    }
+    this.handlersState = "loading";
 
-    return report;
+    try {
+      let commandBodies: RESTPostAPIApplicationCommandsJSONBody[] = [];
+      if (commands.length > 0) {
+        await this.localeManager.ready;
+        const [commandErr, bodies] = this.commandManager.loadCommands(commands, "default");
+        if (commandErr !== null) {
+          throw commandErr;
+        }
+        commandBodies = bodies;
+      }
+
+      const [componentErr] = this.componentManager.validateComponents(components);
+      if (componentErr !== null) {
+        throw componentErr;
+      }
+
+      const [eventErr] = this.eventManager.validateEvents(events);
+      if (eventErr !== null) {
+        throw eventErr;
+      }
+
+      let commandRegistrations: ApplicationCommandRegistration[] = [];
+      if (commands.length > 0) {
+        if (!this.ready && !this.arcOptions.applicationId) {
+          for (const event of events) {
+            const source = event.source ?? gatewayEvents;
+            if (source.id !== gatewayEvents.id || event.event !== "clientReady") {
+              continue;
+            }
+            const [err] = await this.eventManager.loadEvents([event]);
+            if (err !== null) {
+              throw err;
+            }
+            loadedEvents.push(event);
+          }
+          await this.waitReady();
+        }
+        const [registrationErr, registrations] = await this.commandManager.pushGlobalCommands(commandBodies);
+        if (registrationErr !== null) {
+          throw registrationErr;
+        }
+        commandRegistrations = registrations;
+      }
+
+      for (const event of events) {
+        if (loadedEvents.includes(event)) {
+          continue;
+        }
+        const [err] = await this.eventManager.loadEvents([event]);
+        if (err !== null) {
+          throw err;
+        }
+        loadedEvents.push(event);
+      }
+
+      for (const component of components) {
+        const [err] = this.componentManager.loadComponent(component);
+        if (err !== null) {
+          throw err;
+        }
+        loadedComponents.push(component);
+      }
+
+      if (commands.length > 0) {
+        commandsPublishedLocally = true;
+        this.commandManager.resolveCommands(commands, commandRegistrations);
+      }
+
+      this.handlersState = "ready";
+
+      if (logs) {
+        if (events.length > 0) {
+          this.eventManager.logger.info(`Loaded ${events.length} events`);
+        }
+        if (components.length > 0) {
+          this.componentManager.logger.info(`Loaded ${components.length} components`);
+        }
+        if (commands.length > 0) {
+          this.commandManager.logger.info(`Loaded ${commands.length} commands`);
+        }
+      }
+
+      return report;
+    }
+    catch (cause) {
+      for (const component of loadedComponents.toReversed()) {
+        this.componentManager.unloadComponentHandler(component);
+      }
+      for (const event of loadedEvents.toReversed()) {
+        if (event.source) {
+          this.eventManager.unloadEvent(event.source, event.name);
+        }
+        else {
+          this.eventManager.unloadEvent(event.name);
+        }
+      }
+      if (commandsPublishedLocally) {
+        this.commandManager.commands.clear();
+        for (const [name, command] of previousCommands) {
+          this.commandManager.commands.set(name, command);
+        }
+      }
+      this.handlersState = "failed";
+      throw cause;
+    }
   }
 }
