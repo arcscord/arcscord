@@ -198,6 +198,7 @@ describe("message modal operations", () => {
       throw new Error("expected a message modal context");
     }
 
+    expect(ctx.message.id).toBe("message_1");
     await expect(ctx.updateSourceMessage("Updated")).resolves.toEqual([null, true]);
     expect(update).toHaveBeenCalledWith("Updated");
     expect(ctx.hasReply).toBe(true);

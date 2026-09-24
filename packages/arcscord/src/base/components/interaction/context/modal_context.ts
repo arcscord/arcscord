@@ -87,6 +87,11 @@ export class ModalContext<
 > extends BaseComponentContext<M, Route> {
   interaction: ModalSubmitInteraction;
 
+  /** The message that opened this modal, or `null` for command-opened modals. */
+  get message(): Message | null {
+    return this.interaction.message;
+  }
+
   /**
    * Parsed values by field name.
    */
