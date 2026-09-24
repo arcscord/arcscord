@@ -88,6 +88,24 @@ export class BaseComponentContext<
     this.additional = options.additional || ({} as MiddlewaresResults<M>);
   }
 
+  /** Returns a decoded route parameter when it is available. */
+  getParam(name: string): string | undefined {
+    if (!Object.hasOwn(this.params, name)) {
+      return undefined;
+    }
+    const value = (this.params as Record<string, unknown>)[name];
+    return typeof value === "string" ? value : undefined;
+  }
+
+  /**
+   * Checks for a decoded route parameter and narrows `ctx.params` when present.
+   */
+  hasParam<Name extends string>(
+    name: Name,
+  ): this is this & { params: RouteVariablesObject<Route> & Record<Name, string> } {
+    return typeof this.getParam(name) === "string";
+  }
+
   /**
    * Checks if the current context is a button context.
    * @returns True if it is a button context, false otherwise.

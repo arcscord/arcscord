@@ -186,19 +186,23 @@ class RequiredRouteParamMiddleware extends ComponentMiddleware {
   readonly name = "requiredRouteParam" as const;
 
   run(ctx: ComponentContext): ComponentMiddlewareRun<{ itemId: string }> {
-    const itemId = ctx.params.itemId;
-
-    if (!itemId) {
+    if (!ctx.hasParam("itemId")) {
       return this.fail({
         _tag: "MissingRouteParameter",
         parameter: "itemId",
       } as const);
     }
 
-    return this.next({ itemId });
+    return this.next({ itemId: ctx.params.itemId });
   }
 }
 ```
+
+Reusable component middleware receives a union of every component context, so
+use `ctx.getParam(name)` for an optional `string | undefined` lookup or
+`ctx.hasParam(name)` to narrow `ctx.params[name]` to `string`. The presence
+check accepts empty-string values; it checks the route parameter property rather
+than its truthiness.
 
 ## Accessing Middleware Values
 
