@@ -17,6 +17,23 @@ export * from "./message_component_context";
 export * from "./modal_context";
 export * from "./select_menu_context";
 
+// TypeScript 5.4 requires an interface method for this `this`-based predicate.
+// eslint-disable-next-line ts/consistent-type-definitions
+interface ComponentParamAccess<Route extends string> {
+  /** Returns a decoded route parameter when it is available. */
+  getParam: (name: string) => string | undefined;
+
+  /**
+   * Checks for a decoded route parameter and narrows `ctx.params` when present.
+   */
+  // eslint-disable-next-line ts/method-signature-style
+  hasParam<Name extends string>(
+    name: Name,
+  ): this is ComponentContext<Route> & {
+    params: RouteVariablesObject<Route> & Record<Name, string>;
+  };
+}
+
 /**
  * Union of every component context (button, modal, and the select-menu variants)
  * a component handler may receive, parameterized by its `Route`.
@@ -38,17 +55,4 @@ export type ComponentContext<Route extends string = string>
       ? Omit<Context, "getParam" | "hasParam">
       : never
     : never)
-  & {
-    /** Returns a decoded route parameter when it is available. */
-    getParam: (name: string) => string | undefined;
-
-    /**
-     * Checks for a decoded route parameter and narrows `ctx.params` when present.
-     */
-    hasParam: <Name extends string>(
-      this: ComponentContext<Route>,
-      name: Name,
-    ) => this is ComponentContext<Route> & {
-      params: RouteVariablesObject<Route> & Record<Name, string>;
-    };
-  };
+  & ComponentParamAccess<Route>;

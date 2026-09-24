@@ -106,6 +106,7 @@ const arcscordTypedocOptions = {
     "CommandExecutionHandlerOptions",
     "CommandResultHandlerImplementer",
     "ComponentExecutionHandlerOptions",
+    "ComponentParamAccess",
     "ContextOptionsDef",
     "EventExecutionHandlerOptions",
     "FullCommandInput",
