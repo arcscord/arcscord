@@ -29,6 +29,22 @@ describe("buttonContext", () => {
     expect(makeButtonContext("my_button").customId).toBe("my_button");
   });
 
+  it("reads and narrows route parameters without treating empty values as absent", () => {
+    const client = createMockClient();
+    const interaction = createMockButtonInteraction({ customId: "ticket/$" });
+    const ctx = new ButtonContext<[], "ticket/{ticketId}">(client, interaction, {
+      locale: "en",
+      params: { ticketId: "" },
+    });
+
+    expect(ctx.getParam("ticketId")).toBe("");
+    expect(ctx.hasParam("ticketId")).toBe(true);
+    expect(ctx.getParam("missing")).toBeUndefined();
+    expect(ctx.hasParam("missing")).toBe(false);
+    expect(ctx.getParam("toString")).toBeUndefined();
+    expect(ctx.hasParam("toString")).toBe(false);
+  });
+
   it("sends follow-up replies through the shared repliable context", async () => {
     const ctx = makeButtonContext();
     const followUp = vi.fn(async () => ({}));
