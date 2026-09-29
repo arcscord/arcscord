@@ -24,6 +24,8 @@ export type ResolvedReleasePackage<TPackage extends ReleasePackage = ReleasePack
 
 export const RELEASE_PACKAGES = Object.freeze([
   { directory: "packages/arcscord", name: "arcscord", slug: "arcscord" },
+  { directory: "packages/adapter-i18next", name: "@arcscord/adapter-i18next", slug: "adapter-i18next" },
+  { directory: "packages/adapter-paraglide", name: "@arcscord/adapter-paraglide", slug: "adapter-paraglide" },
   { directory: "packages/components", name: "@arcscord/components", slug: "components" },
   { directory: "packages/middleware", name: "@arcscord/middleware", slug: "middleware" },
   { directory: "packages/error", name: "@arcscord/error", slug: "error" },

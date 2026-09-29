@@ -59,6 +59,7 @@ Controls the built-in logger. All fields are optional.
 | `level` | `"trace"` \| `"debug"` \| `"info"` \| `"warn"` \| `"error"` \| `"fatal"` | `"info"` | Minimum level to log. Use `"debug"` to see command/component execution logs during development. |
 | `format` | `"pretty"` \| `"json"` | `"pretty"` | Output format. Use `"json"` in production or containers. |
 | `loggerFunc` | `(...data: unknown[]) => void` | per-level `console.log`/`console.error` | Custom function to receive each log line. When omitted, warn/error/fatal go to `console.error`, everything else to `console.log`. |
+| `sink` | `(record: StructuredLogRecord) => void` | — | Primary structured output. When set without `loggerFunc`, replaces the default console output. |
 | `customLogger` | `LoggerConstructor` | `ArcLogger` | Replace the built-in logger class entirely. Must satisfy `LoggerInterface`. |
 | `diagnostics` | `{ loggerFunc, format? }` | — | Secondary output for full error diagnostics. Providing `loggerFunc` is what turns it on. |
 | `errorDetail` | `"short"` \| `"full"` | `"short"` if `diagnostics` is set, `"full"` otherwise | How much detail `logError`/`fatalError` print on the main sink. |
@@ -131,8 +132,8 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 ```
 
 The `context` argument contains:
-- `context.locale` — the detected i18next language for the interaction (when locale manager is enabled).
-- `context.t` — a fixed translation function for that locale.
+- `context.locale` — the detected provider language for the interaction.
+- `context.t` — the deprecated fixed i18next function, only when the legacy locale manager is enabled.
 
 ---
 
@@ -145,7 +146,8 @@ Per-manager configuration. All fields are optional.
 | `managers.command` | Slash, user, and message commands — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
 | `managers.component` | Buttons, select menus, modals — execution handlers, dispatch diagnostics | [Execution handlers](/guide/execution-handlers) |
 | `managers.event` | Discord.js event listeners — intent checks, execution handlers | [Execution handlers](/guide/execution-handlers) |
-| `managers.locale` | i18next integration — language map, detection, resources | [Localization](/guide/localization) |
+| `localization` | Adapter, locale mapping, detection, and Discord metadata locales | [Localization](/guide/localization) |
+| `managers.locale` | Deprecated v1 i18next compatibility layer; removed in v2 | [Localization migration](/guide/localization#migrating-from-localemanager) |
 
 Example with event intent check configuration:
 
@@ -165,14 +167,15 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 
 ## Manager properties
 
-`ArcClient` exposes four manager instances:
+`ArcClient` exposes its managers and the provider-independent localization service:
 
 | Property | Description |
 |---|---|
 | `client.commandManager` | Registers commands with Discord and dispatches interactions. |
 | `client.componentManager` | Routes component custom IDs and dispatches interactions. |
 | `client.eventManager` | Wraps discord.js event listeners with execution handling. |
-| `client.localeManager` | i18next wrapper used at registration time and per interaction. |
+| `client.localization` | Detects provider locales and resolves Discord metadata through the configured adapter. |
+| `client.localeManager` | Deprecated v1 i18next compatibility wrapper; removed in v2. |
 | `client.handlersState` | Latest handler bootstrap state: `idle`, `loading`, `ready`, or `failed`. |
 
 ## Methods
@@ -180,6 +183,8 @@ const client = new ArcClient(process.env.DISCORD_TOKEN!, {
 ### `waitReady(options?)`
 
 Waits for the Discord client to become ready. Per-call options override the defaults configured through `ArcClientOptions.waitReady`. The promise rejects with `ArcClientReadyTimeoutError` when the effective timeout is reached.
+
+This is separate from `localization.readyTimeout`, which limits how long command loading waits for a localization adapter to initialize.
 
 ```ts
 await client.waitReady({

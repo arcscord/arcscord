@@ -14,6 +14,7 @@ import type {
   CommandContexts,
   CommandIntegrationType,
 } from "#/base/command/command_definition.type";
+import type { LocalizationDefinition } from "#/localization";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils";
 import { ApplicationCommandOptionType, ApplicationCommandType } from "discord-api-types/v10";
@@ -28,7 +29,7 @@ import { permissionToAPI } from "#/utils/discord/transformers/permission";
 /** Metadata shared by top-level command definitions and sub-command groups. */
 type CommonCommandMetadata = {
   name: string;
-  nameLocalizations?: LocaleMap | LocaleCallback;
+  nameLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
   defaultMemberPermissions?: Parameters<typeof permissionToAPI>[0];
   nsfw?: boolean;
   contexts?: CommandContexts[];

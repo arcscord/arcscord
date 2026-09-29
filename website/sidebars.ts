@@ -62,6 +62,8 @@ const sidebars: SidebarsConfig = {
       label: "External packages",
       items: [
         "packages/arcscord",
+        "packages/adapter-i18next",
+        "packages/adapter-paraglide",
         "packages/components",
         "packages/webhooks",
         "packages/middleware",

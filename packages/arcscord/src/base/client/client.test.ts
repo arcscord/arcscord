@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { createCommand } from "#/base/command/command_func";
 import { button, createButton, createSelectMenu, stringSelectMenu } from "#/base/components";
 import { createEvent } from "#/base/event";
+import { createLocalizationAdapter } from "#/localization";
 import { ArcscordError, arcscordErrorCodes } from "#/utils";
 import { ArcClient } from "./client.class";
 
@@ -22,6 +23,20 @@ afterEach(() => {
 });
 
 describe("arc client messages", () => {
+  it("rejects modern and legacy localization configured together", () => {
+    const adapter = createLocalizationAdapter({
+      defaultLocale: "en",
+      locales: ["en"],
+      getFixed: locale => locale,
+    });
+
+    expect(() => new ArcClient("token", {
+      intents: [],
+      localization: { adapter },
+      managers: { locale: { enabled: false } },
+    })).toThrow("cannot be configured together");
+  });
+
   it("passes locale context to user-visible base messages", async () => {
     const client = new ArcClient("token", {
       intents: [],
@@ -148,6 +163,38 @@ describe("arcClient.waitReady", () => {
 });
 
 describe("arcClient.loadHandlers", () => {
+  it("waits for modern localization before preparing commands", async () => {
+    let resolveReady!: () => void;
+    const ready = new Promise<void>((resolve) => {
+      resolveReady = resolve;
+    });
+    const adapter = createLocalizationAdapter({
+      defaultLocale: "en",
+      locales: ["en"],
+      ready,
+      getFixed: locale => locale,
+    });
+    const client = new ArcClient("token", {
+      intents: [],
+      applicationId: "app",
+      localization: { adapter },
+    });
+    const command = createCommand({
+      slash: { name: "localized", description: "Localized" },
+      run: ctx => ctx.ok(),
+    });
+    const loadCommands = vi.spyOn(client.commandManager, "loadCommands");
+    vi.spyOn(client.commandManager, "pushGlobalCommands").mockResolvedValue(ok([]));
+
+    const loading = client.loadHandlers({ commands: [command] });
+    await Promise.resolve();
+    expect(loadCommands).not.toHaveBeenCalled();
+
+    resolveReady();
+    await expect(loading).resolves.toEqual({ commands: 1, components: 0, events: 0 });
+    expect(loadCommands).toHaveBeenCalledOnce();
+  });
+
   it("returns a per-category report on success", async () => {
     const client = new ArcClient("token", { intents: [] });
     const simpleButton = createButton({

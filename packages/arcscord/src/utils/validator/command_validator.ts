@@ -10,6 +10,7 @@ import type {
   SubCommandGroupDefinition,
 } from "#/base/command/command_definition.type";
 import type { Option, OptionsList } from "#/base/command/option.type";
+import type { LocalizationDefinition } from "#/localization";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils";
 import type { ValidationContext, ValidationFailure } from "./validator.util";
@@ -438,7 +439,7 @@ function validateOptionChoices(
 
 function validateName(
   value: string,
-  localizations: LocaleMap | LocaleCallback | undefined,
+  localizations: LocaleMap | LocaleCallback | LocalizationDefinition | undefined,
   path: string,
   mode: NameValidationMode,
   client: ArcClient,
@@ -472,7 +473,7 @@ function validateName(
 
 function validateChoiceName(
   value: string,
-  localizations: LocaleMap | LocaleCallback | undefined,
+  localizations: LocaleMap | LocaleCallback | LocalizationDefinition | undefined,
   path: string,
   client: ArcClient,
   context: CommandValidationContext,
@@ -489,7 +490,7 @@ function validateChoiceName(
 
 function validateDescription(
   value: string,
-  localizations: LocaleMap | LocaleCallback | undefined,
+  localizations: LocaleMap | LocaleCallback | LocalizationDefinition | undefined,
   path: string,
   client: ArcClient,
   context: CommandValidationContext,

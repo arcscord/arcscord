@@ -37,6 +37,14 @@ describe("componentMiddleware", () => {
     expect(exit).toEqual({ status: "success", value: { test: { allowed: true } } });
   });
 
+  it("provides route parameter helpers on mock contexts", () => {
+    const ctx = createMockComponentContext({ params: { itemId: "item-1" } });
+
+    expect(ctx.getParam("itemId")).toBe("item-1");
+    expect(ctx.hasParam("itemId")).toBe(true);
+    expect(ctx.getParam("toString")).toBeUndefined();
+  });
+
   it("preserves explicit failures and distinguishes thrown defects", async () => {
     const failure = new class extends ComponentMiddleware {
       readonly name = "failure" as const;
