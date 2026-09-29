@@ -20,6 +20,8 @@ export type {
   LoggerInterface,
   LoggerOptions,
   LogLevel,
+  LogSink,
+  StructuredLogRecord,
 } from "./logger.type";
 export {
   createLogger,

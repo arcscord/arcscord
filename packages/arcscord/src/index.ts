@@ -209,13 +209,18 @@ export {
 } from "./base/components/interaction/context";
 export type {
   ComponentContext,
+  MessageModalContext,
 } from "./base/components/interaction/context";
 export type {
   ComponentBuildArgs,
+  ComponentRoute,
+  ComponentRouteBuild,
+  ComponentRouteParams,
   IdInitialiseFunction,
   RouteVariables,
   RouteVariablesObject,
 } from "./base/components/interaction/route";
+export { createComponentRoute } from "./base/components/interaction/route";
 export {
   buildModal,
   modalChannelSelect,
@@ -374,6 +379,25 @@ export {
   InteractionContext,
 } from "./base/utils/interaction_context.class";
 export {
+  createLocalizationAdapter,
+  createLocalizationDefinition,
+  defaultLanguageMap,
+  defaultLocaleDetector,
+  defaultLocalizationReadyTimeout,
+  isLocalizationDefinition,
+  LocalizationService,
+} from "./localization";
+export type {
+  CreateLocalizationAdapterOptions,
+  LocaleDetectionContext,
+  LocaleDetector,
+  Localizable,
+  LocalizationAdapter,
+  LocalizationDefinition,
+  LocalizationOptions,
+  Localizations,
+} from "./localization";
+export {
   CommandManager,
   ComponentManager,
   defaultCommandExecutionHandler,
@@ -461,6 +485,7 @@ export {
   executionFailure,
   executionSuccess,
   isArcscordError,
+  LocalizationReadyTimeoutError,
   normalizeArcscordError,
   normalizeHandlerReturn,
 } from "./utils/error";
@@ -504,7 +529,9 @@ export type {
   LoggerInterface,
   LoggerOptions,
   LogLevel,
+  LogSink,
   SerializedError,
+  StructuredLogRecord,
 } from "./utils/logger";
 export { logLevels } from "./utils/logger/logger.enum";
 export type {

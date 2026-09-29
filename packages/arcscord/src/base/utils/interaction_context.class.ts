@@ -70,6 +70,9 @@ export class InteractionContext<InGuild extends true | false = true | false> {
 
   /**
    * get a locale text, with language detected self
+   *
+   * @deprecated Use the configured localization adapter's `getFixed(this)` method.
+   * This i18next compatibility property will be removed in Arcscord v2.
    */
   t: typeof i18next.t;
 
@@ -173,6 +176,27 @@ export class RepliableInteractionContext<
     }
     catch (e) {
       return error(new InteractionOperationError("editReply", e));
+    }
+  }
+
+  /**
+   * Sends an additional reply after the interaction has been acknowledged.
+   */
+  async followUp(
+    options: MessagePayload | InteractionReplyOptions | string,
+    extraOptions: Omit<InteractionReplyOptions, "content"> = {},
+  ): Promise<Result<string | true, ArcscordError<"INTERACTION_OPERATION_FAILED">>> {
+    try {
+      await this.interaction.followUp(
+        typeof options === "string"
+          ? { ...extraOptions, content: options }
+          : options,
+      );
+      this.hasReply = true;
+      return ok(true);
+    }
+    catch (e) {
+      return error(new InteractionOperationError("followUp", e));
     }
   }
 

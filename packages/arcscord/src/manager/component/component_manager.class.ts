@@ -341,7 +341,7 @@ export class ComponentManager extends BaseManager {
     interaction: MessageComponentInteraction | ModalSubmitInteraction,
     type: keyof ComponentList,
   ): Promise<void> {
-    const locale = await this.client.localeManager.detectLanguage({
+    const locale = await this.client.localization.detectLanguage({
       interaction,
       user: interaction.user,
       guild: interaction.guild,

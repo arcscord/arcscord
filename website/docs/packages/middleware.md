@@ -43,16 +43,17 @@ import {
 
 ## Localized Reusable Messages
 
-Middleware messages can be static Discord.js message objects or callbacks. A callback receives the middleware-specific data plus `ctx`, `locale`, and `t`, which lets you centralize localized messages instead of redefining them on every command.
+Middleware messages can be static Discord.js message objects or callbacks. A callback receives the middleware-specific data plus `ctx`, `locale`, and the deprecated legacy `t`. Modern adapters use `ctx` with the application's adapter instance.
 
 ```ts
 import type { CommandBotPermissionMiddlewareMessageOptions, MessageOptions } from "@arcscord/middleware";
 import type { CommandContext } from "arcscord";
 import type { PermissionsString } from "discord.js";
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
+import { locale } from "../localization";
 
-const missingBotPermissionMessage: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext> = ({ missingPermissions, t }) => ({
-  content: t($ => $.middleware.bot_missing_permissions, {
+const missingBotPermissionMessage: MessageOptions<CommandBotPermissionMiddlewareMessageOptions, CommandContext> = ({ ctx, missingPermissions }) => ({
+  content: locale.getFixed(ctx)($ => $.middleware.bot_missing_permissions, {
     permissions: missingPermissions.join(", "),
   }),
 });

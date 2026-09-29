@@ -1,5 +1,6 @@
 import type { BaseMessageOptions, ClientOptions } from "discord.js";
 import type i18next from "i18next";
+import type { LocalizationOptions } from "#/localization";
 import type { EventManagerOptions } from "#/manager";
 import type { CommandManagerOptions } from "#/manager/command/command_manager.type";
 import type { ComponentManagerOptions } from "#/manager/component/component_manager.type";
@@ -18,6 +19,12 @@ export type ArcClientLoggerOptions = {
    * @default console.log
    */
   loggerFunc?: (...data: unknown[]) => void;
+
+  /**
+   * Receives sanitized structured records. When configured without
+   * `loggerFunc`, this replaces the default console output.
+   */
+  sink?: LoggerOptions["sink"];
 
   /**
    * Change the logger used by the framework, need a constructor, not a class !
@@ -55,7 +62,6 @@ export type ArcClientLoggerOptions = {
    *     level: "info",
    *     format: "pretty",
    *     diagnostics: {
-   *       enabled: true,
    *       format: "json",
    *       loggerFunc: line => diagnostics.push(String(line)),
    *     },
@@ -64,12 +70,23 @@ export type ArcClientLoggerOptions = {
    * ```
    */
   diagnostics?: LoggerOptions["diagnostics"];
+
+  /** Controls stack and cause detail on the formatted primary output. */
+  errorDetail?: LoggerOptions["errorDetail"];
 };
 
 /**
  * Represents options for an ArcClient.
  */
 export type ArcClientOptions = ClientOptions & {
+  /**
+   * Provider-independent localization configuration.
+   *
+   * Use an adapter package such as `@arcscord/adapter-i18next` or
+   * `@arcscord/adapter-paraglide`.
+   */
+  localization?: LocalizationOptions;
+
   /**
    * Discord application id used to register commands before the client is ready.
    *
@@ -130,6 +147,9 @@ export type WaitReadyOptions = {
 export type ManagersOptions = {
   /**
    * Configuration of {@link LocaleManager} for customize localization of arcscord
+   *
+   * @deprecated Use {@link ArcClientOptions.localization}. This compatibility
+   * layer will be removed in Arcscord v2.
    */
   locale?: LocaleManagerOptions;
 
@@ -160,6 +180,8 @@ export type BaseMessageContext = {
 
   /**
    * Fixed i18next translation function for `locale`.
+   *
+   * @deprecated Use the configured adapter's `getFixed(context)` method.
    */
   t?: typeof i18next.t;
 };
