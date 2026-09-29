@@ -149,6 +149,8 @@ Per-manager configuration. All fields are optional.
 | `localization` | Adapter, locale mapping, detection, and Discord metadata locales | [Localization](/guide/localization) |
 | `managers.locale` | Deprecated v1 i18next compatibility layer; removed in v2 | [Localization migration](/guide/localization#migrating-from-localemanager) |
 
+Manager lifecycle telemetry is available through the opt-in [diagnostics channels](/guide/diagnostics-channels).
+
 Example with event intent check configuration:
 
 ```ts

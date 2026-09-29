@@ -101,6 +101,9 @@ Use `client.eventManager.dispatcher(source)` when a transport needs a bound call
 
 Gateway intent diagnostics apply only to `gatewayEvents`; custom sources never consult the Gateway intent map.
 
+Manager loading, dispatch, execution, and intent checks can also be observed
+without changing handler configuration through [diagnostics channels](/guide/diagnostics-channels).
+
 Gateway `executionHandlers` keep their existing Discord.js-only contract and
 never receive custom-source events. Configure `sourceExecutionHandlers` when a
 custom transport needs its own execution interceptors:
