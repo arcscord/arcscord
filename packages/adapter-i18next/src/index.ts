@@ -44,6 +44,9 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
   const ready = options.instance
     ? Promise.resolve()
     : instance.init(options.options).then(() => undefined);
+  let defaultLocale = options.defaultLocale
+    ?? resolveFallbackLocale(instance, options.options)
+    ?? "en";
 
   const candidates = (): Iterable<string> => {
     if (options.locales) {
@@ -64,13 +67,24 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
         localeSet.add(locale);
       }
     }
+    if (options.defaultLocale === undefined) {
+      const fallback = resolveFallbackLocale(instance, options.options);
+      defaultLocale = fallback && localeSet.has(fallback)
+        ? fallback
+        : localeSet.values().next().value ?? fallback ?? "en";
+    }
   });
 
   const adapter = createLocalizationAdapter<TFunction>({
-    defaultLocale: options.defaultLocale ?? resolveFallbackLocale(instance, options.options),
+    defaultLocale,
     locales: localeSet,
     ready: initialized,
     getFixed: locale => instance.getFixedT(locale),
+  });
+  Object.defineProperty(adapter, "defaultLocale", {
+    configurable: true,
+    enumerable: true,
+    get: () => defaultLocale,
   });
   const discord = ((key: SelectorParam | string | string[], translationOptions?: TOptions) => {
     return createLocalizationDefinition(adapter, (locale) => {
@@ -92,15 +106,24 @@ export function createI18nextAdapter(options: I18nextAdapterOptions): I18nextAda
   });
 }
 
-function resolveFallbackLocale(instance: i18n, options: InitOptions | undefined): string {
+function resolveFallbackLocale(instance: i18n, options: InitOptions | undefined): string | undefined {
   const fallback = instance.options.fallbackLng ?? options?.fallbackLng;
   if (typeof fallback === "string") {
     return fallback;
   }
   if (Array.isArray(fallback)) {
-    return fallback[0] ?? "en";
+    return fallback[0];
   }
-  return "en";
+  if (fallback && typeof fallback === "object" && "default" in fallback) {
+    const globalFallback = fallback.default;
+    if (typeof globalFallback === "string") {
+      return globalFallback;
+    }
+    if (Array.isArray(globalFallback)) {
+      return globalFallback[0];
+    }
+  }
+  return undefined;
 }
 
 function hasTranslationResources(instance: i18n, locale: string): boolean {
