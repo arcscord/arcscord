@@ -21,6 +21,12 @@ export type ArcClientLoggerOptions = {
   loggerFunc?: (...data: unknown[]) => void;
 
   /**
+   * Receives sanitized structured records. When configured without
+   * `loggerFunc`, this replaces the default console output.
+   */
+  sink?: LoggerOptions["sink"];
+
+  /**
    * Change the logger used by the framework, need a constructor, not a class !
    *
    * Only loggers created by ArcClient are updated; defaultLogger is not updated.
@@ -56,7 +62,6 @@ export type ArcClientLoggerOptions = {
    *     level: "info",
    *     format: "pretty",
    *     diagnostics: {
-   *       enabled: true,
    *       format: "json",
    *       loggerFunc: line => diagnostics.push(String(line)),
    *     },
@@ -65,6 +70,9 @@ export type ArcClientLoggerOptions = {
    * ```
    */
   diagnostics?: LoggerOptions["diagnostics"];
+
+  /** Controls stack and cause detail on the formatted primary output. */
+  errorDetail?: LoggerOptions["errorDetail"];
 };
 
 /**
