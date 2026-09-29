@@ -198,8 +198,11 @@ import handlers from "./handlers";
 await client.loadHandlers(handlers, true /* info logs */);
 ```
 
-`loadHandlers` loads events first, then components, then waits for the client to
-be ready before registering commands.
+`loadHandlers` validates the complete batch first, publishes commands to
+Discord, then registers events, components, and resolved commands locally. A
+local failure rolls back the handlers added by that call. If command publication
+must wait for Discord readiness, validated `clientReady` handlers are registered
+before the wait so they do not miss the event.
 
 You can also access the manager directly:
 
