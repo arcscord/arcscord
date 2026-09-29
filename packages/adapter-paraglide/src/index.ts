@@ -57,25 +57,35 @@ export function createParaglideAdapter<Messages extends object>(
         return cached;
       }
 
-      const localized = new Proxy(options.messages, {
-        get(target, property, receiver) {
-          const value = Reflect.get(target, property, receiver) as unknown;
-          if (typeof value !== "function") {
-            return value;
-          }
+      const proxies = new WeakMap<object, object>();
+      const localize = (value: unknown): unknown => {
+        if ((typeof value !== "object" || value === null) && typeof value !== "function") {
+          return value;
+        }
+        const existing = proxies.get(value);
+        if (existing) {
+          return existing;
+        }
 
-          return (...args: unknown[]) => {
-            const inputs = args[0] ?? {};
-            const messageOptions = typeof args[1] === "object" && args[1] !== null
-              ? args[1] as Record<string, unknown>
-              : {};
-            return (value as (inputs: unknown, options: Record<string, unknown>) => string)(
-              inputs,
-              { ...messageOptions, locale },
-            );
-          };
-        },
-      });
+        const localized = typeof value === "function"
+          ? new Proxy(value, {
+              apply(target, thisArg, args: unknown[]) {
+                const inputs = args[0] ?? {};
+                const messageOptions = typeof args[1] === "object" && args[1] !== null
+                  ? args[1] as Record<string, unknown>
+                  : {};
+                return Reflect.apply(target, thisArg, [inputs, { ...messageOptions, locale }]);
+              },
+            })
+          : new Proxy(value, {
+              get(target, property, receiver) {
+                return localize(Reflect.get(target, property, receiver));
+              },
+            });
+        proxies.set(value, localized);
+        return localized;
+      };
+      const localized = localize(options.messages) as Messages;
       cache.set(locale, localized);
       return localized;
     },

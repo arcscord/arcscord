@@ -68,4 +68,51 @@ describe("i18next adapter", () => {
 
     expect(adapter.locales).toEqual(new Set(["en", "de"]));
   });
+
+  it("uses the global fallback from a fallback object", async () => {
+    const adapter = createI18nextAdapter({
+      options: {
+        fallbackLng: { fr: ["en"], default: ["de"] },
+        resources: { de: { translation: { greeting: "Hallo" } } },
+      },
+    });
+    await adapter.ready;
+
+    expect(adapter.defaultLocale).toBe("de");
+    expect(Object.keys(adapter)).toContain("defaultLocale");
+    expect(adapter.locales).toEqual(new Set(["de"]));
+  });
+
+  it("selects a resource locale when the fallback object has no valid global fallback", async () => {
+    const fallbackLngs: Record<string, string[]>[] = [{ fr: ["en"] }, { default: ["en"] }];
+    for (const fallbackLng of fallbackLngs) {
+      const adapter = createI18nextAdapter({
+        options: {
+          fallbackLng,
+          resources: { de: { translation: { greeting: "Hallo" } } },
+        },
+      });
+      await adapter.ready;
+
+      expect(adapter.defaultLocale).toBe("de");
+      expect(adapter.locales).toEqual(new Set(["de"]));
+    }
+  });
+
+  it("keeps an explicit default locale ahead of an object fallback", async () => {
+    const adapter = createI18nextAdapter({
+      defaultLocale: "de",
+      options: {
+        fallbackLng: { default: ["fr"] },
+        resources: {
+          de: { translation: { greeting: "Hallo" } },
+          fr: { translation: { greeting: "Bonjour" } },
+        },
+      },
+    });
+    await adapter.ready;
+
+    expect(adapter.defaultLocale).toBe("de");
+    expect(adapter.locales).toEqual(new Set(["de", "fr"]));
+  });
 });
