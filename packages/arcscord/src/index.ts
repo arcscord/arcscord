@@ -213,10 +213,14 @@ export type {
 } from "./base/components/interaction/context";
 export type {
   ComponentBuildArgs,
+  ComponentRoute,
+  ComponentRouteBuild,
+  ComponentRouteParams,
   IdInitialiseFunction,
   RouteVariables,
   RouteVariablesObject,
 } from "./base/components/interaction/route";
+export { createComponentRoute } from "./base/components/interaction/route";
 export {
   buildModal,
   modalChannelSelect,
