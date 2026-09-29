@@ -79,7 +79,7 @@ export type ArcscordErrorMetadata = {
     presentIntents: string[];
   };
   INTERACTION_OPERATION_FAILED: {
-    operation: "reply" | "editReply" | "deferReply" | "showModal" | "deferUpdate" | "updateMessage" | "autocomplete";
+    operation: "reply" | "editReply" | "followUp" | "deferReply" | "showModal" | "deferUpdate" | "updateMessage" | "updateSourceMessage" | "autocomplete";
   };
   COMMAND_NOT_FOUND: InteractionErrorContext;
   COMMAND_OPTION_PARSING_FAILED: InteractionErrorContext;
