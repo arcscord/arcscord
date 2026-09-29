@@ -11,6 +11,7 @@
     "build:webhooks": "pnpm -r --filter='./packages/webhooks' run build",
     "build:middleware": "pnpm -r --filter='./packages/middleware' run build",
     "lint": "node scripts/ci/lint.mts",
+    "preknip": "pnpm --filter @arcscord/test-bot i18n:compile",
     "knip": "knip",
     "typecheck": "pnpm typecheck:scripts && pnpm -r --parallel run typecheck",
     "typecheck:scripts": "tsc --project scripts/tsconfig.json --noEmit",

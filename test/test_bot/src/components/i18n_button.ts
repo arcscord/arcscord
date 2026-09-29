@@ -11,7 +11,8 @@ export const i18nButton = createButton({
       style: "primary",
     }),
   run: (ctx) => {
-    return ctx.reply(localization.getFixed(ctx)($ => $.i18n.component.run), {
+    const m = localization.getFixed(ctx);
+    return ctx.reply(m.i18n_component_run(), {
       flags: MessageFlags.Ephemeral,
     });
   },

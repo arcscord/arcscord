@@ -2,18 +2,19 @@ import { actionRow, createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
 import { i18nButton } from "../components/i18n_button";
 import { localization } from "../localization";
+import * as messages from "../paraglide/messages.js";
 
 export const i18nCommand = createCommand({
   slash: {
     name: "i18n",
-    nameLocalizations: localization.discord($ => $.i18n.command.name),
+    nameLocalizations: localization.discord(messages.i18n_command_name),
     description: "default description",
-    descriptionLocalizations: localization.discord($ => $.i18n.command.description),
+    descriptionLocalizations: localization.discord(messages.i18n_command_description),
     options: {
       topic: {
         description: "Localized autocomplete topic",
-        nameLocalizations: localization.discord($ => $.i18n.autocomplete.option.name),
-        descriptionLocalizations: localization.discord($ => $.i18n.autocomplete.option.description),
+        nameLocalizations: localization.discord(messages.i18n_autocomplete_option_name),
+        descriptionLocalizations: localization.discord(messages.i18n_autocomplete_option_description),
         type: "string",
         autocomplete: true,
         required: true,
@@ -21,9 +22,10 @@ export const i18nCommand = createCommand({
     },
   },
   run: (ctx) => {
+    const m = localization.getFixed(ctx);
     return ctx.reply({
       components: [actionRow(i18nButton.build())],
-      content: localization.getFixed(ctx)($ => $.i18n.command.run, {
+      content: m.i18n_command_run({
         topic: ctx.options.topic,
       }),
       flags: MessageFlags.Ephemeral,
@@ -31,17 +33,18 @@ export const i18nCommand = createCommand({
   },
   autocomplete: {
     topic: (ctx) => {
+      const m = localization.getFixed(ctx);
       return ctx.sendChoices([
         {
-          name: localization.getFixed(ctx)($ => $.i18n.autocomplete.choices.command),
+          name: m.i18n_autocomplete_choice_command(),
           value: "command",
         },
         {
-          name: localization.getFixed(ctx)($ => $.i18n.autocomplete.choices.component),
+          name: m.i18n_autocomplete_choice_component(),
           value: "component",
         },
         {
-          name: localization.getFixed(ctx)($ => $.i18n.autocomplete.choices.autocomplete),
+          name: m.i18n_autocomplete_choice_autocomplete(),
           value: "autocomplete",
         },
       ]);

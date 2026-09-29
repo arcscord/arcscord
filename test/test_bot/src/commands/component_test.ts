@@ -260,24 +260,26 @@ export const componentTestCommand = createCommand({
             ),
           ),
         );
-      case "components_v2_i18n":
+      case "components_v2_i18n": {
+        const m = localization.getFixed(ctx);
         return ctx.reply(
           v2Message(
             container(
               section(
-                localization.getFixed(ctx)($ => $.componentsV2.i18n.support.title),
-                localization.getFixed(ctx)($ => $.componentsV2.i18n.support.description),
+                m.components_v2_i18n_support_title(),
+                m.components_v2_i18n_support_description(),
                 accessory(i18nButton.build()),
               ),
               separator({ spacing: "large" }),
               section(
-                localization.getFixed(ctx)($ => $.componentsV2.i18n.bug.title),
-                localization.getFixed(ctx)($ => $.componentsV2.i18n.bug.description),
+                m.components_v2_i18n_bug_title(),
+                m.components_v2_i18n_bug_description(),
                 accessory(redSimpleButton.build()),
               ),
             ),
           ),
         );
+      }
       case "components_v2_migration": {
         const legacyReply = await ctx.reply({
           content: "Legacy message content that must be cleared.",

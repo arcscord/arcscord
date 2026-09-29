@@ -9,7 +9,8 @@ export const testMiddlewareSubCommand = createSubCommand({
   description: "test",
   use: [new CommandBotPermissionMiddleware(["ManageMessages"], commandBotPermissionMessage)],
   run: (ctx) => {
-    return ctx.reply(localization.getFixed(ctx)($ => $.middleware.command.ok), {
+    const m = localization.getFixed(ctx);
+    return ctx.reply(m.middleware_command_ok(), {
       flags: MessageFlags.Ephemeral,
     });
   },

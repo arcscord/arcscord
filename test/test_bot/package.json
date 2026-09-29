@@ -7,18 +7,22 @@
   "license": "ISC",
   "keywords": [],
   "scripts": {
+    "i18n:compile": "paraglide-js compile --project ./project.inlang --outdir ./src/paraglide --strategy baseLocale --output-structure locale-modules --emit-ts-declarations --silent",
+    "prestart": "pnpm i18n:compile",
+    "prestart:bun": "pnpm i18n:compile",
+    "pretypecheck": "pnpm i18n:compile",
     "start": "node --import=tsx --env-file-if-exists=.env src/index.ts debug",
     "start:bun": "bun src/index.ts debug",
     "typecheck": "tsc -p tsconfig.eslint.json"
   },
   "dependencies": {
-    "@arcscord/adapter-i18next": "workspace:*",
+    "@arcscord/adapter-paraglide": "workspace:*",
     "@arcscord/middleware": "workspace:*",
     "arcscord": "workspace:*",
-    "discord.js": "^14.27.0",
-    "i18next": "^26.4.2"
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
+    "@inlang/paraglide-js": "^2.25.4",
     "@types/node": "^24.13.4",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3"
