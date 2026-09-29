@@ -34,11 +34,11 @@
   },
   "dependencies": {
     "@commander-js/extra-typings": "^15.0.0",
-    "@inquirer/prompts": "^8.5.2",
+    "@inquirer/prompts": "^8.7.2",
     "commander": "^15.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.13.4",
     "typescript": "^6.0.3"
   },
   "engines": {

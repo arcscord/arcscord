@@ -134,6 +134,39 @@ export class ComponentManager extends BaseManager {
   }
 
   /**
+   * Validates a component batch without mutating the component registry.
+   *
+   * @internal
+   */
+  validateComponents(
+    components: ComponentHandler[],
+  ): Result<true, ArcscordError<"COMPONENT_ROUTE_DUPLICATE" | "COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
+    const stagedRoutes = new Map<string | number, Set<string>>();
+
+    for (const component of components) {
+      const [err, compiledRoute] = this.prepareComponent(component);
+      if (err !== null) {
+        return error(err);
+      }
+
+      const registry = this.componentList(component);
+      const registryKey = component.handlerType === componentHandlerTypeEnum.modal
+        ? "modal"
+        : component.type;
+      const staged = stagedRoutes.get(registryKey) ?? new Set<string>();
+
+      if (registry.has(compiledRoute.canonical) || staged.has(compiledRoute.canonical)) {
+        return error(this.componentRouteDuplicateError(component, compiledRoute));
+      }
+
+      staged.add(compiledRoute.canonical);
+      stagedRoutes.set(registryKey, staged);
+    }
+
+    return ok(true);
+  }
+
+  /**
    * Load a single component
    * @param component - component to load
    * @returns `ok(true)` when loaded, or the route validation/duplication failure.
@@ -170,37 +203,15 @@ export class ComponentManager extends BaseManager {
       }
       return error(err);
     };
-    let compiledRoute: CompiledComponentRoute;
-    try {
-      compiledRoute = compileComponentRoute(component.route);
-    }
-    catch (e) {
-      if (isArcscordError(e) && e.code === arcscordErrorCodes.ComponentRouteInvalid) {
-        return fail(e as ArcscordError<"COMPONENT_ROUTE_INVALID">);
-      }
-      return fail(new ArcscordError({
-        code: arcscordErrorCodes.ComponentRouteInvalid,
-        message: `Invalid component route "${component.route}"`,
-        metadata: { route: component.route, reason: anyToError(e).message },
-        cause: e,
-      }));
+    const [validationErr, compiledRoute] = this.prepareComponent(component);
+    if (validationErr !== null) {
+      return fail(validationErr);
     }
 
-    const [middlewareValidationErr] = validateComponentMiddlewareNames(component.use, component.route);
-    if (middlewareValidationErr !== null) {
-      return fail(middlewareValidationErr);
-    }
-
-    const componentsList = component.handlerType === componentHandlerTypeEnum.modal
-      ? this.components.modal
-      : this.components[component.type];
+    const componentsList = this.componentList(component);
 
     if (componentsList.has(compiledRoute.canonical)) {
-      return fail(new ArcscordError({
-        code: arcscordErrorCodes.ComponentRouteDuplicate,
-        message: `Duplicate component route ${component.route}`,
-        metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
-      }));
+      return fail(this.componentRouteDuplicateError(component, compiledRoute));
     }
 
     this.compiledRoutes.set(component, compiledRoute);
@@ -228,6 +239,50 @@ export class ComponentManager extends BaseManager {
       });
     }
     return ok(true);
+  }
+
+  private prepareComponent(
+    component: ComponentHandler,
+  ): Result<CompiledComponentRoute, ArcscordError<"COMPONENT_ROUTE_INVALID" | "COMPONENT_VALIDATION_FAILED">> {
+    let compiledRoute: CompiledComponentRoute;
+    try {
+      compiledRoute = compileComponentRoute(component.route);
+    }
+    catch (e) {
+      if (isArcscordError(e) && e.code === arcscordErrorCodes.ComponentRouteInvalid) {
+        return error(e as ArcscordError<"COMPONENT_ROUTE_INVALID">);
+      }
+      return error(new ArcscordError({
+        code: arcscordErrorCodes.ComponentRouteInvalid,
+        message: `Invalid component route "${component.route}"`,
+        metadata: { route: component.route, reason: anyToError(e).message },
+        cause: e,
+      }));
+    }
+
+    const [middlewareValidationErr] = validateComponentMiddlewareNames(component.use, component.route);
+    if (middlewareValidationErr !== null) {
+      return error(middlewareValidationErr);
+    }
+
+    return ok(compiledRoute);
+  }
+
+  private componentList(component: ComponentHandler): Map<string, ComponentHandler> {
+    return (component.handlerType === componentHandlerTypeEnum.modal
+      ? this.components.modal
+      : this.components[component.type]) as Map<string, ComponentHandler>;
+  }
+
+  private componentRouteDuplicateError(
+    component: ComponentHandler,
+    compiledRoute: CompiledComponentRoute,
+  ): ArcscordError<"COMPONENT_ROUTE_DUPLICATE"> {
+    return new ArcscordError({
+      code: arcscordErrorCodes.ComponentRouteDuplicate,
+      message: `Duplicate component route ${component.route}`,
+      metadata: { route: component.route, canonicalRoute: compiledRoute.canonical },
+    });
   }
 
   /**
@@ -273,6 +328,24 @@ export class ComponentManager extends BaseManager {
         removed,
       });
     }
+  }
+
+  /** Removes a loaded component only when the registry still contains that exact handler. @internal */
+  unloadComponentHandler(component: ComponentHandler): boolean {
+    const compiledRoute = this.compiledRoutes.get(component);
+    if (!compiledRoute) {
+      return false;
+    }
+
+    const registry = this.componentList(component);
+    if (registry.get(compiledRoute.canonical) !== component) {
+      return false;
+    }
+
+    registry.delete(compiledRoute.canonical);
+    this.compiledRoutes.delete(component);
+    this.trace(`unloaded component with route ${component.route}`);
+    return true;
   }
 
   private setComponent<K extends Exclude<keyof ComponentList, "modal">>(
@@ -413,7 +486,7 @@ export class ComponentManager extends BaseManager {
         interaction,
       });
     }
-    const locale = await this.client.localeManager.detectLanguage({
+    const locale = await this.client.localization.detectLanguage({
       interaction,
       user: interaction.user,
       guild: interaction.guild,

@@ -13,6 +13,8 @@ export default antfu(
       "json_docs/*",
       ".vscode/settings.json",
       "**/templates/**",
+      "test/test_bot/project.inlang/**",
+      "test/test_bot/src/paraglide/**",
       ".local/*",
       "CLAUDE.md",
       "AGENTS.md",

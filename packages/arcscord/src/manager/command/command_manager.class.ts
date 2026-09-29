@@ -815,7 +815,7 @@ export class CommandManager
     }
 
     /* Locale — resolved first so dispatch error replies are translated */
-    const locale = await this.client.localeManager.detectLanguage({
+    const locale = await this.client.localization.detectLanguage({
       interaction,
       user: interaction.user,
       guild: interaction.guild,
@@ -1157,7 +1157,7 @@ export class CommandManager
       return;
     }
 
-    const locale = await this.client.localeManager.detectLanguage({
+    const locale = await this.client.localization.detectLanguage({
       interaction,
       user: interaction.user,
       guild: interaction.guild,

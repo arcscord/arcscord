@@ -5,6 +5,7 @@ import {
 } from "@arcscord/middleware";
 import { createCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { localization } from "../localization";
 import {
   commandAllowListMessage,
   commandBotPermissionMessage,
@@ -22,9 +23,12 @@ export const middlewareAllowListCommand = createCommand({
   use: [
     new CommandUserAllowListMiddleware(allowedUserIds, commandAllowListMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.command.ok), {
-    flags: MessageFlags.Ephemeral,
-  }),
+  run: (ctx) => {
+    const m = localization.getFixed(ctx);
+    return ctx.reply(m.middleware_command_ok(), {
+      flags: MessageFlags.Ephemeral,
+    });
+  },
 });
 
 export const middlewareBotPermissionCommand = createCommand({
@@ -36,7 +40,10 @@ export const middlewareBotPermissionCommand = createCommand({
   use: [
     new CommandBotPermissionMiddleware(["ManageMessages"], commandBotPermissionMessage),
   ],
-  run: ctx => ctx.reply(ctx.t($ => $.middleware.command.ok), {
-    flags: MessageFlags.Ephemeral,
-  }),
+  run: (ctx) => {
+    const m = localization.getFixed(ctx);
+    return ctx.reply(m.middleware_command_ok(), {
+      flags: MessageFlags.Ephemeral,
+    });
+  },
 });

@@ -1,35 +1,5 @@
-import type { ViteUserConfig } from "vitest/config";
-import { defaultExclude, defineConfig } from "vitest/config";
+import { defineConfig } from "vitest/config";
 
-export function createVitestConfig(options: ViteUserConfig = {}) {
-  const optionAlias = Array.isArray(options.resolve?.alias)
-    ? {}
-    : options.resolve?.alias;
-
-  return defineConfig({
-    ...options,
-    resolve: {
-      tsconfigPaths: true,
-      ...options.resolve,
-      alias: {
-        "@arcscord/better-error": new URL("../packages/better_error/src/index.ts", import.meta.url).pathname,
-        "@arcscord/components": new URL("../packages/components/src/index.ts", import.meta.url).pathname,
-        "@arcscord/error": new URL("../packages/error/src/index.ts", import.meta.url).pathname,
-        "@arcscord/webhooks/testing": new URL("../packages/webhooks/src/testing/index.ts", import.meta.url).pathname,
-        "@arcscord/webhooks": new URL("../packages/webhooks/src/index.ts", import.meta.url).pathname,
-        "arcscord/testing": new URL("../packages/arcscord/src/testing/index.ts", import.meta.url).pathname,
-        "arcscord": new URL("../packages/arcscord/src/index.ts", import.meta.url).pathname,
-        ...optionAlias,
-      },
-    },
-    test: {
-      ...options?.test,
-      globals: true,
-      exclude: [...defaultExclude, "**/dist/**", "**/*.no.test.*"],
-    },
-    oxc: {
-      target: "es2022",
-      ...options?.oxc,
-    },
-  });
-}
+export default defineConfig({
+  root: new URL(".", import.meta.url).pathname,
+});

@@ -212,6 +212,9 @@ are specific to that channel and phase.
 - **Published by:** `ComponentManager.unloadComponent()`
 - **Use for:** registry cleanup auditing
 
+The identity-based cleanup used by `ArcClient.loadHandlers()` when rolling back a
+failed batch does not publish this route-unload channel.
+
 | Phase | Channel-specific fields | Meaning |
 | --- | --- | --- |
 | `end` | `route: string`, `component?: ComponentHandler`, `removed: boolean` | The unload attempt completed. `component` is present only when a handler was removed. |

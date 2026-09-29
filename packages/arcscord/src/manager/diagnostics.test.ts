@@ -1,10 +1,12 @@
 import type {
   CommandLoadDiagnosticMessage,
   ComponentLoadDiagnosticMessage,
+  ComponentUnloadDiagnosticMessage,
   EventDispatchDiagnosticMessage,
   EventIntentDiagnosticMessage,
 } from "./diagnostics";
 import { channel } from "node:diagnostics_channel";
+import { ComponentType } from "discord-api-types/v10";
 import { describe, expect, it, vi } from "vitest";
 import { createCommand } from "#/base/command/command_func";
 import { createButton } from "#/base/components/interaction/component_handler.func";
@@ -125,6 +127,61 @@ describe("manager diagnostics channels", () => {
 
     expect(messages.map(message => message.phase)).toEqual(["start", "end"]);
     expect(messages[1]).toMatchObject({ manager, components: [component], loaded: 1 });
+  });
+
+  it("reports a duplicate component route without changing the registered handler", () => {
+    const manager = new ComponentManager(createMockClient());
+    const first = createButton({
+      route: "duplicate-diagnostics",
+      build: id => button({ customId: id(), label: "First", style: "primary" }),
+      run: ctx => ctx.ok(true),
+    });
+    const duplicate = createButton({
+      route: "duplicate-diagnostics",
+      build: id => button({ customId: id(), label: "Duplicate", style: "primary" }),
+      run: ctx => ctx.ok(true),
+    });
+    manager.loadComponent(first);
+    const messages: ComponentLoadDiagnosticMessage[] = [];
+    const listener = (message: ComponentLoadDiagnosticMessage): void => {
+      messages.push(message);
+    };
+
+    managerDiagnosticChannels.component.load.subscribe(listener);
+    const [err] = manager.loadComponent(duplicate);
+    managerDiagnosticChannels.component.load.unsubscribe(listener);
+
+    expect(err?.code).toBe("COMPONENT_ROUTE_DUPLICATE");
+    expect(messages.map(message => message.phase)).toEqual(["start", "error"]);
+    expect(messages[0]!.operationId).toBe(messages[1]!.operationId);
+    expect(messages[1]).toMatchObject({ manager, components: [duplicate], error: err });
+    expect(manager.components[ComponentType.Button].get("duplicate-diagnostics")).toBe(first);
+  });
+
+  it("publishes route unload attempts but keeps identity-based rollback silent", () => {
+    const manager = new ComponentManager(createMockClient());
+    const component = createButton({
+      route: "unload-diagnostics",
+      build: id => button({ customId: id(), label: "Unload", style: "primary" }),
+      run: ctx => ctx.ok(true),
+    });
+    manager.loadComponent(component);
+    const messages: ComponentUnloadDiagnosticMessage[] = [];
+    const listener = (message: ComponentUnloadDiagnosticMessage): void => {
+      messages.push(message);
+    };
+
+    managerDiagnosticChannels.component.unload.subscribe(listener);
+    expect(manager.unloadComponentHandler(component)).toBe(true);
+    expect(manager.unloadComponent("unload-diagnostics")).toBe(false);
+    manager.loadComponent(component);
+    expect(manager.unloadComponent("unload-diagnostics")).toBe(true);
+    managerDiagnosticChannels.component.unload.unsubscribe(listener);
+
+    expect(messages).toMatchObject([
+      { route: "unload-diagnostics", removed: false },
+      { route: "unload-diagnostics", component, removed: true },
+    ]);
   });
 
   it("correlates custom event dispatch and execution outcomes", async () => {

@@ -1,6 +1,7 @@
 import { CommandBotPermissionMiddleware } from "@arcscord/middleware";
 import { createSubCommand } from "arcscord";
 import { MessageFlags } from "discord.js";
+import { localization } from "../../localization";
 import { commandBotPermissionMessage } from "../../utils/middleware_messages";
 
 export const testMiddlewareSubCommand = createSubCommand({
@@ -8,7 +9,8 @@ export const testMiddlewareSubCommand = createSubCommand({
   description: "test",
   use: [new CommandBotPermissionMiddleware(["ManageMessages"], commandBotPermissionMessage)],
   run: (ctx) => {
-    return ctx.reply(ctx.t($ => $.middleware.command.ok), {
+    const m = localization.getFixed(ctx);
+    return ctx.reply(m.middleware_command_ok(), {
       flags: MessageFlags.Ephemeral,
     });
   },

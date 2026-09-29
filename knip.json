@@ -6,12 +6,12 @@
   "workspaces": {
     ".": {
       "entry": [
-        "scripts/*.{mjs,mts}",
-        "scripts/tests/*.test.mjs",
-        "scripts/tests/vitest.config.mts"
+        "scripts/{ci,compat,docs,release,workspace}/*.mts",
+        "scripts/{docs,release}/*.test.ts",
+        "scripts/vitest.config.mts"
       ],
       "project": [
-        "scripts/**/*.{mjs,mts}"
+        "scripts/**/*.{ts,mts}"
       ]
     },
     "packages/arcscord": {
@@ -61,9 +61,6 @@
     "test/test_bot": {
       "project": [
         "src/**/*.ts"
-      ],
-      "ignoreDependencies": [
-        "i18next"
       ]
     },
     "test/components_bot": {

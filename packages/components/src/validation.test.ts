@@ -194,6 +194,12 @@ describe("message component validators", () => {
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Primary, custom_id: "save", label: "Save" });
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Link, url: "https://example.com", label: "Open" });
     validateButton({ type: ComponentType.Button, style: ButtonStyle.Premium, sku_id: "123" });
+    expect(validateButton({
+      type: ComponentType.Button,
+      style: ButtonStyle.Primary,
+      custom_id: "emoji-string",
+      emoji: "<:wave:123456789012345678>",
+    })).toMatchObject({ emoji: { id: "123456789012345678", name: "wave", animated: false } });
     validateButton({
       type: ComponentType.Button,
       style: ButtonStyle.Primary,
@@ -224,6 +230,14 @@ describe("message component validators", () => {
       style: ButtonStyle.Premium,
       sku_id: "18446744073709551616",
     })).rule).toBe("snowflake");
+    const malformedEmoji = validationError(() => validateButton({
+      type: ComponentType.Button,
+      style: ButtonStyle.Primary,
+      custom_id: "malformed-emoji",
+      emoji: "%ZZ",
+    }));
+    expect(malformedEmoji).toMatchObject({ rule: "emoji-identity", path: "button.emoji" });
+    expect(malformedEmoji.cause).toBeInstanceOf(URIError);
   });
 
   it("validates select bounds, options, defaults, and action-row composition", () => {
