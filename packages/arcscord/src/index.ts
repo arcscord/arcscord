@@ -375,6 +375,25 @@ export {
   InteractionContext,
 } from "./base/utils/interaction_context.class";
 export {
+  createLocalizationAdapter,
+  createLocalizationDefinition,
+  defaultLanguageMap,
+  defaultLocaleDetector,
+  defaultLocalizationReadyTimeout,
+  isLocalizationDefinition,
+  LocalizationService,
+} from "./localization";
+export type {
+  CreateLocalizationAdapterOptions,
+  LocaleDetectionContext,
+  LocaleDetector,
+  Localizable,
+  LocalizationAdapter,
+  LocalizationDefinition,
+  LocalizationOptions,
+  Localizations,
+} from "./localization";
+export {
   CommandManager,
   ComponentManager,
   defaultCommandExecutionHandler,
@@ -462,6 +481,7 @@ export {
   executionFailure,
   executionSuccess,
   isArcscordError,
+  LocalizationReadyTimeoutError,
   normalizeArcscordError,
   normalizeHandlerReturn,
 } from "./utils/error";

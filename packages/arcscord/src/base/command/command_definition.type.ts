@@ -2,6 +2,7 @@ import type { PermissionsString } from "discord.js";
 import type { commandContextsEnum, commandIntegrationTypesEnum } from "#/base/command/command.enum";
 import type { AnyCommandHandler, AnySubCommandHandler } from "#/base/command/command.type";
 import type { OptionsList } from "#/base/command/option.type";
+import type { LocalizationDefinition } from "#/localization";
 import type { LocaleCallback } from "#/manager";
 import type { LocaleMap } from "#/utils/discord/type/locale.type";
 
@@ -29,7 +30,7 @@ export type BaseCommandDefinition = {
   /**
    * Localization map for the command name.
    */
-  nameLocalizations?: LocaleMap | LocaleCallback;
+  nameLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
 
   /**
    * Default member permissions required to execute the command.
@@ -66,7 +67,7 @@ export type SlashCommandDefinition = BaseCommandDefinition & {
   /**
    * Localization map for the command description.
    */
-  descriptionLocalizations?: LocaleMap | LocaleCallback;
+  descriptionLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
 
   /**
    * Options for the slash command.
@@ -86,7 +87,7 @@ export type SubCommandDefinition = {
   /**
    * Localization map for the subcommand name.
    */
-  nameLocalizations?: LocaleMap | LocaleCallback;
+  nameLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
 
   /**
    * Description of the subcommand.
@@ -96,7 +97,7 @@ export type SubCommandDefinition = {
   /**
    * Localization map for the subcommand description.
    */
-  descriptionLocalizations?: LocaleMap | LocaleCallback;
+  descriptionLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
 
   /**
    * Options for the subcommand.
@@ -129,7 +130,7 @@ export type SlashWithSubsCommandDefinition = BaseCommandDefinition & {
   /**
    * Localization map for the command description.
    */
-  descriptionLocalizations?: LocaleMap | LocaleCallback;
+  descriptionLocalizations?: LocaleMap | LocaleCallback | LocalizationDefinition;
 
   /**
    * List of subcommands.

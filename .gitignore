@@ -40,6 +40,7 @@ package-lock.json
 # Agents
 .claude/
 .agents/
+.codex/
 CLAUDE.md
 AGENTS.md
 .pnpm-store/

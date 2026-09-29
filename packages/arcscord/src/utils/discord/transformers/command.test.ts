@@ -116,27 +116,33 @@ describe("command transformers", () => {
   });
 
   it("converts string choices from arrays and records", () => {
-    expect(stringChoiceToAPI(["red", { name: "Blue", value: "blue" }])).toEqual([
+    const client = createClient();
+    expect(stringChoiceToAPI(["red", {
+      name: "Blue",
+      nameLocalizations: { fr: "Bleu" },
+      value: "blue",
+    }], client)).toEqual([
       { name: "red", value: "red" },
-      { name: "Blue", value: "blue" },
+      { name: "Blue", name_localizations: { fr: "Bleu" }, value: "blue" },
     ]);
-    expect(stringChoiceToAPI({ Rouge: "red", Bleu: "blue" })).toEqual([
+    expect(stringChoiceToAPI({ Rouge: "red", Bleu: "blue" }, client)).toEqual([
       { name: "Rouge", value: "red" },
       { name: "Bleu", value: "blue" },
     ]);
-    expect(stringChoiceToAPI(undefined)).toBeUndefined();
+    expect(stringChoiceToAPI(undefined, client)).toBeUndefined();
   });
 
   it("converts number choices from arrays and records", () => {
-    expect(numberChoiceToAPI([1, { name: "Two", value: 2 }])).toEqual([
+    const client = createClient();
+    expect(numberChoiceToAPI([1, { name: "Two", value: 2 }], client)).toEqual([
       { name: "1", value: 1 },
       { name: "Two", value: 2 },
     ]);
-    expect(numberChoiceToAPI({ One: 1, Two: 2 })).toEqual([
+    expect(numberChoiceToAPI({ One: 1, Two: 2 }, client)).toEqual([
       { name: "One", value: 1 },
       { name: "Two", value: 2 },
     ]);
-    expect(numberChoiceToAPI(undefined)).toBeUndefined();
+    expect(numberChoiceToAPI(undefined, client)).toBeUndefined();
   });
 
   it("converts command options to Discord API option data", () => {
