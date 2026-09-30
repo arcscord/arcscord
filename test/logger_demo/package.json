@@ -16,10 +16,10 @@
   },
   "devDependencies": {
     "@types/debug": "^4.1.13",
-    "@types/node": "^24.13.4",
+    "@types/node": "^24.19.0",
     "debug": "^4.4.3",
     "pino": "9.5.0",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
     "winston": "^3.19.0"
   }
