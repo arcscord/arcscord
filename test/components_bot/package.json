@@ -10,12 +10,12 @@
   },
   "dependencies": {
     "@arcscord/components": "workspace:*",
-    "discord-api-types": "^0.38.55",
+    "discord-api-types": "^0.38.56",
     "discord.js": "^14.27.0"
   },
   "devDependencies": {
-    "@types/node": "^24.13.4",
-    "tsx": "^4.23.13",
+    "@types/node": "^24.19.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   }
 }

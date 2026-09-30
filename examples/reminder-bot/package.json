@@ -15,16 +15,16 @@
     "@arcscord/webhooks": "^0.1.0",
     "arcscord": "^1.2.0",
     "better-sqlite3": "^12.5.0",
-    "discord.js": "^14.26.4"
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
     "@types/better-sqlite3": "^7.6.13",
-    "@types/node": "^24.10.0",
-    "eslint": "^10.6.0",
-    "tsx": "^4.23.0",
+    "@types/node": "^24.19.0",
+    "eslint": "^10.11.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.62.0"
+    "typescript-eslint": "^8.71.0"
   },
   "engines": {
     "node": ">=24.11.0"

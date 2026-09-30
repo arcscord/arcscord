@@ -14,14 +14,14 @@
     "lint:fix": "eslint --fix ."
   },
   "dependencies": {
-    "arcscord": "^1.0.1",
-    "discord.js": "^14.26.4"
+    "arcscord": "^1.2.0",
+    "discord.js": "^14.27.0"
   },
   "devDependencies": {
-    "@antfu/eslint-config": "^9.1.0",
-    "@types/node": "^24.10.0",
-    "eslint": "^10.6.0",
-    "tsx": "^4.23.0",
+    "@antfu/eslint-config": "^9.3.0",
+    "@types/node": "^24.19.0",
+    "eslint": "^10.11.0",
+    "tsx": "^4.23.15",
     "typescript": "^6.0.3"
   }
 }
