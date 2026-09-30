@@ -57,7 +57,7 @@ discordbot/
 
 | Folder / file | Contents |
 |---|---|
-| `types/i18next.d.ts` | i18next type augmentation so `ctx.t(...)` is fully typed. See [Localization](./localization.md). |
+| `types/i18next.d.ts` | i18next type augmentation so `localization.getFixed(ctx)` is fully typed. See [Localization](./localization.md). |
 | `commands/` | One file per command (`createCommand`). Group related subcommands in a subfolder with a `def.ts`. See [Slash commands](./commands/slash.md) and [Subcommands](./commands/subcommands.md). |
 | `components/` | Buttons, select menus and modals, each identified by a `route`. See [Button](./components/button.md). |
 | `events/` | Gateway event listeners created with `createEvent`. See [Events](./events.md). |
