@@ -1,6 +1,6 @@
 {
   "name": "@arcscord/adapter-i18next",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "i18next localization adapter for Arcscord.",
   "author": "Arcoz0308",
   "license": "MIT",
