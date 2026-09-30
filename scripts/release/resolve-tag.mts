@@ -15,12 +15,15 @@ export type ResolvedReleaseTag = ReleasePackage & {
 
 export function parseReleaseTag(releaseRef: string): ResolvedReleaseTag {
   const tag = releaseRef.replace(/^refs\/tags\//, "");
-  const pkg = RELEASE_PACKAGES.find(({ name }) => tag.startsWith(`${name}@v`));
+  const isSimpleArcscordTag = tag.startsWith("v");
+  const pkg = isSimpleArcscordTag
+    ? RELEASE_PACKAGES.find(({ name }) => name === "arcscord")
+    : RELEASE_PACKAGES.find(({ name }) => tag.startsWith(`${name}@v`));
 
   if (!pkg)
     throw new Error(`Unknown release tag "${releaseRef}".`);
 
-  const version = tag.slice(`${pkg.name}@v`.length);
+  const version = tag.slice(isSimpleArcscordTag ? 1 : `${pkg.name}@v`.length);
   const match = SEMVER_PATTERN.exec(version);
   if (!match) {
     throw new Error(

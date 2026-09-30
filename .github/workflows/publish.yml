@@ -3,6 +3,7 @@ name: Stage npm release
 on:
   push:
     tags:
+      - "v*"
       - "arcscord@v*"
       - "@arcscord/*@v*"
       - "create-arcscord-bot@v*"

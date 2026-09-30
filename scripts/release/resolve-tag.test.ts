@@ -45,8 +45,16 @@ describe("release tag validation", () => {
     assert.equal(release.directory, "packages/better_error");
   });
 
-  it("rejects unknown packages and legacy tags", () => {
-    assert.throws(() => parseReleaseTag("v1.2.3"), /Unknown release tag/);
+  it("maps a simple version tag to arcscord", () => {
+    const release = resolveReleaseTag("v1.2.3", createSourceRoot());
+
+    assert.equal(release.name, "arcscord");
+    assert.equal(release.directory, "packages/arcscord");
+    assert.equal(release.version, "1.2.3");
+    assert.equal(release.distTag, "latest");
+  });
+
+  it("rejects unknown packages", () => {
     assert.throws(() => parseReleaseTag("unknown@v1.2.3"), /Unknown release tag/);
   });
 
