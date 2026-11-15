@@ -1,0 +1,31 @@
+.frame {
+  margin-block: 1rem 1.5rem;
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border: 1px solid var(--arcscord-border);
+  border-radius: var(--arcscord-panel-radius);
+  background: var(--discord-ui-background);
+  color: var(--discord-ui-text);
+}
+
+.selectGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: 1.25rem;
+}
+
+.selectExample {
+  min-width: 0;
+}
+
+.label {
+  margin: 0 0 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 650;
+}
+
+.frame .status {
+  margin: 0.5rem 0 0;
+  color: var(--discord-ui-muted);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+}

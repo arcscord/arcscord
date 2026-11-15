@@ -2,23 +2,17 @@
 sidebar_position: 1
 ---
 
+import { ButtonExamples } from '@site/src/components/DiscordComponentExamples';
+
 # Button
 
 ## Styles
 
 Discord has four interactive button styles. The `button()` helper only creates clickable buttons — link and premium buttons are not dispatched as interactions and must be built directly with discord.js.
 
-<div className="discord-preview">
-  <button className="discord-btn discord-btn--primary">Primary</button>
-  <button className="discord-btn discord-btn--secondary">Secondary</button>
-  <button className="discord-btn discord-btn--success">Success</button>
-  <button className="discord-btn discord-btn--danger">Danger</button>
-</div>
+<ButtonExamples />
 
-<div className="discord-preview">
-  <button className="discord-btn discord-btn--primary">With emoji 🎉</button>
-  <button className="discord-btn discord-btn--secondary discord-btn--disabled">Disabled</button>
-</div>
+*This interactive preview may look or behave differently in the Discord client.*
 
 | Style | Alias | Color |
 |---|---|---|

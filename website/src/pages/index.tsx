@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import Link from "@docusaurus/Link";
-import useBaseUrl from "@docusaurus/useBaseUrl";
 import useDocusaurusContext from "@docusaurus/useDocusaurusContext";
 import CodeBlock from "@theme/CodeBlock";
 import Layout from "@theme/Layout";
@@ -142,20 +141,13 @@ const packages: Pkg[] = [
 ];
 
 function Hero(): ReactNode {
-  const brandWordmark = useBaseUrl("img/brand-wordmark.webp");
   return (
     <header className={styles.hero}>
-      <div className={styles.heroInner}>
+      <div className="container">
         <h1 className={styles.heroTitle}>
-          <span className={styles.visuallyHidden}>Arcscord</span>
-          <img
-            className={styles.heroWordmark}
-            src={brandWordmark}
-            alt=""
-            aria-hidden="true"
-            width={1137}
-            height={180}
-          />
+          Build Discord bots
+          {" "}
+          <span>with TypeScript</span>
         </h1>
         <p className={styles.heroTagline}>
           A TypeScript-first framework for building Discord bots — typed
@@ -163,14 +155,14 @@ function Hero(): ReactNode {
           discord.js.
         </p>
         <div className={styles.heroButtons}>
-          <Link className="button button--primary button--lg" to="/guide/installation">
-            Get started
+          <Link className={`button button--primary ${styles.heroAction}`} to="/guide/installation">
+            Get Started
           </Link>
-          <Link className="button button--secondary button--lg" to="/api">
-            API reference
+          <Link className={`button button--secondary ${styles.heroAction}`} to="/api">
+            API Reference
           </Link>
           <Link
-            className="button button--secondary button--lg"
+            className={`button button--secondary ${styles.heroAction}`}
             href="https://github.com/arcscord/arcscord"
           >
             GitHub
@@ -209,17 +201,15 @@ function Hero(): ReactNode {
 
 function QuickStart(): ReactNode {
   return (
-    <section className={styles.section}>
+    <section className={styles.quickStart} aria-labelledby="quick-start-title">
       <div className="container">
-        <h2 className={styles.sectionTitle}>A bot in a few lines</h2>
+        <h2 className={styles.sectionTitle} id="quick-start-title">A Bot in a Few Lines</h2>
         <p className={styles.sectionSubtitle}>
           Create a client, declare a typed slash command, and register it.
         </p>
-        <div className={styles.codeWrapper}>
-          <CodeBlock language="ts" title="index.ts">
-            {quickStart}
-          </CodeBlock>
-        </div>
+        <CodeBlock className={styles.quickStartBlock} language="ts" title="index.ts">
+          {quickStart}
+        </CodeBlock>
       </div>
     </section>
   );
@@ -229,6 +219,7 @@ function Features(): ReactNode {
   return (
     <section className={styles.section}>
       <div className="container">
+        <h2 className={styles.sectionTitle}>Framework Highlights</h2>
         <div className={styles.featureGrid}>
           {features.map(feature => (
             <Link key={feature.title} className={styles.featureCard} to={feature.to}>
@@ -306,7 +297,7 @@ function Examples(): ReactNode {
           Full bots you can clone and run, from a minimal starter to a
           Prisma-backed ticket system.
         </p>
-        <div className={styles.packageGrid}>
+        <div className={`${styles.packageGrid} ${styles.exampleGrid}`}>
           {examples.map(example => (
             <div key={example.name} className={styles.packageCard}>
               <code className={styles.packageName}>{example.name}</code>
@@ -329,8 +320,8 @@ export default function Home(): ReactNode {
       title="Arcscord — TypeScript framework for Discord bots"
       description={siteConfig.tagline}
     >
-      <Hero />
       <main>
+        <Hero />
         <QuickStart />
         <Features />
         <Install />
