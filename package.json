@@ -36,7 +36,7 @@
     "@commitlint/cli": "^21.2.3",
     "@commitlint/config-conventional": "^21.2.3",
     "@types/node": "^24.19.0",
-    "eslint": "^10.11.0",
+    "eslint": "^10.15.0",
     "husky": "^9.1.7",
     "knip": "^6.38.0",
     "lint-staged": "^17.6.0",
@@ -44,7 +44,8 @@
     "tsdown": "0.23.0",
     "typedoc": "^0.28.20",
     "typescript": "^6.0.3",
-    "vitest": "4.1.11"
+    "vite": "~8.1.6",
+    "vitest": "4.1.12"
   },
   "repository": {
     "type": "git",

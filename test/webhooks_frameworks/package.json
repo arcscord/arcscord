@@ -10,10 +10,10 @@
   },
   "dependencies": {
     "@arcscord/webhooks": "workspace:*",
-    "express": "^5.2.1",
-    "fastify": "^5.12.5",
+    "express": "^5.3.0",
+    "fastify": "^5.12.6",
     "h3": "2.0.1-rc.32",
-    "hono": "^4.13.10",
+    "hono": "^4.13.16",
     "koa": "^3.2.1",
     "light-my-request": "^6.6.0"
   },
@@ -22,7 +22,7 @@
     "@types/koa": "^3.0.3",
     "@types/node": "^24.19.0",
     "typescript": "^6.0.3",
-    "vitest": "4.1.11"
+    "vitest": "4.1.12"
   },
   "engines": {
     "node": ">=24.11.0"
