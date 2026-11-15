@@ -10,6 +10,12 @@ minimumReleaseAgeExclude:
 shellEmulator: true
 trustPolicy: no-downgrade
 
+overrides:
+  "@prisma/config@7.9.1>deepmerge-ts": 8.0.2
+  "@typescript-eslint/typescript-estree>minimatch@^10.0.0": ^11.0.1
+  katex@^0.16.0: 0.18.10
+  prisma@7.9.1>mysql2: 3.24.4
+
 allowBuilds:
   "@prisma/engines": true
   better-sqlite3: true
