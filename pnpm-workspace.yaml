@@ -1,5 +1,8 @@
 minimumReleaseAgeExcludePrune: true
 
+minimumReleaseAgeExclude:
+  - "@arcscord/discord-ui-core@0.2.0"
+  - "@arcscord/discord-ui@0.3.0"
 shellEmulator: true
 
 trustPolicy: no-downgrade

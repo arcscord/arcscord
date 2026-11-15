@@ -24,22 +24,26 @@
   --ifm-color-primary-lightest: #75abe4;
   --ifm-font-family-base: "Inter", ui-sans-serif, system-ui, -apple-system, blinkmacsystemfont, "Segoe UI", sans-serif;
   --ifm-heading-font-family: var(--ifm-font-family-base);
-  --ifm-font-color-base: #17172d;
-  --ifm-heading-color: #25255d;
+  --ifm-font-color-base: #252238;
+  --ifm-heading-color: #211a36;
   --ifm-background-color: #ffffff;
-  --ifm-background-surface-color: #f5f8ff;
-  --ifm-navbar-background-color: #ffffff;
-  --ifm-navbar-shadow: 0 1px 0 rgba(49, 49, 138, 0.14);
-  --ifm-toc-border-color: #d9e2f1;
+  --ifm-background-surface-color: #f7f6fc;
+  --ifm-navbar-background-color: var(--ifm-background-surface-color);
+  --ifm-navbar-height: 4rem;
+  --ifm-navbar-shadow: none;
+  --ifm-toc-border-color: var(--arcscord-border);
+  --ifm-menu-color-background-active: var(--arcscord-active-surface);
   --ifm-code-font-size: 95%;
+  --arcscord-accent: #4c419c;
+  --arcscord-muted: #5f5b72;
+  --arcscord-border: #dcd9e9;
+  --arcscord-control-border: #88819d;
+  --arcscord-active-surface: #eae7f8;
+  --arcscord-pressed-surface: #e2ddf5;
   --arcscord-brand-blue: #1c70cd;
-  --arcscord-brand-indigo: #31318a;
-  --arcscord-brand-bow: #84450d;
-  --arcscord-blue: var(--arcscord-brand-blue);
-  --arcscord-periwinkle: var(--arcscord-brand-indigo);
-  --arcscord-sky: #d6e8fb;
-  --arcscord-bow: var(--arcscord-brand-bow);
-  --arcscord-ink: #17172d;
+  --arcscord-panel-radius: 0.5rem;
+  --arcscord-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  color-scheme: light;
 }
 
 html[data-theme="dark"] {
@@ -54,17 +58,22 @@ html[data-theme="dark"] {
   --ifm-heading-color: #f7f9ff;
   --ifm-background-color: #05010f;
   --ifm-background-surface-color: #090116;
-  --ifm-navbar-background-color: #090116;
-  --ifm-navbar-shadow: 0 1px 0 rgba(105, 169, 239, 0.18);
-  --ifm-toc-border-color: #24264a;
-  --arcscord-blue: #69a9ef;
-  --arcscord-periwinkle: #a7a9ff;
-  --arcscord-sky: #1a244d;
-  --arcscord-ink: #f8fbff;
+  --arcscord-accent: #a7a9ff;
+  --arcscord-muted: #b5bdd4;
+  --arcscord-border: #24264a;
+  --arcscord-control-border: #626485;
+  --arcscord-active-surface: #19182f;
+  --arcscord-pressed-surface: #242248;
+  color-scheme: dark;
 }
 
 html {
   font-optical-sizing: auto;
+}
+
+:where(.navbar, main) :focus-visible {
+  outline: 2px solid var(--arcscord-accent);
+  outline-offset: 3px;
 }
 
 button,
@@ -82,8 +91,9 @@ samp {
 }
 
 .button {
+  border-radius: 0.375rem;
   font-family: var(--ifm-font-family-base);
-  font-weight: 700;
+  font-weight: 650;
 }
 
 .button--primary:not(.button--outline) {
@@ -92,34 +102,32 @@ samp {
   background: var(--arcscord-brand-blue);
 }
 
-.button--primary:not(.button--outline):hover {
-  border-color: #175fad;
-  color: #ffffff;
-  background: #175fad;
-}
-
 .button--secondary:not(.button--outline) {
-  border-color: #c5d9f2;
-  color: var(--arcscord-brand-indigo);
-  background: #edf5ff;
+  border-color: var(--arcscord-control-border);
+  color: var(--ifm-heading-color);
+  background: var(--ifm-background-surface-color);
 }
 
-.button--secondary:not(.button--outline):hover {
-  border-color: var(--arcscord-brand-blue);
-  color: var(--arcscord-brand-indigo);
-  background: #e0edfb;
+.button--primary:not(.button--outline):active {
+  border-color: #134e8f;
+  background: #134e8f;
 }
 
-[data-theme="dark"] .button--secondary:not(.button--outline) {
-  border-color: #303568;
-  color: #f7f9ff;
-  background: #11142b;
+.button--secondary:not(.button--outline):active {
+  border-color: var(--arcscord-accent);
+  background: var(--arcscord-pressed-surface);
 }
 
-[data-theme="dark"] .button--secondary:not(.button--outline):hover {
-  border-color: var(--ifm-color-primary);
-  color: #ffffff;
-  background: #191d3b;
+@media (hover: hover) and (pointer: fine) {
+  .button--primary:not(.button--outline):hover:not(:active) {
+    border-color: #175fad;
+    background: #175fad;
+  }
+
+  .button--secondary:not(.button--outline):hover:not(:active) {
+    border-color: var(--arcscord-accent);
+    background: var(--arcscord-active-surface);
+  }
 }
 
 /* ===== Discord screenshot container ===== */
@@ -145,80 +153,6 @@ samp {
   margin: 0;
 }
 
-/* ===== Discord component previews ===== */
-.discord-preview {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding: 16px;
-  background: #313338;
-  border-radius: 8px;
-  margin: 1rem 0;
-  align-items: center;
-}
-
-.discord-preview-col {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 16px;
-  background: #313338;
-  border-radius: 8px;
-  margin: 1rem 0;
-}
-
-.discord-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  border: none;
-  border-radius: 3px;
-  padding: 2px 16px;
-  height: 32px;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: default;
-  color: white;
-  min-width: 60px;
-  white-space: nowrap;
-  font-family: inherit;
-}
-
-.discord-btn--primary   { background: #5865f2; }
-.discord-btn--secondary { background: #4e5058; }
-.discord-btn--success   { background: #248046; }
-.discord-btn--danger    { background: #da373c; }
-.discord-btn--link      { background: #4e5058; color: #00b0f4; }
-.discord-btn--disabled  { background: #4e5058; color: #80848e; opacity: 0.5; }
-
-.discord-select {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #1e1f22;
-  border: 1px solid #3f4147;
-  border-radius: 4px;
-  padding: 0 12px;
-  height: 40px;
-  color: #b5bac1;
-  font-size: 14px;
-  min-width: 220px;
-  max-width: 440px;
-}
-
-.discord-select-placeholder { color: #80848e; }
-.discord-select-arrow { color: #b5bac1; font-size: 10px; margin-left: 8px; }
-
-.discord-label {
-  color: #b5bac1;
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  margin-bottom: 6px;
-}
-
 /* ===== Sidebar — fixed, full height, no horizontal scroll ===== */
 @media (min-width: 997px) {
   [class*="docSidebarContainer"] {
@@ -232,7 +166,7 @@ samp {
     z-index: 200;
     overflow-x: hidden;
     overflow-y: auto;
-    background: var(--ifm-background-color);
+    background: var(--ifm-background-surface-color);
   }
 
   /* The inner div (sidebar_*) has padding-top: navbar-height designed for
@@ -252,8 +186,34 @@ samp {
 }
 
 .navbar {
-  border-bottom: 1px solid var(--ifm-toc-border-color);
-  box-shadow: var(--ifm-navbar-shadow);
+  border-bottom: 1px solid var(--arcscord-border);
+  isolation: isolate;
+}
+
+@supports (backdrop-filter: blur(16px)) {
+  @media (prefers-reduced-transparency: no-preference) and (prefers-contrast: no-preference) {
+    .navbar {
+      background: transparent;
+    }
+
+    .navbar::before {
+      position: absolute;
+      z-index: -1;
+      inset: 0;
+      background: color-mix(in srgb, var(--ifm-navbar-background-color) 82%, transparent);
+      backdrop-filter: blur(16px) saturate(150%);
+      content: "";
+    }
+  }
+}
+
+.navbar__inner {
+  max-width: 82rem;
+  margin-inline: auto;
+}
+
+.navbar__link {
+  font-size: 0.875rem;
 }
 
 .navbar__brand {
@@ -276,12 +236,14 @@ samp {
 
 .theme-doc-markdown h1,
 .theme-doc-markdown h2 {
-  color: var(--arcscord-blue);
+  color: var(--arcscord-accent);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
 }
 
-[data-theme="dark"] .theme-doc-markdown h1,
-[data-theme="dark"] .theme-doc-markdown h2 {
-  color: var(--arcscord-periwinkle);
+.theme-doc-markdown a:not([class]) {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
 }
 
 .api-shell {
@@ -295,8 +257,8 @@ samp {
   top: var(--ifm-navbar-height);
   height: calc(100vh - var(--ifm-navbar-height));
   overflow: auto;
-  border-right: 1px solid var(--ifm-color-emphasis-200);
-  background: color-mix(in srgb, var(--arcscord-sky) 9%, var(--ifm-background-color));
+  border-right: 1px solid var(--arcscord-border);
+  background: var(--ifm-background-surface-color);
   padding: 1rem;
 }
 
@@ -304,7 +266,7 @@ samp {
   display: grid;
   gap: 0.45rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--ifm-color-emphasis-200);
+  border-bottom: 1px solid var(--arcscord-border);
 }
 
 .api-sidebar__controls label {
@@ -318,7 +280,8 @@ samp {
 .api-sidebar__controls select,
 .api-sidebar__controls input {
   width: 100%;
-  border: 1px solid var(--ifm-color-emphasis-300);
+  min-height: 2.75rem;
+  border: 1px solid var(--arcscord-control-border);
   border-radius: 6px;
   padding: 0.55rem 0.65rem;
   color: var(--ifm-font-color-base);
@@ -353,15 +316,11 @@ samp {
 
 .api-nav h2 {
   margin: 1rem 0 0.4rem;
-  color: var(--arcscord-blue);
+  color: var(--arcscord-accent);
   font-size: 0.75rem;
   font-weight: 800;
   letter-spacing: 0;
   text-transform: uppercase;
-}
-
-[data-theme="dark"] .api-nav h2 {
-  color: var(--arcscord-periwinkle);
 }
 
 .api-nav__item {
@@ -373,22 +332,29 @@ samp {
   color: var(--ifm-font-color-base);
   background: transparent;
   font: inherit;
+  overflow-wrap: anywhere;
   text-align: left;
   cursor: pointer;
 }
 
-.api-nav__item:hover,
-.api-nav__item--active {
-  color: var(--arcscord-ink);
-  background: color-mix(in srgb, var(--arcscord-periwinkle) 22%, transparent);
+.api-nav__item:focus-visible {
+  outline-offset: -2px;
 }
 
-[data-theme="dark"] .api-nav__item:hover,
-[data-theme="dark"] .api-nav__item--active {
-  color: #f8fbff;
+.api-nav__item--active {
+  color: var(--ifm-heading-color);
+  background: var(--arcscord-active-surface);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .api-nav__item:hover {
+    color: var(--ifm-heading-color);
+    background: var(--arcscord-active-surface);
+  }
 }
 
 .api-content {
+  min-width: 0;
   max-width: 1080px;
   width: 100%;
   padding: 2rem clamp(1.25rem, 4vw, 4rem) 4rem;
@@ -404,12 +370,9 @@ samp {
 
 .api-header h1 {
   margin: 0;
-  color: var(--arcscord-blue);
+  color: var(--arcscord-accent);
   font-size: clamp(2rem, 4vw, 3.25rem);
-}
-
-[data-theme="dark"] .api-header h1 {
-  color: var(--arcscord-periwinkle);
+  overflow-wrap: anywhere;
 }
 
 .api-eyebrow,
@@ -425,11 +388,11 @@ samp {
 }
 
 .api-badge {
-  border: 1px solid color-mix(in srgb, var(--arcscord-periwinkle) 55%, var(--ifm-color-emphasis-200));
+  border: 1px solid var(--arcscord-border);
   border-radius: 999px;
   padding: 0.35rem 0.65rem;
-  color: var(--arcscord-blue);
-  background: color-mix(in srgb, var(--arcscord-sky) 22%, var(--ifm-background-color));
+  color: var(--arcscord-accent);
+  background: var(--arcscord-active-surface);
   font-size: 0.8rem;
   font-weight: 800;
   white-space: nowrap;
@@ -501,10 +464,14 @@ samp {
   border: 1px solid color-mix(in srgb, currentColor 55%, transparent);
   border-radius: 4px;
   padding: 0 0.18rem;
-  color: #5865f2;
+  color: var(--arcscord-accent);
   font-size: 0.68em;
   font-weight: 800;
   line-height: 1.25;
+}
+
+.api-signature .api-type__vendor {
+  color: #a7a9ff;
 }
 
 .api-type__external-icon {
@@ -556,9 +523,9 @@ a.api-type:hover {
   max-width: 76ch;
   margin: 1rem 0 1.5rem;
   padding: 1rem;
-  border: 1px solid var(--ifm-color-emphasis-200);
+  border: 1px solid var(--arcscord-border);
   border-radius: 8px;
-  background: color-mix(in srgb, var(--arcscord-sky) 10%, var(--ifm-background-color));
+  background: var(--ifm-background-surface-color);
 }
 
 .api-relations div {
@@ -577,11 +544,7 @@ a.api-type:hover {
 }
 
 .api-relations .api-type {
-  color: var(--arcscord-blue);
-}
-
-[data-theme="dark"] .api-relations .api-type {
-  color: var(--arcscord-periwinkle);
+  color: var(--arcscord-accent);
 }
 
 .api-error {
@@ -629,14 +592,14 @@ a.api-type:hover {
 
 @media (max-width: 900px) {
   .api-shell {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .api-sidebar {
     position: static;
     height: auto;
     border-right: 0;
-    border-bottom: 1px solid var(--ifm-color-emphasis-200);
+    border-bottom: 1px solid var(--arcscord-border);
   }
 
   .api-nav {

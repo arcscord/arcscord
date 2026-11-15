@@ -2,7 +2,7 @@
 sidebar_position: 2
 ---
 
-import { DiscordScreenshot } from '@site/src/components/DiscordScreenshot';
+import { SelectMenuExamples } from '@site/src/components/DiscordComponentExamples';
 
 # Select menus
 
@@ -10,7 +10,11 @@ Select menus are dropdown components. An action row can hold exactly one select 
 
 ## What they look like
 
-<DiscordScreenshot src="/img/components/select-menu/select-menu-overview.png" alt="String, user, mentionable and channel select menus in Discord" />
+Try each menu below. The user, role, and channel options are sample data.
+
+<SelectMenuExamples />
+
+*This interactive preview may look or behave differently in the Discord client.*
 
 :::note
 All select menu builder functions (`stringSelectMenu`, `userSelectMenu`, etc.) already return an `ActionRowData` — they wrap the component in an action row automatically. Pass the result directly to `components: [...]` without wrapping in `actionRow()`.
