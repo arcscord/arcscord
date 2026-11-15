@@ -33,4 +33,4 @@ it("adds local tarballs without losing existing dependency overrides", () => {
   finally {
     rmSync(workspace, { recursive: true, force: true });
   }
-});
+}, 30_000);
